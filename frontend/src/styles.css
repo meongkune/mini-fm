@@ -497,3 +497,61 @@ select { background: var(--panel-2); color: var(--text); border: 1px solid var(-
 .table td.rank[style]::before { content: ''; position: absolute; left: 0; top: 4px; bottom: 4px; width: 3px; border-radius: 2px; background: var(--zone); }
 .zone-legend { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; font-size: .68rem; color: var(--muted); }
 .zone-legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 4px; vertical-align: -1px; }
+
+/* ── 데이터 관리 (/admin) ── */
+.admin h3 { margin: 0 0 10px; }
+.admin .btn { white-space: nowrap; }
+.field { display: grid; gap: 4px; margin-bottom: 10px; font-size: .76rem; color: var(--muted); font-weight: 700; }
+.field input, .prow input, .prow select {
+  width: 100%; min-width: 0; background: var(--panel-2); color: var(--text); border: 1px solid var(--line);
+  border-radius: 8px; padding: 8px 10px; font: inherit; font-size: .9rem;
+}
+.field input:focus, .prow input:focus, .prow select:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+.field input[type="color"] { padding: 2px; height: 38px; cursor: pointer; }
+.check { display: flex; gap: 8px; align-items: center; font-size: .78rem; color: var(--muted); margin-bottom: 10px; }
+.check input { accent-color: var(--accent); width: 16px; height: 16px; }
+.help { margin-top: 10px; font-size: .8rem; }
+.help summary { cursor: pointer; color: var(--accent); font-weight: 700; }
+.help ol { padding-left: 18px; line-height: 1.6; color: var(--muted); }
+.pill.ok { background: rgba(34, 197, 94, .15); border-color: var(--win); color: #86efac; }
+.pill.bad { background: rgba(239, 68, 68, .15); border-color: var(--bad); color: #fca5a5; }
+.pill.warn { background: rgba(245, 158, 11, .15); border-color: var(--warn); color: #fcd34d; }
+.pill.edit { background: rgba(124, 92, 255, .2); border-color: var(--accent); color: #c4b5fd; }
+.bad-text { color: #fca5a5; }
+.notice { background: var(--panel-2); border-left: 3px solid var(--accent); padding: 8px 10px; border-radius: 8px; }
+.notice.ok { border-color: var(--win); margin-bottom: 10px; font-size: .82rem; line-height: 1.5; }
+.notice a, .changes a { color: var(--accent); font-weight: 700; }
+.linkish { background: none; border: 0; padding: 0; color: var(--accent); font: inherit; font-weight: 700; cursor: pointer; text-decoration: underline; }
+
+.admin-teams { display: grid; gap: 8px; }
+.admin-team {
+  display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; cursor: pointer;
+  background: var(--panel-2); color: var(--text); border: 1px solid var(--line); border-left: 4px solid var(--c);
+  border-radius: 10px; padding: 8px 10px; font: inherit;
+}
+.admin-team .crest { width: 34px; height: 34px; font-size: .62rem; color: var(--ink); }
+.admin-team .grow { flex: 1; min-width: 0; display: grid; }
+.admin-team small { color: var(--muted); font-size: .72rem; }
+.admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 10px; margin-top: 12px; }
+.issues { list-style: none; padding: 0; margin: 4px 0 0; font-size: .8rem; display: grid; gap: 4px; }
+.issues .error { color: #fca5a5; }
+.issues .warn { color: #fcd34d; }
+
+.prow {
+  display: grid; grid-template-columns: 38px 52px 1fr 64px 30px; gap: 6px; align-items: center;
+  padding: 8px 0; border-top: 1px solid var(--line);
+}
+.prow.edited { box-shadow: inset 3px 0 0 var(--accent); padding-left: 8px; margin-left: -8px; }
+.prow .pnum { text-align: center; padding: 8px 4px; }
+.prow select { padding: 8px 4px; }
+.povr { display: grid; place-items: center; height: 34px; border-radius: 8px; font-weight: 900; font-variant-numeric: tabular-nums; }
+.povr.tier-elite { background: var(--tier-elite); color: var(--tier-elite-ink); }
+.povr.tier-gold { background: var(--tier-gold); color: var(--tier-gold-ink); }
+.povr.tier-silver { background: var(--tier-silver); color: var(--tier-silver-ink); }
+.povr.tier-bronze { background: var(--tier-bronze); color: var(--tier-bronze-ink); }
+.pdel { height: 34px; border-radius: 8px; border: 1px solid var(--line); background: transparent; color: var(--muted); font-size: 1.1rem; cursor: pointer; }
+.pdel:hover { color: var(--bad); border-color: var(--bad); }
+.pstats { grid-column: 2 / -1; display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.pstats label { display: grid; gap: 2px; font-size: .64rem; color: var(--muted); font-weight: 700; }
+.pstats input { padding: 6px 4px; text-align: center; }
+.changes { margin: 0 0 10px; padding-left: 18px; font-size: .8rem; line-height: 1.6; max-height: 260px; overflow: auto; }

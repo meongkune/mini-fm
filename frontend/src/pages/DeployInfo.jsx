@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { useCallback, useEffect, useState } from 'react'
 import { api } from '../api.js'
 
@@ -83,6 +84,7 @@ function StaticStatus({ meta, latency, checkedAt, onRefresh }) {
         <Row label="구단 수" value={`${meta.data.teams}팀`} />
         <Row label="업데이트" value={meta.data.updatedAt} mono />
         <Row label="출처" value={meta.data.source} mono />
+        <Link className="btn ghost small wide" to="/admin">🛠 데이터 관리</Link>
       </div>
 
       <div className="card">

@@ -37,6 +37,7 @@
 | 7. 배포 안정성 | 롤링 업데이트(min 100% / max 200%), 실패 시 자동 롤백 | ECS Deployment Circuit Breaker |
 | 8. 정적 호스팅 전환 | 서버 로직을 브라우저로 옮겨 서버 없이 운영, SPA 라우팅 폴백 | GitHub Pages, `actions/deploy-pages` |
 | 9. 데이터 파이프라인 | 외부 API → 시즌 데이터 생성 → 커밋 → 자동 재배포 | football-data.org, `workflow_dispatch` |
+| 10. 서버 없는 관리자 화면 | 브라우저에서 데이터 편집 → GitHub API 커밋 → push 트리거로 재배포 | GitHub REST API (Contents), Fine-grained PAT |
 
 앱 안의 **📡 상태** 탭은 컨테이너가 ECS 작업 메타데이터 엔드포인트를 직접 조회해서, 지금 응답한 Task ID · 가용 영역 · 작업 정의 revision · 이미지 태그 · 리소스를 보여 줍니다. 배포가 실제로 어디서 어떻게 이루어졌는지 화면에서 바로 확인할 수 있습니다.
 
@@ -137,6 +138,24 @@ flowchart LR
 |---|---|---|
 | Secret | `FOOTBALL_DATA_TOKEN` | football-data.org API 토큰 (무료 플랜) |
 
+## 데이터 관리 화면 (`/admin`)
+
+서버 없이 동작하는 관리자 화면입니다. 📡 상태 탭 → **🛠 데이터 관리**에서 엽니다.
+
+```mermaid
+flowchart LR
+    A["/admin<br/>시즌 파일 읽기"] -- "GET contents (sha)" --> G[("GitHub 레포<br/>main")]
+    A --> B["구단·선수·능력치 편집<br/>검증 · 변경 내역"]
+    B -- "PUT contents (sha 확인)" --> G
+    G -- "push 트리거" --> P["pages.yml"] --> S["사이트 재배포"]
+```
+
+- **레포가 곧 데이터베이스.** 시즌 JSON을 Contents API로 읽고(`sha` 포함) 고친 뒤 같은 `sha`로 커밋합니다. 그사이 다른 커밋(예: 시즌 가져오기)이 있었다면 409로 거절돼 덮어쓰지 않습니다.
+- **토큰은 브라우저에만.** Fine-grained PAT(이 레포만, Contents 읽기·쓰기)를 입력하면 기본은 탭을 닫을 때 지워지는 `sessionStorage`, 선택하면 `localStorage`에 둡니다. `api.github.com` 외에는 보내지 않습니다.
+- **사용자 토큰의 push는 워크플로를 깨운다.** `GITHUB_TOKEN`과 달리 개인 토큰으로 만든 커밋은 `pages.yml`의 push 트리거를 그대로 실행합니다.
+- **게시 전 검증.** 포메이션을 짤 수 있는 포지션 인원, 등번호 중복, 능력치·나이 범위를 검사하고 오류가 있으면 게시 버튼이 막힙니다. 편집 중인 내용은 새로고침해도 이어서 불러옵니다.
+- **다시 가져와도 편집 유지.** 손댄 구단·선수에는 `manual`, 뺀 선수는 구단의 `removed`에 기록되고, 시즌 가져오기 스크립트가 이를 새 데이터에 다시 입힙니다.
+
 ## Docker 이미지
 
 ```dockerfile
@@ -226,6 +245,7 @@ aws ec2 describe-network-interfaces --network-interface-ids $ENI --query 'Networ
 | `docker run -p 8080:80` 실패 | Windows가 해당 포트를 예약(Hyper-V 제외 범위) | 다른 호스트 포트 사용 |
 | `register-task-definition` → 파일 디코딩 오류 | AWS CLI가 Windows 기본 코드 페이지로 JSON을 읽음 | `AWS_CLI_FILE_ENCODING=UTF-8` |
 | Git Bash에서 `/ecs/...` 인자가 이상한 경로로 바뀜 | MSYS 경로 자동 변환 | `MSYS_NO_PATHCONV=1` |
+| `/admin` 게시 내용의 한글·악센트 이름이 깨짐 | `btoa`는 Latin-1 문자열만 받음 | `TextEncoder`로 UTF-8 바이트를 만든 뒤 base64 |
 | 페이지 이동 시 SPA 전체가 빈 화면 | `useEffect(() => window.scrollTo(0,0))`가 `scrollTo`의 반환값(Promise)을 cleanup으로 반환 | 본문을 `{ }`로 감싸 반환값 제거 + Error Boundary 추가 |
 
 ## 애플리케이션
@@ -278,10 +298,11 @@ aws ec2 describe-network-interfaces --network-interface-ids $ENI --query 'Networ
 │   ├── src/
 │   │   ├── engine/engine.js       # 브라우저용 경기 엔진
 │   │   ├── api.js                 # 데이터 로딩 · 경기 계산 계층
+│   │   ├── github.js              # GitHub Contents API (/admin)
 │   │   ├── App.jsx                # 레이아웃 · 하단 탭 바 · Error Boundary
 │   │   ├── store.jsx              # 전역 상태 + localStorage
 │   │   ├── styles.css             # 모바일 우선 스타일
-│   │   └── pages/                 # Home · Squad · Tactics · Match · MatchPitch · League · DeployInfo
+│   │   └── pages/                 # Home · Squad · Tactics · Match · MatchPitch · League · DeployInfo · Admin
 │   └── vite.config.js
 └── tools/
     ├── import_season.mjs          # football-data.org → 시즌 데이터

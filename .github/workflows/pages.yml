@@ -40,6 +40,7 @@ jobs:
         working-directory: frontend
         env:
           VITE_BASE: /${{ github.event.repository.name }}/
+          VITE_GITHUB_REPO: ${{ github.repository }}   # /admin이 커밋할 레포
         run: |
           export VITE_APP_VERSION="${GITHUB_SHA::7}"
           export VITE_BUILT_AT="$(date -u +%Y-%m-%dT%H:%M:%SZ)"

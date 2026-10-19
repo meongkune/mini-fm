@@ -7,6 +7,7 @@ import Tactics from './pages/Tactics.jsx'
 import Match from './pages/Match.jsx'
 import League from './pages/League.jsx'
 import DeployInfo from './pages/DeployInfo.jsx'
+import Admin from './pages/Admin.jsx'
 
 // 하단 탭 바: [경로, 라벨, 아이콘, 정확히 일치]
 const NAV = [
@@ -41,6 +42,7 @@ export default function App() {
   const { pathname } = useLocation()
   // 중괄호 필수: scrollTo의 반환값(최신 브라우저는 Promise)을 cleanup으로 반환하면 다음 이동 때 React가 터진다
   useEffect(() => { window.scrollTo(0, 0) }, [pathname])
+  const isAdmin = pathname.startsWith('/admin')
 
   return (
     <div className="app">
@@ -60,9 +62,11 @@ export default function App() {
       )}
 
       <main>
-        {error && <div className="card error">API 연결 실패: {error}</div>}
-        {!data && !error && <div className="card muted">데이터를 불러오는 중…</div>}
-        {data && (
+        {/* 데이터 관리 화면은 게임 데이터 로딩과 상관없이 연다 */}
+        {isAdmin && <PageErrorBoundary resetKey={pathname}><Admin /></PageErrorBoundary>}
+        {!isAdmin && error && <div className="card error">API 연결 실패: {error}</div>}
+        {!isAdmin && !data && !error && <div className="card muted">데이터를 불러오는 중…</div>}
+        {!isAdmin && data && (
           <PageErrorBoundary resetKey={pathname}>
           <Routes>
             <Route path="/" element={<Home />} />
