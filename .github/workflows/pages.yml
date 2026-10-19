@@ -1,0 +1,64 @@
+# main push → React 정적 사이트 빌드 → GitHub Pages 배포
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 소스 체크아웃
+        uses: actions/checkout@v4
+
+      - name: Node.js 설정
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: 의존성 설치
+        working-directory: frontend
+        run: npm ci --no-audit --no-fund
+
+      - name: 빌드 (레포 이름을 base 경로로)
+        working-directory: frontend
+        env:
+          VITE_BASE: /${{ github.event.repository.name }}/
+        run: |
+          export VITE_APP_VERSION="${GITHUB_SHA::7}"
+          export VITE_BUILT_AT="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          npm run build
+          # SPA 새로고침 대응: 없는 경로는 404.html(=index.html)이 받아서 React Router가 처리
+          cp dist/index.html dist/404.html
+
+      - name: Pages 아티팩트 업로드
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: frontend/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: GitHub Pages 배포
+        id: deployment
+        uses: actions/deploy-pages@v4

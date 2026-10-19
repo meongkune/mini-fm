@@ -1,0 +1,1524 @@
+{
+ "league": {
+  "id": "premier-league",
+  "name": "프리미어리그",
+  "country": "잉글랜드"
+ },
+ "season": "2025-26",
+ "updatedAt": "2026-10-19",
+ "source": "manual",
+ "teams": [
+  {
+   "id": "ARS",
+   "name": "아스널",
+   "short": "아스널",
+   "color": "#EF0107",
+   "alt": "#F5F5F5",
+   "players": [
+    {
+     "id": "ARS01",
+     "name": "다비드 라야",
+     "pos": "GK",
+     "number": 1,
+     "age": 20,
+     "att": 45,
+     "def": 86,
+     "sta": 74
+    },
+    {
+     "id": "ARS02",
+     "name": "케파 아리사발라가",
+     "pos": "GK",
+     "number": 9,
+     "age": 26,
+     "att": 40,
+     "def": 85,
+     "sta": 79
+    },
+    {
+     "id": "ARS03",
+     "name": "윌리엄 살리바",
+     "pos": "DF",
+     "number": 22,
+     "age": 29,
+     "att": 67,
+     "def": 84,
+     "sta": 83
+    },
+    {
+     "id": "ARS04",
+     "name": "가브리엘 마갈량이스",
+     "pos": "DF",
+     "number": 34,
+     "age": 23,
+     "att": 67,
+     "def": 86,
+     "sta": 83
+    },
+    {
+     "id": "ARS05",
+     "name": "위리엔 팀버르",
+     "pos": "DF",
+     "number": 47,
+     "age": 30,
+     "att": 70,
+     "def": 91,
+     "sta": 73
+    },
+    {
+     "id": "ARS06",
+     "name": "리카르도 칼라피오리",
+     "pos": "DF",
+     "number": 43,
+     "age": 30,
+     "att": 67,
+     "def": 82,
+     "sta": 88
+    },
+    {
+     "id": "ARS07",
+     "name": "벤 화이트",
+     "pos": "DF",
+     "number": 8,
+     "age": 27,
+     "att": 59,
+     "def": 78,
+     "sta": 78
+    },
+    {
+     "id": "ARS08",
+     "name": "마일스 루이스스켈리",
+     "pos": "DF",
+     "number": 16,
+     "age": 21,
+     "att": 65,
+     "def": 85,
+     "sta": 82
+    },
+    {
+     "id": "ARS09",
+     "name": "데클란 라이스",
+     "pos": "MF",
+     "number": 40,
+     "age": 23,
+     "att": 74,
+     "def": 85,
+     "sta": 82
+    },
+    {
+     "id": "ARS10",
+     "name": "마르틴 외데고르",
+     "pos": "MF",
+     "number": 41,
+     "age": 24,
+     "att": 81,
+     "def": 80,
+     "sta": 73
+    },
+    {
+     "id": "ARS11",
+     "name": "마르틴 수비멘디",
+     "pos": "MF",
+     "number": 37,
+     "age": 25,
+     "att": 83,
+     "def": 82,
+     "sta": 86
+    },
+    {
+     "id": "ARS12",
+     "name": "에베레치 에제",
+     "pos": "MF",
+     "number": 28,
+     "age": 32,
+     "att": 75,
+     "def": 80,
+     "sta": 87
+    },
+    {
+     "id": "ARS13",
+     "name": "미켈 메리노",
+     "pos": "MF",
+     "number": 38,
+     "age": 31,
+     "att": 79,
+     "def": 76,
+     "sta": 79
+    },
+    {
+     "id": "ARS14",
+     "name": "크리스티안 뇌르고르",
+     "pos": "MF",
+     "number": 42,
+     "age": 25,
+     "att": 75,
+     "def": 71,
+     "sta": 77
+    },
+    {
+     "id": "ARS15",
+     "name": "부카요 사카",
+     "pos": "FW",
+     "number": 33,
+     "age": 28,
+     "att": 89,
+     "def": 60,
+     "sta": 87
+    },
+    {
+     "id": "ARS16",
+     "name": "빅토르 요케레스",
+     "pos": "FW",
+     "number": 30,
+     "age": 31,
+     "att": 82,
+     "def": 61,
+     "sta": 78
+    },
+    {
+     "id": "ARS17",
+     "name": "가브리엘 마르티넬리",
+     "pos": "FW",
+     "number": 17,
+     "age": 31,
+     "att": 77,
+     "def": 45,
+     "sta": 80
+    },
+    {
+     "id": "ARS18",
+     "name": "레안드로 트로사르",
+     "pos": "FW",
+     "number": 2,
+     "age": 33,
+     "att": 85,
+     "def": 46,
+     "sta": 77
+    }
+   ]
+  },
+  {
+   "id": "MCI",
+   "name": "맨체스터 시티",
+   "short": "맨시티",
+   "color": "#6CABDD",
+   "alt": "#1C2C5B",
+   "players": [
+    {
+     "id": "MCI01",
+     "name": "잔루이지 돈나룸마",
+     "pos": "GK",
+     "number": 1,
+     "age": 23,
+     "att": 48,
+     "def": 82,
+     "sta": 72
+    },
+    {
+     "id": "MCI02",
+     "name": "제임스 트래퍼드",
+     "pos": "GK",
+     "number": 32,
+     "age": 21,
+     "att": 47,
+     "def": 84,
+     "sta": 78
+    },
+    {
+     "id": "MCI03",
+     "name": "후벵 디아스",
+     "pos": "DF",
+     "number": 11,
+     "age": 31,
+     "att": 70,
+     "def": 88,
+     "sta": 82
+    },
+    {
+     "id": "MCI04",
+     "name": "요슈코 그바르디올",
+     "pos": "DF",
+     "number": 49,
+     "age": 33,
+     "att": 65,
+     "def": 85,
+     "sta": 86
+    },
+    {
+     "id": "MCI05",
+     "name": "마테우스 누네스",
+     "pos": "DF",
+     "number": 16,
+     "age": 26,
+     "att": 70,
+     "def": 93,
+     "sta": 86
+    },
+    {
+     "id": "MCI06",
+     "name": "라얀 아이트누리",
+     "pos": "DF",
+     "number": 9,
+     "age": 31,
+     "att": 68,
+     "def": 89,
+     "sta": 72
+    },
+    {
+     "id": "MCI07",
+     "name": "존 스톤스",
+     "pos": "DF",
+     "number": 42,
+     "age": 32,
+     "att": 59,
+     "def": 79,
+     "sta": 78
+    },
+    {
+     "id": "MCI08",
+     "name": "리코 루이스",
+     "pos": "DF",
+     "number": 31,
+     "age": 33,
+     "att": 67,
+     "def": 75,
+     "sta": 78
+    },
+    {
+     "id": "MCI09",
+     "name": "로드리",
+     "pos": "MF",
+     "number": 47,
+     "age": 30,
+     "att": 85,
+     "def": 86,
+     "sta": 87
+    },
+    {
+     "id": "MCI10",
+     "name": "티자니 레인더르스",
+     "pos": "MF",
+     "number": 36,
+     "age": 23,
+     "att": 81,
+     "def": 76,
+     "sta": 84
+    },
+    {
+     "id": "MCI11",
+     "name": "필 포든",
+     "pos": "MF",
+     "number": 18,
+     "age": 32,
+     "att": 85,
+     "def": 81,
+     "sta": 73
+    },
+    {
+     "id": "MCI12",
+     "name": "라얀 셰르키",
+     "pos": "MF",
+     "number": 37,
+     "age": 29,
+     "att": 78,
+     "def": 81,
+     "sta": 82
+    },
+    {
+     "id": "MCI13",
+     "name": "베르나르두 실바",
+     "pos": "MF",
+     "number": 27,
+     "age": 20,
+     "att": 70,
+     "def": 78,
+     "sta": 77
+    },
+    {
+     "id": "MCI14",
+     "name": "마테오 코바치치",
+     "pos": "MF",
+     "number": 21,
+     "age": 21,
+     "att": 74,
+     "def": 67,
+     "sta": 66
+    },
+    {
+     "id": "MCI15",
+     "name": "엘링 홀란",
+     "pos": "FW",
+     "number": 34,
+     "age": 19,
+     "att": 89,
+     "def": 61,
+     "sta": 88
+    },
+    {
+     "id": "MCI16",
+     "name": "오마르 마르무시",
+     "pos": "FW",
+     "number": 44,
+     "age": 33,
+     "att": 83,
+     "def": 61,
+     "sta": 77
+    },
+    {
+     "id": "MCI17",
+     "name": "제레미 도쿠",
+     "pos": "FW",
+     "number": 38,
+     "age": 22,
+     "att": 76,
+     "def": 54,
+     "sta": 65
+    },
+    {
+     "id": "MCI18",
+     "name": "사비뉴",
+     "pos": "FW",
+     "number": 29,
+     "age": 31,
+     "att": 83,
+     "def": 49,
+     "sta": 75
+    }
+   ]
+  },
+  {
+   "id": "LIV",
+   "name": "리버풀",
+   "short": "리버풀",
+   "color": "#C8102E",
+   "alt": "#F6EB61",
+   "players": [
+    {
+     "id": "LIV01",
+     "name": "알리송 베케르",
+     "pos": "GK",
+     "number": 1,
+     "age": 21,
+     "att": 56,
+     "def": 94,
+     "sta": 89
+    },
+    {
+     "id": "LIV02",
+     "name": "기오르기 마마르다슈빌리",
+     "pos": "GK",
+     "number": 11,
+     "age": 23,
+     "att": 45,
+     "def": 81,
+     "sta": 76
+    },
+    {
+     "id": "LIV03",
+     "name": "버질 판데이크",
+     "pos": "DF",
+     "number": 2,
+     "age": 31,
+     "att": 64,
+     "def": 89,
+     "sta": 77
+    },
+    {
+     "id": "LIV04",
+     "name": "이브라히마 코나테",
+     "pos": "DF",
+     "number": 22,
+     "age": 25,
+     "att": 62,
+     "def": 82,
+     "sta": 83
+    },
+    {
+     "id": "LIV05",
+     "name": "제러미 프림퐁",
+     "pos": "DF",
+     "number": 44,
+     "age": 33,
+     "att": 63,
+     "def": 81,
+     "sta": 82
+    },
+    {
+     "id": "LIV06",
+     "name": "밀로시 케르케즈",
+     "pos": "DF",
+     "number": 39,
+     "age": 29,
+     "att": 67,
+     "def": 93,
+     "sta": 71
+    },
+    {
+     "id": "LIV07",
+     "name": "앤디 로버트슨",
+     "pos": "DF",
+     "number": 38,
+     "age": 19,
+     "att": 63,
+     "def": 81,
+     "sta": 74
+    },
+    {
+     "id": "LIV08",
+     "name": "코너 브래들리",
+     "pos": "DF",
+     "number": 33,
+     "age": 29,
+     "att": 59,
+     "def": 81,
+     "sta": 74
+    },
+    {
+     "id": "LIV09",
+     "name": "알렉시스 맥알리스터",
+     "pos": "MF",
+     "number": 10,
+     "age": 33,
+     "att": 75,
+     "def": 81,
+     "sta": 85
+    },
+    {
+     "id": "LIV10",
+     "name": "라이언 흐라번베르흐",
+     "pos": "MF",
+     "number": 36,
+     "age": 28,
+     "att": 83,
+     "def": 86,
+     "sta": 76
+    },
+    {
+     "id": "LIV11",
+     "name": "플로리안 비르츠",
+     "pos": "MF",
+     "number": 16,
+     "age": 21,
+     "att": 83,
+     "def": 82,
+     "sta": 77
+    },
+    {
+     "id": "LIV12",
+     "name": "도미니크 소보슬라이",
+     "pos": "MF",
+     "number": 32,
+     "age": 25,
+     "att": 83,
+     "def": 79,
+     "sta": 85
+    },
+    {
+     "id": "LIV13",
+     "name": "커티스 존스",
+     "pos": "MF",
+     "number": 42,
+     "age": 28,
+     "att": 70,
+     "def": 77,
+     "sta": 66
+    },
+    {
+     "id": "LIV14",
+     "name": "엔도 와타루",
+     "pos": "MF",
+     "number": 34,
+     "age": 27,
+     "att": 73,
+     "def": 67,
+     "sta": 70
+    },
+    {
+     "id": "LIV15",
+     "name": "모하메드 살라",
+     "pos": "FW",
+     "number": 20,
+     "age": 29,
+     "att": 84,
+     "def": 52,
+     "sta": 88
+    },
+    {
+     "id": "LIV16",
+     "name": "알렉산데르 이사크",
+     "pos": "FW",
+     "number": 7,
+     "age": 33,
+     "att": 82,
+     "def": 59,
+     "sta": 77
+    },
+    {
+     "id": "LIV17",
+     "name": "위고 에키티케",
+     "pos": "FW",
+     "number": 28,
+     "age": 26,
+     "att": 86,
+     "def": 55,
+     "sta": 64
+    },
+    {
+     "id": "LIV18",
+     "name": "코디 학포",
+     "pos": "FW",
+     "number": 12,
+     "age": 21,
+     "att": 85,
+     "def": 53,
+     "sta": 70
+    }
+   ]
+  },
+  {
+   "id": "CHE",
+   "name": "첼시",
+   "short": "첼시",
+   "color": "#034694",
+   "alt": "#F5F5F5",
+   "players": [
+    {
+     "id": "CHE01",
+     "name": "로베르트 산체스",
+     "pos": "GK",
+     "number": 1,
+     "age": 26,
+     "att": 54,
+     "def": 86,
+     "sta": 78
+    },
+    {
+     "id": "CHE02",
+     "name": "필리프 요르겐센",
+     "pos": "GK",
+     "number": 35,
+     "age": 26,
+     "att": 40,
+     "def": 78,
+     "sta": 78
+    },
+    {
+     "id": "CHE03",
+     "name": "웨슬리 포파나",
+     "pos": "DF",
+     "number": 10,
+     "age": 26,
+     "att": 67,
+     "def": 80,
+     "sta": 85
+    },
+    {
+     "id": "CHE04",
+     "name": "레비 콜윌",
+     "pos": "DF",
+     "number": 12,
+     "age": 31,
+     "att": 68,
+     "def": 91,
+     "sta": 77
+    },
+    {
+     "id": "CHE05",
+     "name": "리스 제임스",
+     "pos": "DF",
+     "number": 44,
+     "age": 32,
+     "att": 61,
+     "def": 82,
+     "sta": 76
+    },
+    {
+     "id": "CHE06",
+     "name": "마크 쿠쿠레야",
+     "pos": "DF",
+     "number": 13,
+     "age": 19,
+     "att": 61,
+     "def": 86,
+     "sta": 79
+    },
+    {
+     "id": "CHE07",
+     "name": "트레보 찰로바",
+     "pos": "DF",
+     "number": 26,
+     "age": 25,
+     "att": 61,
+     "def": 84,
+     "sta": 67
+    },
+    {
+     "id": "CHE08",
+     "name": "말로 귀스토",
+     "pos": "DF",
+     "number": 19,
+     "age": 19,
+     "att": 58,
+     "def": 74,
+     "sta": 73
+    },
+    {
+     "id": "CHE09",
+     "name": "모이세스 카이세도",
+     "pos": "MF",
+     "number": 29,
+     "age": 27,
+     "att": 82,
+     "def": 81,
+     "sta": 86
+    },
+    {
+     "id": "CHE10",
+     "name": "엔소 페르난데스",
+     "pos": "MF",
+     "number": 36,
+     "age": 22,
+     "att": 73,
+     "def": 81,
+     "sta": 77
+    },
+    {
+     "id": "CHE11",
+     "name": "콜 파머",
+     "pos": "MF",
+     "number": 28,
+     "age": 27,
+     "att": 84,
+     "def": 81,
+     "sta": 75
+    },
+    {
+     "id": "CHE12",
+     "name": "로메오 라비아",
+     "pos": "MF",
+     "number": 7,
+     "age": 28,
+     "att": 76,
+     "def": 81,
+     "sta": 77
+    },
+    {
+     "id": "CHE13",
+     "name": "안드레이 산투스",
+     "pos": "MF",
+     "number": 46,
+     "age": 29,
+     "att": 73,
+     "def": 67,
+     "sta": 65
+    },
+    {
+     "id": "CHE14",
+     "name": "다리오 에수구",
+     "pos": "MF",
+     "number": 21,
+     "age": 31,
+     "att": 69,
+     "def": 66,
+     "sta": 75
+    },
+    {
+     "id": "CHE15",
+     "name": "주앙 페드루",
+     "pos": "FW",
+     "number": 45,
+     "age": 21,
+     "att": 81,
+     "def": 60,
+     "sta": 70
+    },
+    {
+     "id": "CHE16",
+     "name": "페드루 네투",
+     "pos": "FW",
+     "number": 24,
+     "age": 31,
+     "att": 85,
+     "def": 61,
+     "sta": 74
+    },
+    {
+     "id": "CHE17",
+     "name": "에스테방",
+     "pos": "FW",
+     "number": 41,
+     "age": 29,
+     "att": 83,
+     "def": 44,
+     "sta": 78
+    },
+    {
+     "id": "CHE18",
+     "name": "리엄 델랍",
+     "pos": "FW",
+     "number": 18,
+     "age": 24,
+     "att": 77,
+     "def": 52,
+     "sta": 64
+    }
+   ]
+  },
+  {
+   "id": "NEW",
+   "name": "뉴캐슬 유나이티드",
+   "short": "뉴캐슬",
+   "color": "#241F20",
+   "alt": "#41B6E6",
+   "players": [
+    {
+     "id": "NEW01",
+     "name": "닉 포프",
+     "pos": "GK",
+     "number": 1,
+     "age": 29,
+     "att": 48,
+     "def": 87,
+     "sta": 78
+    },
+    {
+     "id": "NEW02",
+     "name": "에런 램스데일",
+     "pos": "GK",
+     "number": 20,
+     "age": 24,
+     "att": 45,
+     "def": 78,
+     "sta": 61
+    },
+    {
+     "id": "NEW03",
+     "name": "스벤 보트만",
+     "pos": "DF",
+     "number": 22,
+     "age": 33,
+     "att": 64,
+     "def": 82,
+     "sta": 73
+    },
+    {
+     "id": "NEW04",
+     "name": "말리크 티아우",
+     "pos": "DF",
+     "number": 12,
+     "age": 28,
+     "att": 65,
+     "def": 83,
+     "sta": 70
+    },
+    {
+     "id": "NEW05",
+     "name": "티노 리브라멘토",
+     "pos": "DF",
+     "number": 18,
+     "age": 29,
+     "att": 63,
+     "def": 85,
+     "sta": 75
+    },
+    {
+     "id": "NEW06",
+     "name": "키어런 트리피어",
+     "pos": "DF",
+     "number": 46,
+     "age": 25,
+     "att": 62,
+     "def": 82,
+     "sta": 68
+    },
+    {
+     "id": "NEW07",
+     "name": "파비안 셰어",
+     "pos": "DF",
+     "number": 6,
+     "age": 30,
+     "att": 62,
+     "def": 76,
+     "sta": 60
+    },
+    {
+     "id": "NEW08",
+     "name": "댄 번",
+     "pos": "DF",
+     "number": 2,
+     "age": 23,
+     "att": 62,
+     "def": 75,
+     "sta": 69
+    },
+    {
+     "id": "NEW09",
+     "name": "브루누 기마랑이스",
+     "pos": "MF",
+     "number": 28,
+     "age": 30,
+     "att": 82,
+     "def": 82,
+     "sta": 70
+    },
+    {
+     "id": "NEW10",
+     "name": "산드로 토날리",
+     "pos": "MF",
+     "number": 45,
+     "age": 23,
+     "att": 82,
+     "def": 76,
+     "sta": 77
+    },
+    {
+     "id": "NEW11",
+     "name": "조엘린통",
+     "pos": "MF",
+     "number": 42,
+     "age": 28,
+     "att": 70,
+     "def": 78,
+     "sta": 77
+    },
+    {
+     "id": "NEW12",
+     "name": "제이컵 램지",
+     "pos": "MF",
+     "number": 43,
+     "age": 22,
+     "att": 78,
+     "def": 70,
+     "sta": 70
+    },
+    {
+     "id": "NEW13",
+     "name": "조 윌록",
+     "pos": "MF",
+     "number": 5,
+     "age": 21,
+     "att": 72,
+     "def": 64,
+     "sta": 63
+    },
+    {
+     "id": "NEW14",
+     "name": "루이스 마일리",
+     "pos": "MF",
+     "number": 8,
+     "age": 19,
+     "att": 65,
+     "def": 71,
+     "sta": 71
+    },
+    {
+     "id": "NEW15",
+     "name": "닉 볼테마데",
+     "pos": "FW",
+     "number": 17,
+     "age": 28,
+     "att": 88,
+     "def": 58,
+     "sta": 76
+    },
+    {
+     "id": "NEW16",
+     "name": "앤서니 엘랑가",
+     "pos": "FW",
+     "number": 3,
+     "age": 19,
+     "att": 84,
+     "def": 57,
+     "sta": 71
+    },
+    {
+     "id": "NEW17",
+     "name": "하비 반스",
+     "pos": "FW",
+     "number": 21,
+     "age": 24,
+     "att": 77,
+     "def": 47,
+     "sta": 72
+    },
+    {
+     "id": "NEW18",
+     "name": "요안 위사",
+     "pos": "FW",
+     "number": 9,
+     "age": 22,
+     "att": 83,
+     "def": 47,
+     "sta": 67
+    }
+   ]
+  },
+  {
+   "id": "TOT",
+   "name": "토트넘 홋스퍼",
+   "short": "토트넘",
+   "color": "#132257",
+   "alt": "#F5F5F5",
+   "players": [
+    {
+     "id": "TOT01",
+     "name": "굴리엘모 비카리오",
+     "pos": "GK",
+     "number": 1,
+     "age": 24,
+     "att": 41,
+     "def": 87,
+     "sta": 84
+    },
+    {
+     "id": "TOT02",
+     "name": "안토닌 킨스키",
+     "pos": "GK",
+     "number": 10,
+     "age": 20,
+     "att": 40,
+     "def": 78,
+     "sta": 60
+    },
+    {
+     "id": "TOT03",
+     "name": "크리스티안 로메로",
+     "pos": "DF",
+     "number": 13,
+     "age": 29,
+     "att": 65,
+     "def": 80,
+     "sta": 76
+    },
+    {
+     "id": "TOT04",
+     "name": "미키 판더펜",
+     "pos": "DF",
+     "number": 36,
+     "age": 29,
+     "att": 65,
+     "def": 88,
+     "sta": 76
+    },
+    {
+     "id": "TOT05",
+     "name": "페드로 포로",
+     "pos": "DF",
+     "number": 3,
+     "age": 19,
+     "att": 67,
+     "def": 76,
+     "sta": 73
+    },
+    {
+     "id": "TOT06",
+     "name": "제드 스펜스",
+     "pos": "DF",
+     "number": 44,
+     "age": 26,
+     "att": 57,
+     "def": 79,
+     "sta": 82
+    },
+    {
+     "id": "TOT07",
+     "name": "데스티니 우도지",
+     "pos": "DF",
+     "number": 47,
+     "age": 32,
+     "att": 52,
+     "def": 80,
+     "sta": 71
+    },
+    {
+     "id": "TOT08",
+     "name": "케빈 단소",
+     "pos": "DF",
+     "number": 37,
+     "age": 30,
+     "att": 55,
+     "def": 81,
+     "sta": 66
+    },
+    {
+     "id": "TOT09",
+     "name": "주앙 팔리냐",
+     "pos": "MF",
+     "number": 27,
+     "age": 27,
+     "att": 73,
+     "def": 74,
+     "sta": 72
+    },
+    {
+     "id": "TOT10",
+     "name": "로드리고 벤탄쿠르",
+     "pos": "MF",
+     "number": 18,
+     "age": 24,
+     "att": 74,
+     "def": 76,
+     "sta": 80
+    },
+    {
+     "id": "TOT11",
+     "name": "사비 시몬스",
+     "pos": "MF",
+     "number": 11,
+     "age": 27,
+     "att": 81,
+     "def": 76,
+     "sta": 84
+    },
+    {
+     "id": "TOT12",
+     "name": "제임스 매디슨",
+     "pos": "MF",
+     "number": 16,
+     "age": 23,
+     "att": 72,
+     "def": 71,
+     "sta": 79
+    },
+    {
+     "id": "TOT13",
+     "name": "파프 마타르 사르",
+     "pos": "MF",
+     "number": 46,
+     "age": 21,
+     "att": 69,
+     "def": 62,
+     "sta": 70
+    },
+    {
+     "id": "TOT14",
+     "name": "데얀 쿨루세브스키",
+     "pos": "MF",
+     "number": 38,
+     "age": 32,
+     "att": 70,
+     "def": 73,
+     "sta": 72
+    },
+    {
+     "id": "TOT15",
+     "name": "모하메드 쿠두스",
+     "pos": "FW",
+     "number": 19,
+     "age": 31,
+     "att": 77,
+     "def": 57,
+     "sta": 71
+    },
+    {
+     "id": "TOT16",
+     "name": "도미닉 솔랑케",
+     "pos": "FW",
+     "number": 32,
+     "age": 20,
+     "att": 81,
+     "def": 52,
+     "sta": 83
+    },
+    {
+     "id": "TOT17",
+     "name": "브레넌 존슨",
+     "pos": "FW",
+     "number": 28,
+     "age": 30,
+     "att": 74,
+     "def": 42,
+     "sta": 62
+    },
+    {
+     "id": "TOT18",
+     "name": "히샬리송",
+     "pos": "FW",
+     "number": 41,
+     "age": 33,
+     "att": 70,
+     "def": 48,
+     "sta": 65
+    }
+   ]
+  },
+  {
+   "id": "AVL",
+   "name": "애스턴 빌라",
+   "short": "애스턴 빌라",
+   "color": "#670E36",
+   "alt": "#95BFE5",
+   "players": [
+    {
+     "id": "AVL01",
+     "name": "에밀리아노 마르티네스",
+     "pos": "GK",
+     "number": 1,
+     "age": 19,
+     "att": 50,
+     "def": 86,
+     "sta": 72
+    },
+    {
+     "id": "AVL02",
+     "name": "마르코 비조트",
+     "pos": "GK",
+     "number": 46,
+     "age": 21,
+     "att": 40,
+     "def": 74,
+     "sta": 76
+    },
+    {
+     "id": "AVL03",
+     "name": "에즈리 콘사",
+     "pos": "DF",
+     "number": 39,
+     "age": 23,
+     "att": 62,
+     "def": 78,
+     "sta": 78
+    },
+    {
+     "id": "AVL04",
+     "name": "파우 토레스",
+     "pos": "DF",
+     "number": 21,
+     "age": 22,
+     "att": 68,
+     "def": 86,
+     "sta": 66
+    },
+    {
+     "id": "AVL05",
+     "name": "마티 캐시",
+     "pos": "DF",
+     "number": 38,
+     "age": 32,
+     "att": 66,
+     "def": 86,
+     "sta": 81
+    },
+    {
+     "id": "AVL06",
+     "name": "뤼카 디뉴",
+     "pos": "DF",
+     "number": 4,
+     "age": 25,
+     "att": 62,
+     "def": 88,
+     "sta": 83
+    },
+    {
+     "id": "AVL07",
+     "name": "이언 마트센",
+     "pos": "DF",
+     "number": 27,
+     "age": 21,
+     "att": 61,
+     "def": 77,
+     "sta": 59
+    },
+    {
+     "id": "AVL08",
+     "name": "타이론 밍스",
+     "pos": "DF",
+     "number": 26,
+     "age": 21,
+     "att": 55,
+     "def": 77,
+     "sta": 63
+    },
+    {
+     "id": "AVL09",
+     "name": "유리 틸레만스",
+     "pos": "MF",
+     "number": 36,
+     "age": 21,
+     "att": 69,
+     "def": 70,
+     "sta": 82
+    },
+    {
+     "id": "AVL10",
+     "name": "부바카르 카마라",
+     "pos": "MF",
+     "number": 35,
+     "age": 29,
+     "att": 80,
+     "def": 79,
+     "sta": 66
+    },
+    {
+     "id": "AVL11",
+     "name": "모건 로저스",
+     "pos": "MF",
+     "number": 12,
+     "age": 32,
+     "att": 74,
+     "def": 70,
+     "sta": 77
+    },
+    {
+     "id": "AVL12",
+     "name": "존 맥긴",
+     "pos": "MF",
+     "number": 34,
+     "age": 23,
+     "att": 72,
+     "def": 77,
+     "sta": 70
+    },
+    {
+     "id": "AVL13",
+     "name": "아마두 오나나",
+     "pos": "MF",
+     "number": 8,
+     "age": 28,
+     "att": 71,
+     "def": 65,
+     "sta": 63
+    },
+    {
+     "id": "AVL14",
+     "name": "에밀리아노 부엔디아",
+     "pos": "MF",
+     "number": 7,
+     "age": 20,
+     "att": 67,
+     "def": 69,
+     "sta": 62
+    },
+    {
+     "id": "AVL15",
+     "name": "올리 왓킨스",
+     "pos": "FW",
+     "number": 11,
+     "age": 32,
+     "att": 88,
+     "def": 48,
+     "sta": 78
+    },
+    {
+     "id": "AVL16",
+     "name": "레온 베일리",
+     "pos": "FW",
+     "number": 43,
+     "age": 23,
+     "att": 86,
+     "def": 51,
+     "sta": 69
+    },
+    {
+     "id": "AVL17",
+     "name": "도니얼 말런",
+     "pos": "FW",
+     "number": 23,
+     "age": 24,
+     "att": 77,
+     "def": 47,
+     "sta": 62
+    },
+    {
+     "id": "AVL18",
+     "name": "에반 게상",
+     "pos": "FW",
+     "number": 18,
+     "age": 27,
+     "att": 78,
+     "def": 43,
+     "sta": 70
+    }
+   ]
+  },
+  {
+   "id": "MUN",
+   "name": "맨체스터 유나이티드",
+   "short": "맨유",
+   "color": "#DA291C",
+   "alt": "#F5F5F5",
+   "players": [
+    {
+     "id": "MUN01",
+     "name": "세너 라먼스",
+     "pos": "GK",
+     "number": 1,
+     "age": 33,
+     "att": 49,
+     "def": 86,
+     "sta": 80
+    },
+    {
+     "id": "MUN02",
+     "name": "알타이 바이은드르",
+     "pos": "GK",
+     "number": 45,
+     "age": 25,
+     "att": 40,
+     "def": 71,
+     "sta": 64
+    },
+    {
+     "id": "MUN03",
+     "name": "마테이스 더리흐트",
+     "pos": "DF",
+     "number": 31,
+     "age": 31,
+     "att": 63,
+     "def": 78,
+     "sta": 76
+    },
+    {
+     "id": "MUN04",
+     "name": "리산드로 마르티네스",
+     "pos": "DF",
+     "number": 39,
+     "age": 31,
+     "att": 68,
+     "def": 80,
+     "sta": 78
+    },
+    {
+     "id": "MUN05",
+     "name": "디오구 달로트",
+     "pos": "DF",
+     "number": 24,
+     "age": 32,
+     "att": 68,
+     "def": 84,
+     "sta": 77
+    },
+    {
+     "id": "MUN06",
+     "name": "해리 매과이어",
+     "pos": "DF",
+     "number": 7,
+     "age": 22,
+     "att": 58,
+     "def": 82,
+     "sta": 83
+    },
+    {
+     "id": "MUN07",
+     "name": "레니 요로",
+     "pos": "DF",
+     "number": 6,
+     "age": 29,
+     "att": 60,
+     "def": 70,
+     "sta": 71
+    },
+    {
+     "id": "MUN08",
+     "name": "루크 쇼",
+     "pos": "DF",
+     "number": 49,
+     "age": 23,
+     "att": 54,
+     "def": 69,
+     "sta": 68
+    },
+    {
+     "id": "MUN09",
+     "name": "브루누 페르난드스",
+     "pos": "MF",
+     "number": 33,
+     "age": 23,
+     "att": 75,
+     "def": 72,
+     "sta": 69
+    },
+    {
+     "id": "MUN10",
+     "name": "카세미루",
+     "pos": "MF",
+     "number": 21,
+     "age": 27,
+     "att": 78,
+     "def": 72,
+     "sta": 72
+    },
+    {
+     "id": "MUN11",
+     "name": "마테우스 쿠냐",
+     "pos": "MF",
+     "number": 18,
+     "age": 24,
+     "att": 70,
+     "def": 76,
+     "sta": 68
+    },
+    {
+     "id": "MUN12",
+     "name": "코비 마이누",
+     "pos": "MF",
+     "number": 16,
+     "age": 23,
+     "att": 72,
+     "def": 77,
+     "sta": 79
+    },
+    {
+     "id": "MUN13",
+     "name": "마누엘 우가르테",
+     "pos": "MF",
+     "number": 12,
+     "age": 29,
+     "att": 67,
+     "def": 67,
+     "sta": 58
+    },
+    {
+     "id": "MUN14",
+     "name": "메이슨 마운트",
+     "pos": "MF",
+     "number": 22,
+     "age": 27,
+     "att": 72,
+     "def": 66,
+     "sta": 71
+    },
+    {
+     "id": "MUN15",
+     "name": "베냐민 셰슈코",
+     "pos": "FW",
+     "number": 29,
+     "age": 24,
+     "att": 77,
+     "def": 56,
+     "sta": 80
+    },
+    {
+     "id": "MUN16",
+     "name": "브라이언 음뵈모",
+     "pos": "FW",
+     "number": 34,
+     "age": 33,
+     "att": 86,
+     "def": 56,
+     "sta": 82
+    },
+    {
+     "id": "MUN17",
+     "name": "아마드 디알로",
+     "pos": "FW",
+     "number": 23,
+     "age": 27,
+     "att": 72,
+     "def": 45,
+     "sta": 69
+    },
+    {
+     "id": "MUN18",
+     "name": "조슈아 지르크제이",
+     "pos": "FW",
+     "number": 37,
+     "age": 29,
+     "att": 74,
+     "def": 40,
+     "sta": 70
+    }
+   ]
+  }
+ ]
+}

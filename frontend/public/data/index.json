@@ -1,0 +1,20 @@
+{
+ "default": {
+  "league": "premier-league",
+  "season": "2025-26"
+ },
+ "leagues": [
+  {
+   "id": "premier-league",
+   "name": "프리미어리그",
+   "country": "잉글랜드",
+   "seasons": [
+    {
+     "id": "2025-26",
+     "file": "premier-league/2025-26.json",
+     "teams": 8
+    }
+   ]
+  }
+ ]
+}
