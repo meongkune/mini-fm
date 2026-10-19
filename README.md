@@ -1,0 +1,242 @@
+<div align="center">
+
+# ⚽ Mini FM
+
+**컨테이너 기반 웹 서비스 배포 파이프라인 — React · Flask · Docker · AWS ECS Fargate · GitHub Actions**
+
+모바일 축구 감독 시뮬레이션(FM 스타일)을 소재로,
+웹 애플리케이션을 **컨테이너로 패키징하고 AWS 관리형 컨테이너 환경에 배포·운영·자동화**하는 전 과정을 구성한 프로젝트
+
+![Docker](https://img.shields.io/badge/Docker-multi--stage-2496ED?logo=docker&logoColor=white)
+![Amazon ECR](https://img.shields.io/badge/Amazon-ECR-FF9900?logo=amazonaws&logoColor=white)
+![Amazon ECS](https://img.shields.io/badge/Amazon-ECS%20Fargate-FF9900?logo=amazonecs&logoColor=white)
+![GitHub Actions](https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-2088FF?logo=githubactions&logoColor=white)
+![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white)
+![Flask](https://img.shields.io/badge/Flask-3.1-000000?logo=flask&logoColor=white)
+
+</div>
+
+---
+
+## 개요
+
+이 프로젝트의 초점은 **"코드를 실제로 서비스되는 상태까지 가져가는 과정"** 입니다.
+프론트엔드 빌드, API 서버, 정적 파일 서빙이 모두 있는 현실적인 웹 앱을 하나 만들고, 이를 다음 단계로 배포·운영합니다.
+
+| 단계 | 다루는 내용 | 사용 기술 |
+|---|---|---|
+| 1. 컨테이너화 | 빌드 환경과 실행 환경을 분리한 멀티 스테이지 이미지, 레이어 캐시, 아키텍처 지정 | Docker, BuildKit |
+| 2. 이미지 레지스트리 | 프라이빗 저장소, 인증 토큰 로그인, 태그 전략(커밋 SHA·latest), push 시 취약점 스캔 | Amazon ECR |
+| 3. 컨테이너 오케스트레이션 | 클러스터 · 작업 정의 · 서비스, 서버리스 컨테이너 실행, 원하는 Task 수 유지 | Amazon ECS on Fargate |
+| 4. 네트워킹 | `awsvpc` 모드(Task별 ENI), 퍼블릭 서브넷 + 퍼블릭 IP, 보안 그룹 인바운드 | VPC, Security Group |
+| 5. 관측 | 컨테이너 stdout 로그 수집, 런타임 메타데이터 조회 | CloudWatch Logs, ECS Task Metadata v4 |
+| 6. CI/CD | push → 빌드 → 레지스트리 → 새 작업 정의 revision → 롤링 배포 → 안정화 대기 | GitHub Actions |
+| 7. 배포 안정성 | 롤링 업데이트(min 100% / max 200%), 실패 시 자동 롤백 | ECS Deployment Circuit Breaker |
+
+앱 안의 **📡 상태** 탭은 컨테이너가 ECS 작업 메타데이터 엔드포인트를 직접 조회해서, 지금 응답한 Task ID · 가용 영역 · 작업 정의 revision · 이미지 태그 · 리소스를 보여 줍니다. 배포가 실제로 어디서 어떻게 이루어졌는지 화면에서 바로 확인할 수 있습니다.
+
+## 배포 아키텍처
+
+```mermaid
+flowchart LR
+    U["📱 Browser<br/>(React SPA)"] -- "HTTP :80" --> T
+
+    subgraph AWS["AWS · ap-northeast-2"]
+      subgraph VPC["VPC · Public Subnets"]
+        subgraph ECS["ECS Cluster (Fargate)"]
+          T["Task · awsvpc ENI + Public IP<br/>gunicorn → Flask<br/>/api/* · static SPA"]
+        end
+      end
+      ECR[("Amazon ECR")]
+      CW["CloudWatch Logs"]
+    end
+
+    ECR -- "image pull<br/>(execution role)" --> T
+    T -- "stdout · awslogs" --> CW
+    T -. "Task Metadata v4" .-> T
+```
+
+| 항목 | 구성 |
+|---|---|
+| 실행 환경 | ECS on Fargate · Linux/X86_64 · 0.25 vCPU / 512 MiB |
+| 네트워크 | `awsvpc`, 퍼블릭 서브넷, `assignPublicIp=ENABLED`, 보안 그룹 TCP 80 인바운드 |
+| 권한 | `ecsTaskExecutionRole` — ECR 이미지 pull, CloudWatch Logs 쓰기 |
+| 로그 | `awslogs` 드라이버 → `/ecs/<service>` |
+| 배포 | 롤링 업데이트 + 서킷 브레이커(자동 롤백) |
+
+**단일 컨테이너 구성.** Flask가 `/api/*`를 처리하고 React 빌드 결과를 정적 파일로 함께 서빙합니다(클라이언트 라우팅용 SPA 폴백 포함). 별도의 웹 서버나 CORS 설정 없이 컨테이너 하나로 배포 단위가 끝납니다.
+
+**Stateless 서버.** 경기 진행 상태는 클라이언트가 보관해서 요청마다 전달하고, 시즌 기록은 브라우저 `localStorage`에 저장합니다. 서버에 세션이 없어서 Task가 교체(재배포)되거나 수평 확장돼도 진행 중인 경기가 끊기지 않습니다.
+
+## CI/CD 파이프라인
+
+```mermaid
+flowchart LR
+    A["git push<br/>main"] --> B["checkout"]
+    B --> C["AWS 자격 증명<br/>+ ECR 로그인"]
+    C --> D["docker build<br/>linux/amd64"]
+    D --> E["ECR push<br/>:sha · :latest"]
+    E --> F["작업 정의 렌더링<br/>image · APP_VERSION"]
+    F --> G["ECS 서비스 업데이트<br/>안정화까지 대기"]
+    G --> H["새 퍼블릭 IP<br/>Job Summary 출력"]
+```
+
+[`.github/workflows/deploy.yml`](.github/workflows/deploy.yml)
+
+- **이미지 태그 = 커밋 SHA 7자리.** 어떤 커밋이 배포됐는지 이미지와 1:1로 추적하고, 앱의 상태 탭에도 같은 버전이 표시됩니다.
+- **작업 정의를 코드로 관리.** [`ecs/task-definition.json`](ecs/task-definition.json)을 기준으로 이미지와 버전만 바꿔 새 revision을 등록합니다.
+- **`wait-for-service-stability`.** 새 Task가 정상 상태가 될 때까지 기다리므로, 배포 실패가 워크플로 실패로 바로 드러납니다.
+- **문서 변경은 배포 제외**(`paths-ignore: **.md`), **동시 배포 방지**(`concurrency`).
+
+| 설정 | 이름 | 설명 |
+|---|---|---|
+| Secret | `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` | 배포용 IAM 자격 증명 |
+| Variable | `AWS_REGION` | 예: `ap-northeast-2` |
+| Variable | `ECR_REPOSITORY`, `ECS_CLUSTER`, `ECS_SERVICE` | 배포 대상 리소스 이름 |
+
+## Docker 이미지
+
+```dockerfile
+FROM node:22-alpine AS frontend-build      # 1단계: React 빌드
+...
+RUN npm ci && npm run build                # → /build/dist
+
+FROM python:3.12-slim AS runtime           # 2단계: 실행 이미지
+...
+COPY --from=frontend-build /build/dist ./static   # 빌드 결과만 가져온다
+EXPOSE 80
+CMD ["gunicorn", "--bind", "0.0.0.0:80", "--workers", "2", "--access-logfile", "-", "app:app"]
+```
+
+| 포인트 | 내용 |
+|---|---|
+| 멀티 스테이지 | Node.js · `node_modules` · JSX 소스는 1단계에만 존재. 최종 이미지에는 Python 런타임 + 빌드 결과만 포함(압축 약 45MB) |
+| 레이어 캐시 | `package*.json` / `requirements.txt`를 먼저 복사해 의존성 설치 레이어를 재사용 |
+| 재현 가능한 설치 | `npm ci`(lock 파일 고정), `pip --no-cache-dir` |
+| 아키텍처 | `--platform linux/amd64` — Fargate(X86_64)와 일치시켜 `exec format error` 방지 |
+| 로그 | `PYTHONUNBUFFERED=1`, gunicorn 접근 로그를 stdout으로 → CloudWatch에서 바로 확인 |
+
+전체 파일: [`Dockerfile`](Dockerfile) (구문별 주석 포함)
+
+## 시작하기
+
+### 로컬에서 컨테이너 실행
+
+```bash
+docker build --platform linux/amd64 -t mini-fm .
+docker run --rm -p 8000:80 mini-fm
+# → http://localhost:8000
+```
+
+### 개발 모드 (Hot Reload)
+
+```bash
+# API 서버 — http://localhost:5000
+python -m venv .venv
+.venv/bin/pip install -r backend/requirements.txt      # Windows: .venv\Scripts\pip
+.venv/bin/python backend/app.py
+
+# 프론트엔드 — http://localhost:5173 (/api → :5000 프록시)
+cd frontend && npm install && npm run dev
+```
+
+## AWS에 배포하기
+
+```bash
+export AWS_REGION=ap-northeast-2
+REGISTRY=<account-id>.dkr.ecr.$AWS_REGION.amazonaws.com
+
+# 1) 레지스트리 + 이미지 push
+aws ecr create-repository --repository-name mini-fm --image-scanning-configuration scanOnPush=true
+aws ecr get-login-password | docker login --username AWS --password-stdin $REGISTRY
+docker build --platform linux/amd64 --provenance=false -t $REGISTRY/mini-fm:v1 .
+docker push $REGISTRY/mini-fm:v1
+
+# 2) 로그 그룹 · 클러스터 · 작업 정의
+aws logs create-log-group --log-group-name /ecs/mini-fm
+aws ecs create-cluster --cluster-name mini-fm
+aws ecs register-task-definition --cli-input-json file://ecs/task-definition.json
+
+# 3) 서비스 — 퍼블릭 서브넷 + TCP 80 인바운드 보안 그룹
+aws ecs create-service --cluster mini-fm --service-name mini-fm \
+  --task-definition mini-fm --desired-count 1 --launch-type FARGATE \
+  --network-configuration 'awsvpcConfiguration={subnets=[<subnet-ids>],securityGroups=[<sg-id>],assignPublicIp=ENABLED}' \
+  --deployment-configuration 'deploymentCircuitBreaker={enable=true,rollback=true}'
+
+# 4) 퍼블릭 IP 확인
+TASK=$(aws ecs list-tasks --cluster mini-fm --service-name mini-fm --query 'taskArns[0]' --output text)
+ENI=$(aws ecs describe-tasks --cluster mini-fm --tasks $TASK --query "tasks[0].attachments[0].details[?name=='networkInterfaceId'].value" --output text)
+aws ec2 describe-network-interfaces --network-interface-ids $ENI --query 'NetworkInterfaces[0].Association.PublicIp' --output text
+```
+
+> ℹ️ 로드밸런서 없이 Task에 퍼블릭 IP를 직접 붙이는 구성이라 **재배포하면 IP가 바뀝니다.** 고정 주소가 필요하면 ALB(+ Route 53)를 앞단에 두고 서비스에 대상 그룹을 연결합니다.
+
+## 트러블슈팅 노트
+
+구축하면서 실제로 만난 문제와 해결 방법입니다.
+
+| 증상 | 원인 | 해결 |
+|---|---|---|
+| `docker login` → `400 Bad Request` | Windows PowerShell 5.1 파이프가 토큰 문자열의 인코딩을 바꿈 | bash 파이프 사용, 또는 PowerShell 7 |
+| `docker login` → `docker-credential-desktop not found` | 자격 증명 헬퍼가 PATH에 없음 | Docker Desktop의 `resources/bin`을 PATH에 추가 |
+| ECR에 태그 없는 이미지가 함께 생김 | BuildKit이 provenance/SBOM attestation을 이미지 인덱스로 push | `--provenance=false --sbom=false` |
+| `docker run -p 8080:80` 실패 | Windows가 해당 포트를 예약(Hyper-V 제외 범위) | 다른 호스트 포트 사용 |
+| `register-task-definition` → 파일 디코딩 오류 | AWS CLI가 Windows 기본 코드 페이지로 JSON을 읽음 | `AWS_CLI_FILE_ENCODING=UTF-8` |
+| Git Bash에서 `/ecs/...` 인자가 이상한 경로로 바뀜 | MSYS 경로 자동 변환 | `MSYS_NO_PATHCONV=1` |
+| 페이지 이동 시 SPA 전체가 빈 화면 | `useEffect(() => window.scrollTo(0,0))`가 `scrollTo`의 반환값(Promise)을 cleanup으로 반환 | 본문을 `{ }`로 감싸 반환값 제거 + Error Boundary 추가 |
+
+## 애플리케이션
+
+| | 기능 |
+|---|---|
+| 🏟️ 경기장 애니메이션 | 세로 경기장을 CSS 3D(`perspective` + `rotateX`)로 눕힌 중계 시점. 22명이 공격권에 따라 전진·후퇴하고 패스·슈팅·선방·골 장면 재생 |
+| 📻 문자 중계 | 경기장과 같은 분 단위 타임라인으로 동기화 |
+| 📋 전술 · 👥 스쿼드 | 포메이션 4종, 경기 운영·압박 강도, 하프타임 전술 변경, 선발 11명 선택·자동 선발 |
+| 🏆 리그 | 8개 구단 더블 라운드 로빈 14라운드, 순위표·최근 5경기·득점 순위 |
+| 📡 상태 | 헬스 체크 응답 시간, 빌드 버전, 가동 시간, ECS Task·컨테이너·런타임 정보 |
+| 📱 모바일 우선 | 폭 360~430px 기준, 하단 탭 바, PC에서는 휴대폰 프레임 |
+
+**스택:** React 18 · React Router 6 · Vite 5 / Python 3.12 · Flask 3.1 · gunicorn 23
+
+### API
+
+| Method | Endpoint | 설명 |
+|---|---|---|
+| `GET` | `/api/health` | 헬스 체크 |
+| `GET` | `/api/meta` | 버전 · 가동 시간 · 런타임 · ECS 작업 메타데이터 |
+| `GET` | `/api/teams` | 구단 · 선수 · 포메이션 |
+| `GET` | `/api/teams/{id}/auto-lineup?formation=4-3-3` | 포메이션별 베스트 11 |
+| `GET` | `/api/league/schedule` | 14라운드 일정 |
+| `POST` | `/api/match/simulate` | 전반(`half: 1`) / 후반(`half: 2` + `state`) 시뮬레이션 → 이벤트 · 타임라인 · 기록 |
+| `POST` | `/api/league/round` | 같은 라운드의 다른 경기 일괄 시뮬레이션 |
+
+### 경기 엔진
+
+[`backend/engine.py`](backend/engine.py) — 1분 단위 확률 모델. 선발 11명의 포지션별 능력치로 공격·중원·수비 지표를 만들고 포메이션·전술 보정을 적용한 뒤, 매 분 점유 → 찬스 → 슈팅 → 결과를 결정합니다. 55분 이후에는 체력과 압박 강도에 따라 지표가 떨어집니다. 2,000경기 시뮬레이션 기준 평균 약 2.3골, 홈 41% · 무 27% · 원정 32%.
+
+## 프로젝트 구조
+
+```
+.
+├── .github/workflows/deploy.yml   # CI/CD
+├── ecs/task-definition.json       # ECS 작업 정의
+├── Dockerfile                     # 멀티 스테이지 빌드
+├── .dockerignore
+├── backend/
+│   ├── app.py                     # Flask 라우트, SPA 서빙, ECS 메타데이터 조회
+│   ├── engine.py                  # 경기 시뮬레이션 엔진
+│   ├── data/teams.json
+│   └── requirements.txt
+├── frontend/
+│   ├── src/
+│   │   ├── App.jsx                # 레이아웃 · 하단 탭 바 · Error Boundary
+│   │   ├── store.jsx              # 전역 상태 + localStorage
+│   │   ├── styles.css             # 모바일 우선 스타일
+│   │   └── pages/                 # Home · Squad · Tactics · Match · MatchPitch · League · DeployInfo
+│   └── vite.config.js
+└── tools/gen_teams.py             # 구단·선수 데이터 생성
+```
+
+## 면책 조항
+
+비공식 팬 프로젝트입니다. 구단·선수 이름은 2025-26 시즌 기준이며 일부는 실제와 다를 수 있고, 능력치와 경기 결과는 임의로 생성한 값입니다. 구단 로고·엠블럼은 사용하지 않았으며 프리미어리그 및 각 구단과 관련이 없습니다.
