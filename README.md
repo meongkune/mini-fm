@@ -2,7 +2,9 @@
 
 # ⚽ Mini FM
 
-**컨테이너 기반 웹 서비스 배포 파이프라인 — React · Flask · Docker · AWS ECS Fargate · GitHub Actions**
+**컨테이너 기반 웹 서비스 배포 파이프라인 — React · Flask · Docker · AWS ECS Fargate · GitHub Actions · GitHub Pages**
+
+🌐 **[meongkune.github.io/mini-fm](https://meongkune.github.io/mini-fm/)**
 
 모바일 축구 감독 시뮬레이션(FM 스타일)을 소재로,
 웹 애플리케이션을 **컨테이너로 패키징하고 AWS 관리형 컨테이너 환경에 배포·운영·자동화**하는 전 과정을 구성한 프로젝트
@@ -12,6 +14,7 @@
 ![Amazon ECS](https://img.shields.io/badge/Amazon-ECS%20Fargate-FF9900?logo=amazonecs&logoColor=white)
 ![GitHub Actions](https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-2088FF?logo=githubactions&logoColor=white)
 ![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white)
+![GitHub Pages](https://img.shields.io/badge/GitHub-Pages-222222?logo=githubpages&logoColor=white)
 ![Flask](https://img.shields.io/badge/Flask-3.1-000000?logo=flask&logoColor=white)
 
 </div>
@@ -32,6 +35,8 @@
 | 5. 관측 | 컨테이너 stdout 로그 수집, 런타임 메타데이터 조회 | CloudWatch Logs, ECS Task Metadata v4 |
 | 6. CI/CD | push → 빌드 → 레지스트리 → 새 작업 정의 revision → 롤링 배포 → 안정화 대기 | GitHub Actions |
 | 7. 배포 안정성 | 롤링 업데이트(min 100% / max 200%), 실패 시 자동 롤백 | ECS Deployment Circuit Breaker |
+| 8. 정적 호스팅 전환 | 서버 로직을 브라우저로 옮겨 서버 없이 운영, SPA 라우팅 폴백 | GitHub Pages, `actions/deploy-pages` |
+| 9. 데이터 파이프라인 | 외부 API → 시즌 데이터 생성 → 커밋 → 자동 재배포 | football-data.org, `workflow_dispatch` |
 
 앱 안의 **📡 상태** 탭은 컨테이너가 ECS 작업 메타데이터 엔드포인트를 직접 조회해서, 지금 응답한 Task ID · 가용 영역 · 작업 정의 revision · 이미지 태그 · 리소스를 보여 줍니다. 배포가 실제로 어디서 어떻게 이루어졌는지 화면에서 바로 확인할 수 있습니다.
 
@@ -93,6 +98,44 @@ flowchart LR
 | Secret | `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` | 배포용 IAM 자격 증명 |
 | Variable | `AWS_REGION` | 예: `ap-northeast-2` |
 | Variable | `ECR_REPOSITORY`, `ECS_CLUSTER`, `ECS_SERVICE` | 배포 대상 리소스 이름 |
+
+## GitHub Pages (현재 운영)
+
+같은 앱을 **서버 없이** 운영하는 구성입니다. 경기 엔진을 JavaScript로 옮겨 브라우저에서 계산하고, 리그·시즌 데이터는 정적 JSON으로 배포합니다. 서버 비용이 없고 컨테이너가 꺼질 일도 없습니다.
+
+```mermaid
+flowchart LR
+    A["git push<br/>frontend/**"] --> B["npm ci + vite build<br/>VITE_BASE=/mini-fm/"]
+    B --> C["404.html = index.html<br/>(SPA 새로고침 대응)"]
+    C --> D["upload-pages-artifact"] --> E["deploy-pages"]
+```
+
+[`.github/workflows/pages.yml`](.github/workflows/pages.yml)
+
+- **경로 기준(base).** 레포 이름 하위 경로(`/mini-fm/`)에서 동작하도록 Vite `base`와 React Router `basename`을 같은 값으로 맞춥니다.
+- **SPA 폴백.** Pages는 서버 라우팅이 없어 `/league` 같은 경로를 새로고침하면 404가 납니다. `404.html`을 `index.html`과 같게 두어 앱이 경로를 처리합니다.
+- **같은 화면, 두 환경.** 📡 상태 탭은 `/api/meta`가 있으면 ECS 정보를, 없으면 빌드 버전·빌드 시각·데이터 출처를 보여 줍니다.
+
+## 시즌 데이터 파이프라인
+
+```mermaid
+flowchart LR
+    A["Actions 탭<br/>리그·시즌 선택 후 실행"] --> B["tools/import_season.mjs<br/>football-data.org API"]
+    B --> C["frontend/public/data/<br/>리그/시즌.json + index.json"]
+    C --> D["github-actions[bot] 커밋"] --> E["pages.yml 실행<br/>재배포"]
+```
+
+[`.github/workflows/import-season.yml`](.github/workflows/import-season.yml) · [`tools/import_season.mjs`](tools/import_season.mjs)
+
+- **토큰은 Secret으로만.** API 토큰(`FOOTBALL_DATA_TOKEN`)은 Actions 실행 중에만 환경 변수로 주입되고 코드·데이터에는 남지 않습니다.
+- **API에 없는 값은 규칙으로 생성.** 구단·선수·포지션·나이는 API 값을 쓰고, 능력치는 전 시즌 순위(구단 기준치) + 나이 곡선 + 선수 ID 기반 고정 난수로 만듭니다. 같은 입력이면 항상 같은 결과가 나옵니다.
+- **1군 25명.** 포지션별 최소 인원(GK 3 · DF 8 · MF 8 · FW 5)을 먼저 채우고 나머지를 능력치 순으로 뽑습니다. 등번호가 없으면 포지션별 관례 번호(GK 1, ST 9 …)를 배정합니다.
+- **안정적인 ID.** 선수 ID는 API 선수 ID 기반이라 다시 가져와도 저장된 선발 명단이 유지되고, 맞지 않으면 앱이 자동으로 다시 선발합니다.
+- **`GITHUB_TOKEN` push는 다른 워크플로를 깨우지 않음.** 그래서 마지막 단계에서 `gh workflow run pages.yml`로 배포를 직접 실행합니다.
+
+| 설정 | 이름 | 설명 |
+|---|---|---|
+| Secret | `FOOTBALL_DATA_TOKEN` | football-data.org API 토큰 (무료 플랜) |
 
 ## Docker 이미지
 
@@ -192,13 +235,13 @@ aws ec2 describe-network-interfaces --network-interface-ids $ENI --query 'Networ
 | 🏟️ 경기장 애니메이션 | 세로 경기장을 CSS 3D(`perspective` + `rotateX`)로 눕힌 중계 시점. 22명이 공격권에 따라 전진·후퇴하고 패스·슈팅·선방·골 장면 재생 |
 | 📻 문자 중계 | 경기장과 같은 분 단위 타임라인으로 동기화 |
 | 📋 전술 · 👥 스쿼드 | 포메이션 4종, 경기 운영·압박 강도, 하프타임 전술 변경, 선발 11명 선택·자동 선발 |
-| 🏆 리그 | 8개 구단 더블 라운드 로빈 14라운드, 순위표·최근 5경기·득점 순위 |
-| 📡 상태 | 헬스 체크 응답 시간, 빌드 버전, 가동 시간, ECS Task·컨테이너·런타임 정보 |
+| 🏆 리그 | 리그·시즌 선택, 실제 구단 수 그대로 더블 라운드 로빈(프리미어리그 20팀 38라운드), 순위 구간(UCL·UEL·강등)·최근 5경기·득점 순위 |
+| 📡 상태 | ECS: 헬스 체크·가동 시간·Task·컨테이너 정보 / Pages: 빌드 버전·빌드 시각·데이터 출처 |
 | 📱 모바일 우선 | 폭 360~430px 기준, 하단 탭 바, PC에서는 휴대폰 프레임 |
 
 **스택:** React 18 · React Router 6 · Vite 5 / Python 3.12 · Flask 3.1 · gunicorn 23
 
-### API
+### API (Docker · ECS 버전)
 
 | Method | Endpoint | 설명 |
 |---|---|---|
@@ -212,13 +255,16 @@ aws ec2 describe-network-interfaces --network-interface-ids $ENI --query 'Networ
 
 ### 경기 엔진
 
-[`backend/engine.py`](backend/engine.py) — 1분 단위 확률 모델. 선발 11명의 포지션별 능력치로 공격·중원·수비 지표를 만들고 포메이션·전술 보정을 적용한 뒤, 매 분 점유 → 찬스 → 슈팅 → 결과를 결정합니다. 55분 이후에는 체력과 압박 강도에 따라 지표가 떨어집니다. 2,000경기 시뮬레이션 기준 평균 약 2.3골, 홈 41% · 무 27% · 원정 32%.
+[`backend/engine.py`](backend/engine.py) · [`frontend/src/engine/engine.js`](frontend/src/engine/engine.js)(Pages 버전, 같은 모델) — 1분 단위 확률 모델. 선발 11명의 포지션별 능력치로 공격·중원·수비 지표를 만들고 포메이션·전술 보정을 적용한 뒤, 매 분 점유 → 찬스 → 슈팅 → 결과를 결정합니다. 55분 이후에는 체력과 압박 강도에 따라 지표가 떨어집니다. 2,000경기 시뮬레이션 기준 평균 약 2.3골, 홈 41% · 무 27% · 원정 32%.
 
 ## 프로젝트 구조
 
 ```
 .
-├── .github/workflows/deploy.yml   # CI/CD
+├── .github/workflows/
+│   ├── deploy.yml                 # ECS 배포
+│   ├── pages.yml                  # GitHub Pages 배포
+│   └── import-season.yml          # 시즌 데이터 가져오기
 ├── ecs/task-definition.json       # ECS 작업 정의
 ├── Dockerfile                     # 멀티 스테이지 빌드
 ├── .dockerignore
@@ -228,15 +274,20 @@ aws ec2 describe-network-interfaces --network-interface-ids $ENI --query 'Networ
 │   ├── data/teams.json
 │   └── requirements.txt
 ├── frontend/
+│   ├── public/data/               # index.json + 리그/시즌.json
 │   ├── src/
+│   │   ├── engine/engine.js       # 브라우저용 경기 엔진
+│   │   ├── api.js                 # 데이터 로딩 · 경기 계산 계층
 │   │   ├── App.jsx                # 레이아웃 · 하단 탭 바 · Error Boundary
 │   │   ├── store.jsx              # 전역 상태 + localStorage
 │   │   ├── styles.css             # 모바일 우선 스타일
 │   │   └── pages/                 # Home · Squad · Tactics · Match · MatchPitch · League · DeployInfo
 │   └── vite.config.js
-└── tools/gen_teams.py             # 구단·선수 데이터 생성
+└── tools/
+    ├── import_season.mjs          # football-data.org → 시즌 데이터
+    └── gen_teams.py               # 초기 8개 구단 샘플 데이터
 ```
 
 ## 면책 조항
 
-비공식 팬 프로젝트입니다. 구단·선수 이름은 2025-26 시즌 기준이며 일부는 실제와 다를 수 있고, 능력치와 경기 결과는 임의로 생성한 값입니다. 구단 로고·엠블럼은 사용하지 않았으며 프리미어리그 및 각 구단과 관련이 없습니다.
+비공식 팬 프로젝트입니다. 구단·선수 이름은 2025-26 시즌 기준이며 일부는 실제와 다를 수 있고, 능력치와 경기 결과는 규칙에 따라 생성한 게임용 값입니다. 선수 명단은 [football-data.org](https://www.football-data.org/) 데이터를 사용합니다. 구단 로고·엠블럼은 사용하지 않았으며 프리미어리그 및 각 구단과 관련이 없습니다.

@@ -100,12 +100,17 @@ export function GameProvider({ children }) {
     ;(async () => {
       const sel = await api.selectSeason(save.league, save.season)
       const [t, s, index] = await Promise.all([api.teams(), api.schedule(), api.index()])
+      // 시즌 데이터를 다시 가져와 선수 ID가 바뀌었으면 선발을 자동으로 다시 고른다
+      const team = t.teams.find((x) => x.id === save.teamId)
+      const staleLineup = team && save.lineup.some((id) => !team.players.some((p) => p.id === id))
+      const fresh = staleLineup ? (await api.autoLineup(team.id, save.formation)).lineup : null
       if (!alive) return
       setData({ ...t, schedule: s.rounds, index, leagueId: sel.leagueId, seasonId: sel.seasonId })
       setSave((cur) => {
         // 저장된 팀이 이 시즌에 없으면(시즌 파일 교체 등) 팀 선택부터 다시
         const teamMissing = cur.teamId && !t.teams.some((x) => x.id === cur.teamId)
         if (teamMissing) return { ...EMPTY_SAVE, league: sel.leagueId, season: sel.seasonId }
+        if (fresh && cur.teamId === team.id) cur = { ...cur, lineup: fresh }
         if (cur.league === sel.leagueId && cur.season === sel.seasonId) return cur
         return { ...cur, league: sel.leagueId, season: sel.seasonId }
       })
