@@ -1,0 +1,85 @@
+# main 브랜치에 push → Docker 이미지 빌드 → ECR push → ECS 서비스 재배포
+name: Deploy to Amazon ECS
+
+on:
+  push:
+    branches: [main]
+    # 문서만 바뀐 커밋은 배포하지 않는다
+    paths-ignore:
+      - '**.md'
+  workflow_dispatch: # Actions 탭에서 수동 실행도 가능
+
+# 인프라 이름은 Settings → Secrets and variables → Actions → Variables 에서 관리
+env:
+  AWS_REGION: ${{ vars.AWS_REGION }}
+  ECR_REPOSITORY: ${{ vars.ECR_REPOSITORY }}
+  ECS_CLUSTER: ${{ vars.ECS_CLUSTER }}
+  ECS_SERVICE: ${{ vars.ECS_SERVICE }}
+  CONTAINER_NAME: mini-fm
+  TASK_DEFINITION: ecs/task-definition.json
+
+permissions:
+  contents: read
+
+# 연속으로 push해도 배포가 겹치지 않도록 한 번에 하나만 실행
+concurrency:
+  group: deploy-ecs
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Build, push, deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: 소스 체크아웃
+        uses: actions/checkout@v4
+
+      - name: AWS 자격 증명 설정
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Amazon ECR 로그인
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: 이미지 빌드 & ECR push
+        id: build
+        env:
+          REGISTRY: ${{ steps.ecr.outputs.registry }}
+        run: |
+          TAG="${GITHUB_SHA::7}"
+          IMAGE="$REGISTRY/$ECR_REPOSITORY"
+          docker build --platform linux/amd64 --provenance=false -t "$IMAGE:$TAG" -t "$IMAGE:latest" .
+          docker push "$IMAGE:$TAG"
+          docker push "$IMAGE:latest"
+          echo "image=$IMAGE:$TAG" >> "$GITHUB_OUTPUT"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
+      - name: 작업 정의에 새 이미지 반영
+        id: taskdef
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ env.TASK_DEFINITION }}
+          container-name: ${{ env.CONTAINER_NAME }}
+          image: ${{ steps.build.outputs.image }}
+          environment-variables: |
+            APP_VERSION=${{ steps.build.outputs.tag }}
+
+      - name: ECS 서비스 배포 (안정화까지 대기)
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: ${{ steps.taskdef.outputs.task-definition }}
+          service: ${{ env.ECS_SERVICE }}
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: true
+
+      - name: 새 퍼블릭 IP 출력
+        run: |
+          TASK=$(aws ecs list-tasks --cluster "$ECS_CLUSTER" --service-name "$ECS_SERVICE" --desired-status RUNNING --query 'taskArns[0]' --output text)
+          ENI=$(aws ecs describe-tasks --cluster "$ECS_CLUSTER" --tasks "$TASK" --query "tasks[0].attachments[0].details[?name=='networkInterfaceId'].value" --output text)
+          IP=$(aws ec2 describe-network-interfaces --network-interface-ids "$ENI" --query 'NetworkInterfaces[0].Association.PublicIp' --output text)
+          echo "### 🚀 배포 완료: http://$IP (이미지 태그 ${{ steps.build.outputs.tag }})" >> "$GITHUB_STEP_SUMMARY"
+          echo "http://$IP"
