@@ -82,9 +82,34 @@ const ageOn = (dob, refDate) => {
   return age
 }
 // 나이 곡선: 26~30세 전성기, 어리거나 많으면 감점
-const ageBonus = (age) => (age < 21 ? -6 : age < 24 ? -2 : age <= 30 ? 2 : age <= 32 ? -1 : -5)
+const ageBonus = (age) => (age < 19 ? -10 : age < 21 ? -6 : age < 24 ? -2 : age <= 30 ? 2 : age <= 32 ? -1 : -5)
 const clamp = (v) => Math.max(40, Math.min(95, Math.round(v)))
-const BIAS = { GK: [-30, 8], DF: [-12, 7], MF: [0, 0], FW: [8, -22] }
+// 포지션별 공격/수비 보정. 앱의 OVR 계산(store.jsx playerOvr)과 맞물려 포지션 간 OVR이 비슷하게 분포한다
+const BIAS = { GK: [-30, 1], DF: [-12, 4], MF: [0, 0], FW: [8, -22] }
+const ovrOf = (p) => (p.pos === 'GK' ? p.def : p.pos === 'DF' ? p.def * 0.8 + p.att * 0.2 : p.pos === 'FW' ? p.att * 0.8 + p.def * 0.2 : (p.att + p.def) / 2)
+
+// 1군 등록 인원(프리미어리그 25명 규정). 포지션별 최소 인원을 먼저 채우고 나머지는 OVR 순
+const SQUAD_SIZE = 25
+const QUOTA = { GK: 3, DF: 8, MF: 8, FW: 5 }
+const POS_ORDER = ['GK', 'DF', 'MF', 'FW']
+// API가 등번호를 주지 않을 때 포지션별로 흔히 쓰는 번호를 주전(OVR 높은 순)부터 배정
+const NUMBERS = { GK: [1, 13, 31, 41], DF: [2, 5, 4, 3, 6, 15, 12, 24, 26, 33], MF: [8, 10, 6, 7, 16, 14, 18, 20, 17, 22], FW: [9, 11, 7, 19, 10, 21, 29, 23] }
+
+export function pickSquad(players) {
+  const sorted = [...players].sort((a, b) => ovrOf(b) - ovrOf(a))
+  const chosen = new Set()
+  for (const pos of POS_ORDER) sorted.filter((p) => p.pos === pos).slice(0, QUOTA[pos]).forEach((p) => chosen.add(p))
+  for (const p of sorted) if (chosen.size < SQUAD_SIZE) chosen.add(p)
+  const squad = sorted.filter((p) => chosen.has(p)).sort((a, b) => POS_ORDER.indexOf(a.pos) - POS_ORDER.indexOf(b.pos))
+  // 등번호: API 번호가 있으면 우선, 없으면 포지션 관례 번호 → 남은 번호
+  const used = new Set(squad.map((p) => p.number).filter(Boolean))
+  for (const p of squad) {
+    if (p.number) continue
+    p.number = NUMBERS[p.pos].find((n) => !used.has(n)) ?? Array.from({ length: 99 }, (_, i) => i + 1).find((n) => n > 12 && !used.has(n))
+    used.add(p.number)
+  }
+  return squad
+}
 
 /** API 응답 → Mini FM 시즌 데이터 (네트워크 없음, 테스트 가능) */
 export function transform({ competition, seasonYear, teamsResp, prevStandingsResp, today = new Date() }) {
@@ -105,23 +130,19 @@ export function transform({ competition, seasonYear, teamsResp, prevStandingsRes
     const rank = prevRank[t.id]
     const base = rank ? 79 - ((rank - 1) / (lastRank - 1)) * 10 : 68
 
-    const used = new Set()
-    const players = (t.squad || [])
+    const players = pickSquad((t.squad || [])
       .map((p) => ({ ...p, pos: mapPosition(p.position) }))
       .filter((p) => p.pos)
-      .map((p, i) => {
+      .map((p) => {
         const rnd = seeded(`${p.id}-${p.name}`)
         const age = ageOn(p.dateOfBirth, refDate)
-        const b = base + ageBonus(age) + (rnd() - 0.5) * 10
+        const b = base + ageBonus(age) + (rnd() - 0.5) * 6
         const [ab, db] = BIAS[p.pos]
-        let number = Number(p.shirtNumber) || 0
-        if (!number || used.has(number)) { number = 1; while (used.has(number)) number++ }
-        used.add(number)
         return {
-          id: `${tla}${String(i + 1).padStart(2, '0')}`,
+          id: `${tla}-${p.id}`, // API 선수 ID 기반이라 다시 가져와도 같은 선수는 같은 ID
           name: p.name,
           pos: p.pos,
-          number,
+          number: Number(p.shirtNumber) || 0,
           age,
           att: clamp(b + ab + (rnd() - 0.5) * 12),
           def: clamp(b + db + (rnd() - 0.5) * 12),
@@ -129,7 +150,7 @@ export function transform({ competition, seasonYear, teamsResp, prevStandingsRes
           ...(p.nationality ? { nation: p.nationality } : {}),
           ext: p.id, // football-data.org 선수 ID (다시 가져올 때 대조용)
         }
-      })
+      }))
 
     return {
       id: tla,
