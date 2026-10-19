@@ -19,7 +19,7 @@ function Crest({ team, size = 40 }) {
 }
 
 export default function Home() {
-  const { data, myTeam, save, standings, nextFixture, teamsById, totalRounds, seasonOver, chooseTeam, quitTeam } = useGame()
+  const { data, myTeam, save, standings, nextFixture, teamsById, totalRounds, seasonOver, chooseTeam, chooseSeason, quitTeam } = useGame()
   const [busy, setBusy] = useState(null)
   const navigate = useNavigate()
 
@@ -33,6 +33,24 @@ export default function Home() {
           <span className="eyebrow">{data.league}</span>
           <h1>맡을 팀을 고르세요</h1>
           <p>{teams.length}개 구단이 홈·원정 두 번씩 맞붙는 {(teams.length - (teams.length % 2 ? 0 : 1)) * 2}라운드 시즌입니다.</p>
+        </div>
+
+        <div className="season-picker">
+          {data.index.leagues.map((l) => (
+            <div key={l.id} className="sp-league">
+              <span className="sp-name">{l.name}<small>{l.country}</small></span>
+              <div className="sp-chips">
+                {l.seasons.map((s) => {
+                  const on = data.leagueId === l.id && data.seasonId === s.id
+                  return (
+                    <button key={s.id} className={`chip ${on ? 'on' : ''}`} aria-pressed={on} onClick={() => !on && chooseSeason(l.id, s.id)}>
+                      {s.id}<small>{s.teams}팀</small>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          ))}
         </div>
         <div className="team-grid">
           {teams.map((t, rank) => (

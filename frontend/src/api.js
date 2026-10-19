@@ -30,6 +30,8 @@ export async function loadSeason(leagueId, seasonId) {
     const data = await getJson(dataUrl(season.file))
     seasonCache = {
       key,
+      leagueId: league.id,
+      seasonId: season.id,
       data,
       teamsById: Object.fromEntries(data.teams.map((t) => [t.id, t])),
       schedule: roundRobin(data.teams.map((t) => t.id)),
@@ -48,9 +50,16 @@ const toView = (r) => ({
 })
 
 export const api = {
+  /** 리그·시즌 목록 (data/index.json) */
+  index: () => loadIndex(),
+  /** 플레이할 리그·시즌을 고른다. 없거나 잘못된 값이면 index.json의 기본 시즌 */
+  async selectSeason(leagueId, seasonId) {
+    const s = await loadSeason(leagueId, seasonId)
+    return { leagueId: s.leagueId, seasonId: s.seasonId }
+  },
   async teams() {
     const { data } = await current()
-    return { league: `${data.league.name} ${data.season}`, leagueInfo: data.league, season: data.season, teams: data.teams, formations: Object.keys(FORMATIONS) }
+    return { league: `${data.league.name} ${data.season}`, leagueInfo: data.league, season: data.season, zones: data.zones || [], teams: data.teams, formations: Object.keys(FORMATIONS) }
   },
   async schedule() {
     const { schedule } = await current()

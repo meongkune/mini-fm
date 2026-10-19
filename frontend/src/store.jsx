@@ -6,6 +6,8 @@ import { api } from './api.js'
 const STORAGE_KEY = 'mini-fm-save-v1'
 const FORMATION_SLOTS = { '4-4-2': [4, 4, 2], '4-3-3': [4, 3, 3], '3-5-2': [3, 5, 2], '5-3-2': [5, 3, 2] }
 const EMPTY_SAVE = {
+  league: null, // 리그 ID (예: premier-league) — null이면 index.json 기본값
+  season: null, // 시즌 ID (예: 2025-26)
   teamId: null,
   formation: '4-4-2',
   mentality: 'balanced',
@@ -71,6 +73,7 @@ export function computeStandings(teams, results) {
     const [hg, ag] = r.score
     const h = table[r.home]
     const a = table[r.away]
+    if (!h || !a) continue // 다른 시즌 데이터가 섞인 경우 무시
     h.p++; a.p++
     h.gf += hg; h.ga += ag; a.gf += ag; a.ga += hg
     if (hg > ag) { h.w++; a.l++; h.pts += 3; h.form.push('W'); a.form.push('L') }
@@ -89,11 +92,26 @@ export function GameProvider({ children }) {
   const [error, setError] = useState(null)
   const [save, setSave] = useState(loadSave)
 
+  // 리그·시즌이 바뀔 때마다 해당 시즌 데이터를 불러온다
   useEffect(() => {
-    Promise.all([api.teams(), api.schedule()])
-      .then(([t, s]) => setData({ ...t, schedule: s.rounds }))
-      .catch((e) => setError(e.message))
-  }, [])
+    let alive = true
+    setData(null)
+    setError(null)
+    ;(async () => {
+      const sel = await api.selectSeason(save.league, save.season)
+      const [t, s, index] = await Promise.all([api.teams(), api.schedule(), api.index()])
+      if (!alive) return
+      setData({ ...t, schedule: s.rounds, index, leagueId: sel.leagueId, seasonId: sel.seasonId })
+      setSave((cur) => {
+        // 저장된 팀이 이 시즌에 없으면(시즌 파일 교체 등) 팀 선택부터 다시
+        const teamMissing = cur.teamId && !t.teams.some((x) => x.id === cur.teamId)
+        if (teamMissing) return { ...EMPTY_SAVE, league: sel.leagueId, season: sel.seasonId }
+        if (cur.league === sel.leagueId && cur.season === sel.seasonId) return cur
+        return { ...cur, league: sel.leagueId, season: sel.seasonId }
+      })
+    })().catch((e) => alive && setError(e.message))
+    return () => { alive = false }
+  }, [save.league, save.season])
 
   useEffect(() => {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(save)) } catch { /* 저장 실패해도 게임은 계속 */ }
@@ -115,13 +133,17 @@ export function GameProvider({ children }) {
       standings: data ? computeStandings(data.teams, save.results) : [],
       async chooseTeam(teamId) {
         const { lineup } = await api.autoLineup(teamId, '4-4-2')
-        setSave({ ...EMPTY_SAVE, teamId, lineup })
+        setSave((s) => ({ ...EMPTY_SAVE, league: s.league, season: s.season, teamId, lineup }))
+      },
+      /** 리그·시즌 변경 — 진행 중인 시즌 기록은 초기화된다 */
+      chooseSeason(league, season) {
+        setSave({ ...EMPTY_SAVE, league, season })
       },
       resetSeason() {
         setSave((s) => ({ ...s, round: 0, results: [] }))
       },
       quitTeam() {
-        setSave(EMPTY_SAVE)
+        setSave((s) => ({ ...EMPTY_SAVE, league: s.league, season: s.season }))
       },
       async finishRound(myResult) {
         const { results } = await api.playRound(save.round, save.teamId)

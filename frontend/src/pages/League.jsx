@@ -16,6 +16,13 @@ export default function League() {
   const topScorers = Object.values(goals).sort((a, b) => b.goals - a.goals).slice(0, 10)
   const roundResults = save.results.filter((r) => r.round === round)
   const champion = seasonOver ? standings[0] : null
+  // 순위 구간(챔피언스리그·강등 등): 시즌 데이터의 zones. from/to가 음수면 아래에서부터
+  const n = standings.length
+  const zoneOf = (rank) => data.zones.find((z) => {
+    const from = z.from < 0 ? n + 1 + z.from : z.from
+    const to = z.to < 0 ? n + 1 + z.to : z.to
+    return rank >= from && rank <= to
+  })
 
   return (
     <section>
@@ -44,7 +51,7 @@ export default function League() {
             <tbody>
               {standings.map((s, i) => (
                 <tr key={s.id} className={s.id === myTeam?.id ? 'me' : ''}>
-                  <td>{i + 1}</td>
+                  <td className="rank" style={zoneOf(i + 1) ? { '--zone': zoneOf(i + 1).color } : undefined}>{i + 1}</td>
                   <td className="left"><span className="swatch" style={{ background: s.color }} />{short(teamsById[s.id])}</td>
                   <td className="hide-m">{s.p}</td><td>{s.w}</td><td>{s.d}</td><td>{s.l}</td>
                   <td>{s.gf - s.ga > 0 ? '+' : ''}{s.gf - s.ga}</td>
@@ -54,6 +61,11 @@ export default function League() {
               ))}
             </tbody>
           </table>
+          {data.zones.length > 0 && (
+            <div className="zone-legend">
+              {data.zones.map((z) => <span key={z.label}><i style={{ background: z.color }} />{z.label}</span>)}
+            </div>
+          )}
         </div>
 
         <div>
