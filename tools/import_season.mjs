@@ -75,11 +75,12 @@ function seeded(str) {
 }
 
 const ageOn = (dob, refDate) => {
-  if (!dob) return 26
+  if (!dob) return null
   const d = new Date(dob)
   let age = refDate.getFullYear() - d.getFullYear()
   if (refDate < new Date(refDate.getFullYear(), d.getMonth(), d.getDate())) age--
-  return age
+  // API 생년월일이 잘못 들어온 경우(예: 51세 유스 선수)는 현역 나이로 보지 않는다
+  return age >= 15 && age <= 45 ? age : null
 }
 // 나이 곡선: 26~30세 전성기, 어리거나 많으면 감점
 const ageBonus = (age) => (age < 19 ? -10 : age < 21 ? -6 : age < 24 ? -2 : age <= 30 ? 2 : age <= 32 ? -1 : -5)
@@ -123,6 +124,7 @@ export function transform({ competition, seasonYear, teamsResp, prevStandingsRes
   for (const row of prevStandingsResp?.standings?.find((s) => s.type === 'TOTAL')?.table || []) prevRank[row.team.id] = row.position
   const lastRank = Math.max(2, ...Object.values(prevRank)) // 순위표 크기(최하위 순위)
 
+  const dataWarnings = []
   const teams = (teamsResp.teams || []).map((t) => {
     const tla = (t.tla || t.shortName || t.name).replace(/[^A-Z0-9]/gi, '').slice(0, 3).toUpperCase()
     const known = KNOWN_TEAMS[tla]
@@ -135,7 +137,9 @@ export function transform({ competition, seasonYear, teamsResp, prevStandingsRes
       .filter((p) => p.pos)
       .map((p) => {
         const rnd = seeded(`${p.id}-${p.name}`)
-        const age = ageOn(p.dateOfBirth, refDate)
+        const realAge = ageOn(p.dateOfBirth, refDate)
+        if (realAge === null) dataWarnings.push(`${t.shortName || t.name}: ${p.name} 생년월일(${p.dateOfBirth || "없음"}) 이상 → 22세로 처리`)
+        const age = realAge ?? 22
         const b = base + ageBonus(age) + (rnd() - 0.5) * 6
         const [ab, db] = BIAS[p.pos]
         return {
@@ -175,7 +179,7 @@ export function transform({ competition, seasonYear, teamsResp, prevStandingsRes
       teams,
     },
     label,
-    warnings: problems.map((t) => `${t.name}: 포지션별 선수가 부족합니다 (선수단 ${t.players.length}명)`),
+    warnings: [...problems.map((t) => `${t.name}: 포지션별 선수가 부족합니다 (선수단 ${t.players.length}명)`), ...dataWarnings],
   }
 }
 
@@ -190,6 +194,43 @@ export function upsertIndex(index, comp, label, teamsCount) {
   league.seasons.sort((a, b) => b.id.localeCompare(a.id)) // 최신 시즌이 앞으로
   return out
 }
+
+/**
+ * /admin에서 손본 내용을 새로 가져온 데이터에 다시 입힌다.
+ * - 팀 `manual: true` → 이름·짧은 이름·색 유지
+ * - 선수 `manual: true` → 같은 API 선수(ext)면 편집한 값 유지, ext가 없으면(직접 추가) 그대로 추가
+ * - 팀 `removed: [ext…]` → 관리자가 뺀 선수는 다시 넣지 않는다
+ */
+export function mergeManual(prev, next) {
+  const warnings = []
+  if (!prev) return { season: next, warnings }
+  const prevTeams = Object.fromEntries((prev.teams || []).map((t) => [t.id, t]))
+  const teams = next.teams.map((t) => {
+    const old = prevTeams[t.id]
+    if (!old) return t
+    const team = { ...t }
+    if (old.manual) Object.assign(team, { name: old.name, short: old.short, color: old.color, alt: old.alt, manual: true })
+    const removed = new Set(old.removed || [])
+    if (removed.size) team.removed = [...removed]
+    const edited = Object.fromEntries((old.players || []).filter((p) => p.manual && p.ext).map((p) => [p.ext, p]))
+    let players = t.players.filter((p) => !removed.has(p.ext)).map((p) => (edited[p.ext] ? { ...p, ...pickEdit(edited[p.ext]), manual: true } : p))
+    for (const p of Object.values(edited)) {
+      if (!players.some((x) => x.ext === p.ext)) warnings.push(`${team.name}: 수동 편집한 ${p.name} 선수가 새 명단에 없어 제외했습니다`)
+    }
+    players = players.concat((old.players || []).filter((p) => p.manual && !p.ext))
+    // 수동으로 정한 등번호가 우선, 겹치는 자동 번호는 비어 있는 번호로
+    const used = new Set(players.filter((p) => p.manual).map((p) => p.number))
+    for (const p of players) {
+      if (p.manual) continue
+      if (used.has(p.number)) p.number = Array.from({ length: 99 }, (_, i) => i + 1).find((n) => n > 12 && !used.has(n))
+      used.add(p.number)
+    }
+    team.players = players
+    return team
+  })
+  return { season: { ...next, teams }, warnings }
+}
+const pickEdit = ({ name, pos, number, age, att, def, sta }) => ({ name, pos, number, age, att, def, sta })
 
 async function get(url, token) {
   const res = await fetch(url, { headers: { 'X-Auth-Token': token } })
@@ -217,10 +258,17 @@ async function main() {
     console.warn(`  (전 시즌 순위를 받지 못해 모든 팀을 같은 기준치로 생성합니다: ${e.message.split('\n')[0]})`)
   }
 
-  const { season, label, warnings } = transform({ competition, seasonYear, teamsResp, prevStandingsResp })
+  const fresh = transform({ competition, seasonYear, teamsResp, prevStandingsResp })
+  const { label } = fresh
   const dir = path.join(DATA_DIR, comp.id)
+  const file = path.join(dir, `${label}.json`)
+  // 이미 있는 시즌이면 /admin에서 편집한 내용을 유지한다
+  const existing = fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, 'utf8')) : null
+  const merged = mergeManual(existing, fresh.season)
+  const season = merged.season
+  const warnings = [...fresh.warnings, ...merged.warnings]
   fs.mkdirSync(dir, { recursive: true })
-  fs.writeFileSync(path.join(dir, `${label}.json`), JSON.stringify(season, null, 1) + '\n')
+  fs.writeFileSync(file, JSON.stringify(season, null, 1) + '\n')
 
   const indexPath = path.join(DATA_DIR, 'index.json')
   let index = upsertIndex(JSON.parse(fs.readFileSync(indexPath, 'utf8')), comp, label, season.teams.length)
