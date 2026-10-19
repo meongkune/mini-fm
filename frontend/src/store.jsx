@@ -47,6 +47,12 @@ export function ink(hex) {
   return 0.299 * r + 0.587 * g + 0.114 * b > 170 ? '#111827' : '#ffffff'
 }
 
+// 어두운 배경 위 막대·테두리용: 팀 색이 너무 어두우면(예: 뉴캐슬 검정) 밝은 회색으로
+export function onDark(hex) {
+  const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16))
+  return 0.299 * r + 0.587 * g + 0.114 * b < 60 ? '#cbd5e1' : hex
+}
+
 export function teamOvr(team) {
   const top = [...team.players].map(playerOvr).sort((a, b) => b - a).slice(0, 11)
   return Math.round(top.reduce((s, v) => s + v, 0) / top.length)

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { api } from '../api.js'
-import { formationNeeds, ink, kitColors, short, teamOvr, useGame } from '../store.jsx'
+import { formationNeeds, ink, kitColors, onDark, short, teamOvr, useGame } from '../store.jsx'
 import MatchPitch from './MatchPitch.jsx'
 import NeedTeam from './NeedTeam.jsx'
 import { MENTALITY, OptionGroup, PRESSING } from './Tactics.jsx'
@@ -118,15 +118,34 @@ export default function Match() {
   const live = (phase === 'h1' || phase === 'h2') && clock > 0
   const liveTick = live ? tickAt(clock) : null
 
+  // 진행 중인 시점까지의 기록 (타임라인 기준이라 하프타임 전에도 실시간으로 보인다)
+  const upto = timeline.filter((t) => t.m <= clock)
+  const poss = [0, 1].map((i) => upto.filter((t) => t.t === i).length)
+  const possPct = upto.length ? Math.round((poss[0] * 100) / upto.length) : 50
+  const shots = [0, 1].map((i) => upto.filter((t) => t.t === i && ['miss', 'save', 'goal'].includes(t.k)).length)
+  const onTgt = [0, 1].map((i) => upto.filter((t) => t.t === i && ['save', 'goal'].includes(t.k)).length)
+  const scorers = [0, 1].map((i) => shown.filter((e) => e.type === 'goal' && e.team === i).map((e) => `${(e.player || '').split(' ').at(-1)} ${e.minute}'`))
+  // 경기장 자막: 최근 2분 안의 주요 장면
+  const lastKey = [...shown].reverse().find((e) => e.type !== 'info')
+  const caption = live && lastKey && clock - lastKey.minute <= 2 ? lastKey : null
+  const clockLabel = phase === 'pre' ? '킥오프 전' : phase === 'ht' ? 'HT' : phase === 'ft' ? 'FT' : `${clock}'`
+  const started = phase !== 'pre'
+
   return (
     <section>
-      <div className="scoreboard" style={{ '--h': home.color, '--a': away.color }}>
-        <div className="side home"><span className="crest" style={{ color: ink(home.color) }}>{home.id}</span><strong>{short(home)}</strong><small>OVR {teamOvr(home)}</small></div>
-        <div className="score">
-          <span className="big">{score[0]} : {score[1]}</span>
-          <span className="clock">{phase === 'pre' ? '킥오프 전' : phase === 'ht' ? '하프타임' : phase === 'ft' ? '경기 종료' : `${clock}'`}</span>
+      <div className="bcast">
+        <div className="bc-team" style={{ '--c': home.color, '--ink': ink(home.color) }}>
+          <span className="bc-id">{home.id}</span><span className="bc-name">{short(home)}</span>
         </div>
-        <div className="side away"><span className="crest" style={{ color: ink(away.color) }}>{away.id}</span><strong>{short(away)}</strong><small>OVR {teamOvr(away)}</small></div>
+        <div className="bc-score"><b>{score[0]}</b><i /><b>{score[1]}</b></div>
+        <div className="bc-team away" style={{ '--c': away.color, '--ink': ink(away.color) }}>
+          <span className="bc-name">{short(away)}</span><span className="bc-id">{away.id}</span>
+        </div>
+      </div>
+      <div className="bc-sub">
+        <span className="bc-scorers">{scorers[0].join(', ')}</span>
+        <span className={`bc-clock ${live ? 'live' : ''}`}>{clockLabel}</span>
+        <span className="bc-scorers right">{scorers[1].join(', ')}</span>
       </div>
       <div className="progress"><span style={{ width: `${(clock / 90) * 100}%` }} /></div>
 
@@ -141,50 +160,30 @@ export default function Match() {
         duration={live ? delayFor(clock) : 300}
         scorerName={liveTick && lineups ? [...lineups[0], ...lineups[1]].find((p) => p.id === liveTick.p)?.name : ''}
         idleLabel={phase === 'ht' ? '하프타임 — 후반 대기' : phase === 'ft' ? '경기 종료' : '킥오프 대기'}
+        caption={caption && { text: caption.text.replace(/^\d+' /, ''), minute: caption.minute, type: caption.type, color: onDark((caption.type === 'card' ? [home, away][1 - caption.team] : [home, away][caption.team])?.color || '#7c5cff') }}
       />
 
       <div className="match-layout">
-        <div className="card log" ref={logRef}>
+        <div className="card side-panel">
           {phase === 'pre' && (
             <div className="pre">
               <h3>경기 준비</h3>
-              <p>내 전술: <strong>{save.formation}</strong> · {MENTALITY.find((m) => m[0] === save.mentality)[1]} · 압박 {PRESSING.find((p) => p[0] === save.pressing)[1]}</p>
-              <p className="muted small">선발 {save.lineup.length}명 (필요: GK 1 · DF {needs.DF} · MF {needs.MF} · FW {needs.FW})</p>
+              <p>내 전술 <strong>{save.formation}</strong> · {MENTALITY.find((m) => m[0] === save.mentality)[1]} · 압박 {PRESSING.find((p) => p[0] === save.pressing)[1]}</p>
+              <p className="muted small">선발 {save.lineup.length}명 (필요: GK 1 · DF {needs.DF} · MF {needs.MF} · FW {needs.FW}). 킥오프하면 전반 45분이 진행되고, 하프타임에 전술을 바꿀 수 있습니다.</p>
               <div className="row">
                 <Link className="btn ghost" to="/tactics">전술 바꾸기</Link>
                 <button className="btn" onClick={() => play(1)}>⚽ 킥오프</button>
               </div>
             </div>
           )}
-          {shown.map((e, i) => (
-            <p key={i} className={`ev ${e.type} ${e.team === myIdx ? 'mine' : e.team === undefined ? '' : 'theirs'}`}>{e.text}</p>
-          ))}
-        </div>
 
-        <div className="card side-panel">
           {(phase === 'h1' || phase === 'h2') && (
-            <>
-              <h3>중계 속도</h3>
-              <div className="row">
-                {Object.keys(SPEEDS).map((s) => (
-                  <button key={s} className={`btn small ${speed === s ? '' : 'ghost'}`} onClick={() => setSpeed(s)}>{s}</button>
-                ))}
-                <button className="btn small ghost" onClick={skip}>⏭ 건너뛰기</button>
-              </div>
-            </>
-          )}
-
-          {showStats && (
-            <>
-              <h3>경기 기록</h3>
-              <table className="stats">
-                <tbody>
-                  <tr><td>{result.stats.possession[0]}%</td><th>점유율</th><td>{result.stats.possession[1]}%</td></tr>
-                  <tr><td>{result.stats.shots[0]}</td><th>슈팅</th><td>{result.stats.shots[1]}</td></tr>
-                  <tr><td>{result.stats.on_target[0]}</td><th>유효 슈팅</th><td>{result.stats.on_target[1]}</td></tr>
-                </tbody>
-              </table>
-            </>
+            <div className="row">
+              {Object.keys(SPEEDS).map((s) => (
+                <button key={s} className={`btn small ${speed === s ? '' : 'ghost'}`} onClick={() => setSpeed(s)}>{s}</button>
+              ))}
+              <button className="btn small ghost" onClick={skip}>⏭ 건너뛰기</button>
+            </div>
           )}
 
           {phase === 'ht' && (
@@ -199,17 +198,49 @@ export default function Match() {
 
           {phase === 'ft' && (
             <>
-              <h3 className="result">
-                {score[myIdx] > score[1 - myIdx] ? '🎉 승리!' : score[myIdx] === score[1 - myIdx] ? '🤝 무승부' : '😢 패배'}
+              <h3 className={`result ${score[myIdx] > score[1 - myIdx] ? 'win' : score[myIdx] === score[1 - myIdx] ? 'draw' : 'loss'}`}>
+                {score[myIdx] > score[1 - myIdx] ? '승리' : score[myIdx] === score[1 - myIdx] ? '무승부' : '패배'}
               </h3>
               <button className="btn wide" disabled={saving} onClick={save_}>
                 {saving ? '다른 경기 진행 중…' : '결과 저장 → 리그 순위 보기'}
               </button>
             </>
           )}
-
-          {phase === 'pre' && <p className="muted small">킥오프하면 경기장 애니메이션과 문자 중계로 전반 45분이 진행됩니다. 하프타임에 전술을 바꿀 수 있어요.</p>}
         </div>
+
+        {started && (
+          <div className="card">
+            <h3>경기 기록</h3>
+            {[
+              ['점유율', possPct, 100 - possPct, '%'],
+              ['슈팅', shots[0], shots[1], ''],
+              ['유효 슈팅', onTgt[0], onTgt[1], ''],
+            ].map(([label, a, b, unit]) => (
+              <div key={label} className="cmp">
+                <div className="cmp-head"><b>{a}{unit}</b><span>{label}</span><b>{b}{unit}</b></div>
+                <div className="cmp-bar">
+                  <span style={{ flex: Math.max(a, 0.001), background: onDark(home.color) }} />
+                  <span style={{ flex: Math.max(b, 0.001), background: onDark(away.color) }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {started && (
+          <div className="card log" ref={logRef}>
+            <h3>문자 중계</h3>
+            <ol className="tl">
+              {shown.map((e, i) => (
+                <li key={i} className={`tl-item ${e.type} ${e.team === undefined ? 'neutral' : e.team === myIdx ? 'mine' : 'theirs'}`}
+                  style={e.team !== undefined ? { '--tc': onDark([home, away][e.type === 'card' ? 1 - e.team : e.team].color) } : undefined}>
+                  <span className="tl-min">{e.minute}'</span>
+                  <span className="tl-text">{e.text.replace(/^\d+' /, '')}</span>
+                </li>
+              ))}
+            </ol>
+          </div>
+        )}
       </div>
     </section>
   )

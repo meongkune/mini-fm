@@ -186,7 +186,7 @@ export function simulate(homeTeam, awayTeam, { homeCfg = {}, awayCfg = {}, half 
         tick.k = 'goal'
         st.score[atk]++
         st.scorers.push({ minute, team: atk, playerId: shooter.id, name: shooter.name })
-        if (withEvents) events.push({ minute, type: 'goal', team: atk, text: rng.choice(GOAL_LINES)(...args), score: [...st.score] })
+        if (withEvents) events.push({ minute, type: 'goal', team: atk, player: shooter.name, text: rng.choice(GOAL_LINES)(...args), score: [...st.score] })
       } else if (withEvents) {
         events.push({ minute, type: 'save', team: atk, text: rng.choice(SAVE_LINES)(...args) })
       }

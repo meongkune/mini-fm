@@ -25,6 +25,8 @@ export default function Home() {
 
   if (!myTeam) {
     const teams = [...data.teams].sort((a, b) => teamOvr(b) - teamOvr(a))
+    const top = teamOvr(teams[0])
+    const floor = teamOvr(teams.at(-1)) - 4 // 막대 기준점: 최약팀보다 조금 아래
     return (
       <section>
         <div className="hero">
@@ -41,6 +43,7 @@ export default function Home() {
                 <span className="tc-ovr">{teamOvr(t)}</span>
               </span>
               <strong>{t.name}</strong>
+              <span className="tc-bar"><span style={{ width: `${((teamOvr(t) - floor) / (top - floor)) * 100}%` }} /></span>
               <span className="tc-label">{busy === t.id ? '계약 중…' : strengthLabel(rank, teams.length)}</span>
             </button>
           ))}
@@ -53,8 +56,9 @@ export default function Home() {
   const me = standings[rank - 1]
   const opp = nextFixture && teamsById[nextFixture.home === myTeam.id ? nextFixture.away : nextFixture.home]
   const isHome = nextFixture?.home === myTeam.id
-  const stars = [...myTeam.players].sort((a, b) => playerOvr(b) - playerOvr(a)).slice(0, 4)
+  const stars = [...myTeam.players].sort((a, b) => playerOvr(b) - playerOvr(a)).slice(0, 6)
   const played = save.results.length > 0
+  const form = me.form.slice(-5)
 
   return (
     <section>
@@ -71,6 +75,16 @@ export default function Home() {
         <div className="card stat"><span>순위</span><strong>{played ? `${rank}위` : '-'}</strong></div>
         <div className="card stat"><span>전적</span><strong>{me.w}승 {me.d}무 {me.l}패</strong></div>
         <div className="card stat"><span>승점</span><strong>{me.pts}</strong></div>
+      </div>
+
+      <div className="card form-card">
+        <span className="eyebrow">최근 5경기</span>
+        <div className="form-row">
+          {Array.from({ length: 5 }, (_, i) => {
+            const f = form[i]
+            return <span key={i} className={`fchip ${f || 'none'}`}>{f ? { W: '승', D: '무', L: '패' }[f] : '–'}</span>
+          })}
+        </div>
       </div>
 
       <div className="card next-match">
@@ -105,7 +119,7 @@ export default function Home() {
         <h3 style={{ margin: 0 }}>핵심 선수</h3>
         <Link className="link" to="/squad">전체 보기 →</Link>
       </div>
-      <div className="card-grid two" style={{ marginBottom: 16 }}>
+      <div className="scroll-row" style={{ marginBottom: 16 }}>
         {stars.map((p) => <PlayerCard key={p.id} player={p} size="lg" onClick={() => navigate('/squad')} />)}
       </div>
 

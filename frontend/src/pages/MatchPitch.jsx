@@ -113,7 +113,7 @@ function toScreen(x, y, myIdx) {
   return { left: `${side * 100}%`, top: `${up * 100}%` }
 }
 
-export default function MatchPitch({ home, away, lineups, tick, duration = 300, scorerName, idleLabel = '킥오프 대기', myIdx = 0 }) {
+export default function MatchPitch({ home, away, lineups, tick, duration = 300, scorerName, idleLabel = '킥오프 대기', myIdx = 0, caption = null }) {
   const [stage, setStage] = useState(0)
 
   // 슈팅 장면은 2단계: 슈터가 공을 잡고 → 잠시 뒤 골문으로
@@ -189,6 +189,12 @@ export default function MatchPitch({ home, away, lineups, tick, duration = 300, 
         <span style={{ '--c': mine.color }}><i />▲ {short(mine)} (내 팀)</span>
         <span style={{ '--c': theirs.color }}><i />▼ {short(theirs)}</span>
       </div>
+
+      {caption && !goalFlash && (
+        <div key={`${caption.minute}-${caption.type}`} className={`pitch-caption ${caption.type}`} style={{ '--c': caption.color }}>
+          <span>{caption.minute}'</span>{caption.text}
+        </div>
+      )}
 
       {goalFlash && (
         <div className="goal-flash" style={{ '--c': teams[tick.t].color }}>
