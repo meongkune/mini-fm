@@ -1,0 +1,46 @@
+# ----- Credentials / secrets -----
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+.aws/
+credentials
+credentials.*
+*accessKeys*.csv
+*_credentials.csv
+*.secret
+secrets/
+*token*.txt
+
+# ----- Node / Vite -----
+node_modules/
+dist/
+*.log
+npm-debug.log*
+
+# ----- Python -----
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+
+# ----- OS / editor -----
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+.claude/
+
+# ----- Local-only files -----
+*.pdf
+~$*.docx
+screenshots/
+report/
+PROGRESS.md
+CHECKLIST.md
+tools/capture-window.ps1
