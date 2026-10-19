@@ -1,0 +1,66 @@
+# Actions 탭에서 수동 실행: football-data.org → 시즌 데이터 생성 → 커밋 → GitHub Pages 재배포
+name: Import season data
+
+on:
+  workflow_dispatch:
+    inputs:
+      competition:
+        description: '리그 (PL=프리미어리그, PD=라리가, BL1=분데스리가, SA=세리에 A, FL1=리그 1)'
+        type: choice
+        options: [PL, PD, BL1, SA, FL1]
+        default: PL
+      season:
+        description: '시즌 시작 연도 (예: 2025 → 2025-26 시즌)'
+        type: string
+        default: '2025'
+      make_default:
+        description: '이 시즌을 앱의 기본 시즌으로 설정'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write   # 시즌 파일 커밋
+  actions: write    # Pages 배포 워크플로 실행
+
+concurrency:
+  group: import-season
+  cancel-in-progress: false
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 소스 체크아웃
+        uses: actions/checkout@v4
+
+      - name: Node.js 설정
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: football-data.org에서 가져오기
+        env:
+          FOOTBALL_DATA_TOKEN: ${{ secrets.FOOTBALL_DATA_TOKEN }}
+        run: node tools/import_season.mjs --competition ${{ inputs.competition }} --season ${{ inputs.season }} --default ${{ inputs.make_default }}
+
+      - name: 변경 사항 커밋
+        id: commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add frontend/public/data
+          if git diff --cached --quiet; then
+            echo "변경 사항 없음" >> "$GITHUB_STEP_SUMMARY"
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            git commit -m "data: ${{ inputs.competition }} ${{ inputs.season }} 시즌 데이터 가져오기"
+            git push
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      # GITHUB_TOKEN으로 한 push는 다른 워크플로를 트리거하지 않으므로 Pages 배포를 직접 실행한다
+      - name: GitHub Pages 재배포
+        if: steps.commit.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run pages.yml --ref main
