@@ -39,9 +39,9 @@ export function Pitch({ team, lineup, formation }) {
   )
 }
 
-export function OptionGroup({ options, value, onChange }) {
+export function OptionGroup({ options, value, onChange, cols }) {
   return (
-    <div className="options">
+    <div className="options" style={cols ? { gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` } : undefined}>
       {options.map(([key, label, desc]) => (
         <button key={key} className={`option ${value === key ? 'on' : ''}`} onClick={() => onChange(key)}>
           <strong>{label}</strong>
@@ -78,6 +78,7 @@ export default function Tactics() {
             options={data.formations.map((f) => [f, f, FORMATION_DESC[f]])}
             value={save.formation}
             onChange={changeFormation}
+            cols={2}
           />
           <h3>경기 운영</h3>
           <OptionGroup options={MENTALITY} value={save.mentality} onChange={(mentality) => update({ mentality })} />

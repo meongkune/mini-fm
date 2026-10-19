@@ -21,8 +21,8 @@ export default function League() {
     <section>
       <div className="section-head">
         <div>
-          <h1>{data.league}</h1>
-          <p className="muted">{save.round} / {totalRounds} 라운드 진행</p>
+          <h1>리그 순위</h1>
+          <p className="muted">{data.league} · {save.round}/{totalRounds} 라운드</p>
         </div>
         {myTeam && !seasonOver && <Link className="btn" to="/match">다음 경기 ▶</Link>}
       </div>

@@ -1,15 +1,10 @@
 import { useState } from 'react'
 import { api } from '../api.js'
+import PlayerCard from '../components/PlayerCard.jsx'
 import { formationNeeds, playerOvr, useGame } from '../store.jsx'
 import NeedTeam from './NeedTeam.jsx'
 
 const POS_LABEL = { GK: '골키퍼', DF: '수비수', MF: '미드필더', FW: '공격수' }
-
-function Bar({ value }) {
-  return (
-    <span className="bar"><span style={{ width: `${value}%` }} /><em>{value}</em></span>
-  )
-}
 
 export default function Squad() {
   const { myTeam, save, update } = useGame()
@@ -49,34 +44,28 @@ export default function Squad() {
         {Object.entries(needs).map(([pos, n]) => (
           <span key={pos} className={counts[pos] === n ? 'ok' : 'warn'}>{pos} {counts[pos]}/{n}</span>
         ))}
-        <span className="small">{ok ? '✅ 포메이션에 맞는 라인업입니다' : '⚠️ 포지션이 맞지 않으면 경기력이 떨어집니다'}</span>
+        <span className="small">{ok ? '포메이션에 맞는 라인업입니다' : '포지션이 맞지 않으면 경기력이 떨어집니다'}</span>
       </div>
       {msg && <p className="toast" onAnimationEnd={() => setMsg('')}>{msg}</p>}
 
-      {['GK', 'DF', 'MF', 'FW'].map((pos) => (
-        <div key={pos} className="card">
-          <h3>{POS_LABEL[pos]}</h3>
-          <table className="players">
-            <thead>
-              <tr><th></th><th>#</th><th>이름</th><th>나이</th><th>OVR</th><th>공격</th><th>수비</th><th>체력</th></tr>
-            </thead>
-            <tbody>
-              {myTeam.players.filter((p) => p.pos === pos).map((p) => (
-                <tr key={p.id} className={selected.has(p.id) ? 'picked' : ''} onClick={() => toggle(p)}>
-                  <td>{selected.has(p.id) ? '✅' : '⬜'}</td>
-                  <td>{p.number}</td>
-                  <td><strong>{p.name}</strong></td>
-                  <td>{p.age}</td>
-                  <td><span className="ovr-pill">{playerOvr(p)}</span></td>
-                  <td><Bar value={p.att} /></td>
-                  <td><Bar value={p.def} /></td>
-                  <td><Bar value={p.sta} /></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      ))}
+      <div className="tier-legend">
+        <span><i style={{ background: 'var(--tier-elite)' }} />엘리트 88+</span>
+        <span><i style={{ background: 'var(--tier-gold)' }} />골드 82+</span>
+        <span><i style={{ background: 'var(--tier-silver)' }} />실버 76+</span>
+        <span><i style={{ background: 'var(--tier-bronze)' }} />브론즈</span>
+      </div>
+
+      {['GK', 'DF', 'MF', 'FW'].map((pos) => {
+        const players = myTeam.players.filter((p) => p.pos === pos).sort((a, b) => playerOvr(b) - playerOvr(a))
+        return (
+          <div key={pos} className="squad-group">
+            <h3>{POS_LABEL[pos]} <span className="muted small">{counts[pos]}/{needs[pos]} 선발</span></h3>
+            <div className="card-grid">
+              {players.map((p) => <PlayerCard key={p.id} player={p} selected={selected.has(p.id)} onClick={() => toggle(p)} />)}
+            </div>
+          </div>
+        )
+      })}
     </section>
   )
 }
