@@ -1,15 +1,20 @@
-// 유럽 대항전 화면: 내 상태, 다음 매치데이, 조별 순위, 토너먼트, 득점 순위
+// 대항전 화면 (챔피언스·유로파·컨퍼런스리그): 내 상태, 다음 매치데이, 조별 순위, 토너먼트, 득점 순위
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Crest } from '../components/Badges.jsx'
-import { STAGE_LABEL, dueMatchday, fixturesOf, groupTable } from '../game/cup.js'
+import { COMPS, STAGE_LABEL, cupStatus, dueMatchday, fixturesOf, groupTable } from '../game/cup.js'
 import { short, useGame } from '../store.jsx'
 
 export default function CupView() {
-  const { cup, allTeams, myKey, cupState, save } = useGame()
+  const { cups, cupIdx, allTeams, myKey, save } = useGame()
   const [view, setView] = useState('groups')
-  if (!save.cup) return <div className="card muted">유럽 대항전을 준비하는 중입니다…</div>
-  if (save.cup.none || !cup) return <div className="card muted">유럽 대항전은 유럽 리그가 2개 이상 들어와 있을 때 열립니다. (지금 리그는 대회 대상이 아니거나 다른 유럽 리그 데이터가 없습니다)</div>
+  const [pick, setPick] = useState(null)
+  if (!save.cups) return <div className="card muted">대항전을 준비하는 중입니다…</div>
+  if (!cups.length) return <div className="card muted">이 리그는 대항전(챔피언스·유로파·컨퍼런스리그) 대상이 아닙니다. 1부 리그 8곳(EPL·라리가·분데스·세리에·리그1·에레디비시·포르투갈·브라질)의 팀만 나갑니다.</div>
+  const sel = pick ?? (cupIdx >= 0 ? cupIdx : 0)
+  const cup = cups[sel]
+  const comp = COMPS[cup.tier]
+  const cupState = cupStatus(cup, myKey)
   const T = (k) => allTeams[k] || cup.teams.find((t) => t.key === k)
   const nextMd = dueMatchday(cup, Infinity)
   const ko = ['R16', 'QF', 'SF', 'F'].filter((s) => cup.fixtures.some((f) => f.stage === s))
@@ -23,8 +28,15 @@ export default function CupView() {
 
   return (
     <>
-      <div className={`card cup-hero ${cupState?.in ? '' : 'out'}`}>
-        <span className="cup-trophy">🏆</span>
+      <div className="seg cup-tabs">
+        {cups.map((c, i) => (
+          <button key={c.id} className={sel === i ? 'on' : ''} onClick={() => setPick(i)}>
+            {COMPS[c.tier].icon} {COMPS[c.tier].name}{i === cupIdx && <i className="dot" />}
+          </button>
+        ))}
+      </div>
+      <div className={`card cup-hero tier-${cup.tier} ${cupState?.in ? '' : 'out'}`}>
+        <span className="cup-trophy">{comp.icon}</span>
         <div className="grow">
           <strong>{cup.name}</strong>
           <span className="muted small">{cup.size}개 팀 · 조별리그 → {cup.size === 32 ? '16강' : '8강'} 토너먼트(단판)</span>

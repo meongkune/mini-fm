@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { leagueZones } from '../game/cup.js'
 import { Link, useSearchParams } from 'react-router-dom'
 import { playerOvr, short, useGame } from '../store.jsx'
 import Rating from '../components/Rating.jsx'
@@ -39,7 +40,7 @@ export default function League() {
         ))}
       </div>
 
-      {tab === 'table' && <StandingsTable standings={standings} teamsById={teamsById} myTeam={myTeam} zones={data.zones} />}
+      {tab === 'table' && <StandingsTable standings={standings} teamsById={teamsById} myTeam={myTeam} zones={leagueZones(data.leagueId, data.zones)} />}
       {tab === 'players' && <PlayerRanks pstats={save.pstats || {}} teamsById={teamsById} myTeam={myTeam} roundsPlayed={save.round} />}
       {tab === 'cup' && <CupView />}
       {tab === 'fixtures' && <Fixtures schedule={data.schedule} results={save.results} teamsById={teamsById} myTeam={myTeam} current={save.round} />}

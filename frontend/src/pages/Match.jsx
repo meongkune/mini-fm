@@ -198,7 +198,7 @@ export default function Match() {
       <div className="card side-panel">
         {phase === 'pre' && (
           <div className="pre">
-            <h3>경기 준비 <span className="muted small">{nextFixture.cup ? <b className="cup-badge">🏆 {nextFixture.label}</b> : nextFixture.label} · {isHome ? '홈' : '원정'}</span></h3>
+            <h3>경기 준비 <span className="muted small">{nextFixture.cup ? <b className="cup-badge">{nextFixture.comp?.icon || '🏆'} {nextFixture.label}</b> : nextFixture.label} · {isHome ? '홈' : '원정'}</span></h3>
             <div className="opp-report">
               <div><span className="muted small">상대</span><strong>{opp.name}</strong></div>
               <div><span className="muted small">전력</span><strong>{teamOvr(opp)}</strong></div>

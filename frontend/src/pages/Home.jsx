@@ -135,7 +135,7 @@ export default function Home() {
         ) : (
           <>
             <div className="row between">
-              <span className="eyebrow">{nextFixture.cup ? <b className="cup-badge">🏆 {nextFixture.label}</b> : `다음 경기 · ${save.round + 1}/${totalRounds} 라운드`}</span>
+              <span className="eyebrow">{nextFixture.cup ? <b className="cup-badge">{nextFixture.comp?.icon || '🏆'} {nextFixture.label}</b> : `다음 경기 · ${save.round + 1}/${totalRounds} 라운드`}</span>
               <span className="pill">{isHome ? '홈' : '원정'}</span>
             </div>
             <div className="versus">

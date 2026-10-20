@@ -276,7 +276,7 @@ export function applyCupMatch(save, { myTeam, mineIdx, summary, label, oppName }
     st[p.id] = { ...defaultStatus(), ...(st[p.id] || {}), inj: Math.max(st[p.id]?.inj || 0, inj.games), injKind: inj.kind || '부상' }
     inbox.push(news(save.round, 'injury', `${p.name} 부상 · ${inj.kind || '부상'}`, `${label} 경기 ${inj.minute}분에 다쳐 약 ${inj.games}경기 결장할 예정입니다.`, { playerId: p.id }))
   }
-  inbox.push(news(save.round, 'cup', `${label} ${res > 0 ? '승리' : res < 0 ? '패배' : '무승부'} · ${gf}:${ga}`, `${oppName}와(과)의 유럽 대항전 경기 결과입니다.`))
+  inbox.push(news(save.round, 'cup', `${label} ${res > 0 ? '승리' : res < 0 ? '패배' : '무승부'} · ${gf}:${ga}`, `${oppName}와(과)의 대항전 경기 결과입니다.`))
   return { ...save, status: st, inbox: [...inbox, ...(save.inbox || [])].slice(0, 80) }
 }
 

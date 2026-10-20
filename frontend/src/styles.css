@@ -1066,3 +1066,8 @@ html.framed body { overflow: hidden; height: 100vh; }
 .owner-card em { grid-column: 1 / -1; font-style: normal; font-size: .72rem; color: var(--accent); font-weight: 800; }
 
 /* VRoid 감독 */
+/* 대항전 3개: 챔스(남색)·유로파(주황)·컨퍼런스(초록) */
+.cup-tabs button { font-size: .74rem; position: relative; }
+.cup-tabs .dot { position: absolute; top: 4px; right: 6px; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+.cup-hero.tier-1 { background: linear-gradient(120deg, #6b3a12, #2a1608 60%, #5a2a10); border-color: #b8661f; }
+.cup-hero.tier-2 { background: linear-gradient(120deg, #0f5132, #08261a 60%, #13493a); border-color: #22a06b; }

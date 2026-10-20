@@ -7,7 +7,7 @@ import { applyCupMatch, applyRound, customTalk, engineStatus, news, playerTalk, 
 import { effectiveTeams } from './game/roster.js'
 import { evaluateTrade, executeTrade, windowState } from './game/trade.js'
 import { boardMidCheck, newBoard, nextSeason, seasonLabel, seasonReview } from './game/career.js'
-import { CUP_LEAGUES, buildCup, cupKey, cupStatus, dueMatchday, myCupFixture, playMatchday } from './game/cup.js'
+import { COMPS, CUP_LEAGUES, buildCups, cupKey, cupStatus, dueMatchday, myCupFixture, playMatchday } from './game/cup.js'
 import { ROSTER_MAX, checkBankruptcy, contractOf, eur, faDecision, newFinance, prizeMoney, releaseCost, renewalAsk, settleMatch, wageFor } from './game/finance.js'
 import { afterMatchOwner, decide } from './game/owner.js'
 import { valueOf } from './game/trade.js'
@@ -139,7 +139,7 @@ export function GameProvider({ children }) {
   const [error, setError] = useState(null)
   const [save, setSave] = useState(loadSave)
   const [manager, setManager] = useState(() => { try { return JSON.parse(localStorage.getItem(MANAGER_KEY) || 'null') } catch { return null } })
-  const [cupTeams, setCupTeams] = useState({}) // 유럽 대항전에 나오는 다른 리그 팀 (키: 리그/팀ID)
+  const [cupTeams, setCupTeams] = useState({}) // 대항전에 나오는 다른 리그 팀 (키: 리그/팀ID)
 
   // 리그·시즌이 바뀔 때마다 해당 시즌 데이터를 불러온다
   useEffect(() => {
@@ -197,7 +197,7 @@ export function GameProvider({ children }) {
     })
   }, [data, save.teamId, save.rosters, save.signed?.length, save.youth?.length, save.finance?.base ? 1 : 0])
 
-  // 유럽 대항전: 시즌마다 참가팀을 뽑고(다른 리그 파일을 읽어서) 대진을 만든다
+  // 대항전(챔스·유로파·컨퍼런스): 시즌마다 참가팀을 뽑고(다른 리그 파일을 읽어서) 대진을 만든다
   const seasonNo = save.seasonNo || 1
   useEffect(() => {
     if (!data || !save.teamId || !CUP_LEAGUES.includes(data.leagueId)) return
@@ -215,26 +215,28 @@ export function GameProvider({ children }) {
       const map = {}
       for (const l of loaded) for (const t of l.teams) map[cupKey(l.leagueId, t.id)] = t
       setCupTeams(map)
-      if (!save.cup || save.cup.seasonNo !== seasonNo) {
-        const cup = buildCup(loaded, { seed: seasonNo * 101 + (save.teamId || '').length, totalRounds: data.schedule.length })
-        setSave((cur) => ({ ...cur, cup: cup ? { ...cup, seasonNo } : { none: true, seasonNo } }))
+      if (!save.cups || save.cupSeason !== seasonNo) {
+        const cups = buildCups(loaded, { seed: seasonNo * 101 + (save.teamId || '').length, totalRounds: data.schedule.length })
+        setSave((cur) => { const { cup: _old, ...rest } = cur; return { ...rest, cups, cupSeason: seasonNo } })
       }
-    })().catch((e) => console.warn('유럽 대항전 준비 실패', e))
+    })().catch((e) => console.warn('대항전 준비 실패', e))
     return () => { alive = false }
-  }, [data, save.teamId, seasonNo, save.cup?.seasonNo])
+  }, [data, save.teamId, seasonNo, save.cupSeason])
 
   // 내 팀 경기가 없는 대회 매치데이(미참가·탈락·다른 조)는 자동으로 진행
   useEffect(() => {
-    const cup = save.cup && !save.cup.none ? save.cup : null
-    if (!data || !cup || !cup.teams.every((t) => cupTeams[t.key] || t.leagueId === data.leagueId)) return
-    const md = dueMatchday(cup, save.round)
-    if (!md) return
+    const cups = save.cups || []
+    if (!data || !cups.length || !cups.every((c) => c.teams.every((t) => cupTeams[t.key] || t.leagueId === data.leagueId))) return
     const myKey = cupKey(data.leagueId, save.teamId)
-    if (myCupFixture(cup, md, myKey)) return
+    const due = cups.map((c) => { const md = dueMatchday(c, save.round); return md && !myCupFixture(c, md, myKey) ? md : null })
+    if (!due.some(Boolean)) return
     const leagueKeyed = Object.fromEntries(effectiveTeams(data.teams, save).map((t) => [cupKey(data.leagueId, t.id), t]))
     const all = { ...cupTeams, ...leagueKeyed }
-    setSave((s) => ({ ...s, cup: playMatchday(s.cup, md, all, engineStatus(s, Object.values(all)), null, s.seasonNo || 1).cup }))
-  }, [data, save.cup, save.round, cupTeams])
+    setSave((s) => {
+      const st = engineStatus(s, Object.values(all))
+      return { ...s, cups: s.cups.map((c, i) => (due[i] ? playMatchday(c, due[i], all, st, null, s.seasonNo || 1).cup : c)) }
+    })
+  }, [data, save.cups, save.round, cupTeams])
 
   useEffect(() => {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(save)) } catch { /* 저장 실패해도 게임은 계속 */ }
@@ -247,11 +249,14 @@ export function GameProvider({ children }) {
     const myTeam = save.teamId ? teamsById[save.teamId] : null
     const totalRounds = data ? data.schedule.length : 0
     const seasonOver = data ? save.round >= totalRounds : false
-    // 유럽 대항전: 내 팀 키, 다른 리그 팀을 포함한 팀 찾기, 이번에 치를 매치데이
+    // 대항전: 내 팀 키, 다른 리그 팀을 포함한 팀 찾기, 내가 나가는 대회와 이번에 치를 매치데이
     const myKey = data && save.teamId ? cupKey(data.leagueId, save.teamId) : null
     const leagueKeyed = data ? Object.fromEntries(teams.map((t) => [cupKey(data.leagueId, t.id), t])) : {}
     const allTeams = { ...cupTeams, ...leagueKeyed }
-    const cup = save.cup && !save.cup.none ? save.cup : null
+    const cups = save.cups || []
+    const cupIdx = cups.findIndex((c) => c.teams.some((t) => t.key === myKey))
+    const cup = cupIdx >= 0 ? cups[cupIdx] : null
+    const comp = cup ? COMPS[cup.tier] : null
     const cupReady = cup && cup.teams.every((t) => allTeams[t.key])
     const cupMd = cupReady ? dueMatchday(cup, save.round) : null
     const myCup = cupMd ? myCupFixture(cup, cupMd, myKey) : null
@@ -260,7 +265,7 @@ export function GameProvider({ children }) {
       : null
     // 다음 경기: 유럽 대항전이 끼어 있으면 그것부터. homeTeam/awayTeam은 팀 객체, isHome은 내 팀이 홈인지
     const nextFixture = myCup
-      ? { ...myCup, cup: true, label: cupMd.label, homeTeam: allTeams[myCup.home], awayTeam: allTeams[myCup.away], isHome: myCup.home === myKey }
+      ? { ...myCup, cup: true, label: `${comp.short} ${cupMd.label}`, comp, homeTeam: allTeams[myCup.home], awayTeam: allTeams[myCup.away], isHome: myCup.home === myKey }
       : leagueFixture
         ? { ...leagueFixture, homeTeam: teamsById[leagueFixture.home], awayTeam: teamsById[leagueFixture.away], isHome: leagueFixture.home === myTeam.id, label: `${save.round + 1}라운드` }
         : null
@@ -271,7 +276,7 @@ export function GameProvider({ children }) {
       manager,
       saveManager(m) { setManager(m); try { localStorage.setItem(MANAGER_KEY, JSON.stringify(m)) } catch { /* 저장 실패 무시 */ } },
       data, error, save, teams, teamsById, myTeam, totalRounds, seasonOver, nextFixture, update, status,
-      cup, cupMd, allTeams, myKey, cupState: cup ? cupStatus(cup, myKey) : null,
+      cups, cup, cupIdx, cupMd, allTeams, myKey, cupState: cup ? cupStatus(cup, myKey) : null,
       standings: data ? computeStandings(teams, save.results) : [],
       unread: (save.inbox || []).filter((x) => !x.read).length,
       /** 컨디션·부상·징계를 고려한 베스트 11 */
@@ -455,15 +460,15 @@ export function GameProvider({ children }) {
       /** 내 경기 요약을 넣고 라운드 마무리 (다른 경기는 여기서 시뮬레이션) */
       finishRound(mine) {
         if (nextFixture?.cup) {
-          // 유럽 대항전 경기: 대회 결과 반영 + 내 선수 상태 (리그 라운드는 그대로)
+          // 대항전 경기: 대회 결과 반영 + 내 선수 상태 (리그 라운드는 그대로)
           const md = cupMd
           setSave((s) => {
-            const r = playMatchday(s.cup, md, allTeams, engineStatus(s, Object.values(allTeams)), { home: nextFixture.home, away: nextFixture.away, summary: mine.summary }, seasonNo)
+            const r = playMatchday(s.cups[cupIdx], md, allTeams, engineStatus(s, Object.values(allTeams)), { home: nextFixture.home, away: nextFixture.away, summary: mine.summary }, seasonNo)
             const mineIdx = nextFixture.isHome ? 0 : 1
             const opp = mineIdx === 0 ? nextFixture.awayTeam : nextFixture.homeTeam
-            const after = applyCupMatch({ ...s, cup: r.cup }, { myTeam, mineIdx, summary: mine.summary, label: `${cup.name} ${md.label}`, oppName: opp.name })
+            const after = applyCupMatch({ ...s, cups: s.cups.map((c, i) => (i === cupIdx ? r.cup : c)) }, { myTeam, mineIdx, summary: mine.summary, label: `${cup.name} ${md.label}`, oppName: opp.name })
             const [gf, ga] = mineIdx === 0 ? mine.summary.score : [...mine.summary.score].reverse()
-            const money = settleMatch(after, { team: myTeam, leagueId: data.leagueId, home: nextFixture.isHome, result: Math.sign(gf - ga), totalRounds: data.schedule.length, cupStage: md.stage })
+            const money = settleMatch(after, { team: myTeam, leagueId: data.leagueId, home: nextFixture.isHome, result: Math.sign(gf - ga), totalRounds: data.schedule.length, cupStage: md.stage, cupPay: comp.pay })
             return afterMatchOwner({ ...after, ...money }, Math.sign(gf - ga))
           })
           return

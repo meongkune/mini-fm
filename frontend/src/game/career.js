@@ -26,7 +26,7 @@ export function boardTarget(teams, myTeamId) {
   const rank = [...teams].sort((a, b) => teamStrength(b) - teamStrength(a)).findIndex((t) => t.id === myTeamId) + 1
   if (rank <= 2) return { pos: 2, label: '우승 경쟁 (2위 이내)' }
   if (rank <= 4) return { pos: 4, label: '챔피언스리그 진출 (4위 이내)' }
-  if (rank <= 7) return { pos: 7, label: '유럽 대항전 진출 (7위 이내)' }
+  if (rank <= 7) return { pos: 7, label: '대항전 진출 (7위 이내)' }
   if (rank <= Math.ceil(n / 2) + 1) return { pos: Math.ceil(n / 2) + 2, label: `중위권 안착 (${Math.ceil(n / 2) + 2}위 이내)` }
   return { pos: n - 3, label: `1부 잔류 (${n - 3}위 이내)` }
 }

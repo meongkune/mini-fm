@@ -71,7 +71,7 @@ export function wageBill(save, team, leagueId) {
  * 라운드(경기) 정산: 수입(중계·스폰서·관중) - 주급. 팬 민심은 홈경기 티켓 가격·결과로 변한다
  * extra: { cup: true } 이면 대회 경기 (상금 포함)
  */
-export function settleMatch(save, { team, leagueId, home, result, totalRounds, cupStage = null }) {
+export function settleMatch(save, { team, leagueId, home, result, totalRounds, cupStage = null, cupPay = 1 }) {
   const m = moneyOf(leagueId)
   const f = { ...(save.finance || newFinance(team, leagueId)) }
   const fans = save.fans ?? 60
@@ -83,8 +83,8 @@ export function settleMatch(save, { team, leagueId, home, result, totalRounds, c
     items.push(['중계권', r1((base * 0.45) / totalRounds)])
     items.push(['스폰서', r1(((base * 0.25) / totalRounds) * (1 + (save.owner?.sponsorBoost || 0)))])
   }
-  if (home) items.push(['관중 수입', r1(((base * 0.3) / (totalRounds / 2)) * t[2] * fanK * (cupStage ? 1.4 : 1))])
-  if (cupStage) items.push(['대회 수당', r1(base * 0.012 * (result > 0 ? 1.6 : 1))])
+  if (home) items.push(['관중 수입', r1(((base * 0.3) / (totalRounds / 2)) * t[2] * fanK * (cupStage ? 0.8 + 0.6 * cupPay : 1))])
+  if (cupStage) items.push(['대회 수당', r1(base * 0.012 * cupPay * (result > 0 ? 1.6 : 1))])
   const wages = cupStage ? 0 : r1(wageBill(save, team, leagueId) / totalRounds)
   if (wages) items.push(['주급', -wages])
   const net = r1(items.reduce((s, [, v]) => s + v, 0))
