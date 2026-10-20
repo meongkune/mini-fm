@@ -1,0 +1,16 @@
+{
+ "leagues": {
+  "premier-league": {
+   "teams": {},
+   "season": 96668
+  },
+  "la-liga": {
+   "teams": {},
+   "season": 97268
+  },
+  "bundesliga": {
+   "teams": {}
+  }
+ },
+ "players": {}
+}
