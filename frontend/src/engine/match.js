@@ -55,8 +55,21 @@ export function pickLineup(team, formation = '4-4-2', status = {}, { useConditio
 export function createMatch({ home, away, homeCfg = {}, awayCfg = {}, seed, status = {}, myIdx = null }) {
   const sideState = (team, cfg) => {
     const tactics = { ...DEFAULT_TACTICS, ...(cfg.tactics || {}) }
-    let onPitch = (cfg.lineup || []).filter((id) => team.players.some((p) => p.id === id) && available(status, id)).slice(0, 11)
-    if (onPitch.length < 11) onPitch = pickLineup(team, tactics.formation, status)
+    const byId = Object.fromEntries(team.players.map((p) => [p.id, p]))
+    const wanted = (cfg.lineup || []).filter((id) => byId[id]).slice(0, 11)
+    let onPitch
+    if (wanted.length < 11) onPitch = pickLineup(team, tactics.formation, status)
+    else {
+      // 출전할 수 없는 선수 자리만 같은 포지션의 가장 좋은 선수로 바꾼다
+      onPitch = wanted.filter((id) => available(status, id))
+      const best = pickLineup(team, tactics.formation, status)
+      for (const id of wanted.filter((x) => !available(status, x))) {
+        const pos = byId[id].pos
+        const sub = team.players.filter((p) => p.pos === pos && !onPitch.includes(p.id) && available(status, p.id)).sort((a, b) => playerOvrOf(b) - playerOvrOf(a))[0]
+          || best.map((x) => byId[x]).find((p) => !onPitch.includes(p.id))
+        if (sub) onPitch.push(sub.id)
+      }
+    }
     const energy = {}
     for (const p of team.players) energy[p.id] = status[p.id]?.cond ?? 100
     return { teamId: team.id, name: team.short || team.name, tactics, onPitch, subsLeft: MAX_SUBS, subs: [], sentOff: [], injured: [], yellows: {}, energy }
@@ -314,7 +327,7 @@ export function step(match, ctx, { withEvents = true } = {}) {
       const p = team.players.find((x) => x.id === id)
       if (!p) continue
       const gk = p.pos === 'GK' ? 0.35 : 1
-      sd.energy[id] = Math.max(0, sd.energy[id] - 0.22 * r[idx].drain * gk * (1.35 - p.sta / 100))
+      sd.energy[id] = Math.max(0, sd.energy[id] - 0.4 * r[idx].drain * gk * (1.35 - p.sta / 100))
     }
     if (idx !== match.myIdx) aiSubs(match, ctx, idx)
   }

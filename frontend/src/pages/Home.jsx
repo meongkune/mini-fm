@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import PlayerCard from '../components/PlayerCard.jsx'
+import PlayerSheet from '../components/PlayerSheet.jsx'
 import { ink, playerOvr, short, teamOvr, useGame } from '../store.jsx'
 
 // 전력 순위에 따른 한 줄 소개 (팀 수와 관계없이 4등분)
@@ -19,9 +20,9 @@ function Crest({ team, size = 40 }) {
 }
 
 export default function Home() {
-  const { data, myTeam, save, standings, nextFixture, teamsById, totalRounds, seasonOver, chooseTeam, chooseSeason, quitTeam } = useGame()
+  const { data, myTeam, save, standings, nextFixture, teamsById, totalRounds, seasonOver, chooseTeam, chooseSeason, quitTeam, status, unread } = useGame()
   const [busy, setBusy] = useState(null)
-  const navigate = useNavigate()
+  const [detail, setDetail] = useState(null)
 
   if (!myTeam) {
     const teams = [...data.teams].sort((a, b) => teamOvr(b) - teamOvr(a))
@@ -105,6 +106,8 @@ export default function Home() {
         </div>
       </div>
 
+      <TeamStatus team={myTeam} status={status} lineup={save.lineup} inbox={save.inbox || []} unread={unread} />
+
       <div className="card next-match">
         {seasonOver ? (
           <>
@@ -138,8 +141,10 @@ export default function Home() {
         <Link className="link" to="/squad">전체 보기 →</Link>
       </div>
       <div className="scroll-row" style={{ marginBottom: 16 }}>
-        {stars.map((p) => <PlayerCard key={p.id} player={p} size="lg" onClick={() => navigate('/squad')} />)}
+        {stars.map((p) => <PlayerCard key={p.id} player={p} size="lg" status={status[p.id]} onClick={() => setDetail(p)} />)}
       </div>
+
+      {detail && <PlayerSheet player={detail} onClose={() => setDetail(null)} />}
 
       <div className="row end">
         <button className="btn ghost small" onClick={() => { if (confirm('팀을 바꾸면 현재 시즌 기록이 삭제됩니다. 계속할까요?')) quitTeam() }}>
@@ -147,5 +152,32 @@ export default function Home() {
         </button>
       </div>
     </section>
+  )
+}
+
+// 팀 상태 요약: 선발 평균 컨디션, 부상·징계·불만, 최근 소식
+function TeamStatus({ team, status, lineup, inbox, unread }) {
+  const ids = team.players.map((p) => p.id)
+  const inj = ids.filter((id) => status[id]?.inj > 0).length
+  const susp = ids.filter((id) => status[id]?.susp > 0).length
+  const upset = ids.filter((id) => (status[id]?.morale ?? 60) < 40).length
+  const cond = Math.round(lineup.reduce((s, id) => s + (status[id]?.cond ?? 100), 0) / (lineup.length || 1))
+  const morale = Math.round(ids.reduce((s, id) => s + (status[id]?.morale ?? 60), 0) / (ids.length || 1))
+  const latest = inbox.slice(0, 2)
+  return (
+    <div className="card team-status">
+      <div className="ts-grid">
+        <div><span>선발 컨디션</span><strong className={cond >= 80 ? 'good' : cond >= 65 ? 'ok' : 'bad'}>{cond}%</strong></div>
+        <div><span>팀 사기</span><strong className={morale >= 60 ? 'good' : morale >= 45 ? 'ok' : 'bad'}>{morale}</strong></div>
+        <div><span>부상·징계</span><strong className={inj + susp ? 'bad' : 'good'}>{inj + susp}</strong></div>
+        <div><span>불만</span><strong className={upset ? 'bad' : 'good'}>{upset}</strong></div>
+      </div>
+      {latest.length > 0 && (
+        <Link to="/inbox" className="ts-inbox">
+          <span>📬 {unread > 0 ? `새 소식 ${unread}개` : '받은 편지함'}</span>
+          <em>{latest[0].title}</em>
+        </Link>
+      )}
+    </div>
   )
 }

@@ -12,13 +12,14 @@ export function tierOf(ovr) {
 const lastName = (name) => name.split(' ').at(-1)
 
 /** FC 스타일 세로형 선수 카드. size: 'sm'(스쿼드 그리드) | 'lg'(홈 가로 스크롤) */
-export default function PlayerCard({ player, selected = false, onClick, size = 'sm' }) {
+/** status를 주면 카드 아래에 컨디션 막대와 부상·징계·사기 표시 */
+export default function PlayerCard({ player, selected = false, onClick, size = 'sm', status = null }) {
   const ovr = playerOvr(player)
   const tier = tierOf(ovr)
   return (
     <button
       type="button"
-      className={`pcard tier-${tier} ${size} ${selected ? 'on' : ''}`}
+      className={`pcard tier-${tier} ${size} ${selected ? 'on' : ''} ${status && (status.inj > 0 || status.susp > 0) ? 'out' : ''}`}
       onClick={onClick}
       aria-pressed={onClick ? selected : undefined}
       title={`${player.name} · ${player.pos} · OVR ${ovr} · ${player.age}세`}
@@ -35,6 +36,14 @@ export default function PlayerCard({ player, selected = false, onClick, size = '
         <span><b>{player.sta}</b><em>체력</em></span>
       </span>
       {selected && <span className="pc-check" aria-hidden="true">✓</span>}
+      {status && (
+        <span className="pc-state">
+          <span className="pc-cond"><i style={{ width: `${Math.round(status.cond ?? 100)}%` }} className={(status.cond ?? 100) >= 80 ? 'hi' : (status.cond ?? 100) >= 60 ? 'mid' : 'lo'} /></span>
+          {status.inj > 0 && <em className="pc-flag">🚑{status.inj}</em>}
+          {status.susp > 0 && <em className="pc-flag">🟥{status.susp}</em>}
+          {!(status.inj > 0) && !(status.susp > 0) && (status.morale ?? 60) < 40 && <em className="pc-flag">{(status.morale ?? 60) < 25 ? '😠' : '🙁'}</em>}
+        </span>
+      )}
     </button>
   )
 }

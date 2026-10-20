@@ -749,3 +749,64 @@ html.framed body { overflow: hidden; height: 100vh; }
 .fx-goals { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 64px 1fr; font-size: .66rem; color: var(--muted); }
 .fx-goals span:first-child { text-align: right; }
 .fx-goals span:last-child { grid-column: 3; }
+
+/* ---------- 감독 모드: 상태 표시·선수 상세·편지함 ---------- */
+.pc-state { position: absolute; left: 6px; right: 6px; bottom: 4px; z-index: 2; display: flex; align-items: center; gap: 3px; }
+.pc-cond { flex: 1; height: 4px; border-radius: 99px; background: rgba(0, 0, 0, .35); overflow: hidden; }
+.pc-cond i { display: block; height: 100%; border-radius: 99px; }
+.pc-cond i.hi { background: #22c55e; } .pc-cond i.mid { background: #eab308; } .pc-cond i.lo { background: #ef4444; }
+.pc-flag { font-style: normal; font-size: .6rem; font-weight: 900; padding: 0 3px; border-radius: 4px; background: rgba(0, 0, 0, .55); color: #fff; line-height: 1.5; }
+.pcard.out { filter: grayscale(.85) brightness(.75); }
+.pcard .pc-stats { margin-bottom: 6px; }
+
+.seg.inline { display: inline-grid; margin: 0; width: auto; }
+.seg.inline button { padding: 6px 14px; }
+
+.sq { width: 100%; border-collapse: collapse; font-size: .8rem; font-variant-numeric: tabular-nums; }
+.sq th { font-size: .64rem; color: var(--muted); font-weight: 700; padding: 8px 4px; background: var(--panel-2); }
+.sq td { padding: 7px 4px; text-align: center; border-top: 1px solid rgba(255, 255, 255, .05); }
+.sq .left { text-align: left; }
+.sq tr { cursor: pointer; }
+.sq tr.sel td { background: rgba(124, 92, 255, .12); }
+.sq tr.out { opacity: .6; }
+.sq-sel { width: 14px; color: var(--accent); font-size: .6rem; }
+.sq-name { display: flex; align-items: center; gap: 5px; min-width: 0; }
+.sq-name strong { font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px; }
+.sq-name em { font-style: normal; font-size: .64rem; }
+
+.ps-top { display: grid; grid-template-columns: 116px 1fr; gap: 12px; align-items: start; }
+.ps-top .pcard.lg { width: 116px; }
+.ps-status { display: grid; gap: 6px; font-size: .8rem; }
+.ps-row { display: flex; justify-content: space-between; align-items: center; gap: 6px; padding-bottom: 5px; border-bottom: 1px solid rgba(255, 255, 255, .05); }
+.ps-row span { color: var(--muted); font-size: .72rem; }
+.ps-row b { display: flex; align-items: center; gap: 5px; font-weight: 800; text-align: right; }
+.ps-row.bad b { color: #fca5a5; }
+.ps-form { flex-wrap: wrap; justify-content: flex-end; }
+.ps-form .rt { min-width: 28px; height: 18px; font-size: .64rem; }
+.mood.great, .mood.good { color: #86efac; } .mood.bad, .mood.worst { color: #fca5a5; }
+.ps-season { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; }
+.ps-season div { display: grid; place-items: center; padding: 8px 2px; border-radius: 10px; background: var(--panel-2); }
+.ps-season b { font-size: 1rem; font-weight: 900; font-variant-numeric: tabular-nums; }
+.ps-season span { font-size: .62rem; color: var(--muted); }
+.option:disabled { opacity: .45; cursor: default; }
+
+.bell { position: relative; font-size: 1.35rem; line-height: 1; padding: 4px; }
+.bell b { position: absolute; top: -4px; right: -6px; min-width: 17px; height: 17px; padding: 0 4px; border-radius: 99px; background: #ef4444; color: #fff; font-size: .62rem; font-weight: 900; display: grid; place-items: center; box-shadow: 0 0 0 2px var(--bg); }
+
+.inbox { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.mail { display: flex; gap: 10px; padding: 12px; border-radius: 14px; background: var(--panel); border: 1px solid var(--line); }
+.mail.unread { border-color: var(--accent); box-shadow: inset 3px 0 0 var(--accent); }
+.mail-ico { font-size: 1.3rem; flex: none; }
+.mail-body { flex: 1; min-width: 0; }
+.mail-head { display: flex; justify-content: space-between; gap: 8px; }
+.mail-head strong { font-size: .9rem; }
+.mail p { margin: 4px 0 6px; font-size: .82rem; color: #d6d0ee; line-height: 1.5; }
+
+.team-status { padding: 12px; }
+.ts-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; text-align: center; }
+.ts-grid span { display: block; font-size: .62rem; color: var(--muted); font-weight: 700; }
+.ts-grid strong { font-size: 1.1rem; font-weight: 900; font-variant-numeric: tabular-nums; }
+.ts-grid .good { color: #86efac; } .ts-grid .ok { color: #fde68a; } .ts-grid .bad { color: #fca5a5; }
+.ts-inbox { display: flex; align-items: center; gap: 8px; margin-top: 10px; padding: 9px 10px; border-radius: 10px; background: var(--panel-2); font-size: .78rem; }
+.ts-inbox span { font-weight: 800; flex: none; }
+.ts-inbox em { font-style: normal; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

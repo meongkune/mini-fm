@@ -132,6 +132,7 @@ export default function Match() {
   const clockLabel = phase === 'pre' ? '킥오프 전' : phase === 'ht' ? 'HT' : phase === 'ft' ? 'FT' : `${match.minute}'`
   const started = phase !== 'pre'
   const unavailable = save.lineup.filter((id) => status[id]?.inj > 0 || status[id]?.susp > 0)
+  const promised = myTeam.players.filter((p) => save.status?.[p.id]?.promise === save.round)
   const opp = ctx.teams[1 - myIdx]
   const mom = phase === 'ft' ? Object.keys(rt).sort((a, b) => rt[b] - rt[a])[0] : null
   const res = score[myIdx] > score[1 - myIdx] ? 'win' : score[myIdx] === score[1 - myIdx] ? 'draw' : 'loss'
@@ -180,8 +181,11 @@ export default function Match() {
             </div>
             <p className="small muted">상대 핵심: {[...opp.players].sort((a, b) => playerOvr(b) - playerOvr(a)).slice(0, 3).map((p) => `${p.name.split(' ').at(-1)}(${playerOvr(p)})`).join(' · ')}</p>
             <p className="small">내 전술 <strong>{save.formation}</strong> · {MENTALITY.find((m) => m[0] === save.mentality)[1]} · 압박 {PRESSING.find((p) => p[0] === save.pressing)[1]}</p>
+            {promised.length > 0 && (
+              <p className="small notice">🤝 선발 약속: {promised.map((p) => p.name).join(', ')} {promised.every((p) => save.lineup.includes(p.id)) ? '— 선발에 포함됨 ✓' : '— 선발에 없습니다! 약속을 어기면 사기가 크게 떨어집니다'}</p>
+            )}
             {unavailable.length > 0 && (
-              <p className="small bad-text">⚠ 선발 중 {unavailable.map((id) => byId[id]?.name).join(', ')} 선수는 출전할 수 없어 자동으로 대체됩니다.</p>
+              <p className="small bad-text">⚠ 선발 중 {unavailable.map((id) => byId[id]?.name).join(', ')} 선수는 출전할 수 없어 같은 포지션 선수로 자동 대체됩니다.</p>
             )}
             <div className="row">
               <Link className="btn ghost" to="/squad">선발 조정</Link>

@@ -3,7 +3,7 @@
 import { playerOvrOf } from '../engine/engine.js'
 import { quickMatch } from '../engine/match.js'
 
-export const RECOVERY = 15 // 라운드 사이 컨디션 회복량
+export const RECOVERY = 6 // 라운드 사이 기본 회복량 (+ 부족분의 30% + 지구력 보정)
 export const YELLOW_LIMIT = 5 // 경고 누적 출전 정지 기준
 
 const hash = (s) => { let h = 2166136261; for (const c of String(s)) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return h >>> 0 }
@@ -86,7 +86,7 @@ export function applyRound(save, { teamsById, schedule, myTeamId, mine }) {
   // 4) 컨디션 회복 (경기를 뛴 선수도, 안 뛴 선수도)
   for (const t of teams) for (const p of t.players) {
     const s = st[p.id]
-    if (s && s.cond < 100) st[p.id] = { ...s, cond: Math.min(100, Math.round(s.cond + RECOVERY + (p.sta - 70) / 10)) }
+    if (s && s.cond < 100) st[p.id] = { ...s, cond: Math.min(100, Math.round(s.cond + RECOVERY + (100 - s.cond) * 0.3 + (p.sta - 70) / 10)) }
   }
 
   // 5) 내 팀: 사기, 출전 불만, 부상·징계 알림
@@ -95,7 +95,11 @@ export function applyRound(save, { teamsById, schedule, myTeamId, mine }) {
     const myIdx = mine.home === myTeamId ? 0 : 1
     const [gf, ga] = myIdx === 0 ? mine.summary.score : [...mine.summary.score].reverse()
     const res = Math.sign(gf - ga)
-    const core = new Set([...my.players].sort((a, b) => playerOvrOf(b) - playerOvrOf(a)).slice(0, 15).map((p) => p.id))
+    // 불만을 낼 만한 선수: GK가 아니고, 같은 포지션 선발 중 가장 낮은 선수와 실력이 비슷하거나 나은 선수
+    const starterMin = {}
+    for (const p of my.players) if (mine.summary.players[p.id]?.start) starterMin[p.pos] = Math.min(starterMin[p.pos] ?? 99, playerOvrOf(p))
+    const deserves = (p) => p.pos !== 'GK' && playerOvrOf(p) >= (starterMin[p.pos] ?? 99) - 1
+    let complaints = 0
     for (const p of my.players) {
       const s = touch(p.id)
       const r = mine.summary.players[p.id]
@@ -103,10 +107,13 @@ export function applyRound(save, { teamsById, schedule, myTeamId, mine }) {
       if (r) {
         dm += clamp((r.r - 6.6) * 4, -5, 6)
         s.benched = 0
+        s.complained = false
       } else if (s.inj <= 0 && s.susp <= 0) {
         s.benched = (s.benched || 0) + 1
-        if (core.has(p.id) && s.benched >= 3) dm -= 4
-        if (core.has(p.id) && s.benched === 3) {
+        if (deserves(p) && s.benched >= 3) dm -= 4
+        if (deserves(p) && s.benched >= 3 && !s.complained && complaints < 1) {
+          complaints++
+          s.complained = true
           inbox.push(news(round, 'talk', `${p.name} 면담 요청`, `${p.name} 선수가 최근 ${s.benched}경기 연속 출전하지 못해 불만을 드러내며 면담을 요청했습니다.`, { playerId: p.id, actions: TALK_ACTIONS }))
         }
       }
@@ -193,4 +200,35 @@ export function teamTalkEffect(kind, diff, avgMorale = 60) {
   }
   const [boost, text] = table[kind][lead]
   return { boost, text }
+}
+
+/** 사기 단계 */
+export function moraleLabel(m = 60) {
+  if (m >= 80) return ['😄', '매우 좋음', 'great']
+  if (m >= 60) return ['🙂', '좋음', 'good']
+  if (m >= 40) return ['😐', '보통', 'ok']
+  if (m >= 25) return ['🙁', '나쁨', 'bad']
+  return ['😠', '매우 나쁨', 'worst']
+}
+
+/** 개별 면담 (라운드당 한 번): 최근 폼에 맞는 말을 해야 효과가 있다 */
+export const PLAYER_TALKS = [
+  ['praise', '👏 칭찬', '최근 활약을 칭찬한다'],
+  ['demand', '📣 분발 요구', '더 잘할 수 있다고 압박한다'],
+  ['support', '🤝 격려', '부진해도 믿는다고 말한다'],
+]
+export function playerTalk(save, playerId, kind) {
+  const s = { ...defaultStatus(), ...(save.status?.[playerId] || {}) }
+  if (s.talkRound === save.round) return { save, text: '이번 라운드에는 이미 면담했습니다.' }
+  const good = (s.form ?? 6.6) >= 6.9
+  const bad = (s.form ?? 6.6) < 6.4
+  const table = {
+    praise: good ? [6, '"감사합니다! 계속 이렇게 하겠습니다."'] : bad ? [-3, '"…지금 저한테 칭찬이요?" (진정성이 없다고 느낌)'] : [3, '"힘이 나네요."'],
+    demand: bad ? [5, '"알겠습니다. 다음 경기에서 증명하겠습니다."'] : good ? [-6, '"이 정도로 뛰는데 뭘 더 하라는 거죠?"'] : [1, '"…노력하겠습니다."'],
+    support: bad ? [4, '"믿어 주셔서 감사합니다."'] : [2, '"네, 감독님."'],
+  }
+  const [dm, text] = table[kind]
+  s.morale = clamp(s.morale + dm, 0, 100)
+  s.talkRound = save.round
+  return { save: { ...save, status: { ...save.status, [playerId]: s } }, text: `${text} (사기 ${dm >= 0 ? '+' : ''}${dm})` }
 }

@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import { api } from './api.js'
 import { playerOvrOf } from './engine/engine.js'
 import { pickLineup } from './engine/match.js'
-import { applyRound, engineStatus, resolveTalk } from './game/season.js'
+import { applyRound, engineStatus, playerTalk, resolveTalk } from './game/season.js'
 import { effectiveTeams } from './game/roster.js'
 
 // 시즌 진행 상황은 서버가 아니라 브라우저 localStorage에 저장한다 (서버는 stateless).
@@ -161,6 +161,12 @@ export function GameProvider({ children }) {
       },
       answerTalk(id, action) {
         setSave((s) => resolveTalk(s, id, action))
+      },
+      /** 개별 면담 → 반응 문구를 돌려준다 */
+      talkTo(playerId, kind) {
+        const r = playerTalk(save, playerId, kind)
+        setSave(r.save)
+        return r.text
       },
       /** 리그·시즌 변경 — 진행 중인 시즌 기록은 초기화된다 */
       chooseSeason(league, season) {
