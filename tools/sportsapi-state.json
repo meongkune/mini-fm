@@ -1,16 +1,7513 @@
 {
  "leagues": {
   "premier-league": {
-   "teams": {},
+   "teams": {
+    "7": {
+     "name": "Crystal Palace",
+     "done": "2026-10-20"
+    },
+    "11": {
+     "name": "Coventry City",
+     "done": "2026-10-20"
+    },
+    "14": {
+     "name": "Nottingham Forest",
+     "done": "2026-10-20"
+    },
+    "17": {
+     "name": "Manchester City",
+     "done": "2026-10-20"
+    },
+    "30": {
+     "name": "Brighton & Hove Albion",
+     "done": "2026-10-20"
+    },
+    "32": {
+     "name": "Ipswich Town",
+     "done": "2026-10-20"
+    },
+    "33": {
+     "name": "Tottenham Hotspur",
+     "done": "2026-10-20"
+    },
+    "34": {
+     "name": "Leeds United",
+     "done": "2026-10-20"
+    },
+    "35": {
+     "name": "Manchester United",
+     "done": "2026-10-20"
+    },
+    "38": {
+     "name": "Chelsea",
+     "done": "2026-10-20"
+    },
+    "39": {
+     "name": "Newcastle United",
+     "done": "2026-10-20"
+    },
+    "40": {
+     "name": "Aston Villa",
+     "done": "2026-10-20"
+    },
+    "41": {
+     "name": "Sunderland",
+     "done": "2026-10-20"
+    },
+    "42": {
+     "name": "Arsenal",
+     "done": "2026-10-20"
+    },
+    "43": {
+     "name": "Fulham",
+     "done": "2026-10-20"
+    },
+    "44": {
+     "name": "Liverpool FC",
+     "done": "2026-10-20"
+    },
+    "48": {
+     "name": "Everton",
+     "done": "2026-10-20"
+    },
+    "50": {
+     "name": "Brentford",
+     "done": "2026-10-20"
+    },
+    "60": {
+     "name": "Bournemouth",
+     "done": "2026-10-20"
+    },
+    "96": {
+     "name": "Hull City",
+     "done": "2026-10-20"
+    }
+   },
    "season": 96668
   },
   "la-liga": {
-   "teams": {},
+   "teams": {
+    "2814": {
+     "name": "Espanyol",
+     "done": "2026-10-20"
+    },
+    "2816": {
+     "name": "Real Betis",
+     "done": "2026-10-20"
+    },
+    "2817": {
+     "name": "FC Barcelona",
+     "done": "2026-10-20"
+    },
+    "2818": {
+     "name": "Rayo Vallecano",
+     "done": "2026-10-20"
+    },
+    "2819": {
+     "name": "Villarreal",
+     "done": "2026-10-20"
+    },
+    "2820": {
+     "name": "Osasuna",
+     "done": "2026-10-20"
+    },
+    "2821": {
+     "name": "Celta Vigo",
+     "done": "2026-10-20"
+    },
+    "2824": {
+     "name": "Real Sociedad",
+     "done": "2026-10-20"
+    },
+    "2825": {
+     "name": "Athletic Club",
+     "done": "2026-10-20"
+    },
+    "2828": {
+     "name": "Valencia",
+     "done": "2026-10-20"
+    },
+    "2829": {
+     "name": "Real Madrid",
+     "done": "2026-10-20"
+    },
+    "2830": {
+     "name": "Málaga CF",
+     "done": "2026-10-20"
+    },
+    "2832": {
+     "name": "Deportivo de A Coruña",
+     "done": "2026-10-20"
+    },
+    "2833": {
+     "name": "Sevilla",
+     "done": "2026-10-20"
+    },
+    "2835": {
+     "name": "Real Racing Club",
+     "done": "2026-10-20"
+    },
+    "2836": {
+     "name": "Atlético Madrid",
+     "done": "2026-10-20"
+    },
+    "2846": {
+     "name": "Elche",
+     "done": "2026-10-20"
+    },
+    "2849": {
+     "name": "Levante UD",
+     "done": "2026-10-20"
+    },
+    "2859": {
+     "name": "Getafe",
+     "done": "2026-10-20"
+    },
+    "2885": {
+     "name": "Deportivo Alavés",
+     "done": "2026-10-20"
+    }
+   },
    "season": 97268
   },
   "bundesliga": {
-   "teams": {}
+   "teams": {
+    "2527": {
+     "name": "Borussia M'gladbach",
+     "done": "2026-10-20"
+    },
+    "2530": {
+     "name": "FC Schalke 04",
+     "done": "2026-10-20"
+    },
+    "2534": {
+     "name": "SV Werder Bremen",
+     "done": "2026-10-20"
+    },
+    "2538": {
+     "name": "SC Freiburg",
+     "done": "2026-10-20"
+    },
+    "2547": {
+     "name": "1. FC Union Berlin",
+     "done": "2026-10-20"
+    },
+    "2556": {
+     "name": "1. FSV Mainz 05",
+     "done": "2026-10-20"
+    },
+    "2561": {
+     "name": "SC Paderborn 07",
+     "done": "2026-10-20"
+    },
+    "2569": {
+     "name": "TSG Hoffenheim",
+     "done": "2026-10-20"
+    },
+    "2598": {
+     "name": "SV 07 Elversberg",
+     "done": "2026-10-20"
+    },
+    "2600": {
+     "name": "FC Augsburg",
+     "done": "2026-10-20"
+    },
+    "2671": {
+     "name": "1. FC Köln",
+     "done": "2026-10-20"
+    },
+    "2672": {
+     "name": "FC Bayern München",
+     "done": "2026-10-20"
+    },
+    "2673": {
+     "name": "Borussia Dortmund",
+     "done": "2026-10-20"
+    },
+    "2674": {
+     "name": "Eintracht Frankfurt",
+     "done": "2026-10-20"
+    },
+    "2676": {
+     "name": "Hamburger SV",
+     "done": "2026-10-20"
+    },
+    "2677": {
+     "name": "VfB Stuttgart",
+     "done": "2026-10-20"
+    },
+    "2681": {
+     "name": "Bayer 04 Leverkusen",
+     "done": "2026-10-20"
+    },
+    "36360": {
+     "name": "RB Leipzig",
+     "done": "2026-10-20"
+    }
+   },
+   "season": 97464
+  },
+  "serie-a": {
+   "teams": {
+    "2685": {
+     "name": "Bologna",
+     "done": "2026-10-20"
+    },
+    "2686": {
+     "name": "Atalanta",
+     "done": "2026-10-20"
+    },
+    "2687": {
+     "name": "Juventus",
+     "done": "2026-10-20"
+    },
+    "2688": {
+     "name": "Venezia",
+     "done": "2026-10-20"
+    },
+    "2689": {
+     "name": "Lecce",
+     "done": "2026-10-20"
+    },
+    "2690": {
+     "name": "Parma",
+     "done": "2026-10-20"
+    },
+    "2692": {
+     "name": "AC Milan",
+     "done": "2026-10-20"
+    },
+    "2693": {
+     "name": "Fiorentina",
+     "done": "2026-10-20"
+    },
+    "2695": {
+     "name": "Udinese",
+     "done": "2026-10-20"
+    },
+    "2696": {
+     "name": "Torino",
+     "done": "2026-10-20"
+    },
+    "2697": {
+     "name": "Inter",
+     "done": "2026-10-20"
+    },
+    "2699": {
+     "name": "Lazio",
+     "done": "2026-10-20"
+    },
+    "2702": {
+     "name": "AS Roma",
+     "done": "2026-10-20"
+    },
+    "2704": {
+     "name": "Como",
+     "done": "2026-10-20"
+    },
+    "2713": {
+     "name": "Genoa",
+     "done": "2026-10-20"
+    },
+    "2714": {
+     "name": "SSC Napoli",
+     "done": "2026-10-20"
+    },
+    "2719": {
+     "name": "Cagliari",
+     "done": "2026-10-20"
+    },
+    "2729": {
+     "name": "Monza",
+     "done": "2026-10-20"
+    },
+    "2793": {
+     "name": "Sassuolo",
+     "done": "2026-10-20"
+    },
+    "2801": {
+     "name": "Frosinone",
+     "done": "2026-10-20"
+    }
+   },
+   "season": 95836
+  },
+  "ligue-1": {
+   "teams": {
+    "1641": {
+     "name": "Olympique de Marseille",
+     "done": "2026-10-20"
+    },
+    "1643": {
+     "name": "Lille",
+     "done": "2026-10-20"
+    },
+    "1644": {
+     "name": "Paris Saint-Germain",
+     "done": "2026-10-20"
+    },
+    "1646": {
+     "name": "Auxerre",
+     "done": "2026-10-20"
+    },
+    "1648": {
+     "name": "RC Lens",
+     "done": null
+    },
+    "1649": {
+     "name": "Olympique Lyonnais",
+     "done": null
+    },
+    "1652": {
+     "name": "Troyes",
+     "done": null
+    },
+    "1653": {
+     "name": "AS Monaco",
+     "done": null
+    },
+    "1656": {
+     "name": "Lorient",
+     "done": null
+    },
+    "1658": {
+     "name": "Stade Rennais",
+     "done": null
+    },
+    "1659": {
+     "name": "RC Strasbourg",
+     "done": null
+    },
+    "1661": {
+     "name": "Nice",
+     "done": null
+    },
+    "1662": {
+     "name": "Le Havre",
+     "done": null
+    },
+    "1672": {
+     "name": "Le Mans",
+     "done": null
+    },
+    "1681": {
+     "name": "Toulouse",
+     "done": null
+    },
+    "1684": {
+     "name": "Angers",
+     "done": null
+    },
+    "1715": {
+     "name": "Stade Brestois",
+     "done": null
+    },
+    "6070": {
+     "name": "Paris FC",
+     "done": null
+    }
+   },
+   "season": 96127
   }
  },
- "players": {}
+ "players": {
+  "CRY-3638": {
+   "sid": 845286,
+   "lid": "premier-league",
+   "ovr": 84,
+   "attr": null
+  },
+  "CRY-641": {
+   "sid": 848276,
+   "lid": "premier-league",
+   "ovr": 83,
+   "attr": null
+  },
+  "CRY-213269": {
+   "sid": 876599,
+   "lid": "premier-league",
+   "ovr": 84,
+   "attr": null
+  },
+  "CRY-128710": {
+   "sid": 930245,
+   "lid": "premier-league",
+   "ovr": 81,
+   "attr": null
+  },
+  "CRY-7800": {
+   "sid": 858194,
+   "lid": "premier-league",
+   "ovr": 79,
+   "attr": null
+  },
+  "CRY-6716": {
+   "sid": 794338,
+   "lid": "premier-league",
+   "ovr": 78,
+   "attr": null
+  },
+  "CRY-3737": {
+   "sid": 355796,
+   "lid": "premier-league",
+   "ovr": 77,
+   "attr": null
+  },
+  "EVE-11623": {
+   "sid": 935543,
+   "lid": "premier-league",
+   "ovr": 82,
+   "attr": null
+  },
+  "CRY-137068": {
+   "sid": 988275,
+   "lid": "premier-league",
+   "ovr": 82,
+   "attr": null
+  },
+  "CRY-74677": {
+   "sid": 906047,
+   "lid": "premier-league",
+   "ovr": 77,
+   "attr": null
+  },
+  "CRY-8124": {
+   "sid": 193554,
+   "lid": "premier-league",
+   "ovr": 77,
+   "attr": null
+  },
+  "CRY-150948": {
+   "sid": 1064218,
+   "lid": "premier-league",
+   "ovr": 78,
+   "attr": null
+  },
+  "WHU-813": {
+   "sid": 827243,
+   "lid": "premier-league",
+   "ovr": 80,
+   "attr": null
+  },
+  "CRY-99856": {
+   "sid": 931844,
+   "lid": "premier-league",
+   "ovr": 82,
+   "attr": null
+  },
+  "CRY-260271": {
+   "sid": 1471671,
+   "lid": "premier-league",
+   "ovr": 79,
+   "attr": null
+  },
+  "CRY-5457": {
+   "sid": 788134,
+   "lid": "premier-league",
+   "ovr": 86,
+   "attr": null
+  },
+  "CRY-8420": {
+   "sid": 249859,
+   "lid": "premier-league",
+   "ovr": 81,
+   "attr": null
+  },
+  "CRY-6413": {
+   "sid": 581610,
+   "lid": "premier-league",
+   "ovr": 66,
+   "attr": null
+  },
+  "NOT-9218": {
+   "sid": 359664,
+   "lid": "premier-league",
+   "ovr": 77,
+   "attr": null
+  },
+  "BRE-4334": {
+   "sid": 855864,
+   "lid": "premier-league",
+   "ovr": 76,
+   "attr": null
+  },
+  "BRE-7796": {
+   "sid": 856260,
+   "lid": "premier-league",
+   "ovr": 70,
+   "attr": null
+  },
+  "WOL-4418": {
+   "sid": 101367,
+   "lid": "premier-league",
+   "ovr": 74,
+   "attr": null
+  },
+  "CHE-151095": {
+   "sid": 997087,
+   "lid": "premier-league",
+   "ovr": 82,
+   "attr": null
+  },
+  "NOT-256339": {
+   "sid": 981619,
+   "lid": "premier-league",
+   "ovr": 82,
+   "attr": null
+  },
+  "CRY-22010": {
+   "sid": 870360,
+   "lid": "premier-league",
+   "ovr": 82,
+   "attr": null
+  },
+  "NOT-4091": {
+   "sid": 865912,
+   "lid": "premier-league",
+   "ovr": 87,
+   "attr": null
+  },
+  "NOT-7816": {
+   "sid": 867442,
+   "lid": "premier-league",
+   "ovr": 82,
+   "attr": null
+  },
+  "NOT-8307": {
+   "sid": 843754,
+   "lid": "premier-league",
+   "ovr": 81,
+   "attr": null
+  },
+  "NOT-172956": {
+   "sid": 1003334,
+   "lid": "premier-league",
+   "ovr": 79,
+   "attr": null
+  },
+  "NOT-77641": {
+   "sid": 944327,
+   "lid": "premier-league",
+   "ovr": 83,
+   "attr": null
+  },
+  "NOT-46346": {
+   "sid": 871765,
+   "lid": "premier-league",
+   "ovr": 79,
+   "attr": null
+  },
+  "NOT-5435": {
+   "sid": 846252,
+   "lid": "premier-league",
+   "ovr": 77,
+   "attr": null
+  },
+  "NOT-192637": {
+   "sid": 1199282,
+   "lid": "premier-league",
+   "ovr": 83,
+   "attr": null
+  },
+  "NOT-1775": {
+   "sid": 836168,
+   "lid": "premier-league",
+   "ovr": 82,
+   "attr": null
+  },
+  "NOT-3386": {
+   "sid": 800417,
+   "lid": "premier-league",
+   "ovr": 80,
+   "attr": null
+  },
+  "NOT-133765": {
+   "sid": 927356,
+   "lid": "premier-league",
+   "ovr": 83,
+   "attr": null
+  },
+  "NOT-191730": {
+   "sid": 1010220,
+   "lid": "premier-league",
+   "ovr": 78,
+   "attr": null
+  },
+  "NOT-144361": {
+   "sid": 979144,
+   "lid": "premier-league",
+   "ovr": 75,
+   "attr": null
+  },
+  "MCI-38101": {
+   "sid": 839956,
+   "lid": "premier-league",
+   "ovr": 92,
+   "attr": null
+  },
+  "CHE-102603": {
+   "sid": 974505,
+   "lid": "premier-league",
+   "ovr": 89,
+   "attr": null
+  },
+  "MCI-7888": {
+   "sid": 859765,
+   "lid": "premier-league",
+   "ovr": 86,
+   "attr": null
+  },
+  "MCI-4417": {
+   "sid": 934354,
+   "lid": "premier-league",
+   "ovr": 87,
+   "attr": null
+  },
+  "MCI-133242": {
+   "sid": 979128,
+   "lid": "premier-league",
+   "ovr": 86,
+   "attr": null
+  },
+  "MCI-99775": {
+   "sid": 934386,
+   "lid": "premier-league",
+   "ovr": 85,
+   "attr": null
+  },
+  "EVE-94091": {
+   "sid": 914309,
+   "lid": "premier-league",
+   "ovr": 86,
+   "attr": null
+  },
+  "NOT-107330": {
+   "sid": 994546,
+   "lid": "premier-league",
+   "ovr": 87,
+   "attr": null
+  },
+  "MCI-65": {
+   "sid": 136710,
+   "lid": "premier-league",
+   "ovr": 80,
+   "attr": null
+  },
+  "MCI-212868": {
+   "sid": 1194333,
+   "lid": "premier-league",
+   "ovr": 82,
+   "attr": null
+  },
+  "MCI-8642": {
+   "sid": 931278,
+   "lid": "premier-league",
+   "ovr": 83,
+   "attr": null
+  },
+  "MCI-10183": {
+   "sid": 318941,
+   "lid": "premier-league",
+   "ovr": 85,
+   "attr": null
+  },
+  "MCI-206743": {
+   "sid": 1142703,
+   "lid": "premier-league",
+   "ovr": 83,
+   "attr": null
+  },
+  "MCI-118489": {
+   "sid": 877994,
+   "lid": "premier-league",
+   "ovr": 87,
+   "attr": null
+  },
+  "MCI-91512": {
+   "sid": 945122,
+   "lid": "premier-league",
+   "ovr": 84,
+   "attr": null
+  },
+  "MCI-1731": {
+   "sid": 824509,
+   "lid": "premier-league",
+   "ovr": 88,
+   "attr": null
+  },
+  "MCI-3953": {
+   "sid": 257993,
+   "lid": "premier-league",
+   "ovr": 70,
+   "attr": null
+  },
+  "BHA-264300": {
+   "sid": 1416535,
+   "lid": "premier-league",
+   "ovr": 80,
+   "attr": null
+  },
+  "BHA-132707": {
+   "sid": 936849,
+   "lid": "premier-league",
+   "ovr": 81,
+   "attr": null
+  },
+  "BHA-145613": {
+   "sid": 1036269,
+   "lid": "premier-league",
+   "ovr": 81,
+   "attr": null
+  },
+  "BHA-178951": {
+   "sid": 1065588,
+   "lid": "premier-league",
+   "ovr": 82,
+   "attr": null
+  },
+  "BHA-8273": {
+   "sid": 48480,
+   "lid": "premier-league",
+   "ovr": 78,
+   "attr": null
+  },
+  "BHA-187482": {
+   "sid": 1400106,
+   "lid": "premier-league",
+   "ovr": 82,
+   "attr": null
+  },
+  "BHA-3974": {
+   "sid": 891829,
+   "lid": "premier-league",
+   "ovr": 80,
+   "attr": null
+  },
+  "BHA-190851": {
+   "sid": 1142315,
+   "lid": "premier-league",
+   "ovr": 79,
+   "attr": null
+  },
+  "BHA-81189": {
+   "sid": 946695,
+   "lid": "premier-league",
+   "ovr": 81,
+   "attr": null
+  },
+  "BHA-9869": {
+   "sid": 825844,
+   "lid": "premier-league",
+   "ovr": 84,
+   "attr": null
+  },
+  "BHA-142075": {
+   "sid": 997152,
+   "lid": "premier-league",
+   "ovr": 83,
+   "attr": null
+  },
+  "BHA-97505": {
+   "sid": 959628,
+   "lid": "premier-league",
+   "ovr": 82,
+   "attr": null
+  },
+  "LEE-4146": {
+   "sid": 836675,
+   "lid": "premier-league",
+   "ovr": 82,
+   "attr": null
+  },
+  "BHA-846": {
+   "sid": 788784,
+   "lid": "premier-league",
+   "ovr": 81,
+   "attr": null
+  },
+  "BHA-126870": {
+   "sid": 994363,
+   "lid": "premier-league",
+   "ovr": 85,
+   "attr": null
+  },
+  "BHA-4040": {
+   "sid": 31867,
+   "lid": "premier-league",
+   "ovr": 74,
+   "attr": null
+  },
+  "BHA-140203": {
+   "sid": 1007073,
+   "lid": "premier-league",
+   "ovr": 68,
+   "attr": null
+  },
+  "BUR-67893": {
+   "sid": 875137,
+   "lid": "premier-league",
+   "ovr": 81,
+   "attr": null
+  },
+  "FUL-32938": {
+   "sid": 371222,
+   "lid": "premier-league",
+   "ovr": 78,
+   "attr": null
+  },
+  "FUL-8296": {
+   "sid": 825719,
+   "lid": "premier-league",
+   "ovr": 78,
+   "attr": null
+  },
+  "MCI-66896": {
+   "sid": 873554,
+   "lid": "premier-league",
+   "ovr": 85,
+   "attr": null
+  },
+  "TOT-8133": {
+   "sid": 840217,
+   "lid": "premier-league",
+   "ovr": 80,
+   "attr": null
+  },
+  "TOT-7878": {
+   "sid": 361420,
+   "lid": "premier-league",
+   "ovr": 82,
+   "attr": null
+  },
+  "TOT-77399": {
+   "sid": 905163,
+   "lid": "premier-league",
+   "ovr": 85,
+   "attr": null
+  },
+  "CHE-98978": {
+   "sid": 958966,
+   "lid": "premier-league",
+   "ovr": 80,
+   "attr": null
+  },
+  "MCI-146352": {
+   "sid": 1046795,
+   "lid": "premier-league",
+   "ovr": 82,
+   "attr": null
+  },
+  "TOT-148289": {
+   "sid": 997183,
+   "lid": "premier-league",
+   "ovr": 83,
+   "attr": null
+  },
+  "NEW-2563": {
+   "sid": 892673,
+   "lid": "premier-league",
+   "ovr": 87,
+   "attr": null
+  },
+  "TOT-119265": {
+   "sid": 904970,
+   "lid": "premier-league",
+   "ovr": 83,
+   "attr": null
+  },
+  "TOT-3992": {
+   "sid": 356398,
+   "lid": "premier-league",
+   "ovr": 80,
+   "attr": null
+  },
+  "TOT-1859": {
+   "sid": 928124,
+   "lid": "premier-league",
+   "ovr": 79,
+   "attr": null
+  },
+  "WHU-187216": {
+   "sid": 1142562,
+   "lid": "premier-league",
+   "ovr": 83,
+   "attr": null
+  },
+  "TOT-2041": {
+   "sid": 791190,
+   "lid": "premier-league",
+   "ovr": 80,
+   "attr": null
+  },
+  "LIV-7868": {
+   "sid": 262911,
+   "lid": "premier-league",
+   "ovr": 79,
+   "attr": null
+  },
+  "TOT-81037": {
+   "sid": 913654,
+   "lid": "premier-league",
+   "ovr": 84,
+   "attr": null
+  },
+  "TOT-131177": {
+   "sid": 998247,
+   "lid": "premier-league",
+   "ovr": 85,
+   "attr": null
+  },
+  "BOU-46046": {
+   "sid": 830659,
+   "lid": "premier-league",
+   "ovr": 81,
+   "attr": null
+  },
+  "BHA-98566": {
+   "sid": 962012,
+   "lid": "premier-league",
+   "ovr": 86,
+   "attr": null
+  },
+  "TOT-170378": {
+   "sid": 983572,
+   "lid": "premier-league",
+   "ovr": 80,
+   "attr": null
+  },
+  "TOT-255239": {
+   "sid": 1031251,
+   "lid": "premier-league",
+   "ovr": 82,
+   "attr": null
+  },
+  "BUR-7914": {
+   "sid": 42209,
+   "lid": "premier-league",
+   "ovr": 74,
+   "attr": null
+  },
+  "TOT-133229": {
+   "sid": 859896,
+   "lid": "premier-league",
+   "ovr": 68,
+   "attr": null
+  },
+  "LEE-16058": {
+   "sid": 865523,
+   "lid": "premier-league",
+   "ovr": 83,
+   "attr": null
+  },
+  "LEE-7839": {
+   "sid": 372344,
+   "lid": "premier-league",
+   "ovr": 82,
+   "attr": null
+  },
+  "LEE-113262": {
+   "sid": 973431,
+   "lid": "premier-league",
+   "ovr": 82,
+   "attr": null
+  },
+  "LEE-7892": {
+   "sid": 803185,
+   "lid": "premier-league",
+   "ovr": 78,
+   "attr": null
+  },
+  "LEE-49105": {
+   "sid": 871886,
+   "lid": "premier-league",
+   "ovr": 80,
+   "attr": null
+  },
+  "FUL-11777": {
+   "sid": 355528,
+   "lid": "premier-league",
+   "ovr": 82,
+   "attr": null
+  },
+  "LEE-7974": {
+   "sid": 828639,
+   "lid": "premier-league",
+   "ovr": 78,
+   "attr": null
+  },
+  "LEE-7815": {
+   "sid": 847097,
+   "lid": "premier-league",
+   "ovr": 83,
+   "attr": null
+  },
+  "LEE-75284": {
+   "sid": 911679,
+   "lid": "premier-league",
+   "ovr": 78,
+   "attr": null
+  },
+  "LEE-65843": {
+   "sid": 889861,
+   "lid": "premier-league",
+   "ovr": 83,
+   "attr": null
+  },
+  "LEE-31531": {
+   "sid": 834308,
+   "lid": "premier-league",
+   "ovr": 82,
+   "attr": null
+  },
+  "LEE-4955": {
+   "sid": 866191,
+   "lid": "premier-league",
+   "ovr": 79,
+   "attr": null
+  },
+  "LEE-4184": {
+   "sid": 929132,
+   "lid": "premier-league",
+   "ovr": 81,
+   "attr": null
+  },
+  "LEE-74688": {
+   "sid": 886930,
+   "lid": "premier-league",
+   "ovr": 81,
+   "attr": null
+  },
+  "LEE-5613": {
+   "sid": 827681,
+   "lid": "premier-league",
+   "ovr": 80,
+   "attr": null
+  },
+  "LEE-5714": {
+   "sid": 828640,
+   "lid": "premier-league",
+   "ovr": 81,
+   "attr": null
+  },
+  "MCI-153874": {
+   "sid": 980643,
+   "lid": "premier-league",
+   "ovr": 85,
+   "attr": null
+  },
+  "LEE-5315": {
+   "sid": 162417,
+   "lid": "premier-league",
+   "ovr": 62,
+   "attr": null
+  },
+  "MUN-8626": {
+   "sid": 927083,
+   "lid": "premier-league",
+   "ovr": 87,
+   "attr": null
+  },
+  "MUN-30842": {
+   "sid": 886363,
+   "lid": "premier-league",
+   "ovr": 87,
+   "attr": null
+  },
+  "MUN-124244": {
+   "sid": 986397,
+   "lid": "premier-league",
+   "ovr": 85,
+   "attr": null
+  },
+  "MUN-99731": {
+   "sid": 917007,
+   "lid": "premier-league",
+   "ovr": 81,
+   "attr": null
+  },
+  "MUN-3257": {
+   "sid": 288205,
+   "lid": "premier-league",
+   "ovr": 85,
+   "attr": null
+  },
+  "MUN-133584": {
+   "sid": 971037,
+   "lid": "premier-league",
+   "ovr": 83,
+   "attr": null
+  },
+  "MUN-190797": {
+   "sid": 1142175,
+   "lid": "premier-league",
+   "ovr": 83,
+   "attr": null
+  },
+  "BHA-178604": {
+   "sid": 1199043,
+   "lid": "premier-league",
+   "ovr": 83,
+   "attr": null
+  },
+  "CHE-166366": {
+   "sid": 1105779,
+   "lid": "premier-league",
+   "ovr": 81,
+   "attr": null
+  },
+  "MUN-7599": {
+   "sid": 836694,
+   "lid": "premier-league",
+   "ovr": 82,
+   "attr": null
+  },
+  "MUN-211559": {
+   "sid": 1397168,
+   "lid": "premier-league",
+   "ovr": 79,
+   "attr": null
+  },
+  "AVL-3658": {
+   "sid": 331737,
+   "lid": "premier-league",
+   "ovr": 84,
+   "attr": null
+  },
+  "MUN-28549": {
+   "sid": 846425,
+   "lid": "premier-league",
+   "ovr": 81,
+   "attr": null
+  },
+  "MUN-7553": {
+   "sid": 847030,
+   "lid": "premier-league",
+   "ovr": 80,
+   "attr": null
+  },
+  "MUN-46451": {
+   "sid": 859999,
+   "lid": "premier-league",
+   "ovr": 85,
+   "attr": null
+  },
+  "MUN-7549": {
+   "sid": 803031,
+   "lid": "premier-league",
+   "ovr": 82,
+   "attr": null
+  },
+  "MUN-3326": {
+   "sid": 149380,
+   "lid": "premier-league",
+   "ovr": 81,
+   "attr": null
+  },
+  "MUN-15905": {
+   "sid": 843200,
+   "lid": "premier-league",
+   "ovr": 82,
+   "attr": null
+  },
+  "MUN-181933": {
+   "sid": 1153315,
+   "lid": "premier-league",
+   "ovr": 80,
+   "attr": null
+  },
+  "MUN-7898": {
+   "sid": 190839,
+   "lid": "premier-league",
+   "ovr": 79,
+   "attr": null
+  },
+  "MUN-129946": {
+   "sid": 964753,
+   "lid": "premier-league",
+   "ovr": 85,
+   "attr": null
+  },
+  "MUN-8035": {
+   "sid": 18122,
+   "lid": "premier-league",
+   "ovr": 67,
+   "attr": null
+  },
+  "CHE-103125": {
+   "sid": 975079,
+   "lid": "premier-league",
+   "ovr": 86,
+   "attr": null
+  },
+  "BHA-3328": {
+   "sid": 33902,
+   "lid": "premier-league",
+   "ovr": 79,
+   "attr": null
+  },
+  "CHE-144892": {
+   "sid": 982780,
+   "lid": "premier-league",
+   "ovr": 87,
+   "attr": null
+  },
+  "CHE-121103": {
+   "sid": 987650,
+   "lid": "premier-league",
+   "ovr": 87,
+   "attr": null
+  },
+  "AVL-82140": {
+   "sid": 948261,
+   "lid": "premier-league",
+   "ovr": 87,
+   "attr": null
+  },
+  "CHE-179460": {
+   "sid": 1140599,
+   "lid": "premier-league",
+   "ovr": 79,
+   "attr": null
+  },
+  "BRE-3320": {
+   "sid": 42694,
+   "lid": "premier-league",
+   "ovr": 75,
+   "attr": null
+  },
+  "CHE-172738": {
+   "sid": 1069488,
+   "lid": "premier-league",
+   "ovr": 79,
+   "attr": null
+  },
+  "CHE-56628": {
+   "sid": 885908,
+   "lid": "premier-league",
+   "ovr": 86,
+   "attr": null
+  },
+  "CRY-82351": {
+   "sid": 879674,
+   "lid": "premier-league",
+   "ovr": 86,
+   "attr": null
+  },
+  "CHE-152498": {
+   "sid": 996958,
+   "lid": "premier-league",
+   "ovr": 82,
+   "attr": null
+  },
+  "CHE-170440": {
+   "sid": 996911,
+   "lid": "premier-league",
+   "ovr": 84,
+   "attr": null
+  },
+  "CHE-8545": {
+   "sid": 923894,
+   "lid": "premier-league",
+   "ovr": 83,
+   "attr": null
+  },
+  "AVL-3141": {
+   "sid": 158263,
+   "lid": "premier-league",
+   "ovr": 85,
+   "attr": null
+  },
+  "CHE-175910": {
+   "sid": 1009762,
+   "lid": "premier-league",
+   "ovr": 66,
+   "attr": null
+  },
+  "NEW-612": {
+   "sid": 805123,
+   "lid": "premier-league",
+   "ovr": 82,
+   "attr": null
+  },
+  "NEW-169324": {
+   "sid": 1122603,
+   "lid": "premier-league",
+   "ovr": 81,
+   "attr": null
+  },
+  "NEW-8076": {
+   "sid": 855647,
+   "lid": "premier-league",
+   "ovr": 84,
+   "attr": null
+  },
+  "MCI-171986": {
+   "sid": 954056,
+   "lid": "premier-league",
+   "ovr": 84,
+   "attr": null
+  },
+  "NEW-10653": {
+   "sid": 560128,
+   "lid": "premier-league",
+   "ovr": 81,
+   "attr": null
+  },
+  "NEW-191939": {
+   "sid": 1400650,
+   "lid": "premier-league",
+   "ovr": 79,
+   "attr": null
+  },
+  "NEW-7934": {
+   "sid": 372336,
+   "lid": "premier-league",
+   "ovr": 80,
+   "attr": null
+  },
+  "NEW-111437": {
+   "sid": 975937,
+   "lid": "premier-league",
+   "ovr": 84,
+   "attr": null
+  },
+  "NEW-7798": {
+   "sid": 888550,
+   "lid": "premier-league",
+   "ovr": 81,
+   "attr": null
+  },
+  "NEW-142732": {
+   "sid": 1014286,
+   "lid": "premier-league",
+   "ovr": 85,
+   "attr": null
+  },
+  "NEW-4870": {
+   "sid": 99090,
+   "lid": "premier-league",
+   "ovr": 78,
+   "attr": null
+  },
+  "NEW-81082": {
+   "sid": 910046,
+   "lid": "premier-league",
+   "ovr": 83,
+   "attr": null
+  },
+  "NEW-88": {
+   "sid": 101882,
+   "lid": "premier-league",
+   "ovr": 77,
+   "attr": null
+  },
+  "NEW-3310": {
+   "sid": 162653,
+   "lid": "premier-league",
+   "ovr": 80,
+   "attr": null
+  },
+  "AVL-7985": {
+   "sid": 610766,
+   "lid": "premier-league",
+   "ovr": 80,
+   "attr": null
+  },
+  "WOL-138034": {
+   "sid": 1015267,
+   "lid": "premier-league",
+   "ovr": 84,
+   "attr": null
+  },
+  "AVL-31941": {
+   "sid": 783126,
+   "lid": "premier-league",
+   "ovr": 80,
+   "attr": null
+  },
+  "AVL-114024": {
+   "sid": 923973,
+   "lid": "premier-league",
+   "ovr": 82,
+   "attr": null
+  },
+  "AVL-34646": {
+   "sid": 250223,
+   "lid": "premier-league",
+   "ovr": 81,
+   "attr": null
+  },
+  "AVL-8346": {
+   "sid": 826204,
+   "lid": "premier-league",
+   "ovr": 85,
+   "attr": null
+  },
+  "AVL-260718": {
+   "sid": 1631879,
+   "lid": "premier-league",
+   "ovr": 76,
+   "attr": null
+  },
+  "AVL-172899": {
+   "sid": 1089388,
+   "lid": "premier-league",
+   "ovr": 77,
+   "attr": null
+  },
+  "WHU-8158": {
+   "sid": 863653,
+   "lid": "premier-league",
+   "ovr": 79,
+   "attr": null
+  },
+  "AVL-11644": {
+   "sid": 833956,
+   "lid": "premier-league",
+   "ovr": 81,
+   "attr": null
+  },
+  "AVL-3492": {
+   "sid": 143334,
+   "lid": "premier-league",
+   "ovr": 77,
+   "attr": null
+  },
+  "AVL-131120": {
+   "sid": 976263,
+   "lid": "premier-league",
+   "ovr": 82,
+   "attr": null
+  },
+  "AVL-33109": {
+   "sid": 864169,
+   "lid": "premier-league",
+   "ovr": 81,
+   "attr": null
+  },
+  "AVL-8235": {
+   "sid": 303638,
+   "lid": "premier-league",
+   "ovr": 77,
+   "attr": null
+  },
+  "AVL-7675": {
+   "sid": 100390,
+   "lid": "premier-league",
+   "ovr": 78,
+   "attr": null
+  },
+  "AVL-204460": {
+   "sid": 1138445,
+   "lid": "premier-league",
+   "ovr": 60,
+   "attr": null
+  },
+  "SUN-83599": {
+   "sid": 877980,
+   "lid": "premier-league",
+   "ovr": 81,
+   "attr": null
+  },
+  "SUN-97535": {
+   "sid": 910048,
+   "lid": "premier-league",
+   "ovr": 84,
+   "attr": null
+  },
+  "SUN-3477": {
+   "sid": 117777,
+   "lid": "premier-league",
+   "ovr": 81,
+   "attr": null
+  },
+  "SUN-182273": {
+   "sid": 1171539,
+   "lid": "premier-league",
+   "ovr": 80,
+   "attr": null
+  },
+  "SUN-171876": {
+   "sid": 1128532,
+   "lid": "premier-league",
+   "ovr": 81,
+   "attr": null
+  },
+  "SUN-187375": {
+   "sid": 1116571,
+   "lid": "premier-league",
+   "ovr": 79,
+   "attr": null
+  },
+  "SUN-99664": {
+   "sid": 984014,
+   "lid": "premier-league",
+   "ovr": 82,
+   "attr": null
+  },
+  "SUN-190817": {
+   "sid": 1394089,
+   "lid": "premier-league",
+   "ovr": 78,
+   "attr": null
+  },
+  "SUN-165311": {
+   "sid": 1000139,
+   "lid": "premier-league",
+   "ovr": 68,
+   "attr": null
+  },
+  "SUN-46491": {
+   "sid": 805137,
+   "lid": "premier-league",
+   "ovr": 78,
+   "attr": null
+  },
+  "SUN-8371": {
+   "sid": 780014,
+   "lid": "premier-league",
+   "ovr": 80,
+   "attr": null
+  },
+  "TOT-6655": {
+   "sid": 794953,
+   "lid": "premier-league",
+   "ovr": 81,
+   "attr": null
+  },
+  "SUN-121109": {
+   "sid": 958878,
+   "lid": "premier-league",
+   "ovr": 82,
+   "attr": null
+  },
+  "SUN-117687": {
+   "sid": 989034,
+   "lid": "premier-league",
+   "ovr": 80,
+   "attr": null
+  },
+  "SUN-6259": {
+   "sid": 365812,
+   "lid": "premier-league",
+   "ovr": 68,
+   "attr": null
+  },
+  "SUN-137691": {
+   "sid": 1012928,
+   "lid": "premier-league",
+   "ovr": 84,
+   "attr": null
+  },
+  "SUN-150893": {
+   "sid": 1099795,
+   "lid": "premier-league",
+   "ovr": 74,
+   "attr": null
+  },
+  "SUN-4292": {
+   "sid": 95461,
+   "lid": "premier-league",
+   "ovr": 66,
+   "attr": null
+  },
+  "ARS-8279": {
+   "sid": 804508,
+   "lid": "premier-league",
+   "ovr": 85,
+   "attr": null
+  },
+  "ARS-99813": {
+   "sid": 934235,
+   "lid": "premier-league",
+   "ovr": 87,
+   "attr": null
+  },
+  "ARS-167720": {
+   "sid": 966547,
+   "lid": "premier-league",
+   "ovr": 83,
+   "attr": null
+  },
+  "ARS-7427": {
+   "sid": 547410,
+   "lid": "premier-league",
+   "ovr": 87,
+   "attr": null
+  },
+  "ARS-8215": {
+   "sid": 856714,
+   "lid": "premier-league",
+   "ovr": 89,
+   "attr": null
+  },
+  "ARS-4032": {
+   "sid": 864921,
+   "lid": "premier-league",
+   "ovr": 86,
+   "attr": null
+  },
+  "NEW-1684": {
+   "sid": 866469,
+   "lid": "premier-league",
+   "ovr": 87,
+   "attr": null
+  },
+  "ARS-7935": {
+   "sid": 592010,
+   "lid": "premier-league",
+   "ovr": 82,
+   "attr": null
+  },
+  "ARS-115035": {
+   "sid": 966837,
+   "lid": "premier-league",
+   "ovr": 86,
+   "attr": null
+  },
+  "ARS-23128": {
+   "sid": 869792,
+   "lid": "premier-league",
+   "ovr": 86,
+   "attr": null
+  },
+  "ARS-80171": {
+   "sid": 941168,
+   "lid": "premier-league",
+   "ovr": 88,
+   "attr": null
+  },
+  "ARS-125674": {
+   "sid": 1002837,
+   "lid": "premier-league",
+   "ovr": 83,
+   "attr": null
+  },
+  "ARS-98816": {
+   "sid": 958959,
+   "lid": "premier-league",
+   "ovr": 87,
+   "attr": null
+  },
+  "ARS-133512": {
+   "sid": 957602,
+   "lid": "premier-league",
+   "ovr": 84,
+   "attr": null
+  },
+  "ARS-172839": {
+   "sid": 1144630,
+   "lid": "premier-league",
+   "ovr": 81,
+   "attr": null
+  },
+  "ARS-6154": {
+   "sid": 846036,
+   "lid": "premier-league",
+   "ovr": 83,
+   "attr": null
+  },
+  "AVL-6317": {
+   "sid": 827679,
+   "lid": "premier-league",
+   "ovr": 85,
+   "attr": null
+  },
+  "ARS-4832": {
+   "sid": 581310,
+   "lid": "premier-league",
+   "ovr": 86,
+   "attr": null
+  },
+  "ARS-3189": {
+   "sid": 232422,
+   "lid": "premier-league",
+   "ovr": 80,
+   "attr": null
+  },
+  "LEE-74831": {
+   "sid": 906076,
+   "lid": "premier-league",
+   "ovr": 78,
+   "attr": null
+  },
+  "FUL-138036": {
+   "sid": 1015256,
+   "lid": "premier-league",
+   "ovr": 81,
+   "attr": null
+  },
+  "FUL-179716": {
+   "sid": 1065216,
+   "lid": "premier-league",
+   "ovr": 81,
+   "attr": null
+  },
+  "FUL-3392": {
+   "sid": 352770,
+   "lid": "premier-league",
+   "ovr": 81,
+   "attr": null
+  },
+  "FUL-85570": {
+   "sid": 867445,
+   "lid": "premier-league",
+   "ovr": 80,
+   "attr": null
+  },
+  "FUL-8973": {
+   "sid": 793167,
+   "lid": "premier-league",
+   "ovr": 82,
+   "attr": null
+  },
+  "FUL-246418": {
+   "sid": 1546231,
+   "lid": "premier-league",
+   "ovr": 80,
+   "attr": null
+  },
+  "FUL-3965": {
+   "sid": 82566,
+   "lid": "premier-league",
+   "ovr": 71,
+   "attr": null
+  },
+  "FUL-3995": {
+   "sid": 365802,
+   "lid": "premier-league",
+   "ovr": 71,
+   "attr": null
+  },
+  "FUL-146154": {
+   "sid": 861972,
+   "lid": "premier-league",
+   "ovr": 83,
+   "attr": null
+  },
+  "FUL-3927": {
+   "sid": 803174,
+   "lid": "premier-league",
+   "ovr": 82,
+   "attr": null
+  },
+  "FUL-1836": {
+   "sid": 329417,
+   "lid": "premier-league",
+   "ovr": 77,
+   "attr": null
+  },
+  "FUL-2253": {
+   "sid": 362682,
+   "lid": "premier-league",
+   "ovr": 80,
+   "attr": null
+  },
+  "FUL-3959": {
+   "sid": 836698,
+   "lid": "premier-league",
+   "ovr": 81,
+   "attr": null
+  },
+  "FUL-8460": {
+   "sid": 190877,
+   "lid": "premier-league",
+   "ovr": 76,
+   "attr": null
+  },
+  "FUL-98750": {
+   "sid": 868715,
+   "lid": "premier-league",
+   "ovr": 77,
+   "attr": null
+  },
+  "FUL-3174": {
+   "sid": 103335,
+   "lid": "premier-league",
+   "ovr": 82,
+   "attr": null
+  },
+  "FUL-8366": {
+   "sid": 123207,
+   "lid": "premier-league",
+   "ovr": 76,
+   "attr": null
+  },
+  "LIV-6486": {
+   "sid": 823941,
+   "lid": "premier-league",
+   "ovr": 88,
+   "attr": null
+  },
+  "LIV-152454": {
+   "sid": 1048422,
+   "lid": "premier-league",
+   "ovr": 85,
+   "attr": null
+  },
+  "LIV-1780": {
+   "sid": 845386,
+   "lid": "premier-league",
+   "ovr": 78,
+   "attr": null
+  },
+  "LIV-19334": {
+   "sid": 1019322,
+   "lid": "premier-league",
+   "ovr": 86,
+   "attr": null
+  },
+  "LIV-16347": {
+   "sid": 869856,
+   "lid": "premier-league",
+   "ovr": 88,
+   "attr": null
+  },
+  "LIV-45681": {
+   "sid": 895324,
+   "lid": "premier-league",
+   "ovr": 87,
+   "attr": null
+  },
+  "LIV-7459": {
+   "sid": 862967,
+   "lid": "premier-league",
+   "ovr": 87,
+   "attr": null
+  },
+  "LIV-81793": {
+   "sid": 904897,
+   "lid": "premier-league",
+   "ovr": 86,
+   "attr": null
+  },
+  "LIV-3269": {
+   "sid": 143040,
+   "lid": "premier-league",
+   "ovr": 76,
+   "attr": null
+  },
+  "LIV-230517": {
+   "sid": 1445945,
+   "lid": "premier-league",
+   "ovr": 77,
+   "attr": null
+  },
+  "LIV-128954": {
+   "sid": 970361,
+   "lid": "premier-league",
+   "ovr": 83,
+   "attr": null
+  },
+  "LIV-171141": {
+   "sid": 1097425,
+   "lid": "premier-league",
+   "ovr": 81,
+   "attr": null
+  },
+  "LIV-7862": {
+   "sid": 318927,
+   "lid": "premier-league",
+   "ovr": 78,
+   "attr": null
+  },
+  "LIV-84506": {
+   "sid": 930997,
+   "lid": "premier-league",
+   "ovr": 86,
+   "attr": null
+  },
+  "LIV-11629": {
+   "sid": 284417,
+   "lid": "premier-league",
+   "ovr": 76,
+   "attr": null
+  },
+  "EVE-250436": {
+   "sid": 1403061,
+   "lid": "premier-league",
+   "ovr": 78,
+   "attr": null
+  },
+  "CRY-124694": {
+   "sid": 1085180,
+   "lid": "premier-league",
+   "ovr": 82,
+   "attr": null
+  },
+  "EVE-171995": {
+   "sid": 1395746,
+   "lid": "premier-league",
+   "ovr": 82,
+   "attr": null
+  },
+  "EVE-3895": {
+   "sid": 189061,
+   "lid": "premier-league",
+   "ovr": 81,
+   "attr": null
+  },
+  "ARS-24102": {
+   "sid": 135256,
+   "lid": "premier-league",
+   "ovr": 77,
+   "attr": null
+  },
+  "EVE-140194": {
+   "sid": 861970,
+   "lid": "premier-league",
+   "ovr": 84,
+   "attr": null
+  },
+  "EVE-140269": {
+   "sid": 1017392,
+   "lid": "premier-league",
+   "ovr": 78,
+   "attr": null
+  },
+  "EVE-101076": {
+   "sid": 927361,
+   "lid": "premier-league",
+   "ovr": 85,
+   "attr": null
+  },
+  "EVE-156552": {
+   "sid": 1064082,
+   "lid": "premier-league",
+   "ovr": 79,
+   "attr": null
+  },
+  "EVE-264281": {
+   "sid": 1627560,
+   "lid": "premier-league",
+   "ovr": 79,
+   "attr": null
+  },
+  "EVE-16165": {
+   "sid": 876643,
+   "lid": "premier-league",
+   "ovr": 82,
+   "attr": null
+  },
+  "EVE-114120": {
+   "sid": 979563,
+   "lid": "premier-league",
+   "ovr": 83,
+   "attr": null
+  },
+  "EVE-3316": {
+   "sid": 145188,
+   "lid": "premier-league",
+   "ovr": 79,
+   "attr": null
+  },
+  "EVE-131569": {
+   "sid": 998253,
+   "lid": "premier-league",
+   "ovr": 80,
+   "attr": null
+  },
+  "EVE-7829": {
+   "sid": 110846,
+   "lid": "premier-league",
+   "ovr": 76,
+   "attr": null
+  },
+  "EVE-3309": {
+   "sid": 138530,
+   "lid": "premier-league",
+   "ovr": 84,
+   "attr": null
+  },
+  "EVE-82135": {
+   "sid": 856720,
+   "lid": "premier-league",
+   "ovr": 75,
+   "attr": null
+  },
+  "EVE-6180": {
+   "sid": 603922,
+   "lid": "premier-league",
+   "ovr": 63,
+   "attr": null
+  },
+  "BRE-151119": {
+   "sid": 991604,
+   "lid": "premier-league",
+   "ovr": 75,
+   "attr": null
+  },
+  "BRE-213518": {
+   "sid": 1403098,
+   "lid": "premier-league",
+   "ovr": 73,
+   "attr": null
+  },
+  "BRE-177305": {
+   "sid": 1106451,
+   "lid": "premier-league",
+   "ovr": 82,
+   "attr": null
+  },
+  "BRE-123286": {
+   "sid": 1006387,
+   "lid": "premier-league",
+   "ovr": 84,
+   "attr": null
+  },
+  "BRE-24238": {
+   "sid": 907072,
+   "lid": "premier-league",
+   "ovr": 83,
+   "attr": null
+  },
+  "BRE-10000": {
+   "sid": 814873,
+   "lid": "premier-league",
+   "ovr": 81,
+   "attr": null
+  },
+  "BRE-10194": {
+   "sid": 799251,
+   "lid": "premier-league",
+   "ovr": 77,
+   "attr": null
+  },
+  "WHU-205441": {
+   "sid": 1471764,
+   "lid": "premier-league",
+   "ovr": 80,
+   "attr": null
+  },
+  "BRE-204348": {
+   "sid": 1137431,
+   "lid": "premier-league",
+   "ovr": 81,
+   "attr": null
+  },
+  "BRE-16068": {
+   "sid": 576384,
+   "lid": "premier-league",
+   "ovr": 82,
+   "attr": null
+  },
+  "BRE-7720": {
+   "sid": 924378,
+   "lid": "premier-league",
+   "ovr": 82,
+   "attr": null
+  },
+  "BRE-115642": {
+   "sid": 958916,
+   "lid": "premier-league",
+   "ovr": 83,
+   "attr": null
+  },
+  "BRE-101910": {
+   "sid": 972421,
+   "lid": "premier-league",
+   "ovr": 83,
+   "attr": null
+  },
+  "BRE-101111": {
+   "sid": 966869,
+   "lid": "premier-league",
+   "ovr": 80,
+   "attr": null
+  },
+  "BRE-4426": {
+   "sid": 599128,
+   "lid": "premier-league",
+   "ovr": 78,
+   "attr": null
+  },
+  "BRE-102046": {
+   "sid": 827362,
+   "lid": "premier-league",
+   "ovr": 86,
+   "attr": null
+  },
+  "BRE-144530": {
+   "sid": 1005959,
+   "lid": "premier-league",
+   "ovr": 74,
+   "attr": null
+  },
+  "BRE-4419": {
+   "sid": 860205,
+   "lid": "premier-league",
+   "ovr": 67,
+   "attr": null
+  },
+  "BOU-204241": {
+   "sid": 1426228,
+   "lid": "premier-league",
+   "ovr": 83,
+   "attr": null
+  },
+  "BOU-131260": {
+   "sid": 998490,
+   "lid": "premier-league",
+   "ovr": 83,
+   "attr": null
+  },
+  "BOU-203356": {
+   "sid": 1464966,
+   "lid": "premier-league",
+   "ovr": 82,
+   "attr": null
+  },
+  "BOU-137047": {
+   "sid": 991478,
+   "lid": "premier-league",
+   "ovr": 81,
+   "attr": null
+  },
+  "BOU-7561": {
+   "sid": 851596,
+   "lid": "premier-league",
+   "ovr": 82,
+   "attr": null
+  },
+  "BOU-161088": {
+   "sid": 1104986,
+   "lid": "premier-league",
+   "ovr": 84,
+   "attr": null
+  },
+  "BOU-192316": {
+   "sid": 1476524,
+   "lid": "premier-league",
+   "ovr": 75,
+   "attr": null
+  },
+  "BOU-77596": {
+   "sid": 800419,
+   "lid": "premier-league",
+   "ovr": 83,
+   "attr": null
+  },
+  "BOU-6396": {
+   "sid": 895576,
+   "lid": "premier-league",
+   "ovr": 82,
+   "attr": null
+  },
+  "BOU-34495": {
+   "sid": 322391,
+   "lid": "premier-league",
+   "ovr": 79,
+   "attr": null
+  },
+  "BOU-4321": {
+   "sid": 855731,
+   "lid": "premier-league",
+   "ovr": 78,
+   "attr": null
+  },
+  "BOU-3327": {
+   "sid": 548188,
+   "lid": "premier-league",
+   "ovr": 79,
+   "attr": null
+  },
+  "BOU-183583": {
+   "sid": 1201520,
+   "lid": "premier-league",
+   "ovr": 72,
+   "attr": null
+  },
+  "BOU-135482": {
+   "sid": 999028,
+   "lid": "premier-league",
+   "ovr": 82,
+   "attr": null
+  },
+  "BOU-227046": {
+   "sid": 1406130,
+   "lid": "premier-league",
+   "ovr": 77,
+   "attr": null
+  },
+  "BOU-98745": {
+   "sid": 962408,
+   "lid": "premier-league",
+   "ovr": 81,
+   "attr": null
+  },
+  "BOU-82145": {
+   "sid": 1156586,
+   "lid": "premier-league",
+   "ovr": 82,
+   "attr": null
+  },
+  "BOU-8231": {
+   "sid": 44566,
+   "lid": "premier-league",
+   "ovr": 69,
+   "attr": null
+  },
+  "BOU-121765": {
+   "sid": 882604,
+   "lid": "premier-league",
+   "ovr": 86,
+   "attr": null
+  },
+  "BOU-8079": {
+   "sid": 19314,
+   "lid": "premier-league",
+   "ovr": 73,
+   "attr": null
+  },
+  "EVE-169326": {
+   "sid": 1085950,
+   "lid": "premier-league",
+   "ovr": 78,
+   "attr": null
+  },
+  "ESP-180218": {
+   "sid": 1392592,
+   "lid": "la-liga",
+   "ovr": 80,
+   "attr": null
+  },
+  "MAL-185178": {
+   "sid": 1183542,
+   "lid": "la-liga",
+   "ovr": 70,
+   "attr": null
+  },
+  "ESP-81168": {
+   "sid": 891511,
+   "lid": "la-liga",
+   "ovr": 76,
+   "attr": null
+  },
+  "ESP-33652": {
+   "sid": 877262,
+   "lid": "la-liga",
+   "ovr": 75,
+   "attr": null
+  },
+  "ESP-149049": {
+   "sid": 1063015,
+   "lid": "la-liga",
+   "ovr": 77,
+   "attr": null
+  },
+  "ESP-125210": {
+   "sid": 826010,
+   "lid": "la-liga",
+   "ovr": 76,
+   "attr": null
+  },
+  "ESP-151031": {
+   "sid": 1064009,
+   "lid": "la-liga",
+   "ovr": 79,
+   "attr": null
+  },
+  "ESP-154714": {
+   "sid": 1064026,
+   "lid": "la-liga",
+   "ovr": 77,
+   "attr": null
+  },
+  "ESP-11040": {
+   "sid": 81992,
+   "lid": "la-liga",
+   "ovr": 74,
+   "attr": null
+  },
+  "VAL-32584": {
+   "sid": 892521,
+   "lid": "la-liga",
+   "ovr": 73,
+   "attr": null
+  },
+  "ATH-33091": {
+   "sid": 866810,
+   "lid": "la-liga",
+   "ovr": 73,
+   "attr": null
+  },
+  "ESP-170833": {
+   "sid": 1129360,
+   "lid": "la-liga",
+   "ovr": 72,
+   "attr": null
+  },
+  "ESP-3430": {
+   "sid": 94527,
+   "lid": "la-liga",
+   "ovr": 73,
+   "attr": null
+  },
+  "BET-32415": {
+   "sid": 887055,
+   "lid": "la-liga",
+   "ovr": 80,
+   "attr": null
+  },
+  "BET-97085": {
+   "sid": 958380,
+   "lid": "la-liga",
+   "ovr": 84,
+   "attr": null
+  },
+  "RMA-68": {
+   "sid": 547838,
+   "lid": "la-liga",
+   "ovr": 76,
+   "attr": null
+  },
+  "BET-3216": {
+   "sid": 798835,
+   "lid": "la-liga",
+   "ovr": 76,
+   "attr": null
+  },
+  "BET-99992": {
+   "sid": 838629,
+   "lid": "la-liga",
+   "ovr": 75,
+   "attr": null
+  },
+  "BET-179141": {
+   "sid": 1129401,
+   "lid": "la-liga",
+   "ovr": 78,
+   "attr": null
+  },
+  "BET-128731": {
+   "sid": 989113,
+   "lid": "la-liga",
+   "ovr": 74,
+   "attr": null
+  },
+  "BET-33117": {
+   "sid": 816763,
+   "lid": "la-liga",
+   "ovr": 77,
+   "attr": null
+  },
+  "BET-32710": {
+   "sid": 847128,
+   "lid": "la-liga",
+   "ovr": 74,
+   "attr": null
+  },
+  "LEV-126913": {
+   "sid": 992331,
+   "lid": "la-liga",
+   "ovr": 71,
+   "attr": null
+  },
+  "RMA-213266": {
+   "sid": 851271,
+   "lid": "la-liga",
+   "ovr": 76,
+   "attr": null
+  },
+  "BET-7783": {
+   "sid": 188365,
+   "lid": "la-liga",
+   "ovr": 74,
+   "attr": null
+  },
+  "BET-138031": {
+   "sid": 1015287,
+   "lid": "la-liga",
+   "ovr": 83,
+   "attr": null
+  },
+  "BET-33037": {
+   "sid": 914835,
+   "lid": "la-liga",
+   "ovr": 73,
+   "attr": null
+  },
+  "BET-9": {
+   "sid": 305278,
+   "lid": "la-liga",
+   "ovr": 74,
+   "attr": null
+  },
+  "BET-33045": {
+   "sid": 893062,
+   "lid": "la-liga",
+   "ovr": 74,
+   "attr": null
+  },
+  "BET-272694": {
+   "sid": 1152139,
+   "lid": "la-liga",
+   "ovr": 73,
+   "attr": null
+  },
+  "VIL-150546": {
+   "sid": 951008,
+   "lid": "la-liga",
+   "ovr": 76,
+   "attr": null
+  },
+  "FCB-202283": {
+   "sid": 1402912,
+   "lid": "la-liga",
+   "ovr": 88,
+   "attr": null
+  },
+  "FCB-37428": {
+   "sid": 831005,
+   "lid": "la-liga",
+   "ovr": 86,
+   "attr": null
+  },
+  "FCB-133860": {
+   "sid": 992587,
+   "lid": "la-liga",
+   "ovr": 89,
+   "attr": null
+  },
+  "FCB-214533": {
+   "sid": 1153270,
+   "lid": "la-liga",
+   "ovr": 87,
+   "attr": null
+  },
+  "FCB-7559": {
+   "sid": 795222,
+   "lid": "la-liga",
+   "ovr": 82,
+   "attr": null
+  },
+  "FCB-23132": {
+   "sid": 789071,
+   "lid": "la-liga",
+   "ovr": 86,
+   "attr": null
+  },
+  "FCB-264321": {
+   "sid": 1526618,
+   "lid": "la-liga",
+   "ovr": 80,
+   "attr": null
+  },
+  "FCB-8499": {
+   "sid": 827212,
+   "lid": "la-liga",
+   "ovr": 86,
+   "attr": null
+  },
+  "FCB-2000": {
+   "sid": 138892,
+   "lid": "la-liga",
+   "ovr": 79,
+   "attr": null
+  },
+  "FCB-172761": {
+   "sid": 997035,
+   "lid": "la-liga",
+   "ovr": 81,
+   "attr": null
+  },
+  "FCB-3455": {
+   "sid": 186795,
+   "lid": "la-liga",
+   "ovr": 77,
+   "attr": null
+  },
+  "FCB-101345": {
+   "sid": 876214,
+   "lid": "la-liga",
+   "ovr": 84,
+   "attr": null
+  },
+  "FCB-287848": {
+   "sid": 1546073,
+   "lid": "la-liga",
+   "ovr": 78,
+   "attr": null
+  },
+  "FCB-264320": {
+   "sid": 1094827,
+   "lid": "la-liga",
+   "ovr": 82,
+   "attr": null
+  },
+  "FCB-152506": {
+   "sid": 930267,
+   "lid": "la-liga",
+   "ovr": 88,
+   "attr": null
+  },
+  "FCB-2022": {
+   "sid": 50490,
+   "lid": "la-liga",
+   "ovr": 76,
+   "attr": null
+  },
+  "RAY-115175": {
+   "sid": 910024,
+   "lid": "la-liga",
+   "ovr": 78,
+   "attr": null
+  },
+  "RAY-106014": {
+   "sid": 981604,
+   "lid": "la-liga",
+   "ovr": 74,
+   "attr": null
+  },
+  "RAY-133276": {
+   "sid": 900003,
+   "lid": "la-liga",
+   "ovr": 78,
+   "attr": null
+  },
+  "RAY-37649": {
+   "sid": 913679,
+   "lid": "la-liga",
+   "ovr": 72,
+   "attr": null
+  },
+  "RAY-33496": {
+   "sid": 899982,
+   "lid": "la-liga",
+   "ovr": 75,
+   "attr": null
+  },
+  "RAY-32312": {
+   "sid": 345111,
+   "lid": "la-liga",
+   "ovr": 74,
+   "attr": null
+  },
+  "RAY-32124": {
+   "sid": 588566,
+   "lid": "la-liga",
+   "ovr": 72,
+   "attr": null
+  },
+  "RAY-32228": {
+   "sid": 900669,
+   "lid": "la-liga",
+   "ovr": 73,
+   "attr": null
+  },
+  "RAY-32109": {
+   "sid": 900008,
+   "lid": "la-liga",
+   "ovr": 73,
+   "attr": null
+  },
+  "RAY-187117": {
+   "sid": 966637,
+   "lid": "la-liga",
+   "ovr": 70,
+   "attr": null
+  },
+  "RAY-114955": {
+   "sid": 965031,
+   "lid": "la-liga",
+   "ovr": 81,
+   "attr": null
+  },
+  "MAL-2151": {
+   "sid": 893642,
+   "lid": "la-liga",
+   "ovr": 72,
+   "attr": null
+  },
+  "RAY-7925": {
+   "sid": 88528,
+   "lid": "la-liga",
+   "ovr": 76,
+   "attr": null
+  },
+  "RAY-2071": {
+   "sid": 850035,
+   "lid": "la-liga",
+   "ovr": 71,
+   "attr": null
+  },
+  "ELC-213280": {
+   "sid": 928672,
+   "lid": "la-liga",
+   "ovr": 72,
+   "attr": null
+  },
+  "RAY-8716": {
+   "sid": 152446,
+   "lid": "la-liga",
+   "ovr": 72,
+   "attr": null
+  },
+  "RAY-46245": {
+   "sid": 358910,
+   "lid": "la-liga",
+   "ovr": 79,
+   "attr": null
+  },
+  "RAY-133288": {
+   "sid": 965832,
+   "lid": "la-liga",
+   "ovr": 73,
+   "attr": null
+  },
+  "VIL-8412": {
+   "sid": 593526,
+   "lid": "la-liga",
+   "ovr": 78,
+   "attr": null
+  },
+  "VIL-136646": {
+   "sid": 1009372,
+   "lid": "la-liga",
+   "ovr": 84,
+   "attr": null
+  },
+  "VIL-32719": {
+   "sid": 146866,
+   "lid": "la-liga",
+   "ovr": 76,
+   "attr": null
+  },
+  "VIL-177826": {
+   "sid": 1172477,
+   "lid": "la-liga",
+   "ovr": 77,
+   "attr": null
+  },
+  "VIL-7936": {
+   "sid": 345195,
+   "lid": "la-liga",
+   "ovr": 79,
+   "attr": null
+  },
+  "VIL-633": {
+   "sid": 879694,
+   "lid": "la-liga",
+   "ovr": 84,
+   "attr": null
+  },
+  "VIL-113175": {
+   "sid": 973290,
+   "lid": "la-liga",
+   "ovr": 79,
+   "attr": null
+  },
+  "VIL-273016": {
+   "sid": 1893907,
+   "lid": "la-liga",
+   "ovr": 71,
+   "attr": null
+  },
+  "VIL-213263": {
+   "sid": 843678,
+   "lid": "la-liga",
+   "ovr": 77,
+   "attr": null
+  },
+  "VIL-289770": {
+   "sid": 2238900,
+   "lid": "la-liga",
+   "ovr": 76,
+   "attr": null
+  },
+  "VIL-7996": {
+   "sid": 873189,
+   "lid": "la-liga",
+   "ovr": 77,
+   "attr": null
+  },
+  "VIL-212858": {
+   "sid": 1468046,
+   "lid": "la-liga",
+   "ovr": 79,
+   "attr": null
+  },
+  "VIL-177823": {
+   "sid": 1184541,
+   "lid": "la-liga",
+   "ovr": 76,
+   "attr": null
+  },
+  "ESP-186564": {
+   "sid": 1396048,
+   "lid": "la-liga",
+   "ovr": 80,
+   "attr": null
+  },
+  "VIL-814": {
+   "sid": 911853,
+   "lid": "la-liga",
+   "ovr": 80,
+   "attr": null
+  },
+  "VIL-180289": {
+   "sid": 986245,
+   "lid": "la-liga",
+   "ovr": 77,
+   "attr": null
+  },
+  "VIL-178718": {
+   "sid": 1066603,
+   "lid": "la-liga",
+   "ovr": 82,
+   "attr": null
+  },
+  "OSA-32004": {
+   "sid": 591132,
+   "lid": "la-liga",
+   "ovr": 70,
+   "attr": null
+  },
+  "OSA-146128": {
+   "sid": 980383,
+   "lid": "la-liga",
+   "ovr": 72,
+   "attr": null
+  },
+  "OSA-119093": {
+   "sid": 985329,
+   "lid": "la-liga",
+   "ovr": 75,
+   "attr": null
+  },
+  "OSA-32212": {
+   "sid": 260031,
+   "lid": "la-liga",
+   "ovr": 74,
+   "attr": null
+  },
+  "OSA-111674": {
+   "sid": 976141,
+   "lid": "la-liga",
+   "ovr": 77,
+   "attr": null
+  },
+  "OSA-32217": {
+   "sid": 149370,
+   "lid": "la-liga",
+   "ovr": 72,
+   "attr": null
+  },
+  "OSA-32002": {
+   "sid": 187313,
+   "lid": "la-liga",
+   "ovr": 74,
+   "attr": null
+  },
+  "OSA-191925": {
+   "sid": 1119586,
+   "lid": "la-liga",
+   "ovr": 69,
+   "attr": null
+  },
+  "OSA-284105": {
+   "sid": 1512107,
+   "lid": "la-liga",
+   "ovr": 57,
+   "attr": null
+  },
+  "OSA-8559": {
+   "sid": 842419,
+   "lid": "la-liga",
+   "ovr": 73,
+   "attr": null
+  },
+  "OSA-186674": {
+   "sid": 1010165,
+   "lid": "la-liga",
+   "ovr": 73,
+   "attr": null
+  },
+  "OSA-249577": {
+   "sid": 1399702,
+   "lid": "la-liga",
+   "ovr": 67,
+   "attr": null
+  },
+  "OSA-32391": {
+   "sid": 99516,
+   "lid": "la-liga",
+   "ovr": 73,
+   "attr": null
+  },
+  "CEL-32056": {
+   "sid": 785989,
+   "lid": "la-liga",
+   "ovr": 76,
+   "attr": null
+  },
+  "CEL-3201": {
+   "sid": 19356,
+   "lid": "la-liga",
+   "ovr": 76,
+   "attr": null
+  },
+  "CEL-83406": {
+   "sid": 949962,
+   "lid": "la-liga",
+   "ovr": 78,
+   "attr": null
+  },
+  "CEL-188859": {
+   "sid": 1398524,
+   "lid": "la-liga",
+   "ovr": 74,
+   "attr": null
+  },
+  "CEL-157368": {
+   "sid": 962890,
+   "lid": "la-liga",
+   "ovr": 78,
+   "attr": null
+  },
+  "ELC-32052": {
+   "sid": 286167,
+   "lid": "la-liga",
+   "ovr": 75,
+   "attr": null
+  },
+  "CEL-175869": {
+   "sid": 1154935,
+   "lid": "la-liga",
+   "ovr": 75,
+   "attr": null
+  },
+  "CEL-272435": {
+   "sid": 1398526,
+   "lid": "la-liga",
+   "ovr": 78,
+   "attr": null
+  },
+  "CEL-133570": {
+   "sid": 1002764,
+   "lid": "la-liga",
+   "ovr": 79,
+   "attr": null
+  },
+  "CEL-253001": {
+   "sid": 1008259,
+   "lid": "la-liga",
+   "ovr": 74,
+   "attr": null
+  },
+  "CEL-288772": {
+   "sid": 1916256,
+   "lid": "la-liga",
+   "ovr": 67,
+   "attr": null
+  },
+  "OSA-213260": {
+   "sid": 825133,
+   "lid": "la-liga",
+   "ovr": 72,
+   "attr": null
+  },
+  "CEL-31019": {
+   "sid": 360718,
+   "lid": "la-liga",
+   "ovr": 76,
+   "attr": null
+  },
+  "CEL-2788": {
+   "sid": 815202,
+   "lid": "la-liga",
+   "ovr": 81,
+   "attr": null
+  },
+  "CEL-32918": {
+   "sid": 848980,
+   "lid": "la-liga",
+   "ovr": 71,
+   "attr": null
+  },
+  "RSO-180137": {
+   "sid": 823622,
+   "lid": "la-liga",
+   "ovr": 82,
+   "attr": null
+  },
+  "RSO-182319": {
+   "sid": 1026015,
+   "lid": "la-liga",
+   "ovr": 77,
+   "attr": null
+  },
+  "RSO-48555": {
+   "sid": 880218,
+   "lid": "la-liga",
+   "ovr": 81,
+   "attr": null
+  },
+  "RSO-82516": {
+   "sid": 949156,
+   "lid": "la-liga",
+   "ovr": 79,
+   "attr": null
+  },
+  "RSO-3259": {
+   "sid": 280979,
+   "lid": "la-liga",
+   "ovr": 76,
+   "attr": null
+  },
+  "RSO-170540": {
+   "sid": 1066045,
+   "lid": "la-liga",
+   "ovr": 75,
+   "attr": null
+  },
+  "RSO-77734": {
+   "sid": 839585,
+   "lid": "la-liga",
+   "ovr": 75,
+   "attr": null
+  },
+  "RSO-33148": {
+   "sid": 832427,
+   "lid": "la-liga",
+   "ovr": 76,
+   "attr": null
+  },
+  "RSO-156615": {
+   "sid": 980410,
+   "lid": "la-liga",
+   "ovr": 77,
+   "attr": null
+  },
+  "RSO-263820": {
+   "sid": 1216309,
+   "lid": "la-liga",
+   "ovr": 81,
+   "attr": null
+  },
+  "ELC-227023": {
+   "sid": 1402908,
+   "lid": "la-liga",
+   "ovr": 76,
+   "attr": null
+  },
+  "RSO-141571": {
+   "sid": 1116388,
+   "lid": "la-liga",
+   "ovr": 78,
+   "attr": null
+  },
+  "RSO-164": {
+   "sid": 855835,
+   "lid": "la-liga",
+   "ovr": 80,
+   "attr": null
+  },
+  "RSO-245442": {
+   "sid": 1466116,
+   "lid": "la-liga",
+   "ovr": 78,
+   "attr": null
+  },
+  "RSO-11": {
+   "sid": 353250,
+   "lid": "la-liga",
+   "ovr": 67,
+   "attr": null
+  },
+  "RSO-29": {
+   "sid": 838159,
+   "lid": "la-liga",
+   "ovr": 76,
+   "attr": null
+  },
+  "ALA-144615": {
+   "sid": 934383,
+   "lid": "la-liga",
+   "ovr": 75,
+   "attr": null
+  },
+  "RSO-100129": {
+   "sid": 966441,
+   "lid": "la-liga",
+   "ovr": 72,
+   "attr": null
+  },
+  "RSO-272954": {
+   "sid": 1539149,
+   "lid": "la-liga",
+   "ovr": 68,
+   "attr": null
+  },
+  "RSO-32413": {
+   "sid": 791773,
+   "lid": "la-liga",
+   "ovr": 83,
+   "attr": null
+  },
+  "RSO-157040": {
+   "sid": 1094782,
+   "lid": "la-liga",
+   "ovr": 70,
+   "attr": null
+  },
+  "ATH-81565": {
+   "sid": 605672,
+   "lid": "la-liga",
+   "ovr": 75,
+   "attr": null
+  },
+  "ATH-126878": {
+   "sid": 966801,
+   "lid": "la-liga",
+   "ovr": 82,
+   "attr": null
+  },
+  "ATH-2294": {
+   "sid": 592012,
+   "lid": "la-liga",
+   "ovr": 76,
+   "attr": null
+  },
+  "ATH-244599": {
+   "sid": 1495844,
+   "lid": "la-liga",
+   "ovr": 79,
+   "attr": null
+  },
+  "ATH-168663": {
+   "sid": 1012409,
+   "lid": "la-liga",
+   "ovr": 79,
+   "attr": null
+  },
+  "ATH-172027": {
+   "sid": 1019318,
+   "lid": "la-liga",
+   "ovr": 69,
+   "attr": null
+  },
+  "ATH-32618": {
+   "sid": 910978,
+   "lid": "la-liga",
+   "ovr": 81,
+   "attr": null
+  },
+  "ATH-32579": {
+   "sid": 807648,
+   "lid": "la-liga",
+   "ovr": 70,
+   "attr": null
+  },
+  "ATH-136000": {
+   "sid": 910267,
+   "lid": "la-liga",
+   "ovr": 75,
+   "attr": null
+  },
+  "GIR-229042": {
+   "sid": 1632454,
+   "lid": "la-liga",
+   "ovr": 72,
+   "attr": null
+  },
+  "ATH-32570": {
+   "sid": 797291,
+   "lid": "la-liga",
+   "ovr": 84,
+   "attr": null
+  },
+  "ATH-203459": {
+   "sid": 1155116,
+   "lid": "la-liga",
+   "ovr": 73,
+   "attr": null
+  },
+  "VAL-9870": {
+   "sid": 827064,
+   "lid": "la-liga",
+   "ovr": 72,
+   "attr": null
+  },
+  "VAL-7672": {
+   "sid": 754710,
+   "lid": "la-liga",
+   "ovr": 73,
+   "attr": null
+  },
+  "VAL-32762": {
+   "sid": 909119,
+   "lid": "la-liga",
+   "ovr": 78,
+   "attr": null
+  },
+  "VAL-33131": {
+   "sid": 873947,
+   "lid": "la-liga",
+   "ovr": 68,
+   "attr": null
+  },
+  "VAL-39104": {
+   "sid": 609752,
+   "lid": "la-liga",
+   "ovr": 76,
+   "attr": null
+  },
+  "VAL-177180": {
+   "sid": 1122610,
+   "lid": "la-liga",
+   "ovr": 81,
+   "attr": null
+  },
+  "VAL-33270": {
+   "sid": 826948,
+   "lid": "la-liga",
+   "ovr": 77,
+   "attr": null
+  },
+  "MAL-218445": {
+   "sid": 998950,
+   "lid": "la-liga",
+   "ovr": 76,
+   "attr": null
+  },
+  "VAL-30802": {
+   "sid": 857482,
+   "lid": "la-liga",
+   "ovr": 76,
+   "attr": null
+  },
+  "VAL-8456": {
+   "sid": 797306,
+   "lid": "la-liga",
+   "ovr": 70,
+   "attr": null
+  },
+  "MAL-33513": {
+   "sid": 788216,
+   "lid": "la-liga",
+   "ovr": 72,
+   "attr": null
+  },
+  "GIR-151744": {
+   "sid": 1084081,
+   "lid": "la-liga",
+   "ovr": 77,
+   "attr": null
+  },
+  "VAL-8780": {
+   "sid": 151138,
+   "lid": "la-liga",
+   "ovr": 69,
+   "attr": null
+  },
+  "VAL-33781": {
+   "sid": 97951,
+   "lid": "la-liga",
+   "ovr": 76,
+   "attr": null
+  },
+  "RMA-3374": {
+   "sid": 826643,
+   "lid": "la-liga",
+   "ovr": 91,
+   "attr": null
+  },
+  "RMA-1556": {
+   "sid": 868812,
+   "lid": "la-liga",
+   "ovr": 89,
+   "attr": null
+  },
+  "RMA-1324": {
+   "sid": 910536,
+   "lid": "la-liga",
+   "ovr": 85,
+   "attr": null
+  },
+  "LEV-247061": {
+   "sid": 1649918,
+   "lid": "la-liga",
+   "ovr": 77,
+   "attr": null
+  },
+  "RMA-125010": {
+   "sid": 991011,
+   "lid": "la-liga",
+   "ovr": 88,
+   "attr": null
+  },
+  "RMA-96": {
+   "sid": 831808,
+   "lid": "la-liga",
+   "ovr": 87,
+   "attr": null
+  },
+  "RMA-169162": {
+   "sid": 1091116,
+   "lid": "la-liga",
+   "ovr": 84,
+   "attr": null
+  },
+  "RMA-7887": {
+   "sid": 835485,
+   "lid": "la-liga",
+   "ovr": 84,
+   "attr": null
+  },
+  "RMA-102343": {
+   "sid": 973887,
+   "lid": "la-liga",
+   "ovr": 83,
+   "attr": null
+  },
+  "RMA-8514": {
+   "sid": 859025,
+   "lid": "la-liga",
+   "ovr": 87,
+   "attr": null
+  },
+  "RMA-7867": {
+   "sid": 795064,
+   "lid": "la-liga",
+   "ovr": 86,
+   "attr": null
+  },
+  "RMA-1337": {
+   "sid": 822519,
+   "lid": "la-liga",
+   "ovr": 81,
+   "attr": null
+  },
+  "RMA-3177": {
+   "sid": 142622,
+   "lid": "la-liga",
+   "ovr": 80,
+   "attr": null
+  },
+  "RMA-182020": {
+   "sid": 1085081,
+   "lid": "la-liga",
+   "ovr": 84,
+   "attr": null
+  },
+  "RMA-8458": {
+   "sid": 792073,
+   "lid": "la-liga",
+   "ovr": 76,
+   "attr": null
+  },
+  "RMA-3641": {
+   "sid": 70988,
+   "lid": "la-liga",
+   "ovr": 87,
+   "attr": null
+  },
+  "RMA-28995": {
+   "sid": 857574,
+   "lid": "la-liga",
+   "ovr": 82,
+   "attr": null
+  },
+  "OSA-81183": {
+   "sid": 936234,
+   "lid": "la-liga",
+   "ovr": 70,
+   "attr": null
+  },
+  "LEV-32830": {
+   "sid": 927066,
+   "lid": "la-liga",
+   "ovr": 73,
+   "attr": null
+  },
+  "ESP-32362": {
+   "sid": 857205,
+   "lid": "la-liga",
+   "ovr": 71,
+   "attr": null
+  },
+  "ESP-151257": {
+   "sid": 1068891,
+   "lid": "la-liga",
+   "ovr": 71,
+   "attr": null
+  },
+  "FCB-188817": {
+   "sid": 1000483,
+   "lid": "la-liga",
+   "ovr": 77,
+   "attr": null
+  },
+  "ATL-213277": {
+   "sid": 325355,
+   "lid": "la-liga",
+   "ovr": 78,
+   "attr": null
+  },
+  "MAL-172628": {
+   "sid": 1131909,
+   "lid": "la-liga",
+   "ovr": 80,
+   "attr": null
+  },
+  "SEV-38625": {
+   "sid": 875890,
+   "lid": "la-liga",
+   "ovr": 74,
+   "attr": null
+  },
+  "LEV-156746": {
+   "sid": 1014042,
+   "lid": "la-liga",
+   "ovr": 77,
+   "attr": null
+  },
+  "VIL-32324": {
+   "sid": 1468090,
+   "lid": "la-liga",
+   "ovr": 73,
+   "attr": null
+  },
+  "SEV-31913": {
+   "sid": 872919,
+   "lid": "la-liga",
+   "ovr": 79,
+   "attr": null
+  },
+  "SEV-98223": {
+   "sid": 960006,
+   "lid": "la-liga",
+   "ovr": 79,
+   "attr": null
+  },
+  "ALA-33092": {
+   "sid": 788141,
+   "lid": "la-liga",
+   "ovr": 72,
+   "attr": null
+  },
+  "SEV-213279": {
+   "sid": 1142094,
+   "lid": "la-liga",
+   "ovr": 67,
+   "attr": null
+  },
+  "SEV-295172": {
+   "sid": 1892023,
+   "lid": "la-liga",
+   "ovr": 64,
+   "attr": null
+  },
+  "SEV-21385": {
+   "sid": 818986,
+   "lid": "la-liga",
+   "ovr": 77,
+   "attr": null
+  },
+  "SEV-45449": {
+   "sid": 840951,
+   "lid": "la-liga",
+   "ovr": 72,
+   "attr": null
+  },
+  "SEV-171984": {
+   "sid": 1015240,
+   "lid": "la-liga",
+   "ovr": 76,
+   "attr": null
+  },
+  "GET-83351": {
+   "sid": 949707,
+   "lid": "la-liga",
+   "ovr": 76,
+   "attr": null
+  },
+  "SEV-34909": {
+   "sid": 252815,
+   "lid": "la-liga",
+   "ovr": 71,
+   "attr": null
+  },
+  "RMA-206826": {
+   "sid": 1493226,
+   "lid": "la-liga",
+   "ovr": 71,
+   "attr": null
+  },
+  "SEV-42871": {
+   "sid": 138149,
+   "lid": "la-liga",
+   "ovr": 78,
+   "attr": null
+  },
+  "SEV-161304": {
+   "sid": 1089222,
+   "lid": "la-liga",
+   "ovr": 57,
+   "attr": null
+  },
+  "BET-274546": {
+   "sid": 1893910,
+   "lid": "la-liga",
+   "ovr": 73,
+   "attr": null
+  },
+  "VAL-37539": {
+   "sid": 845693,
+   "lid": "la-liga",
+   "ovr": 75,
+   "attr": null
+  },
+  "GIR-102497": {
+   "sid": 973699,
+   "lid": "la-liga",
+   "ovr": 72,
+   "attr": null
+  },
+  "ELC-293874": {
+   "sid": 1485292,
+   "lid": "la-liga",
+   "ovr": 67,
+   "attr": null
+  },
+  "ATL-98571": {
+   "sid": 944656,
+   "lid": "la-liga",
+   "ovr": 88,
+   "attr": null
+  },
+  "ATL-9554": {
+   "sid": 824200,
+   "lid": "la-liga",
+   "ovr": 84,
+   "attr": null
+  },
+  "ATL-8167": {
+   "sid": 309078,
+   "lid": "la-liga",
+   "ovr": 80,
+   "attr": null
+  },
+  "ATL-171964": {
+   "sid": 1099352,
+   "lid": "la-liga",
+   "ovr": 83,
+   "attr": null
+  },
+  "ATL-213278": {
+   "sid": 910031,
+   "lid": "la-liga",
+   "ovr": 85,
+   "attr": null
+  },
+  "ATL-177509": {
+   "sid": 1142588,
+   "lid": "la-liga",
+   "ovr": 85,
+   "attr": null
+  },
+  "ATL-112": {
+   "sid": 84539,
+   "lid": "la-liga",
+   "ovr": 79,
+   "attr": null
+  },
+  "ATL-189617": {
+   "sid": 1391752,
+   "lid": "la-liga",
+   "ovr": 77,
+   "attr": null
+  },
+  "ATL-70": {
+   "sid": 353138,
+   "lid": "la-liga",
+   "ovr": 83,
+   "attr": null
+  },
+  "ATL-176745": {
+   "sid": 1094106,
+   "lid": "la-liga",
+   "ovr": 83,
+   "attr": null
+  },
+  "ATL-99791": {
+   "sid": 787751,
+   "lid": "la-liga",
+   "ovr": 80,
+   "attr": null
+  },
+  "ATL-289895": {
+   "sid": 1414932,
+   "lid": "la-liga",
+   "ovr": 69,
+   "attr": null
+  },
+  "ATL-120": {
+   "sid": 69768,
+   "lid": "la-liga",
+   "ovr": 87,
+   "attr": null
+  },
+  "ATL-279062": {
+   "sid": 1179149,
+   "lid": "la-liga",
+   "ovr": 67,
+   "attr": null
+  },
+  "ELC-171148": {
+   "sid": 1126447,
+   "lid": "la-liga",
+   "ovr": 71,
+   "attr": null
+  },
+  "GIR-3369": {
+   "sid": 191182,
+   "lid": "la-liga",
+   "ovr": 71,
+   "attr": null
+  },
+  "ELC-170459": {
+   "sid": 1117026,
+   "lid": "la-liga",
+   "ovr": 70,
+   "attr": null
+  },
+  "ELC-8214": {
+   "sid": 848512,
+   "lid": "la-liga",
+   "ovr": 71,
+   "attr": null
+  },
+  "ELC-33150": {
+   "sid": 914765,
+   "lid": "la-liga",
+   "ovr": 70,
+   "attr": null
+  },
+  "ELC-165143": {
+   "sid": 1100646,
+   "lid": "la-liga",
+   "ovr": 72,
+   "attr": null
+  },
+  "ELC-159647": {
+   "sid": 1014595,
+   "lid": "la-liga",
+   "ovr": 74,
+   "attr": null
+  },
+  "ELC-33843": {
+   "sid": 605374,
+   "lid": "la-liga",
+   "ovr": 70,
+   "attr": null
+  },
+  "ELC-206810": {
+   "sid": 1092515,
+   "lid": "la-liga",
+   "ovr": 67,
+   "attr": null
+  },
+  "ELC-151557": {
+   "sid": 855831,
+   "lid": "la-liga",
+   "ovr": 72,
+   "attr": null
+  },
+  "ESP-180108": {
+   "sid": 1021165,
+   "lid": "la-liga",
+   "ovr": 70,
+   "attr": null
+  },
+  "ELC-23810": {
+   "sid": 556884,
+   "lid": "la-liga",
+   "ovr": 67,
+   "attr": null
+  },
+  "ELC-175982": {
+   "sid": 1019324,
+   "lid": "la-liga",
+   "ovr": 69,
+   "attr": null
+  },
+  "LEV-4159": {
+   "sid": 859769,
+   "lid": "la-liga",
+   "ovr": 70,
+   "attr": null
+  },
+  "CEL-168650": {
+   "sid": 1120669,
+   "lid": "la-liga",
+   "ovr": 72,
+   "attr": null
+  },
+  "LEV-161293": {
+   "sid": 1010383,
+   "lid": "la-liga",
+   "ovr": 72,
+   "attr": null
+  },
+  "LEV-211851": {
+   "sid": 952222,
+   "lid": "la-liga",
+   "ovr": 70,
+   "attr": null
+  },
+  "LEV-98741": {
+   "sid": 997244,
+   "lid": "la-liga",
+   "ovr": 75,
+   "attr": null
+  },
+  "LEV-118715": {
+   "sid": 984789,
+   "lid": "la-liga",
+   "ovr": 76,
+   "attr": null
+  },
+  "LEV-162": {
+   "sid": 149606,
+   "lid": "la-liga",
+   "ovr": 73,
+   "attr": null
+  },
+  "LEV-3403": {
+   "sid": 134029,
+   "lid": "la-liga",
+   "ovr": 77,
+   "attr": null
+  },
+  "LEV-165167": {
+   "sid": 2660173,
+   "lid": "la-liga",
+   "ovr": 72,
+   "attr": null
+  },
+  "GET-152458": {
+   "sid": 973536,
+   "lid": "la-liga",
+   "ovr": 78,
+   "attr": null
+  },
+  "GET-69": {
+   "sid": 604954,
+   "lid": "la-liga",
+   "ovr": 75,
+   "attr": null
+  },
+  "GET-2": {
+   "sid": 96369,
+   "lid": "la-liga",
+   "ovr": 72,
+   "attr": null
+  },
+  "GET-191064": {
+   "sid": 1154549,
+   "lid": "la-liga",
+   "ovr": 75,
+   "attr": null
+  },
+  "MAL-3724": {
+   "sid": 344847,
+   "lid": "la-liga",
+   "ovr": 73,
+   "attr": null
+  },
+  "GET-81187": {
+   "sid": 1101232,
+   "lid": "la-liga",
+   "ovr": 73,
+   "attr": null
+  },
+  "GET-191367": {
+   "sid": 1108450,
+   "lid": "la-liga",
+   "ovr": 75,
+   "attr": null
+  },
+  "GET-220164": {
+   "sid": 1392092,
+   "lid": "la-liga",
+   "ovr": 67,
+   "attr": null
+  },
+  "GET-256157": {
+   "sid": 1918369,
+   "lid": "la-liga",
+   "ovr": 67,
+   "attr": null
+  },
+  "GET-213274": {
+   "sid": 53739,
+   "lid": "la-liga",
+   "ovr": 71,
+   "attr": null
+  },
+  "GET-78": {
+   "sid": 604258,
+   "lid": "la-liga",
+   "ovr": 79,
+   "attr": null
+  },
+  "GET-146888": {
+   "sid": 826047,
+   "lid": "la-liga",
+   "ovr": 74,
+   "attr": null
+  },
+  "ALA-11113": {
+   "sid": 814385,
+   "lid": "la-liga",
+   "ovr": 75,
+   "attr": null
+  },
+  "ALA-11733": {
+   "sid": 831253,
+   "lid": "la-liga",
+   "ovr": 77,
+   "attr": null
+  },
+  "ALA-246154": {
+   "sid": 1639543,
+   "lid": "la-liga",
+   "ovr": 64,
+   "attr": null
+  },
+  "ALA-184988": {
+   "sid": 1082968,
+   "lid": "la-liga",
+   "ovr": 72,
+   "attr": null
+  },
+  "ALA-157626": {
+   "sid": 855832,
+   "lid": "la-liga",
+   "ovr": 78,
+   "attr": null
+  },
+  "ALA-213262": {
+   "sid": 794937,
+   "lid": "la-liga",
+   "ovr": 72,
+   "attr": null
+  },
+  "ALA-15868": {
+   "sid": 138383,
+   "lid": "la-liga",
+   "ovr": 70,
+   "attr": null
+  },
+  "ALA-33093": {
+   "sid": 891931,
+   "lid": "la-liga",
+   "ovr": 72,
+   "attr": null
+  },
+  "ALA-45831": {
+   "sid": 879875,
+   "lid": "la-liga",
+   "ovr": 69,
+   "attr": null
+  },
+  "ALA-46123": {
+   "sid": 896073,
+   "lid": "la-liga",
+   "ovr": 73,
+   "attr": null
+  },
+  "ALA-146969": {
+   "sid": 999178,
+   "lid": "la-liga",
+   "ovr": 73,
+   "attr": null
+  },
+  "ALA-33622": {
+   "sid": 235648,
+   "lid": "la-liga",
+   "ovr": 73,
+   "attr": null
+  },
+  "ALA-28663": {
+   "sid": 873717,
+   "lid": "la-liga",
+   "ovr": 68,
+   "attr": null
+  },
+  "ALA-202315": {
+   "sid": 1440572,
+   "lid": "la-liga",
+   "ovr": 61,
+   "attr": null
+  },
+  "BMG-9499": {
+   "sid": 228981,
+   "lid": "bundesliga",
+   "ovr": 77,
+   "attr": null
+  },
+  "BMG-48988": {
+   "sid": 925910,
+   "lid": "bundesliga",
+   "ovr": 73,
+   "attr": null
+  },
+  "BMG-282450": {
+   "sid": 1995809,
+   "lid": "bundesliga",
+   "ovr": 77,
+   "attr": null
+  },
+  "BMG-151888": {
+   "sid": 1019312,
+   "lid": "bundesliga",
+   "ovr": 76,
+   "attr": null
+  },
+  "BMG-188201": {
+   "sid": 1142210,
+   "lid": "bundesliga",
+   "ovr": 75,
+   "attr": null
+  },
+  "BMG-9522": {
+   "sid": 837205,
+   "lid": "bundesliga",
+   "ovr": 72,
+   "attr": null
+  },
+  "BMG-9999": {
+   "sid": 95381,
+   "lid": "bundesliga",
+   "ovr": 73,
+   "attr": null
+  },
+  "BMG-727": {
+   "sid": 280453,
+   "lid": "bundesliga",
+   "ovr": 76,
+   "attr": null
+  },
+  "BMG-400": {
+   "sid": 876858,
+   "lid": "bundesliga",
+   "ovr": 75,
+   "attr": null
+  },
+  "BMG-7464": {
+   "sid": 583806,
+   "lid": "bundesliga",
+   "ovr": 75,
+   "attr": null
+  },
+  "BMG-82442": {
+   "sid": 1002920,
+   "lid": "bundesliga",
+   "ovr": 73,
+   "attr": null
+  },
+  "BMG-176307": {
+   "sid": 1130067,
+   "lid": "bundesliga",
+   "ovr": 69,
+   "attr": null
+  },
+  "BMG-187273": {
+   "sid": 1083382,
+   "lid": "bundesliga",
+   "ovr": 73,
+   "attr": null
+  },
+  "BMG-72392": {
+   "sid": 939880,
+   "lid": "bundesliga",
+   "ovr": 74,
+   "attr": null
+  },
+  "BMG-6668": {
+   "sid": 578166,
+   "lid": "bundesliga",
+   "ovr": 80,
+   "attr": null
+  },
+  "BMG-6667": {
+   "sid": 8772,
+   "lid": "bundesliga",
+   "ovr": 72,
+   "attr": null
+  },
+  "SVW-7562": {
+   "sid": 794962,
+   "lid": "bundesliga",
+   "ovr": 72,
+   "attr": null
+  },
+  "HEI-150733": {
+   "sid": 1067120,
+   "lid": "bundesliga",
+   "ovr": 74,
+   "attr": null
+  },
+  "SVW-176637": {
+   "sid": 1166832,
+   "lid": "bundesliga",
+   "ovr": 70,
+   "attr": null
+  },
+  "SVW-61630": {
+   "sid": 815612,
+   "lid": "bundesliga",
+   "ovr": 75,
+   "attr": null
+  },
+  "SVW-122949": {
+   "sid": 1005343,
+   "lid": "bundesliga",
+   "ovr": 75,
+   "attr": null
+  },
+  "SVW-6555": {
+   "sid": 138150,
+   "lid": "bundesliga",
+   "ovr": 74,
+   "attr": null
+  },
+  "SVW-23925": {
+   "sid": 830142,
+   "lid": "bundesliga",
+   "ovr": 78,
+   "attr": null
+  },
+  "SVW-9765": {
+   "sid": 826171,
+   "lid": "bundesliga",
+   "ovr": 77,
+   "attr": null
+  },
+  "SVW-9447": {
+   "sid": 825771,
+   "lid": "bundesliga",
+   "ovr": 78,
+   "attr": null
+  },
+  "SVW-10559": {
+   "sid": 933398,
+   "lid": "bundesliga",
+   "ovr": 74,
+   "attr": null
+  },
+  "SVW-93320": {
+   "sid": 960114,
+   "lid": "bundesliga",
+   "ovr": 75,
+   "attr": null
+  },
+  "SVW-66095": {
+   "sid": 851254,
+   "lid": "bundesliga",
+   "ovr": 74,
+   "attr": null
+  },
+  "SVW-6557": {
+   "sid": 229544,
+   "lid": "bundesliga",
+   "ovr": 73,
+   "attr": null
+  },
+  "SVW-153843": {
+   "sid": 991591,
+   "lid": "bundesliga",
+   "ovr": 75,
+   "attr": null
+  },
+  "SCF-156629": {
+   "sid": 1019321,
+   "lid": "bundesliga",
+   "ovr": 81,
+   "attr": null
+  },
+  "SCF-175704": {
+   "sid": 1131002,
+   "lid": "bundesliga",
+   "ovr": 79,
+   "attr": null
+  },
+  "SCF-9501": {
+   "sid": 280009,
+   "lid": "bundesliga",
+   "ovr": 75,
+   "attr": null
+  },
+  "SCF-265186": {
+   "sid": 1508537,
+   "lid": "bundesliga",
+   "ovr": 73,
+   "attr": null
+  },
+  "SCF-145293": {
+   "sid": 1020422,
+   "lid": "bundesliga",
+   "ovr": 81,
+   "attr": null
+  },
+  "SCF-6686": {
+   "sid": 171961,
+   "lid": "bundesliga",
+   "ovr": 78,
+   "attr": null
+  },
+  "SCF-6484": {
+   "sid": 836711,
+   "lid": "bundesliga",
+   "ovr": 78,
+   "attr": null
+  },
+  "SCF-9452": {
+   "sid": 569784,
+   "lid": "bundesliga",
+   "ovr": 78,
+   "attr": null
+  },
+  "BMG-123277": {
+   "sid": 990209,
+   "lid": "bundesliga",
+   "ovr": 78,
+   "attr": null
+  },
+  "SCF-120962": {
+   "sid": 914755,
+   "lid": "bundesliga",
+   "ovr": 78,
+   "attr": null
+  },
+  "SCF-171186": {
+   "sid": 1131339,
+   "lid": "bundesliga",
+   "ovr": 78,
+   "attr": null
+  },
+  "SCF-122651": {
+   "sid": 979820,
+   "lid": "bundesliga",
+   "ovr": 81,
+   "attr": null
+  },
+  "SCF-3176": {
+   "sid": 142259,
+   "lid": "bundesliga",
+   "ovr": 77,
+   "attr": null
+  },
+  "SCF-9477": {
+   "sid": 576266,
+   "lid": "bundesliga",
+   "ovr": 78,
+   "attr": null
+  },
+  "SCF-171203": {
+   "sid": 1131337,
+   "lid": "bundesliga",
+   "ovr": 76,
+   "attr": null
+  },
+  "SCF-9473": {
+   "sid": 142525,
+   "lid": "bundesliga",
+   "ovr": 74,
+   "attr": null
+  },
+  "SCF-24097": {
+   "sid": 103442,
+   "lid": "bundesliga",
+   "ovr": 70,
+   "attr": null
+  },
+  "SVW-179984": {
+   "sid": 1083390,
+   "lid": "bundesliga",
+   "ovr": 80,
+   "attr": null
+  },
+  "SCF-6614": {
+   "sid": 842858,
+   "lid": "bundesliga",
+   "ovr": 72,
+   "attr": null
+  },
+  "SCF-7741": {
+   "sid": 174341,
+   "lid": "bundesliga",
+   "ovr": 69,
+   "attr": null
+  },
+  "UNB-182886": {
+   "sid": 953767,
+   "lid": "bundesliga",
+   "ovr": 77,
+   "attr": null
+  },
+  "UNB-212285": {
+   "sid": 1513469,
+   "lid": "bundesliga",
+   "ovr": 70,
+   "attr": null
+  },
+  "UNB-8027": {
+   "sid": 608362,
+   "lid": "bundesliga",
+   "ovr": 73,
+   "attr": null
+  },
+  "UNB-72117": {
+   "sid": 877302,
+   "lid": "bundesliga",
+   "ovr": 74,
+   "attr": null
+  },
+  "UNB-64934": {
+   "sid": 886737,
+   "lid": "bundesliga",
+   "ovr": 74,
+   "attr": null
+  },
+  "UNB-6657": {
+   "sid": 149479,
+   "lid": "bundesliga",
+   "ovr": 73,
+   "attr": null
+  },
+  "UNB-10195": {
+   "sid": 327863,
+   "lid": "bundesliga",
+   "ovr": 69,
+   "attr": null
+  },
+  "UNB-188299": {
+   "sid": 1198074,
+   "lid": "bundesliga",
+   "ovr": 75,
+   "attr": null
+  },
+  "UNB-6828": {
+   "sid": 48557,
+   "lid": "bundesliga",
+   "ovr": 71,
+   "attr": null
+  },
+  "UNB-7029": {
+   "sid": 800252,
+   "lid": "bundesliga",
+   "ovr": 70,
+   "attr": null
+  },
+  "UNB-9489": {
+   "sid": 168985,
+   "lid": "bundesliga",
+   "ovr": 73,
+   "attr": null
+  },
+  "UNB-23202": {
+   "sid": 791642,
+   "lid": "bundesliga",
+   "ovr": 71,
+   "attr": null
+  },
+  "UNB-152811": {
+   "sid": 1086547,
+   "lid": "bundesliga",
+   "ovr": 77,
+   "attr": null
+  },
+  "BMG-6825": {
+   "sid": 254449,
+   "lid": "bundesliga",
+   "ovr": 71,
+   "attr": null
+  },
+  "UNB-279839": {
+   "sid": 1534045,
+   "lid": "bundesliga",
+   "ovr": 59,
+   "attr": null
+  },
+  "UNB-3450": {
+   "sid": 137692,
+   "lid": "bundesliga",
+   "ovr": 78,
+   "attr": null
+  },
+  "UNB-144395": {
+   "sid": 842718,
+   "lid": "bundesliga",
+   "ovr": 70,
+   "attr": null
+  },
+  "UNB-50717": {
+   "sid": 148167,
+   "lid": "bundesliga",
+   "ovr": 68,
+   "attr": null
+  },
+  "HSV-137302": {
+   "sid": 1012235,
+   "lid": "bundesliga",
+   "ovr": 73,
+   "attr": null
+  },
+  "M05-7633": {
+   "sid": 352544,
+   "lid": "bundesliga",
+   "ovr": 73,
+   "attr": null
+  },
+  "M05-45593": {
+   "sid": 822340,
+   "lid": "bundesliga",
+   "ovr": 75,
+   "attr": null
+  },
+  "M05-150647": {
+   "sid": 975800,
+   "lid": "bundesliga",
+   "ovr": 77,
+   "attr": null
+  },
+  "M05-114809": {
+   "sid": 1028307,
+   "lid": "bundesliga",
+   "ovr": 84,
+   "attr": null
+  },
+  "M05-179889": {
+   "sid": 537552,
+   "lid": "bundesliga",
+   "ovr": 75,
+   "attr": null
+  },
+  "M05-320": {
+   "sid": 327755,
+   "lid": "bundesliga",
+   "ovr": 80,
+   "attr": null
+  },
+  "M05-150432": {
+   "sid": 980621,
+   "lid": "bundesliga",
+   "ovr": 79,
+   "attr": null
+  },
+  "KOE-152726": {
+   "sid": 988639,
+   "lid": "bundesliga",
+   "ovr": 76,
+   "attr": null
+  },
+  "M05-2114": {
+   "sid": 157377,
+   "lid": "bundesliga",
+   "ovr": 71,
+   "attr": null
+  },
+  "M05-6576": {
+   "sid": 138126,
+   "lid": "bundesliga",
+   "ovr": 72,
+   "attr": null
+  },
+  "M05-147832": {
+   "sid": 1028306,
+   "lid": "bundesliga",
+   "ovr": 71,
+   "attr": null
+  },
+  "M05-8785": {
+   "sid": 846471,
+   "lid": "bundesliga",
+   "ovr": 76,
+   "attr": null
+  },
+  "M05-6826": {
+   "sid": 893962,
+   "lid": "bundesliga",
+   "ovr": 72,
+   "attr": null
+  },
+  "M05-395": {
+   "sid": 355486,
+   "lid": "bundesliga",
+   "ovr": 76,
+   "attr": null
+  },
+  "M05-152": {
+   "sid": 152206,
+   "lid": "bundesliga",
+   "ovr": 73,
+   "attr": null
+  },
+  "M05-6707": {
+   "sid": 97926,
+   "lid": "bundesliga",
+   "ovr": 72,
+   "attr": null
+  },
+  "M05-6616": {
+   "sid": 174345,
+   "lid": "bundesliga",
+   "ovr": 77,
+   "attr": null
+  },
+  "HSV-125686": {
+   "sid": 991824,
+   "lid": "bundesliga",
+   "ovr": 74,
+   "attr": null
+  },
+  "HEI-75545": {
+   "sid": 909485,
+   "lid": "bundesliga",
+   "ovr": 72,
+   "attr": null
+  },
+  "TSG-220226": {
+   "sid": 2216257,
+   "lid": "bundesliga",
+   "ovr": 66,
+   "attr": null
+  },
+  "TSG-318": {
+   "sid": 67647,
+   "lid": "bundesliga",
+   "ovr": 78,
+   "attr": null
+  },
+  "TSG-145562": {
+   "sid": 1010117,
+   "lid": "bundesliga",
+   "ovr": 81,
+   "attr": null
+  },
+  "TSG-99042": {
+   "sid": 963801,
+   "lid": "bundesliga",
+   "ovr": 77,
+   "attr": null
+  },
+  "TSG-248657": {
+   "sid": 1418703,
+   "lid": "bundesliga",
+   "ovr": 73,
+   "attr": null
+  },
+  "TSG-144433": {
+   "sid": 1014290,
+   "lid": "bundesliga",
+   "ovr": 78,
+   "attr": null
+  },
+  "TSG-206319": {
+   "sid": 1493305,
+   "lid": "bundesliga",
+   "ovr": 80,
+   "attr": null
+  },
+  "WOB-124324": {
+   "sid": 987504,
+   "lid": "bundesliga",
+   "ovr": 78,
+   "attr": null
+  },
+  "TSG-76770": {
+   "sid": 916946,
+   "lid": "bundesliga",
+   "ovr": 81,
+   "attr": null
+  },
+  "TSG-113457": {
+   "sid": 978062,
+   "lid": "bundesliga",
+   "ovr": 77,
+   "attr": null
+  },
+  "TSG-30548": {
+   "sid": 857740,
+   "lid": "bundesliga",
+   "ovr": 80,
+   "attr": null
+  },
+  "TSG-62631": {
+   "sid": 138024,
+   "lid": "bundesliga",
+   "ovr": 76,
+   "attr": null
+  },
+  "TSG-49031": {
+   "sid": 790977,
+   "lid": "bundesliga",
+   "ovr": 76,
+   "attr": null
+  },
+  "TSG-151443": {
+   "sid": 1000269,
+   "lid": "bundesliga",
+   "ovr": 80,
+   "attr": null
+  },
+  "TSG-9540": {
+   "sid": 828571,
+   "lid": "bundesliga",
+   "ovr": 76,
+   "attr": null
+  },
+  "TSG-188239": {
+   "sid": 957615,
+   "lid": "bundesliga",
+   "ovr": 78,
+   "attr": null
+  },
+  "TSG-121279": {
+   "sid": 944899,
+   "lid": "bundesliga",
+   "ovr": 76,
+   "attr": null
+  },
+  "TSG-316": {
+   "sid": 40244,
+   "lid": "bundesliga",
+   "ovr": 81,
+   "attr": null
+  },
+  "TSG-75703": {
+   "sid": 943550,
+   "lid": "bundesliga",
+   "ovr": 69,
+   "attr": null
+  },
+  "TSG-220259": {
+   "sid": 1196091,
+   "lid": "bundesliga",
+   "ovr": 66,
+   "attr": null
+  },
+  "VFB-212314": {
+   "sid": 1469995,
+   "lid": "bundesliga",
+   "ovr": 71,
+   "attr": null
+  },
+  "FCA-6661": {
+   "sid": 111483,
+   "lid": "bundesliga",
+   "ovr": 72,
+   "attr": null
+  },
+  "FCA-178772": {
+   "sid": 1215904,
+   "lid": "bundesliga",
+   "ovr": 71,
+   "attr": null
+  },
+  "FCA-608": {
+   "sid": 822877,
+   "lid": "bundesliga",
+   "ovr": 79,
+   "attr": null
+  },
+  "FCA-274217": {
+   "sid": 1996846,
+   "lid": "bundesliga",
+   "ovr": 70,
+   "attr": null
+  },
+  "FCA-152692": {
+   "sid": 929620,
+   "lid": "bundesliga",
+   "ovr": 78,
+   "attr": null
+  },
+  "FCA-98953": {
+   "sid": 927340,
+   "lid": "bundesliga",
+   "ovr": 78,
+   "attr": null
+  },
+  "FCA-175963": {
+   "sid": 1129365,
+   "lid": "bundesliga",
+   "ovr": 77,
+   "attr": null
+  },
+  "FCA-6714": {
+   "sid": 254119,
+   "lid": "bundesliga",
+   "ovr": 74,
+   "attr": null
+  },
+  "FCA-65692": {
+   "sid": 860461,
+   "lid": "bundesliga",
+   "ovr": 74,
+   "attr": null
+  },
+  "FCA-97120": {
+   "sid": 877842,
+   "lid": "bundesliga",
+   "ovr": 71,
+   "attr": null
+  },
+  "FCA-147912": {
+   "sid": 963198,
+   "lid": "bundesliga",
+   "ovr": 80,
+   "attr": null
+  },
+  "FCA-6645": {
+   "sid": 146853,
+   "lid": "bundesliga",
+   "ovr": 74,
+   "attr": null
+  },
+  "FCA-147197": {
+   "sid": 947986,
+   "lid": "bundesliga",
+   "ovr": 74,
+   "attr": null
+  },
+  "FCA-6617": {
+   "sid": 822564,
+   "lid": "bundesliga",
+   "ovr": 82,
+   "attr": null
+  },
+  "UNB-295064": {
+   "sid": 1995013,
+   "lid": "bundesliga",
+   "ovr": 60,
+   "attr": null
+  },
+  "KOE-7772": {
+   "sid": 877544,
+   "lid": "bundesliga",
+   "ovr": 78,
+   "attr": null
+  },
+  "KOE-65441": {
+   "sid": 378340,
+   "lid": "bundesliga",
+   "ovr": 75,
+   "attr": null
+  },
+  "SGE-3608": {
+   "sid": 591706,
+   "lid": "bundesliga",
+   "ovr": 74,
+   "attr": null
+  },
+  "KOE-127596": {
+   "sid": 1112327,
+   "lid": "bundesliga",
+   "ovr": 76,
+   "attr": null
+  },
+  "KOE-327": {
+   "sid": 921033,
+   "lid": "bundesliga",
+   "ovr": 73,
+   "attr": null
+  },
+  "KOE-99812": {
+   "sid": 930272,
+   "lid": "bundesliga",
+   "ovr": 75,
+   "attr": null
+  },
+  "KOE-137031": {
+   "sid": 1010726,
+   "lid": "bundesliga",
+   "ovr": 71,
+   "attr": null
+  },
+  "KOE-8945": {
+   "sid": 839898,
+   "lid": "bundesliga",
+   "ovr": 72,
+   "attr": null
+  },
+  "KOE-152743": {
+   "sid": 1014493,
+   "lid": "bundesliga",
+   "ovr": 72,
+   "attr": null
+  },
+  "KOE-144647": {
+   "sid": 1020206,
+   "lid": "bundesliga",
+   "ovr": 75,
+   "attr": null
+  },
+  "KOE-309": {
+   "sid": 387220,
+   "lid": "bundesliga",
+   "ovr": 69,
+   "attr": null
+  },
+  "KOE-107201": {
+   "sid": 965950,
+   "lid": "bundesliga",
+   "ovr": 72,
+   "attr": null
+  },
+  "KOE-9957": {
+   "sid": 187185,
+   "lid": "bundesliga",
+   "ovr": 78,
+   "attr": null
+  },
+  "KOE-9388": {
+   "sid": 41615,
+   "lid": "bundesliga",
+   "ovr": 74,
+   "attr": null
+  },
+  "KOE-7015": {
+   "sid": 840352,
+   "lid": "bundesliga",
+   "ovr": 61,
+   "attr": null
+  },
+  "FCB-8004": {
+   "sid": 108579,
+   "lid": "bundesliga",
+   "ovr": 90,
+   "attr": null
+  },
+  "FCB-113765": {
+   "sid": 978838,
+   "lid": "bundesliga",
+   "ovr": 89,
+   "attr": null
+  },
+  "FCB-22396": {
+   "sid": 883537,
+   "lid": "bundesliga",
+   "ovr": 87,
+   "attr": null
+  },
+  "FCB-144393": {
+   "sid": 1010231,
+   "lid": "bundesliga",
+   "ovr": 85,
+   "attr": null
+  },
+  "FCB-277592": {
+   "sid": 1861975,
+   "lid": "bundesliga",
+   "ovr": 82,
+   "attr": null
+  },
+  "FCB-359": {
+   "sid": 259117,
+   "lid": "bundesliga",
+   "ovr": 86,
+   "attr": null
+  },
+  "FCB-311": {
+   "sid": 187433,
+   "lid": "bundesliga",
+   "ovr": 83,
+   "attr": null
+  },
+  "FCB-202665": {
+   "sid": 1142251,
+   "lid": "bundesliga",
+   "ovr": 85,
+   "attr": null
+  },
+  "FCB-172574": {
+   "sid": 1129935,
+   "lid": "bundesliga",
+   "ovr": 80,
+   "attr": null
+  },
+  "FCB-21288": {
+   "sid": 843665,
+   "lid": "bundesliga",
+   "ovr": 84,
+   "attr": null
+  },
+  "FCB-9541": {
+   "sid": 798583,
+   "lid": "bundesliga",
+   "ovr": 86,
+   "attr": null
+  },
+  "FCB-149": {
+   "sid": 227672,
+   "lid": "bundesliga",
+   "ovr": 82,
+   "attr": null
+  },
+  "SGE-184533": {
+   "sid": 1159759,
+   "lid": "bundesliga",
+   "ovr": 83,
+   "attr": null
+  },
+  "FCB-122188": {
+   "sid": 927407,
+   "lid": "bundesliga",
+   "ovr": 84,
+   "attr": null
+  },
+  "FCB-9549": {
+   "sid": 355492,
+   "lid": "bundesliga",
+   "ovr": 83,
+   "attr": null
+  },
+  "FCB-48657": {
+   "sid": 873106,
+   "lid": "bundesliga",
+   "ovr": 81,
+   "attr": null
+  },
+  "FCB-172342": {
+   "sid": 1130647,
+   "lid": "bundesliga",
+   "ovr": 82,
+   "attr": null
+  },
+  "FCB-342": {
+   "sid": 26768,
+   "lid": "bundesliga",
+   "ovr": 74,
+   "attr": null
+  },
+  "BVB-211": {
+   "sid": 328027,
+   "lid": "bundesliga",
+   "ovr": 83,
+   "attr": null
+  },
+  "BVB-125151": {
+   "sid": 954076,
+   "lid": "bundesliga",
+   "ovr": 80,
+   "attr": null
+  },
+  "BVB-133903": {
+   "sid": 980628,
+   "lid": "bundesliga",
+   "ovr": 82,
+   "attr": null
+  },
+  "BVB-279093": {
+   "sid": 1937835,
+   "lid": "bundesliga",
+   "ovr": 71,
+   "attr": null
+  },
+  "BVB-171692": {
+   "sid": 1134083,
+   "lid": "bundesliga",
+   "ovr": 80,
+   "attr": null
+  },
+  "BVB-101074": {
+   "sid": 907463,
+   "lid": "bundesliga",
+   "ovr": 86,
+   "attr": null
+  },
+  "BVB-9551": {
+   "sid": 133908,
+   "lid": "bundesliga",
+   "ovr": 78,
+   "attr": null
+  },
+  "BVB-167570": {
+   "sid": 994556,
+   "lid": "bundesliga",
+   "ovr": 77,
+   "attr": null
+  },
+  "BVB-44030": {
+   "sid": 800951,
+   "lid": "bundesliga",
+   "ovr": 82,
+   "attr": null
+  },
+  "BVB-145937": {
+   "sid": 1021272,
+   "lid": "bundesliga",
+   "ovr": 80,
+   "attr": null
+  },
+  "BVB-8805": {
+   "sid": 577726,
+   "lid": "bundesliga",
+   "ovr": 79,
+   "attr": null
+  },
+  "BVB-75539": {
+   "sid": 940871,
+   "lid": "bundesliga",
+   "ovr": 86,
+   "attr": null
+  },
+  "BVB-3183": {
+   "sid": 138156,
+   "lid": "bundesliga",
+   "ovr": 75,
+   "attr": null
+  },
+  "BVB-379": {
+   "sid": 799046,
+   "lid": "bundesliga",
+   "ovr": 81,
+   "attr": null
+  },
+  "BVB-334": {
+   "sid": 556866,
+   "lid": "bundesliga",
+   "ovr": 87,
+   "attr": null
+  },
+  "BVB-7109": {
+   "sid": 132607,
+   "lid": "bundesliga",
+   "ovr": 70,
+   "attr": null
+  },
+  "SGE-192207": {
+   "sid": 1474296,
+   "lid": "bundesliga",
+   "ovr": 78,
+   "attr": null
+  },
+  "SGE-82404": {
+   "sid": 939830,
+   "lid": "bundesliga",
+   "ovr": 83,
+   "attr": null
+  },
+  "SGE-150860": {
+   "sid": 997012,
+   "lid": "bundesliga",
+   "ovr": 78,
+   "attr": null
+  },
+  "SGE-178658": {
+   "sid": 1192318,
+   "lid": "bundesliga",
+   "ovr": 78,
+   "attr": null
+  },
+  "SGE-193605": {
+   "sid": 1440948,
+   "lid": "bundesliga",
+   "ovr": 80,
+   "attr": null
+  },
+  "SGE-7531": {
+   "sid": 790965,
+   "lid": "bundesliga",
+   "ovr": 80,
+   "attr": null
+  },
+  "SGE-140": {
+   "sid": 66518,
+   "lid": "bundesliga",
+   "ovr": 77,
+   "attr": null
+  },
+  "SGE-205537": {
+   "sid": 1149113,
+   "lid": "bundesliga",
+   "ovr": 76,
+   "attr": null
+  },
+  "SGE-275141": {
+   "sid": 1977245,
+   "lid": "bundesliga",
+   "ovr": 71,
+   "attr": null
+  },
+  "SGE-6701": {
+   "sid": 40239,
+   "lid": "bundesliga",
+   "ovr": 70,
+   "attr": null
+  },
+  "SGE-249811": {
+   "sid": 1501641,
+   "lid": "bundesliga",
+   "ovr": 72,
+   "attr": null
+  },
+  "SGE-9479": {
+   "sid": 581302,
+   "lid": "bundesliga",
+   "ovr": 78,
+   "attr": null
+  },
+  "SGE-213880": {
+   "sid": 1403018,
+   "lid": "bundesliga",
+   "ovr": 72,
+   "attr": null
+  },
+  "SGE-171714": {
+   "sid": 1048569,
+   "lid": "bundesliga",
+   "ovr": 78,
+   "attr": null
+  },
+  "SCF-123287": {
+   "sid": 980626,
+   "lid": "bundesliga",
+   "ovr": 82,
+   "attr": null
+  },
+  "SGE-9387": {
+   "sid": 27214,
+   "lid": "bundesliga",
+   "ovr": 70,
+   "attr": null
+  },
+  "HSV-3466": {
+   "sid": 135264,
+   "lid": "bundesliga",
+   "ovr": 70,
+   "attr": null
+  },
+  "HSV-112948": {
+   "sid": 904835,
+   "lid": "bundesliga",
+   "ovr": 79,
+   "attr": null
+  },
+  "HSV-8862": {
+   "sid": 901892,
+   "lid": "bundesliga",
+   "ovr": 79,
+   "attr": null
+  },
+  "HSV-50215": {
+   "sid": 798303,
+   "lid": "bundesliga",
+   "ovr": 74,
+   "attr": null
+  },
+  "HSV-6539": {
+   "sid": 842526,
+   "lid": "bundesliga",
+   "ovr": 68,
+   "attr": null
+  },
+  "HSV-149995": {
+   "sid": 1064305,
+   "lid": "bundesliga",
+   "ovr": 77,
+   "attr": null
+  },
+  "HSV-102974": {
+   "sid": 973564,
+   "lid": "bundesliga",
+   "ovr": 77,
+   "attr": null
+  },
+  "HSV-6551": {
+   "sid": 801003,
+   "lid": "bundesliga",
+   "ovr": 74,
+   "attr": null
+  },
+  "HSV-135467": {
+   "sid": 999030,
+   "lid": "bundesliga",
+   "ovr": 74,
+   "attr": null
+  },
+  "HSV-146024": {
+   "sid": 1030355,
+   "lid": "bundesliga",
+   "ovr": 73,
+   "attr": null
+  },
+  "HSV-10078": {
+   "sid": 113442,
+   "lid": "bundesliga",
+   "ovr": 76,
+   "attr": null
+  },
+  "VFB-6928": {
+   "sid": 794298,
+   "lid": "bundesliga",
+   "ovr": 81,
+   "attr": null
+  },
+  "VFB-33242": {
+   "sid": 878081,
+   "lid": "bundesliga",
+   "ovr": 81,
+   "attr": null
+  },
+  "WOB-184970": {
+   "sid": 1127790,
+   "lid": "bundesliga",
+   "ovr": 78,
+   "attr": null
+  },
+  "VFB-189873": {
+   "sid": 1126569,
+   "lid": "bundesliga",
+   "ovr": 80,
+   "attr": null
+  },
+  "VFB-128565": {
+   "sid": 901882,
+   "lid": "bundesliga",
+   "ovr": 85,
+   "attr": null
+  },
+  "VFB-123333": {
+   "sid": 990201,
+   "lid": "bundesliga",
+   "ovr": 84,
+   "attr": null
+  },
+  "VFB-206": {
+   "sid": 891510,
+   "lid": "bundesliga",
+   "ovr": 79,
+   "attr": null
+  },
+  "VFB-7079": {
+   "sid": 801030,
+   "lid": "bundesliga",
+   "ovr": 75,
+   "attr": null
+  },
+  "VFB-190": {
+   "sid": 861981,
+   "lid": "bundesliga",
+   "ovr": 78,
+   "attr": null
+  },
+  "TSG-6836": {
+   "sid": 253993,
+   "lid": "bundesliga",
+   "ovr": 76,
+   "attr": null
+  },
+  "VFB-246680": {
+   "sid": 1566307,
+   "lid": "bundesliga",
+   "ovr": 70,
+   "attr": null
+  },
+  "VFB-6549": {
+   "sid": 788949,
+   "lid": "bundesliga",
+   "ovr": 81,
+   "attr": null
+  },
+  "VFB-221768": {
+   "sid": 1418649,
+   "lid": "bundesliga",
+   "ovr": 79,
+   "attr": null
+  },
+  "VFB-6483": {
+   "sid": 826205,
+   "lid": "bundesliga",
+   "ovr": 71,
+   "attr": null
+  },
+  "VFB-6523": {
+   "sid": 906278,
+   "lid": "bundesliga",
+   "ovr": 79,
+   "attr": null
+  },
+  "VFB-7748": {
+   "sid": 863271,
+   "lid": "bundesliga",
+   "ovr": 80,
+   "attr": null
+  },
+  "VFB-170857": {
+   "sid": 1979970,
+   "lid": "bundesliga",
+   "ovr": 71,
+   "attr": null
+  },
+  "HEI-111071": {
+   "sid": 962898,
+   "lid": "bundesliga",
+   "ovr": 70,
+   "attr": null
+  },
+  "VFB-135485": {
+   "sid": 1009334,
+   "lid": "bundesliga",
+   "ovr": 77,
+   "attr": null
+  },
+  "VFB-157263": {
+   "sid": 916943,
+   "lid": "bundesliga",
+   "ovr": 82,
+   "attr": null
+  },
+  "VFB-6603": {
+   "sid": 152463,
+   "lid": "bundesliga",
+   "ovr": 73,
+   "attr": null
+  },
+  "VFB-67401": {
+   "sid": 930339,
+   "lid": "bundesliga",
+   "ovr": 65,
+   "attr": null
+  },
+  "B04-202532": {
+   "sid": 1407524,
+   "lid": "bundesliga",
+   "ovr": 81,
+   "attr": null
+  },
+  "SVW-130811": {
+   "sid": 978521,
+   "lid": "bundesliga",
+   "ovr": 75,
+   "attr": null
+  },
+  "B04-189287": {
+   "sid": 1394353,
+   "lid": "bundesliga",
+   "ovr": 77,
+   "attr": null
+  },
+  "B04-1826": {
+   "sid": 280609,
+   "lid": "bundesliga",
+   "ovr": 80,
+   "attr": null
+  },
+  "B04-144715": {
+   "sid": 920379,
+   "lid": "bundesliga",
+   "ovr": 80,
+   "attr": null
+  },
+  "B04-8797": {
+   "sid": 846445,
+   "lid": "bundesliga",
+   "ovr": 77,
+   "attr": null
+  },
+  "B04-6681": {
+   "sid": 142390,
+   "lid": "bundesliga",
+   "ovr": 74,
+   "attr": null
+  },
+  "B04-45": {
+   "sid": 255239,
+   "lid": "bundesliga",
+   "ovr": 76,
+   "attr": null
+  },
+  "B04-144470": {
+   "sid": 975798,
+   "lid": "bundesliga",
+   "ovr": 81,
+   "attr": null
+  },
+  "B04-33524": {
+   "sid": 796047,
+   "lid": "bundesliga",
+   "ovr": 81,
+   "attr": null
+  },
+  "B04-287850": {
+   "sid": 1568522,
+   "lid": "bundesliga",
+   "ovr": 76,
+   "attr": null
+  },
+  "B04-64713": {
+   "sid": 883262,
+   "lid": "bundesliga",
+   "ovr": 84,
+   "attr": null
+  },
+  "B04-176718": {
+   "sid": 1003339,
+   "lid": "bundesliga",
+   "ovr": 84,
+   "attr": null
+  },
+  "B04-136039": {
+   "sid": 1006489,
+   "lid": "bundesliga",
+   "ovr": 81,
+   "attr": null
+  },
+  "B04-45611": {
+   "sid": 168903,
+   "lid": "bundesliga",
+   "ovr": 77,
+   "attr": null
+  },
+  "B04-184979": {
+   "sid": 1138778,
+   "lid": "bundesliga",
+   "ovr": 71,
+   "attr": null
+  },
+  "B04-9923": {
+   "sid": 171919,
+   "lid": "bundesliga",
+   "ovr": 83,
+   "attr": null
+  },
+  "B04-6931": {
+   "sid": 96832,
+   "lid": "bundesliga",
+   "ovr": 75,
+   "attr": null
+  },
+  "RBL-169295": {
+   "sid": 1121923,
+   "lid": "bundesliga",
+   "ovr": 80,
+   "attr": null
+  },
+  "RBL-154110": {
+   "sid": 1088896,
+   "lid": "bundesliga",
+   "ovr": 79,
+   "attr": null
+  },
+  "RBL-211796": {
+   "sid": 1426577,
+   "lid": "bundesliga",
+   "ovr": 76,
+   "attr": null
+  },
+  "RBL-289697": {
+   "sid": 2269705,
+   "lid": "bundesliga",
+   "ovr": 71,
+   "attr": null
+  },
+  "RBL-212636": {
+   "sid": 1418623,
+   "lid": "bundesliga",
+   "ovr": 77,
+   "attr": null
+  },
+  "RBL-191102": {
+   "sid": 1198075,
+   "lid": "bundesliga",
+   "ovr": 80,
+   "attr": null
+  },
+  "RBL-175951": {
+   "sid": 1155383,
+   "lid": "bundesliga",
+   "ovr": 78,
+   "attr": null
+  },
+  "RBL-56829": {
+   "sid": 825956,
+   "lid": "bundesliga",
+   "ovr": 84,
+   "attr": null
+  },
+  "RBL-113038": {
+   "sid": 976575,
+   "lid": "bundesliga",
+   "ovr": 82,
+   "attr": null
+  },
+  "BMG-150517": {
+   "sid": 1048650,
+   "lid": "bundesliga",
+   "ovr": 80,
+   "attr": null
+  },
+  "RBL-264272": {
+   "sid": 1900995,
+   "lid": "bundesliga",
+   "ovr": 59,
+   "attr": null
+  },
+  "RBL-171405": {
+   "sid": 976421,
+   "lid": "bundesliga",
+   "ovr": 83,
+   "attr": null
+  },
+  "RBL-9905": {
+   "sid": 856076,
+   "lid": "bundesliga",
+   "ovr": 82,
+   "attr": null
+  },
+  "RBL-9537": {
+   "sid": 136924,
+   "lid": "bundesliga",
+   "ovr": 79,
+   "attr": null
+  },
+  "RBL-6634": {
+   "sid": 856553,
+   "lid": "bundesliga",
+   "ovr": 79,
+   "attr": null
+  },
+  "RBL-156": {
+   "sid": 319857,
+   "lid": "bundesliga",
+   "ovr": 77,
+   "attr": null
+  },
+  "RBL-9536": {
+   "sid": 319853,
+   "lid": "bundesliga",
+   "ovr": 73,
+   "attr": null
+  },
+  "RBL-214538": {
+   "sid": 1146250,
+   "lid": "bundesliga",
+   "ovr": 72,
+   "attr": null
+  },
+  "RBL-75739": {
+   "sid": 934385,
+   "lid": "bundesliga",
+   "ovr": 82,
+   "attr": null
+  },
+  "RBL-45569": {
+   "sid": 148263,
+   "lid": "bundesliga",
+   "ovr": 67,
+   "attr": null
+  },
+  "ROM-24217": {
+   "sid": 798820,
+   "lid": "serie-a",
+   "ovr": 79,
+   "attr": null
+  },
+  "BOL-2040": {
+   "sid": 294597,
+   "lid": "serie-a",
+   "ovr": 76,
+   "attr": null
+  },
+  "FIO-102591": {
+   "sid": 958982,
+   "lid": "serie-a",
+   "ovr": 80,
+   "attr": null
+  },
+  "BOL-117606": {
+   "sid": 971005,
+   "lid": "serie-a",
+   "ovr": 79,
+   "attr": null
+  },
+  "BOL-1886": {
+   "sid": 793645,
+   "lid": "serie-a",
+   "ovr": 80,
+   "attr": null
+  },
+  "BOL-34638": {
+   "sid": 907152,
+   "lid": "serie-a",
+   "ovr": 79,
+   "attr": null
+  },
+  "BOL-23135": {
+   "sid": 814882,
+   "lid": "serie-a",
+   "ovr": 77,
+   "attr": null
+  },
+  "BOL-2017": {
+   "sid": 826064,
+   "lid": "serie-a",
+   "ovr": 79,
+   "attr": null
+  },
+  "BOL-99013": {
+   "sid": 928796,
+   "lid": "serie-a",
+   "ovr": 77,
+   "attr": null
+  },
+  "INT-7900": {
+   "sid": 19352,
+   "lid": "serie-a",
+   "ovr": 75,
+   "attr": null
+  },
+  "BOL-32491": {
+   "sid": 855829,
+   "lid": "serie-a",
+   "ovr": 80,
+   "attr": null
+  },
+  "BOL-16197": {
+   "sid": 933264,
+   "lid": "serie-a",
+   "ovr": 79,
+   "attr": null
+  },
+  "JUV-111777": {
+   "sid": 965264,
+   "lid": "serie-a",
+   "ovr": 78,
+   "attr": null
+  },
+  "BOL-152702": {
+   "sid": 1085913,
+   "lid": "serie-a",
+   "ovr": 78,
+   "attr": null
+  },
+  "BOL-127143": {
+   "sid": 928104,
+   "lid": "serie-a",
+   "ovr": 76,
+   "attr": null
+  },
+  "BOL-56645": {
+   "sid": 862697,
+   "lid": "serie-a",
+   "ovr": 74,
+   "attr": null
+  },
+  "BOL-2292": {
+   "sid": 14718,
+   "lid": "serie-a",
+   "ovr": 71,
+   "attr": null
+  },
+  "BOL-1797": {
+   "sid": 44906,
+   "lid": "serie-a",
+   "ovr": 80,
+   "attr": null
+  },
+  "BOL-286326": {
+   "sid": 1526395,
+   "lid": "serie-a",
+   "ovr": 54,
+   "attr": null
+  },
+  "ATA-129947": {
+   "sid": 960441,
+   "lid": "serie-a",
+   "ovr": 83,
+   "attr": null
+  },
+  "ATA-142140": {
+   "sid": 1019442,
+   "lid": "serie-a",
+   "ovr": 79,
+   "attr": null
+  },
+  "ATA-114117": {
+   "sid": 865651,
+   "lid": "serie-a",
+   "ovr": 82,
+   "attr": null
+  },
+  "ATA-2681": {
+   "sid": 807301,
+   "lid": "serie-a",
+   "ovr": 82,
+   "attr": null
+  },
+  "ATA-120679": {
+   "sid": 839156,
+   "lid": "serie-a",
+   "ovr": 83,
+   "attr": null
+  },
+  "BOL-176664": {
+   "sid": 1065261,
+   "lid": "serie-a",
+   "ovr": 82,
+   "attr": null
+  },
+  "ATA-152528": {
+   "sid": 984184,
+   "lid": "serie-a",
+   "ovr": 79,
+   "attr": null
+  },
+  "ATA-81440": {
+   "sid": 946888,
+   "lid": "serie-a",
+   "ovr": 84,
+   "attr": null
+  },
+  "ATA-3553": {
+   "sid": 190437,
+   "lid": "serie-a",
+   "ovr": 78,
+   "attr": null
+  },
+  "ATA-130420": {
+   "sid": 980624,
+   "lid": "serie-a",
+   "ovr": 78,
+   "attr": null
+  },
+  "NAP-30629": {
+   "sid": 838232,
+   "lid": "serie-a",
+   "ovr": 79,
+   "attr": null
+  },
+  "ATA-1748": {
+   "sid": 826185,
+   "lid": "serie-a",
+   "ovr": 80,
+   "attr": null
+  },
+  "CAG-102211": {
+   "sid": 902019,
+   "lid": "serie-a",
+   "ovr": 79,
+   "attr": null
+  },
+  "ATA-151933": {
+   "sid": 1012177,
+   "lid": "serie-a",
+   "ovr": 78,
+   "attr": null
+  },
+  "ATA-167098": {
+   "sid": 973437,
+   "lid": "serie-a",
+   "ovr": 80,
+   "attr": null
+  },
+  "ATA-7786": {
+   "sid": 142148,
+   "lid": "serie-a",
+   "ovr": 78,
+   "attr": null
+  },
+  "ATA-153990": {
+   "sid": 1012176,
+   "lid": "serie-a",
+   "ovr": 81,
+   "attr": null
+  },
+  "ATA-167031": {
+   "sid": 1157713,
+   "lid": "serie-a",
+   "ovr": 81,
+   "attr": null
+  },
+  "UDI-151299": {
+   "sid": 1063373,
+   "lid": "serie-a",
+   "ovr": 79,
+   "attr": null
+  },
+  "ATA-246518": {
+   "sid": 1432414,
+   "lid": "serie-a",
+   "ovr": 66,
+   "attr": null
+  },
+  "ATA-102220": {
+   "sid": 865646,
+   "lid": "serie-a",
+   "ovr": 86,
+   "attr": null
+  },
+  "ATA-1767": {
+   "sid": 176301,
+   "lid": "serie-a",
+   "ovr": 74,
+   "attr": null
+  },
+  "JUV-2105": {
+   "sid": 161325,
+   "lid": "serie-a",
+   "ovr": 72,
+   "attr": null
+  },
+  "JUV-8990": {
+   "sid": 887766,
+   "lid": "serie-a",
+   "ovr": 78,
+   "attr": null
+  },
+  "JUV-4121": {
+   "sid": 367056,
+   "lid": "serie-a",
+   "ovr": 77,
+   "attr": null
+  },
+  "JUV-1751": {
+   "sid": 363860,
+   "lid": "serie-a",
+   "ovr": 82,
+   "attr": null
+  },
+  "JUV-6507": {
+   "sid": 881931,
+   "lid": "serie-a",
+   "ovr": 83,
+   "attr": null
+  },
+  "JUV-7693": {
+   "sid": 803033,
+   "lid": "serie-a",
+   "ovr": 79,
+   "attr": null
+  },
+  "JUV-124865": {
+   "sid": 917048,
+   "lid": "serie-a",
+   "ovr": 80,
+   "attr": null
+  },
+  "JUV-141295": {
+   "sid": 965330,
+   "lid": "serie-a",
+   "ovr": 83,
+   "attr": null
+  },
+  "BOL-22113": {
+   "sid": 818481,
+   "lid": "serie-a",
+   "ovr": 82,
+   "attr": null
+  },
+  "JUV-153130": {
+   "sid": 1128063,
+   "lid": "serie-a",
+   "ovr": 78,
+   "attr": null
+  },
+  "JUV-121860": {
+   "sid": 988037,
+   "lid": "serie-a",
+   "ovr": 77,
+   "attr": null
+  },
+  "ROM-29622": {
+   "sid": 893008,
+   "lid": "serie-a",
+   "ovr": 80,
+   "attr": null
+  },
+  "JUV-4393": {
+   "sid": 865167,
+   "lid": "serie-a",
+   "ovr": 82,
+   "attr": null
+  },
+  "FIO-2027": {
+   "sid": 139273,
+   "lid": "serie-a",
+   "ovr": 73,
+   "attr": null
+  },
+  "LAZ-23703": {
+   "sid": 798002,
+   "lid": "serie-a",
+   "ovr": 73,
+   "attr": null
+  },
+  "NAP-2386": {
+   "sid": 377512,
+   "lid": "serie-a",
+   "ovr": 71,
+   "attr": null
+  },
+  "BOL-98606": {
+   "sid": 909991,
+   "lid": "serie-a",
+   "ovr": 77,
+   "attr": null
+  },
+  "USL-16794": {
+   "sid": 886628,
+   "lid": "serie-a",
+   "ovr": 70,
+   "attr": null
+  },
+  "NAP-161310": {
+   "sid": 108484,
+   "lid": "serie-a",
+   "ovr": 74,
+   "attr": null
+  },
+  "HVE-111555": {
+   "sid": 976025,
+   "lid": "serie-a",
+   "ovr": 75,
+   "attr": null
+  },
+  "HVE-2891": {
+   "sid": 253391,
+   "lid": "serie-a",
+   "ovr": 72,
+   "attr": null
+  },
+  "USL-167394": {
+   "sid": 978327,
+   "lid": "serie-a",
+   "ovr": 70,
+   "attr": null
+  },
+  "USL-8658": {
+   "sid": 804621,
+   "lid": "serie-a",
+   "ovr": 72,
+   "attr": null
+  },
+  "TOR-67697": {
+   "sid": 877371,
+   "lid": "serie-a",
+   "ovr": 76,
+   "attr": null
+  },
+  "CRE-57805": {
+   "sid": 849274,
+   "lid": "serie-a",
+   "ovr": 70,
+   "attr": null
+  },
+  "USL-177262": {
+   "sid": 1175854,
+   "lid": "serie-a",
+   "ovr": 69,
+   "attr": null
+  },
+  "USL-188103": {
+   "sid": 1142149,
+   "lid": "serie-a",
+   "ovr": 72,
+   "attr": null
+  },
+  "USL-125069": {
+   "sid": 1019125,
+   "lid": "serie-a",
+   "ovr": 72,
+   "attr": null
+  },
+  "USL-116223": {
+   "sid": 984998,
+   "lid": "serie-a",
+   "ovr": 74,
+   "attr": null
+  },
+  "USL-286314": {
+   "sid": 1149067,
+   "lid": "serie-a",
+   "ovr": 59,
+   "attr": null
+  },
+  "USL-246341": {
+   "sid": 1651825,
+   "lid": "serie-a",
+   "ovr": 76,
+   "attr": null
+  },
+  "USL-213073": {
+   "sid": 1090374,
+   "lid": "serie-a",
+   "ovr": 73,
+   "attr": null
+  },
+  "USL-77469": {
+   "sid": 945616,
+   "lid": "serie-a",
+   "ovr": 73,
+   "attr": null
+  },
+  "USL-185129": {
+   "sid": 1002045,
+   "lid": "serie-a",
+   "ovr": 70,
+   "attr": null
+  },
+  "USL-150530": {
+   "sid": 1014287,
+   "lid": "serie-a",
+   "ovr": 73,
+   "attr": null
+  },
+  "USL-117369": {
+   "sid": 981470,
+   "lid": "serie-a",
+   "ovr": 68,
+   "attr": null
+  },
+  "USL-113590": {
+   "sid": 1392819,
+   "lid": "serie-a",
+   "ovr": 69,
+   "attr": null
+  },
+  "USL-56649": {
+   "sid": 256667,
+   "lid": "serie-a",
+   "ovr": 79,
+   "attr": null
+  },
+  "PAR-204288": {
+   "sid": 1486729,
+   "lid": "serie-a",
+   "ovr": 74,
+   "attr": null
+  },
+  "PAR-31881": {
+   "sid": 856065,
+   "lid": "serie-a",
+   "ovr": 70,
+   "attr": null
+  },
+  "PAR-92051": {
+   "sid": 934384,
+   "lid": "serie-a",
+   "ovr": 79,
+   "attr": null
+  },
+  "PAR-165900": {
+   "sid": 1110136,
+   "lid": "serie-a",
+   "ovr": 79,
+   "attr": null
+  },
+  "PAR-97894": {
+   "sid": 876259,
+   "lid": "serie-a",
+   "ovr": 76,
+   "attr": null
+  },
+  "FIO-171123": {
+   "sid": 1067204,
+   "lid": "serie-a",
+   "ovr": 76,
+   "attr": null
+  },
+  "PAR-152734": {
+   "sid": 1086199,
+   "lid": "serie-a",
+   "ovr": 69,
+   "attr": null
+  },
+  "PAR-42613": {
+   "sid": 891346,
+   "lid": "serie-a",
+   "ovr": 73,
+   "attr": null
+  },
+  "PAR-191285": {
+   "sid": 1201388,
+   "lid": "serie-a",
+   "ovr": 74,
+   "attr": null
+  },
+  "PAR-289179": {
+   "sid": 1542692,
+   "lid": "serie-a",
+   "ovr": 66,
+   "attr": null
+  },
+  "COM-8698": {
+   "sid": 604232,
+   "lid": "serie-a",
+   "ovr": 77,
+   "attr": null
+  },
+  "PAR-212729": {
+   "sid": 1516324,
+   "lid": "serie-a",
+   "ovr": 76,
+   "attr": null
+  },
+  "PAR-97151": {
+   "sid": 958517,
+   "lid": "serie-a",
+   "ovr": 71,
+   "attr": null
+  },
+  "PAR-136714": {
+   "sid": 990411,
+   "lid": "serie-a",
+   "ovr": 76,
+   "attr": null
+  },
+  "MIL-145": {
+   "sid": 817957,
+   "lid": "serie-a",
+   "ovr": 84,
+   "attr": null
+  },
+  "MIL-43": {
+   "sid": 15466,
+   "lid": "serie-a",
+   "ovr": 80,
+   "attr": null
+  },
+  "MIL-3368": {
+   "sid": 250737,
+   "lid": "serie-a",
+   "ovr": 82,
+   "attr": null
+  },
+  "MIL-32642": {
+   "sid": 805465,
+   "lid": "serie-a",
+   "ovr": 78,
+   "attr": null
+  },
+  "MIL-8858": {
+   "sid": 901891,
+   "lid": "serie-a",
+   "ovr": 81,
+   "attr": null
+  },
+  "MIL-8159": {
+   "sid": 284441,
+   "lid": "serie-a",
+   "ovr": 78,
+   "attr": null
+  },
+  "CRE-156527": {
+   "sid": 1000366,
+   "lid": "serie-a",
+   "ovr": 71,
+   "attr": null
+  },
+  "MIL-112969": {
+   "sid": 965893,
+   "lid": "serie-a",
+   "ovr": 84,
+   "attr": null
+  },
+  "MIL-11528": {
+   "sid": 788255,
+   "lid": "serie-a",
+   "ovr": 78,
+   "attr": null
+  },
+  "MIL-153556": {
+   "sid": 1001828,
+   "lid": "serie-a",
+   "ovr": 80,
+   "attr": null
+  },
+  "MIL-1753": {
+   "sid": 826195,
+   "lid": "serie-a",
+   "ovr": 80,
+   "attr": null
+  },
+  "CRE-144950": {
+   "sid": 1034303,
+   "lid": "serie-a",
+   "ovr": 73,
+   "attr": null
+  },
+  "MIL-278015": {
+   "sid": 1983939,
+   "lid": "serie-a",
+   "ovr": 63,
+   "attr": null
+  },
+  "MIL-8390": {
+   "sid": 191210,
+   "lid": "serie-a",
+   "ovr": 86,
+   "attr": null
+  },
+  "MIL-251128": {
+   "sid": 1403294,
+   "lid": "serie-a",
+   "ovr": 70,
+   "attr": null
+  },
+  "MIL-2476": {
+   "sid": 136856,
+   "lid": "serie-a",
+   "ovr": 77,
+   "attr": null
+  },
+  "PAR-157538": {
+   "sid": 1099296,
+   "lid": "serie-a",
+   "ovr": 80,
+   "attr": null
+  },
+  "USL-1792": {
+   "sid": 893640,
+   "lid": "serie-a",
+   "ovr": 70,
+   "attr": null
+  },
+  "FIO-97879": {
+   "sid": 901850,
+   "lid": "serie-a",
+   "ovr": 80,
+   "attr": null
+  },
+  "FIO-192307": {
+   "sid": 1114422,
+   "lid": "serie-a",
+   "ovr": 78,
+   "attr": null
+  },
+  "UDI-190552": {
+   "sid": 1444690,
+   "lid": "serie-a",
+   "ovr": 81,
+   "attr": null
+  },
+  "FIO-99858": {
+   "sid": 928800,
+   "lid": "serie-a",
+   "ovr": 77,
+   "attr": null
+  },
+  "FIO-16474": {
+   "sid": 822518,
+   "lid": "serie-a",
+   "ovr": 80,
+   "attr": null
+  },
+  "FIO-15110": {
+   "sid": 847467,
+   "lid": "serie-a",
+   "ovr": 76,
+   "attr": null
+  },
+  "FIO-1778": {
+   "sid": 893998,
+   "lid": "serie-a",
+   "ovr": 76,
+   "attr": null
+  },
+  "FIO-129801": {
+   "sid": 972886,
+   "lid": "serie-a",
+   "ovr": 75,
+   "attr": null
+  },
+  "FIO-3188": {
+   "sid": 69378,
+   "lid": "serie-a",
+   "ovr": 82,
+   "attr": null
+  },
+  "FIO-24293": {
+   "sid": 860306,
+   "lid": "serie-a",
+   "ovr": 72,
+   "attr": null
+  },
+  "FIO-2786": {
+   "sid": 139272,
+   "lid": "serie-a",
+   "ovr": 69,
+   "attr": null
+  },
+  "UDI-2013": {
+   "sid": 864898,
+   "lid": "serie-a",
+   "ovr": 80,
+   "attr": null
+  },
+  "UDI-84493": {
+   "sid": 796455,
+   "lid": "serie-a",
+   "ovr": 72,
+   "attr": null
+  },
+  "UDI-274050": {
+   "sid": 1536811,
+   "lid": "serie-a",
+   "ovr": 73,
+   "attr": null
+  },
+  "UDI-3896": {
+   "sid": 830858,
+   "lid": "serie-a",
+   "ovr": 78,
+   "attr": null
+  },
+  "UDI-64243": {
+   "sid": 825271,
+   "lid": "serie-a",
+   "ovr": 74,
+   "attr": null
+  },
+  "UDI-7567": {
+   "sid": 904887,
+   "lid": "serie-a",
+   "ovr": 79,
+   "attr": null
+  },
+  "UDI-187404": {
+   "sid": 1154894,
+   "lid": "serie-a",
+   "ovr": 74,
+   "attr": null
+  },
+  "UDI-822": {
+   "sid": 351434,
+   "lid": "serie-a",
+   "ovr": 75,
+   "attr": null
+  },
+  "UDI-202427": {
+   "sid": 1476922,
+   "lid": "serie-a",
+   "ovr": 70,
+   "attr": null
+  },
+  "UDI-31065": {
+   "sid": 227894,
+   "lid": "serie-a",
+   "ovr": 76,
+   "attr": null
+  },
+  "UDI-2996": {
+   "sid": 922928,
+   "lid": "serie-a",
+   "ovr": 75,
+   "attr": null
+  },
+  "HVE-10887": {
+   "sid": 575852,
+   "lid": "serie-a",
+   "ovr": 73,
+   "attr": null
+  },
+  "UDI-150522": {
+   "sid": 1009661,
+   "lid": "serie-a",
+   "ovr": 69,
+   "attr": null
+  },
+  "UDI-8462": {
+   "sid": 892979,
+   "lid": "serie-a",
+   "ovr": 81,
+   "attr": null
+  },
+  "COM-9204": {
+   "sid": 798147,
+   "lid": "serie-a",
+   "ovr": 74,
+   "attr": null
+  },
+  "UDI-8111": {
+   "sid": 58351,
+   "lid": "serie-a",
+   "ovr": 73,
+   "attr": null
+  },
+  "TOR-777": {
+   "sid": 848279,
+   "lid": "serie-a",
+   "ovr": 72,
+   "attr": null
+  },
+  "UDI-172425": {
+   "sid": 1136399,
+   "lid": "serie-a",
+   "ovr": 75,
+   "attr": null
+  },
+  "UDI-65480": {
+   "sid": 891656,
+   "lid": "serie-a",
+   "ovr": 81,
+   "attr": null
+  },
+  "TOR-1789": {
+   "sid": 341143,
+   "lid": "serie-a",
+   "ovr": 79,
+   "attr": null
+  },
+  "TOR-81085": {
+   "sid": 856737,
+   "lid": "serie-a",
+   "ovr": 75,
+   "attr": null
+  },
+  "TOR-4119": {
+   "sid": 773409,
+   "lid": "serie-a",
+   "ovr": 75,
+   "attr": null
+  },
+  "TOR-59075": {
+   "sid": 826026,
+   "lid": "serie-a",
+   "ovr": 73,
+   "attr": null
+  },
+  "HVE-160756": {
+   "sid": 1103488,
+   "lid": "serie-a",
+   "ovr": 76,
+   "attr": null
+  },
+  "TOR-7843": {
+   "sid": 357596,
+   "lid": "serie-a",
+   "ovr": 78,
+   "attr": null
+  },
+  "TOR-179558": {
+   "sid": 1016788,
+   "lid": "serie-a",
+   "ovr": 78,
+   "attr": null
+  },
+  "FIO-2230": {
+   "sid": 548178,
+   "lid": "serie-a",
+   "ovr": 77,
+   "attr": null
+  },
+  "TOR-172940": {
+   "sid": 1142612,
+   "lid": "serie-a",
+   "ovr": 73,
+   "attr": null
+  },
+  "PAR-171586": {
+   "sid": 965009,
+   "lid": "serie-a",
+   "ovr": 73,
+   "attr": null
+  },
+  "TOR-123689": {
+   "sid": 1089453,
+   "lid": "serie-a",
+   "ovr": 77,
+   "attr": null
+  },
+  "TOR-23287": {
+   "sid": 840414,
+   "lid": "serie-a",
+   "ovr": 75,
+   "attr": null
+  },
+  "TOR-1776": {
+   "sid": 122848,
+   "lid": "serie-a",
+   "ovr": 71,
+   "attr": null
+  },
+  "TOR-97893": {
+   "sid": 1084846,
+   "lid": "serie-a",
+   "ovr": 75,
+   "attr": null
+  },
+  "TOR-217847": {
+   "sid": 1519010,
+   "lid": "serie-a",
+   "ovr": 64,
+   "attr": null
+  },
+  "INT-3220": {
+   "sid": 823984,
+   "lid": "serie-a",
+   "ovr": 87,
+   "attr": null
+  },
+  "INT-215433": {
+   "sid": 1156616,
+   "lid": "serie-a",
+   "ovr": 81,
+   "attr": null
+  },
+  "INT-152738": {
+   "sid": 1086223,
+   "lid": "serie-a",
+   "ovr": 80,
+   "attr": null
+  },
+  "INT-1911": {
+   "sid": 363856,
+   "lid": "serie-a",
+   "ovr": 85,
+   "attr": null
+  },
+  "INT-2097": {
+   "sid": 138605,
+   "lid": "serie-a",
+   "ovr": 80,
+   "attr": null
+  },
+  "INT-30821": {
+   "sid": 284361,
+   "lid": "serie-a",
+   "ovr": 85,
+   "attr": null
+  },
+  "INT-168656": {
+   "sid": 1048889,
+   "lid": "serie-a",
+   "ovr": 82,
+   "attr": null
+  },
+  "INT-154013": {
+   "sid": 1091303,
+   "lid": "serie-a",
+   "ovr": 82,
+   "attr": null
+  },
+  "INT-115074": {
+   "sid": 977679,
+   "lid": "serie-a",
+   "ovr": 80,
+   "attr": null
+  },
+  "INT-143": {
+   "sid": 383560,
+   "lid": "serie-a",
+   "ovr": 82,
+   "attr": null
+  },
+  "INT-1834": {
+   "sid": 826188,
+   "lid": "serie-a",
+   "ovr": 86,
+   "attr": null
+  },
+  "INT-193": {
+   "sid": 906275,
+   "lid": "serie-a",
+   "ovr": 85,
+   "attr": null
+  },
+  "INT-101415": {
+   "sid": 845291,
+   "lid": "serie-a",
+   "ovr": 81,
+   "attr": null
+  },
+  "LAZ-2475": {
+   "sid": 308182,
+   "lid": "serie-a",
+   "ovr": 77,
+   "attr": null
+  },
+  "INT-2819": {
+   "sid": 301162,
+   "lid": "serie-a",
+   "ovr": 68,
+   "attr": null
+  },
+  "LAZ-2158": {
+   "sid": 293581,
+   "lid": "serie-a",
+   "ovr": 78,
+   "attr": null
+  },
+  "FIO-3851": {
+   "sid": 804909,
+   "lid": "serie-a",
+   "ovr": 78,
+   "attr": null
+  },
+  "LAZ-128007": {
+   "sid": 976381,
+   "lid": "serie-a",
+   "ovr": 80,
+   "attr": null
+  },
+  "SAS-2016": {
+   "sid": 826198,
+   "lid": "serie-a",
+   "ovr": 80,
+   "attr": null
+  },
+  "LAZ-152787": {
+   "sid": 1017649,
+   "lid": "serie-a",
+   "ovr": 75,
+   "attr": null
+  },
+  "LAZ-171448": {
+   "sid": 1069244,
+   "lid": "serie-a",
+   "ovr": 77,
+   "attr": null
+  },
+  "INT-2200": {
+   "sid": 835600,
+   "lid": "serie-a",
+   "ovr": 81,
+   "attr": null
+  },
+  "LAZ-97537": {
+   "sid": 959806,
+   "lid": "serie-a",
+   "ovr": 81,
+   "attr": null
+  },
+  "LAZ-187476": {
+   "sid": 1389689,
+   "lid": "serie-a",
+   "ovr": 74,
+   "attr": null
+  },
+  "LAZ-147781": {
+   "sid": 910121,
+   "lid": "serie-a",
+   "ovr": 76,
+   "attr": null
+  },
+  "LAZ-111220": {
+   "sid": 937324,
+   "lid": "serie-a",
+   "ovr": 80,
+   "attr": null
+  },
+  "LAZ-2329": {
+   "sid": 317301,
+   "lid": "serie-a",
+   "ovr": 76,
+   "attr": null
+  },
+  "LAZ-286550": {
+   "sid": 1547464,
+   "lid": "serie-a",
+   "ovr": 54,
+   "attr": null
+  },
+  "LAZ-80459": {
+   "sid": 944973,
+   "lid": "serie-a",
+   "ovr": 79,
+   "attr": null
+  },
+  "LAZ-1803": {
+   "sid": 826186,
+   "lid": "serie-a",
+   "ovr": 73,
+   "attr": null
+  },
+  "LAZ-2069": {
+   "sid": 267619,
+   "lid": "serie-a",
+   "ovr": 76,
+   "attr": null
+  },
+  "LAZ-2358": {
+   "sid": 273405,
+   "lid": "serie-a",
+   "ovr": 73,
+   "attr": null
+  },
+  "LAZ-219746": {
+   "sid": 1518983,
+   "lid": "serie-a",
+   "ovr": 76,
+   "attr": null
+  },
+  "LAZ-118438": {
+   "sid": 984095,
+   "lid": "serie-a",
+   "ovr": 65,
+   "attr": null
+  },
+  "ROM-2046": {
+   "sid": 256219,
+   "lid": "serie-a",
+   "ovr": 77,
+   "attr": null
+  },
+  "ROM-7457": {
+   "sid": 803039,
+   "lid": "serie-a",
+   "ovr": 86,
+   "attr": null
+  },
+  "ROM-171121": {
+   "sid": 1082406,
+   "lid": "serie-a",
+   "ovr": 82,
+   "attr": null
+  },
+  "ROM-1819": {
+   "sid": 555540,
+   "lid": "serie-a",
+   "ovr": 77,
+   "attr": null
+  },
+  "ROM-265218": {
+   "sid": 1923599,
+   "lid": "serie-a",
+   "ovr": 70,
+   "attr": null
+  },
+  "ROM-179164": {
+   "sid": 1134200,
+   "lid": "serie-a",
+   "ovr": 81,
+   "attr": null
+  },
+  "ROM-102395": {
+   "sid": 974087,
+   "lid": "serie-a",
+   "ovr": 85,
+   "attr": null
+  },
+  "ROM-192382": {
+   "sid": 1175821,
+   "lid": "serie-a",
+   "ovr": 79,
+   "attr": null
+  },
+  "ROM-1844": {
+   "sid": 186855,
+   "lid": "serie-a",
+   "ovr": 79,
+   "attr": null
+  },
+  "ROM-1837": {
+   "sid": 611210,
+   "lid": "serie-a",
+   "ovr": 80,
+   "attr": null
+  },
+  "ROM-32703": {
+   "sid": 353130,
+   "lid": "serie-a",
+   "ovr": 78,
+   "attr": null
+  },
+  "ROM-191705": {
+   "sid": 1384847,
+   "lid": "serie-a",
+   "ovr": 79,
+   "attr": null
+  },
+  "ROM-16735": {
+   "sid": 793986,
+   "lid": "serie-a",
+   "ovr": 86,
+   "attr": null
+  },
+  "ROM-1829": {
+   "sid": 329175,
+   "lid": "serie-a",
+   "ovr": 72,
+   "attr": null
+  },
+  "FIO-2171": {
+   "sid": 835601,
+   "lid": "serie-a",
+   "ovr": 83,
+   "attr": null
+  },
+  "COM-43285": {
+   "sid": 894863,
+   "lid": "serie-a",
+   "ovr": 82,
+   "attr": null
+  },
+  "COM-203511": {
+   "sid": 1171451,
+   "lid": "serie-a",
+   "ovr": 83,
+   "attr": null
+  },
+  "COM-218474": {
+   "sid": 1493689,
+   "lid": "serie-a",
+   "ovr": 80,
+   "attr": null
+  },
+  "COM-156912": {
+   "sid": 1090019,
+   "lid": "serie-a",
+   "ovr": 84,
+   "attr": null
+  },
+  "COM-179159": {
+   "sid": 1086286,
+   "lid": "serie-a",
+   "ovr": 82,
+   "attr": null
+  },
+  "COM-124620": {
+   "sid": 911848,
+   "lid": "serie-a",
+   "ovr": 82,
+   "attr": null
+  },
+  "COM-270254": {
+   "sid": 1800245,
+   "lid": "serie-a",
+   "ovr": 79,
+   "attr": null
+  },
+  "MIL-115245": {
+   "sid": 930189,
+   "lid": "serie-a",
+   "ovr": 80,
+   "attr": null
+  },
+  "COM-178165": {
+   "sid": 1177723,
+   "lid": "serie-a",
+   "ovr": 77,
+   "attr": null
+  },
+  "COM-101350": {
+   "sid": 859027,
+   "lid": "serie-a",
+   "ovr": 79,
+   "attr": null
+  },
+  "COM-247056": {
+   "sid": 1403348,
+   "lid": "serie-a",
+   "ovr": 81,
+   "attr": null
+  },
+  "COM-189493": {
+   "sid": 1142238,
+   "lid": "serie-a",
+   "ovr": 76,
+   "attr": null
+  },
+  "COM-114212": {
+   "sid": 974581,
+   "lid": "serie-a",
+   "ovr": 74,
+   "attr": null
+  },
+  "COM-9471": {
+   "sid": 226974,
+   "lid": "serie-a",
+   "ovr": 75,
+   "attr": null
+  },
+  "CAG-40265": {
+   "sid": 870211,
+   "lid": "serie-a",
+   "ovr": 75,
+   "attr": null
+  },
+  "COM-2187": {
+   "sid": 295133,
+   "lid": "serie-a",
+   "ovr": 73,
+   "attr": null
+  },
+  "COM-9186": {
+   "sid": 599114,
+   "lid": "serie-a",
+   "ovr": 82,
+   "attr": null
+  },
+  "ROM-1823": {
+   "sid": 45925,
+   "lid": "serie-a",
+   "ovr": 75,
+   "attr": null
+  },
+  "GEN-144566": {
+   "sid": 930191,
+   "lid": "serie-a",
+   "ovr": 77,
+   "attr": null
+  },
+  "GEN-178736": {
+   "sid": 1093695,
+   "lid": "serie-a",
+   "ovr": 77,
+   "attr": null
+  },
+  "GEN-154031": {
+   "sid": 1012172,
+   "lid": "serie-a",
+   "ovr": 76,
+   "attr": null
+  },
+  "GEN-24119": {
+   "sid": 918440,
+   "lid": "serie-a",
+   "ovr": 80,
+   "attr": null
+  },
+  "GEN-203350": {
+   "sid": 1511706,
+   "lid": "serie-a",
+   "ovr": 73,
+   "attr": null
+  },
+  "UDI-7710": {
+   "sid": 609206,
+   "lid": "serie-a",
+   "ovr": 72,
+   "attr": null
+  },
+  "GEN-172413": {
+   "sid": 933203,
+   "lid": "serie-a",
+   "ovr": 74,
+   "attr": null
+  },
+  "GEN-2443": {
+   "sid": 184421,
+   "lid": "serie-a",
+   "ovr": 73,
+   "attr": null
+  },
+  "GEN-44032": {
+   "sid": 879746,
+   "lid": "serie-a",
+   "ovr": 80,
+   "attr": null
+  },
+  "GEN-188644": {
+   "sid": 1068885,
+   "lid": "serie-a",
+   "ovr": 78,
+   "attr": null
+  },
+  "GEN-188357": {
+   "sid": 1404639,
+   "lid": "serie-a",
+   "ovr": 69,
+   "attr": null
+  },
+  "GEN-292956": {
+   "sid": 1526308,
+   "lid": "serie-a",
+   "ovr": 60,
+   "attr": null
+  },
+  "GEN-7460": {
+   "sid": 556696,
+   "lid": "serie-a",
+   "ovr": 77,
+   "attr": null
+  },
+  "GEN-75224": {
+   "sid": 595572,
+   "lid": "serie-a",
+   "ovr": 61,
+   "attr": null
+  },
+  "NAP-152770": {
+   "sid": 1086417,
+   "lid": "serie-a",
+   "ovr": 85,
+   "attr": null
+  },
+  "NAP-7571": {
+   "sid": 850993,
+   "lid": "serie-a",
+   "ovr": 80,
+   "attr": null
+  },
+  "NAP-220542": {
+   "sid": 1122835,
+   "lid": "serie-a",
+   "ovr": 81,
+   "attr": null
+  },
+  "NAP-176944": {
+   "sid": 1069560,
+   "lid": "serie-a",
+   "ovr": 79,
+   "attr": null
+  },
+  "NAP-3654": {
+   "sid": 70996,
+   "lid": "serie-a",
+   "ovr": 83,
+   "attr": null
+  },
+  "NAP-7905": {
+   "sid": 879346,
+   "lid": "serie-a",
+   "ovr": 84,
+   "attr": null
+  },
+  "NAP-33628": {
+   "sid": 150383,
+   "lid": "serie-a",
+   "ovr": 80,
+   "attr": null
+  },
+  "NAP-2193": {
+   "sid": 235672,
+   "lid": "serie-a",
+   "ovr": 79,
+   "attr": null
+  },
+  "NAP-126289": {
+   "sid": 907668,
+   "lid": "serie-a",
+   "ovr": 81,
+   "attr": null
+  },
+  "NAP-2487": {
+   "sid": 153257,
+   "lid": "serie-a",
+   "ovr": 80,
+   "attr": null
+  },
+  "NAP-23127": {
+   "sid": 332155,
+   "lid": "serie-a",
+   "ovr": 80,
+   "attr": null
+  },
+  "NAP-2280": {
+   "sid": 870263,
+   "lid": "serie-a",
+   "ovr": 82,
+   "attr": null
+  },
+  "NAP-32754": {
+   "sid": 805078,
+   "lid": "serie-a",
+   "ovr": 80,
+   "attr": null
+  },
+  "NAP-53281": {
+   "sid": 898815,
+   "lid": "serie-a",
+   "ovr": 81,
+   "attr": null
+  },
+  "NAP-2275": {
+   "sid": 356160,
+   "lid": "serie-a",
+   "ovr": 82,
+   "attr": null
+  },
+  "NAP-2344": {
+   "sid": 592794,
+   "lid": "serie-a",
+   "ovr": 80,
+   "attr": null
+  },
+  "LAZ-136113": {
+   "sid": 970928,
+   "lid": "serie-a",
+   "ovr": 76,
+   "attr": null
+  },
+  "SAS-161370": {
+   "sid": 788061,
+   "lid": "serie-a",
+   "ovr": 72,
+   "attr": null
+  },
+  "SAS-192659": {
+   "sid": 1031548,
+   "lid": "serie-a",
+   "ovr": 73,
+   "attr": null
+  },
+  "CAG-111294": {
+   "sid": 975811,
+   "lid": "serie-a",
+   "ovr": 72,
+   "attr": null
+  },
+  "FIO-177054": {
+   "sid": 1012179,
+   "lid": "serie-a",
+   "ovr": 76,
+   "attr": null
+  },
+  "CAG-185019": {
+   "sid": 928777,
+   "lid": "serie-a",
+   "ovr": 77,
+   "attr": null
+  },
+  "HVE-2006": {
+   "sid": 287057,
+   "lid": "serie-a",
+   "ovr": 71,
+   "attr": null
+  },
+  "CAG-1914": {
+   "sid": 328109,
+   "lid": "serie-a",
+   "ovr": 71,
+   "attr": null
+  },
+  "CAG-289720": {
+   "sid": 1151647,
+   "lid": "serie-a",
+   "ovr": 57,
+   "attr": null
+  },
+  "CAG-3728": {
+   "sid": 360396,
+   "lid": "serie-a",
+   "ovr": 74,
+   "attr": null
+  },
+  "CAG-170374": {
+   "sid": 964153,
+   "lid": "serie-a",
+   "ovr": 76,
+   "attr": null
+  },
+  "CAG-286712": {
+   "sid": 1798927,
+   "lid": "serie-a",
+   "ovr": 58,
+   "attr": null
+  },
+  "CAG-82004": {
+   "sid": 947954,
+   "lid": "serie-a",
+   "ovr": 80,
+   "attr": null
+  },
+  "CAG-148992": {
+   "sid": 363380,
+   "lid": "serie-a",
+   "ovr": 70,
+   "attr": null
+  },
+  "PIS-206715": {
+   "sid": 1525367,
+   "lid": "serie-a",
+   "ovr": 72,
+   "attr": null
+  },
+  "CAG-42760": {
+   "sid": 869795,
+   "lid": "serie-a",
+   "ovr": 75,
+   "attr": null
+  },
+  "PIS-56853": {
+   "sid": 826326,
+   "lid": "serie-a",
+   "ovr": 74,
+   "attr": null
+  },
+  "FIO-267944": {
+   "sid": 1526933,
+   "lid": "serie-a",
+   "ovr": 72,
+   "attr": null
+  },
+  "COM-146639": {
+   "sid": 1014583,
+   "lid": "serie-a",
+   "ovr": 72,
+   "attr": null
+  },
+  "CAG-114054": {
+   "sid": 965008,
+   "lid": "serie-a",
+   "ovr": 78,
+   "attr": null
+  },
+  "SAS-8822": {
+   "sid": 932643,
+   "lid": "serie-a",
+   "ovr": 81,
+   "attr": null
+  },
+  "SAS-175891": {
+   "sid": 1155625,
+   "lid": "serie-a",
+   "ovr": 75,
+   "attr": null
+  },
+  "HVE-105081": {
+   "sid": 983601,
+   "lid": "serie-a",
+   "ovr": 76,
+   "attr": null
+  },
+  "SAS-172183": {
+   "sid": 1134351,
+   "lid": "serie-a",
+   "ovr": 81,
+   "attr": null
+  },
+  "JUV-183018": {
+   "sid": 1149288,
+   "lid": "serie-a",
+   "ovr": 76,
+   "attr": null
+  },
+  "SAS-3438": {
+   "sid": 44241,
+   "lid": "serie-a",
+   "ovr": 76,
+   "attr": null
+  },
+  "CAG-188791": {
+   "sid": 105905,
+   "lid": "serie-a",
+   "ovr": 74,
+   "attr": null
+  },
+  "SAS-44033": {
+   "sid": 924973,
+   "lid": "serie-a",
+   "ovr": 78,
+   "attr": null
+  },
+  "SAS-189844": {
+   "sid": 1154898,
+   "lid": "serie-a",
+   "ovr": 73,
+   "attr": null
+  },
+  "SAS-147020": {
+   "sid": 882592,
+   "lid": "serie-a",
+   "ovr": 74,
+   "attr": null
+  },
+  "SAS-53403": {
+   "sid": 933641,
+   "lid": "serie-a",
+   "ovr": 80,
+   "attr": null
+  },
+  "SAS-105441": {
+   "sid": 886243,
+   "lid": "serie-a",
+   "ovr": 75,
+   "attr": null
+  },
+  "COM-126768": {
+   "sid": 989186,
+   "lid": "serie-a",
+   "ovr": 73,
+   "attr": null
+  },
+  "SAS-122407": {
+   "sid": 989276,
+   "lid": "serie-a",
+   "ovr": 73,
+   "attr": null
+  },
+  "SAS-117370": {
+   "sid": 892430,
+   "lid": "serie-a",
+   "ovr": 72,
+   "attr": null
+  },
+  "INT-264821": {
+   "sid": 1461516,
+   "lid": "serie-a",
+   "ovr": 69,
+   "attr": null
+  },
+  "SAS-177039": {
+   "sid": 1069028,
+   "lid": "serie-a",
+   "ovr": 69,
+   "attr": null
+  },
+  "SAS-81179": {
+   "sid": 888971,
+   "lid": "serie-a",
+   "ovr": 79,
+   "attr": null
+  },
+  "SAS-2178": {
+   "sid": 832375,
+   "lid": "serie-a",
+   "ovr": 67,
+   "attr": null
+  },
+  "CAG-295721": {
+   "sid": 918862,
+   "lid": "serie-a",
+   "ovr": 63,
+   "attr": null
+  },
+  "CRE-2107": {
+   "sid": 869888,
+   "lid": "serie-a",
+   "ovr": 71,
+   "attr": null
+  },
+  "GEN-153097": {
+   "sid": 970998,
+   "lid": "serie-a",
+   "ovr": 75,
+   "attr": null
+  },
+  "MAR-8476": {
+   "sid": 859026,
+   "lid": "ligue-1",
+   "ovr": 83,
+   "attr": null
+  },
+  "MAR-119703": {
+   "sid": 981815,
+   "lid": "ligue-1",
+   "ovr": 83,
+   "attr": null
+  },
+  "MAR-8492": {
+   "sid": 855810,
+   "lid": "ligue-1",
+   "ovr": 81,
+   "attr": null
+  },
+  "MAR-80754": {
+   "sid": 945830,
+   "lid": "ligue-1",
+   "ovr": 75,
+   "attr": null
+  },
+  "MAR-8093": {
+   "sid": 149593,
+   "lid": "ligue-1",
+   "ovr": 81,
+   "attr": null
+  },
+  "MAR-33149": {
+   "sid": 96544,
+   "lid": "ligue-1",
+   "ovr": 76,
+   "attr": null
+  },
+  "MAR-294659": {
+   "sid": 2011326,
+   "lid": "ligue-1",
+   "ovr": 52,
+   "attr": null
+  },
+  "MAR-81191": {
+   "sid": 877102,
+   "lid": "ligue-1",
+   "ovr": 80,
+   "attr": null
+  },
+  "MAR-7809": {
+   "sid": 155997,
+   "lid": "ligue-1",
+   "ovr": 79,
+   "attr": null
+  },
+  "MAR-179721": {
+   "sid": 1131448,
+   "lid": "ligue-1",
+   "ovr": 76,
+   "attr": null
+  },
+  "FCL-179596": {
+   "sid": 1131541,
+   "lid": "ligue-1",
+   "ovr": 76,
+   "attr": null
+  },
+  "MAR-67880": {
+   "sid": 803034,
+   "lid": "ligue-1",
+   "ovr": 75,
+   "attr": null
+  },
+  "MAR-178114": {
+   "sid": 1142668,
+   "lid": "ligue-1",
+   "ovr": 60,
+   "attr": null
+  },
+  "MAR-130271": {
+   "sid": 952626,
+   "lid": "ligue-1",
+   "ovr": 61,
+   "attr": null
+  },
+  "LIL-3371": {
+   "sid": 39070,
+   "lid": "ligue-1",
+   "ovr": 74,
+   "attr": null
+  },
+  "LIL-260879": {
+   "sid": 1140859,
+   "lid": "ligue-1",
+   "ovr": 79,
+   "attr": null
+  },
+  "LIL-192666": {
+   "sid": 1391541,
+   "lid": "ligue-1",
+   "ovr": 76,
+   "attr": null
+  },
+  "LIL-6503": {
+   "sid": 368120,
+   "lid": "ligue-1",
+   "ovr": 77,
+   "attr": null
+  },
+  "LIL-99722": {
+   "sid": 965357,
+   "lid": "ligue-1",
+   "ovr": 76,
+   "attr": null
+  },
+  "LIL-213221": {
+   "sid": 1138804,
+   "lid": "ligue-1",
+   "ovr": 81,
+   "attr": null
+  },
+  "LIL-8811": {
+   "sid": 51665,
+   "lid": "ligue-1",
+   "ovr": 79,
+   "attr": null
+  },
+  "LIL-914": {
+   "sid": 827506,
+   "lid": "ligue-1",
+   "ovr": 75,
+   "attr": null
+  },
+  "LIL-9861": {
+   "sid": 361780,
+   "lid": "ligue-1",
+   "ovr": 72,
+   "attr": null
+  },
+  "LIL-185196": {
+   "sid": 1049775,
+   "lid": "ligue-1",
+   "ovr": 80,
+   "attr": null
+  },
+  "LIL-192677": {
+   "sid": 1119487,
+   "lid": "ligue-1",
+   "ovr": 80,
+   "attr": null
+  },
+  "LIL-188087": {
+   "sid": 1087364,
+   "lid": "ligue-1",
+   "ovr": 77,
+   "attr": null
+  },
+  "LIL-8435": {
+   "sid": 827519,
+   "lid": "ligue-1",
+   "ovr": 76,
+   "attr": null
+  },
+  "LIL-29890": {
+   "sid": 847494,
+   "lid": "ligue-1",
+   "ovr": 82,
+   "attr": null
+  },
+  "PSG-3373": {
+   "sid": 818244,
+   "lid": "ligue-1",
+   "ovr": 88,
+   "attr": null
+  },
+  "PSG-113285": {
+   "sid": 889259,
+   "lid": "ligue-1",
+   "ovr": 90,
+   "attr": null
+  },
+  "PSG-177522": {
+   "sid": 1154605,
+   "lid": "ligue-1",
+   "ovr": 85,
+   "attr": null
+  },
+  "PSG-178722": {
+   "sid": 902029,
+   "lid": "ligue-1",
+   "ovr": 89,
+   "attr": null
+  },
+  "PSG-190877": {
+   "sid": 1190933,
+   "lid": "ligue-1",
+   "ovr": 86,
+   "attr": null
+  },
+  "PSG-22": {
+   "sid": 784655,
+   "lid": "ligue-1",
+   "ovr": 83,
+   "attr": null
+  },
+  "PSG-186089": {
+   "sid": 1142672,
+   "lid": "ligue-1",
+   "ovr": 83,
+   "attr": null
+  },
+  "ASM-175701": {
+   "sid": 1130939,
+   "lid": "ligue-1",
+   "ovr": 83,
+   "attr": null
+  },
+  "PSG-53": {
+   "sid": 814594,
+   "lid": "ligue-1",
+   "ovr": 87,
+   "attr": null
+  },
+  "PSG-144570": {
+   "sid": 989768,
+   "lid": "ligue-1",
+   "ovr": 85,
+   "attr": null
+  },
+  "PSG-3225": {
+   "sid": 155995,
+   "lid": "ligue-1",
+   "ovr": 84,
+   "attr": null
+  },
+  "PSG-114102": {
+   "sid": 979480,
+   "lid": "ligue-1",
+   "ovr": 85,
+   "attr": null
+  },
+  "PSG-169204": {
+   "sid": 1108441,
+   "lid": "ligue-1",
+   "ovr": 78,
+   "attr": null
+  },
+  "PSG-143573": {
+   "sid": 1023567,
+   "lid": "ligue-1",
+   "ovr": 82,
+   "attr": null
+  },
+  "PSG-3365": {
+   "sid": 352370,
+   "lid": "ligue-1",
+   "ovr": 81,
+   "attr": null
+  },
+  "PSG-49244": {
+   "sid": 800749,
+   "lid": "ligue-1",
+   "ovr": 86,
+   "attr": null
+  },
+  "PSG-147896": {
+   "sid": 996953,
+   "lid": "ligue-1",
+   "ovr": 83,
+   "attr": null
+  },
+  "AJA-4289": {
+   "sid": 867440,
+   "lid": "ligue-1",
+   "ovr": 76,
+   "attr": null
+  },
+  "BRE-204240": {
+   "sid": 1401005,
+   "lid": "ligue-1",
+   "ovr": 72,
+   "attr": null
+  },
+  "AJA-175724": {
+   "sid": 1151803,
+   "lid": "ligue-1",
+   "ovr": 78,
+   "attr": null
+  },
+  "AJA-8762": {
+   "sid": 913942,
+   "lid": "ligue-1",
+   "ovr": 74,
+   "attr": null
+  },
+  "AJA-131752": {
+   "sid": 997104,
+   "lid": "ligue-1",
+   "ovr": 71,
+   "attr": null
+  },
+  "AJA-3631": {
+   "sid": 782240,
+   "lid": "ligue-1",
+   "ovr": 65,
+   "attr": null
+  },
+  "AJA-153924": {
+   "sid": 1087805,
+   "lid": "ligue-1",
+   "ovr": 73,
+   "attr": null
+  },
+  "AJA-177412": {
+   "sid": 1177351,
+   "lid": "ligue-1",
+   "ovr": 71,
+   "attr": null
+  },
+  "AJA-185194": {
+   "sid": 1387156,
+   "lid": "ligue-1",
+   "ovr": 76,
+   "attr": null
+  },
+  "AJA-141637": {
+   "sid": 996951,
+   "lid": "ligue-1",
+   "ovr": 76,
+   "attr": null
+  },
+  "AJA-124243": {
+   "sid": 987491,
+   "lid": "ligue-1",
+   "ovr": 73,
+   "attr": null
+  }
+ }
 }
