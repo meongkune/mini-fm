@@ -844,3 +844,24 @@ html.framed body { overflow: hidden; height: 100vh; }
 .mk-ovr { flex: none; min-width: 26px; text-align: center; font-weight: 900; font-size: .84rem; }
 .mk-val { flex: none; min-width: 52px; text-align: right; font-size: .74rem; font-weight: 800; color: #86efac; font-variant-numeric: tabular-nums; }
 .trade-log { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: .8rem; }
+
+/* ---------- 보드·시즌 마감 ---------- */
+.board { display: grid; gap: 6px; }
+.board-goal { font-size: 1rem; }
+.conf { display: grid; grid-template-columns: auto 1fr auto; gap: 8px; align-items: center; font-size: .72rem; color: var(--muted); }
+.conf b { color: var(--text); font-variant-numeric: tabular-nums; }
+.conf-bar { height: 7px; border-radius: 99px; background: var(--panel-2); overflow: hidden; }
+.conf-bar i { display: block; height: 100%; border-radius: 99px; }
+.conf-bar i.hi { background: #22c55e; } .conf-bar i.mid { background: #eab308; } .conf-bar i.lo { background: #ef4444; }
+.season-end { display: grid; gap: 10px; }
+.season-end h2 { margin: 0; }
+.verdict { display: grid; gap: 2px; padding: 10px 12px; border-radius: 12px; background: var(--panel-2); border-left: 4px solid; }
+.verdict.ok { border-color: #22c55e; } .verdict.bad { border-color: #ef4444; }
+.verdict span { font-size: .8rem; color: var(--muted); }
+.verdict em { font-style: normal; font-size: .76rem; color: #fca5a5; font-weight: 700; }
+.history { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; font-size: .78rem; }
+.history li { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 6px 8px; border-radius: 8px; background: var(--panel-2); }
+.history em { font-style: normal; font-weight: 800; } .history em.ok { color: #86efac; } .history em.bad { color: #fca5a5; }
+.history small { color: var(--muted); }
+.sacked { border-color: var(--bad); }
+.sacked p { margin: 6px 0 0; font-size: .84rem; }

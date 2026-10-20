@@ -16,7 +16,7 @@ export function Crest({ team, size = 22 }) {
 }
 
 export default function League() {
-  const { data, save, standings, teamsById, myTeam, totalRounds, seasonOver, resetSeason } = useGame()
+  const { data, save, standings, teamsById, myTeam, totalRounds, seasonOver, seasonText } = useGame()
   const [tab, setTab] = useState('table')
   const champion = seasonOver ? standings[0] : null
 
@@ -25,7 +25,7 @@ export default function League() {
       <div className="section-head">
         <div>
           <h1>{data.leagueInfo.name}</h1>
-          <p className="muted">{data.season} · {Math.min(save.round, totalRounds)}/{totalRounds} 라운드</p>
+          <p className="muted">{seasonText.replace(`${data.leagueInfo.name} `, '')} · {Math.min(save.round, totalRounds)}/{totalRounds} 라운드</p>
         </div>
         {myTeam && !seasonOver && <Link className="btn small" to="/match">다음 경기 ▶</Link>}
       </div>
@@ -33,7 +33,7 @@ export default function League() {
       {champion && (
         <div className="card champion" style={{ '--c': champion.color }}>
           🏆 {champion.name} 우승! {champion.id === myTeam?.id ? '감독님, 축하합니다!' : ''}
-          <button className="btn small ghost" onClick={() => { if (confirm('같은 팀으로 새 시즌을 시작할까요?')) resetSeason() }}>새 시즌</button>
+          {myTeam && <Link className="btn small ghost" to="/">시즌 마감 →</Link>}
         </div>
       )}
 

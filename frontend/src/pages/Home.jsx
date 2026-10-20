@@ -20,7 +20,7 @@ function Crest({ team, size = 40 }) {
 }
 
 export default function Home() {
-  const { data, myTeam, save, standings, nextFixture, teamsById, totalRounds, seasonOver, chooseTeam, chooseSeason, quitTeam, status, unread } = useGame()
+  const { data, myTeam, save, standings, nextFixture, teamsById, totalRounds, seasonOver, chooseTeam, chooseSeason, quitTeam, status, unread, seasonText, review, startNextSeason } = useGame()
   const [busy, setBusy] = useState(null)
   const [detail, setDetail] = useState(null)
 
@@ -30,6 +30,13 @@ export default function Home() {
     const floor = teamOvr(teams.at(-1)) - 4 // 막대 기준점: 최약팀보다 조금 아래
     return (
       <section>
+        {save.sacked && (
+          <div className="card sacked">
+            <strong>🏛️ 경질 통보</strong>
+            <p>{teamsById[save.sacked.team]?.name} 보드가 두 시즌 연속 목표 미달을 이유로 감독직 해임을 결정했습니다. 새로운 팀에서 다시 시작하세요.</p>
+            {save.sacked.history?.length > 0 && <p className="small muted">커리어: {save.sacked.history.map((h) => `${h.label} ${h.pos}위`).join(' · ')}</p>}
+          </div>
+        )}
         <div className="hero">
           <span className="eyebrow">{data.league}</span>
           <h1>맡을 팀을 고르세요</h1>
@@ -85,7 +92,7 @@ export default function Home() {
         <div>
           <span className="th-label">내 팀</span>
           <h1>{myTeam.name}</h1>
-          <span className="th-sub">{data.league}</span>
+          <span className="th-sub">{seasonText}{save.seasonNo > 1 ? ` · ${save.seasonNo}번째 시즌` : ''}</span>
         </div>
         <div className="th-ovr"><strong>{teamOvr(myTeam)}</strong><span>OVR</span></div>
       </div>
@@ -107,14 +114,11 @@ export default function Home() {
       </div>
 
       <TeamStatus team={myTeam} status={status} lineup={save.lineup} inbox={save.inbox || []} unread={unread} />
+      {save.board && !seasonOver && <BoardCard board={save.board} rank={played ? rank : null} />}
 
       <div className="card next-match">
         {seasonOver ? (
-          <>
-            <h2>🏁 시즌 종료</h2>
-            <p>최종 {rank}위 {rank === 1 ? '· 🏆 우승을 축하합니다!' : ''}</p>
-            <Link className="btn wide" to="/league">최종 순위 보기</Link>
-          </>
+          <SeasonEnd review={review} rank={rank} history={save.history || []} onNext={startNextSeason} />
         ) : (
           <>
             <div className="row between">
@@ -177,6 +181,45 @@ function TeamStatus({ team, status, lineup, inbox, unread }) {
           <span>📬 {unread > 0 ? `새 소식 ${unread}개` : '받은 편지함'}</span>
           <em>{latest[0].title}</em>
         </Link>
+      )}
+    </div>
+  )
+}
+
+function BoardCard({ board, rank }) {
+  const ok = rank !== null && rank <= board.pos
+  return (
+    <div className="card board">
+      <div className="row between">
+        <span className="eyebrow">🏛️ 보드 목표</span>
+        <span className={`pill ${rank === null ? '' : ok ? 'ok' : 'bad'}`}>{rank === null ? '시즌 전' : ok ? `현재 ${rank}위 · 순항` : `현재 ${rank}위 · 목표 미달`}</span>
+      </div>
+      <strong className="board-goal">{board.label}</strong>
+      <div className="conf"><span>보드 신뢰도</span><div className="conf-bar"><i style={{ width: `${board.confidence}%` }} className={board.confidence >= 60 ? 'hi' : board.confidence >= 35 ? 'mid' : 'lo'} /></div><b>{board.confidence}</b></div>
+      {board.fails > 0 && <p className="small bad-text">지난 시즌 목표 미달 — 이번 시즌도 실패하면 경질됩니다.</p>}
+    </div>
+  )
+}
+
+function SeasonEnd({ review, rank, history, onNext }) {
+  if (!review) return null
+  return (
+    <div className="season-end">
+      <h2>🏁 시즌 종료 · 최종 {rank}위{rank === 1 ? ' 🏆' : ''}</h2>
+      <div className={`verdict ${review.success ? 'ok' : 'bad'}`}>
+        <strong>{review.success ? '보드 목표 달성' : '보드 목표 미달'}</strong>
+        <span>{review.target.label}</span>
+        {!review.success && <em>{review.sacked ? '두 시즌 연속 미달 — 다음 시즌으로 넘어가면 경질됩니다.' : '한 번 더 실패하면 경질됩니다.'}</em>}
+      </div>
+      <p className="small muted">다음 시즌에는 모든 선수가 한 살 많아지고, 출전 시간과 잠재력에 따라 성장하거나 하락합니다. 35세 이상은 은퇴할 수 있고 유스 선수 2명이 올라옵니다.</p>
+      <div className="row">
+        <Link className="btn ghost" to="/league">최종 순위</Link>
+        <button className="btn" onClick={() => { if (confirm(review.sacked ? '시즌을 마감합니다. 경질되어 팀을 다시 골라야 합니다.' : '다음 시즌을 시작할까요?')) onNext() }}>{review.sacked ? '시즌 마감' : '다음 시즌 시작 ▶'}</button>
+      </div>
+      {history.length > 0 && (
+        <ul className="history">
+          {history.map((h) => <li key={h.seasonNo}><span>{h.label}</span><b>{h.pos}위</b><em className={h.success ? 'ok' : 'bad'}>{h.success ? '목표 달성' : '미달'}</em>{h.topScorer && <small>득점 1위 {h.topScorer.name} {h.topScorer.g}골</small>}</li>)}
+        </ul>
       )}
     </div>
   )

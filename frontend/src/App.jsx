@@ -40,7 +40,7 @@ class PageErrorBoundary extends Component {
 }
 
 export default function App() {
-  const { data, error, myTeam, unread } = useGame()
+  const { data, error, myTeam, unread, seasonText } = useGame()
   const { pathname } = useLocation()
   // 중괄호 필수: scrollTo의 반환값(최신 브라우저는 Promise)을 cleanup으로 반환하면 다음 이동 때 React가 터진다
   // PC 휴대폰 프레임에서는 .app이 스크롤 영역이므로 둘 다 맨 위로
@@ -55,7 +55,7 @@ export default function App() {
           <span className="logo">⚽</span>
           <div>
             <strong>Mini FM</strong>
-            <small>{data?.league ?? '미니 축구 감독 시뮬레이션'}</small>
+            <small>{seasonText || '미니 축구 감독 시뮬레이션'}</small>
           </div>
         </div>
         {myTeam && (

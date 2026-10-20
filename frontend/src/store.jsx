@@ -5,6 +5,7 @@ import { pickLineup } from './engine/match.js'
 import { applyRound, engineStatus, playerTalk, resolveTalk } from './game/season.js'
 import { effectiveTeams } from './game/roster.js'
 import { evaluateTrade, executeTrade, windowState } from './game/trade.js'
+import { boardMidCheck, newBoard, nextSeason, seasonLabel, seasonReview } from './game/career.js'
 
 // 시즌 진행 상황은 서버가 아니라 브라우저 localStorage에 저장한다 (서버는 stateless).
 // v2: 프리미어리그 구단 데이터로 바뀌면서 이전 저장(가상 구단 ID)과 호환되지 않아 키를 올림
@@ -128,6 +129,11 @@ export function GameProvider({ children }) {
     return () => { alive = false }
   }, [save.league, save.season])
 
+  // 예전 저장(보드 목표 없음)이면 지금 전력으로 목표를 정한다
+  useEffect(() => {
+    if (data && save.teamId && !save.board) setSave((s) => ({ ...s, board: newBoard(effectiveTeams(data.teams, s), s.teamId) }))
+  }, [data, save.teamId, save.board])
+
   useEffect(() => {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(save)) } catch { /* 저장 실패해도 게임은 계속 */ }
   }, [save])
@@ -155,7 +161,24 @@ export function GameProvider({ children }) {
       },
       chooseTeam(teamId) {
         const lineup = pickLineup(teamsById[teamId], '4-4-2', {})
-        setSave((s) => ({ ...EMPTY_SAVE, league: s.league, season: s.season, teamId, lineup }))
+        const base = effectiveTeams(data.teams, EMPTY_SAVE)
+        setSave((s) => ({ ...EMPTY_SAVE, league: s.league, season: s.season, teamId, lineup, board: newBoard(base, teamId) }))
+      },
+      seasonText: data ? `${data.leagueInfo.name} ${seasonLabel(data.season, save.seasonNo)}` : '',
+      review: data && save.teamId && save.round >= data.schedule.length ? seasonReview(save, computeStandings(teams, save.results)) : null,
+      /** 시즌 마감 → 다음 시즌 (경질되면 팀 선택으로) */
+      startNextSeason() {
+        setSave((s) => {
+          const standingsNow = computeStandings(teams, s.results)
+          const r = nextSeason(s, { teams, baseTeams: data.teams, standings: standingsNow, country: data.leagueInfo.country, baseSeason: data.season })
+          if (r.review.sacked) {
+            return { ...EMPTY_SAVE, league: s.league, season: s.season, sacked: { team: s.teamId, history: r.save.history } }
+          }
+          const nextTeams = effectiveTeams(data.teams, r.save)
+          const mine = nextTeams.find((t) => t.id === s.teamId)
+          const lineup = r.save.lineup.length === 11 ? r.save.lineup : pickLineup(mine, s.formation, {})
+          return { ...r.save, lineup, board: newBoard(nextTeams, s.teamId, { confidence: r.conf, fails: r.review.fails }) }
+        })
       },
       readInbox(id) {
         setSave((s) => ({ ...s, inbox: s.inbox.map((x) => (x.id === id || id === 'all' ? { ...x, read: true } : x)) }))
@@ -204,7 +227,10 @@ export function GameProvider({ children }) {
       },
       /** 내 경기 요약을 넣고 라운드 마무리 (다른 경기는 여기서 시뮬레이션) */
       finishRound(mine) {
-        setSave((s) => applyRound(s, { teamsById, schedule: data.schedule, myTeamId: s.teamId, mine }))
+        setSave((s) => {
+          const next = applyRound(s, { teamsById, schedule: data.schedule, myTeamId: s.teamId, mine })
+          return boardMidCheck(next, computeStandings(teams, next.results), data.schedule.length)
+        })
       },
     }
   }, [data, error, save])

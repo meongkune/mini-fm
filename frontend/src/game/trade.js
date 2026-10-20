@@ -10,6 +10,7 @@ export const PATIENCE = 3 // 같은 선수를 두고 협상할 수 있는 횟수
 
 /** 숨겨진 잠재력(PA): 선수 ID로 정해지는 고정 값. 어릴수록 폭이 크다 */
 export function potentialOf(p) {
+  if (p.pa) return p.pa // 유스 선수·지난 시즌에 고정된 값
   const ovr = playerOvrOf(p)
   const r = (hash(`pa-${p.id}`) % 1000) / 1000
   const [lo, hi] = p.age <= 19 ? [6, 20] : p.age <= 21 ? [4, 14] : p.age <= 23 ? [2, 9] : p.age <= 26 ? [0, 4] : [0, 0]
