@@ -27,6 +27,18 @@
      "teams": 18
     }
    ]
+  },
+  {
+   "id": "la-liga",
+   "name": "라리가",
+   "country": "스페인",
+   "seasons": [
+    {
+     "id": "2025-26",
+     "file": "la-liga/2025-26.json",
+     "teams": 20
+    }
+   ]
   }
  ]
 }
