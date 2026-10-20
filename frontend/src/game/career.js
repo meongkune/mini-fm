@@ -16,6 +16,7 @@ export function seasonLabel(base, seasonNo = 1) {
   const y = parseInt(base, 10)
   if (!y) return base
   const s = y + seasonNo - 1
+  if (!String(base).includes('-')) return String(s) // 브라질처럼 한 해에 끝나는 리그
   return `${s}-${String((s + 1) % 100).padStart(2, '0')}`
 }
 
