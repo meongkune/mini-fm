@@ -965,3 +965,14 @@ html.framed body { overflow: hidden; height: 100vh; }
 .bench-chip.out { opacity: 1; background: rgba(239, 68, 68, .12); border: 1px solid rgba(239, 68, 68, .4); }
 .bench-out { font-style: normal; font-size: .62rem; font-weight: 900; color: #fca5a5; }
 .pick:disabled .lu-name { opacity: 1; }
+
+/* 3D 감독 */
+.mgr3d { width: 100%; border-radius: 14px; overflow: hidden; touch-action: pan-y; cursor: grab; background: radial-gradient(60% 55% at 50% 45%, color-mix(in srgb, var(--c, #7c5cff) 30%, transparent), transparent 75%); }
+.mgr3d.loading { display: grid; place-items: center; color: var(--muted); font-size: .85rem; }
+.mgr3d canvas { display: block; }
+.mgr-tools { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+.look-slider { display: grid; gap: 4px; margin-bottom: 14px; font-size: .8rem; font-weight: 700; }
+.look-slider input { width: 100%; accent-color: var(--accent); }
+.look-slider small { display: flex; justify-content: space-between; color: var(--muted); font-size: .66rem; }
+.look-slider em { font-style: normal; }
+.mgr-thumb { display: block; border-radius: 50%; object-fit: cover; background: var(--panel-2); }

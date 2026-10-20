@@ -63,7 +63,7 @@ export default function App() {
         <div className="top-actions">
         {manager && (
           <Link to="/manager" className="top-avatar" aria-label="감독 프로필">
-            <ManagerAvatar look={manager.look} teamColor={myTeam?.color} size={30} bg={false} />
+            {manager.thumb ? <img className="mgr-thumb" src={manager.thumb} alt="" width={34} height={34} /> : <ManagerAvatar look={manager.look} teamColor={myTeam?.color} size={30} bg={false} />}
           </Link>
         )}
         {myTeam && (

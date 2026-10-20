@@ -34,7 +34,7 @@ export default function Home() {
           </div>
         )}
         <Link to="/manager" className={`card mgr-card ${manager ? '' : 'cta'}`}>
-          {manager ? <ManagerAvatar look={manager.look} size={64} /> : <span className="mgr-ghost">👔</span>}
+          {manager ? (manager.thumb ? <img className="mgr-thumb" src={manager.thumb} alt="" width={64} height={64} /> : <ManagerAvatar look={manager.look} size={64} />) : <span className="mgr-ghost">👔</span>}
           <span className="grow">
             <small className="muted">{manager ? '감독' : '먼저 감독을 만들어 보세요'}</small>
             <strong>{manager ? manager.name : '감독 만들기'}</strong>
@@ -103,7 +103,7 @@ export default function Home() {
       </div>
       {manager && (
         <Link to="/manager" className="card mgr-strip">
-          <ManagerAvatar look={manager.look} teamColor={myTeam.color} size={52} />
+          {manager.thumb ? <img className="mgr-thumb" src={manager.thumb} alt="" width={56} height={56} style={{ background: myTeam.color }} /> : <ManagerAvatar look={manager.look} teamColor={myTeam.color} size={52} />}
           <span className="grow"><small className="muted">감독</small><strong>{manager.name}</strong></span>
           {save.board && <span className="muted small">보드 신뢰도 {save.board.confidence}</span>}
         </Link>
