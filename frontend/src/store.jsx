@@ -113,7 +113,7 @@ export function GameProvider({ children }) {
       const [t, s, index] = await Promise.all([api.teams(), api.schedule(), api.index()])
       // 시즌 데이터를 다시 가져와 선수 ID가 바뀌었으면 선발을 자동으로 다시 고른다
       const team = effectiveTeams(t.teams, save).find((x) => x.id === save.teamId)
-      const staleLineup = team && save.lineup.some((id) => !team.players.some((p) => p.id === id))
+      const staleLineup = team && (save.lineup.length !== 11 || save.lineup.some((id) => !team.players.some((p) => p.id === id)))
       const fresh = staleLineup ? pickLineup(team, save.formation, {}) : null
       if (!alive) return
       setData({ ...t, schedule: s.rounds, index, leagueId: sel.leagueId, seasonId: sel.seasonId })
