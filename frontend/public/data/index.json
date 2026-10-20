@@ -63,6 +63,18 @@
      "teams": 18
     }
    ]
+  },
+  {
+   "id": "championship",
+   "name": "챔피언십",
+   "country": "잉글랜드",
+   "seasons": [
+    {
+     "id": "2025-26",
+     "file": "championship/2025-26.json",
+     "teams": 24
+    }
+   ]
   }
  ]
 }
