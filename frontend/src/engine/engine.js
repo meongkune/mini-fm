@@ -9,9 +9,11 @@ export const FORMATIONS = {
   '5-3-2': { slots: [5, 3, 2], att: -4, mid: -1, def: 5 },
 }
 export const MENTALITY = {
+  allout: { att: 12, def: -12 }, // 노빠꾸: 전원 공격
   attacking: { att: 6, def: -6 },
   balanced: { att: 0, def: 0 },
   defensive: { att: -6, def: 6 },
+  parkbus: { att: -13, def: 11 }, // 버스 세우기
 }
 export const PRESSING = {
   // 압박: 점유율 보정, 체력 소모 배수

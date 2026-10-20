@@ -13,6 +13,13 @@ export const TEMPO = { slow: { att: -2, mid: 2, acc: 0.03, drain: 0.95 }, normal
 const AI_SHAPES = ['4-4-2', '4-3-3', '4-2-3-1', '4-1-4-1', '3-5-2', '4-4-1-1', '4-3-3', '4-2-3-1']
 export const aiFormation = (teamId) => AI_SHAPES[[...String(teamId)].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7) % AI_SHAPES.length]
 export const MAX_SUBS = 5
+// 전력 차가 결과에 미치는 정도 (클수록 이변이 잦다)
+const HOME_ADV = 1.5
+const K_POSS = 110
+const K_CHANCE = 520
+const K_QUAL = 800
+const K_FINISH = 500
+const CHANCE = 0.165
 
 // ── 난수: 상태에 정수 하나만 저장 (mulberry32) ──
 function rngOf(match) {
@@ -72,6 +79,8 @@ export function createMatch({ home, away, homeCfg = {}, awayCfg = {}, seed, stat
     score: [0, 0],
     ps: {},
     talk: [0, 0], // 하프타임 지시 효과 (경기력 배수 보정)
+    // 그날의 컨디션(운): 같은 전력이라도 경기마다 ±4% 안팎으로 달라진다 → 약팀이 이기는 날도 있다
+    day: [dayForm(s, 1), dayForm(s, 2)],
     scorers: [],
     events: [],
     timeline: [],
@@ -81,12 +90,20 @@ export function createMatch({ home, away, homeCfg = {}, awayCfg = {}, seed, stat
   return match
 }
 
-// 그 분의 선수 실효 능력치: 체력·사기·폼·하프타임 지시
+// 경기마다 고정되는 '그날 컨디션' (정규분포 근사, 표준편차 약 3.5%)
+function dayForm(seed, k) {
+  let u = 0
+  for (let i = 0; i < 4; i++) u += hash(`day-${seed}-${k}-${i}`)
+  return 1 + (u - 2) * 0.06
+}
+
+// 그 분의 선수 실효 능력치: 체력·사기(±8%)·폼(±5%)·하프타임 지시·태업·그날 컨디션
+// (상대 AI는 사기·폼 기본값이라 사실상 OVR과 그날 컨디션만 반영된다)
 function effective(match, ctx, idx, p) {
   const sd = match.sides[idx]
   const st = ctx.status?.[p.id] || {}
   const e = sd.energy[p.id] ?? 100
-  const f = (0.8 + 0.2 * e / 100) * (0.97 + 0.06 * (st.morale ?? 50) / 100) * (1 + clamp(((st.form ?? 6.6) - 6.6) * 0.02, -0.03, 0.03)) * (1 + match.talk[idx]) * (st.sulk > 0 ? 0.94 : 1)
+  const f = (0.8 + 0.2 * e / 100) * (0.92 + 0.16 * (st.morale ?? 50) / 100) * (1 + clamp(((st.form ?? 6.6) - 6.6) * 0.05, -0.05, 0.05)) * (1 + match.talk[idx]) * (st.sulk > 0 ? 0.94 : 1) * (match.day?.[idx] ?? 1)
   return { ...p, att: p.att * f, def: p.def * f }
 }
 
@@ -111,11 +128,18 @@ function sideRatings(match, ctx, idx) {
   const tp = TEMPO[sd.tactics.tempo] || TEMPO.normal
   const missing = 11 - xi.length // 퇴장·부상으로 빈 자리
   const penalty = (g.GK.length !== 1 ? 15 : 0) + missing * 6
+  // 경기 상황: 후반 55분 이후 지는 팀은 라인을 올려 몰아붙이고, 이기는 팀은 지키는 쪽으로 기운다
+  const diff = match.score[idx] - match.score[1 - idx]
+  const late = match.minute > 55 ? Math.min(1, (match.minute - 55) / 20) : 0
+  const chase = late * (diff < 0 ? Math.min(2, -diff) : 0)
+  const hold = late * (diff > 0 ? 1 : 0)
+  const gsAtt = chase * 3 - hold * 2
+  const gsDef = -chase * 2.5 + hold * 2
   return {
     xi,
-    attack: avg([...g.FW.map((p) => p.att), ...g.FW.map((p) => p.att), ...g.MF.map((p) => p.att)]) + f.att + m.att + tp.att - penalty,
+    attack: avg([...g.FW.map((p) => p.att), ...g.FW.map((p) => p.att), ...g.MF.map((p) => p.att)]) + f.att + m.att + tp.att + gsAtt - penalty,
     midfield: avg(g.MF.map((p) => (p.att + p.def) / 2)) + f.mid + pr.mid + ln.mid + tp.mid - penalty,
-    defense: avg([...g.DF.map((p) => p.def), ...g.DF.map((p) => p.def), ...g.MF.map((p) => p.def)]) + f.def + m.def + ln.def - penalty,
+    defense: avg([...g.DF.map((p) => p.def), ...g.DF.map((p) => p.def), ...g.MF.map((p) => p.def)]) + f.def + m.def + ln.def + gsDef - penalty,
     keeper: avg(g.GK.map((p) => p.def), 40),
     gk: g.GK[0] || null,
     drain: pr.drain * tp.drain,
@@ -203,8 +227,8 @@ export function step(match, ctx, { withEvents = true } = {}) {
   const minute = ++match.minute
   if (withEvents && minute === 46) match.events.push({ minute: 45, type: 'info', text: '후반전 시작!' })
   const r = [sideRatings(match, ctx, 0), sideRatings(match, ctx, 1)]
-  const mid = [r[0].midfield + 3, r[1].midfield] // 홈 어드밴티지
-  const atk = rng.random() < clamp(0.5 + (mid[0] - mid[1]) / 80, 0.2, 0.8) ? 0 : 1
+  const mid = [r[0].midfield + HOME_ADV, r[1].midfield] // 홈 어드밴티지
+  const atk = rng.random() < clamp(0.5 + (mid[0] - mid[1]) / K_POSS, 0.25, 0.75) ? 0 : 1
   const dfn = 1 - atk
   const S = match.stats
   S[atk].poss++
@@ -230,7 +254,7 @@ export function step(match, ctx, { withEvents = true } = {}) {
     const assister = helpers.length && rng.random() < (long ? 0.35 : 0.78) ? rng.weighted(helpers, helpers.map((p) => ({ MF: 2.2, FW: 1.6, DF: 0.7 })[p.pos] * p.att)) : null
     S[atk].shots++
     match.ps[shooter.id].sh++
-    const quality = long ? 0.09 : 0.3 + (shooter.att - r[dfn].keeper) / 400 + (a - d) / 600
+    const quality = long ? 0.09 : 0.3 + (shooter.att - r[dfn].keeper) / K_FINISH + (a - d) / K_QUAL
     const pOn = long ? 0.28 : clamp(0.45 + (shooter.att - 60) / 200, 0.25, 0.75)
     const pGoal = clamp(quality, long ? 0.04 : 0.08, 0.55)
     const xg = pOn * pGoal
@@ -263,7 +287,7 @@ export function step(match, ctx, { withEvents = true } = {}) {
     }
   }
 
-  if (rng.random() > 0.17 + (a - d) / 400) {
+  if (rng.random() > CHANCE + (a - d) / K_CHANCE) {
     // 결정적 찬스 없이 끝난 공격: 파울·카드, 오프사이드, 중거리 슈팅, 태클
     const x = rng.random()
     const defenders = r[dfn].xi.filter((p) => p.pos !== 'GK')
@@ -482,4 +506,24 @@ export function quickMatch(home, away, status, seed) {
   const match = createMatch({ home, away, seed, status })
   advance(match, ctx, 90, { withEvents: false })
   return summarize(match, ctx)
+}
+
+/**
+ * 경기 전 예상: 같은 조건으로 n경기를 빠르게 돌려 승·무·패 확률과 평균 득점을 낸다
+ * (그날 컨디션·경기 흐름은 매번 달라지므로 확률일 뿐 — 낮은 확률도 터진다)
+ */
+export function predict(home, away, { homeCfg = {}, awayCfg = {}, status = {}, n = 120 } = {}) {
+  let w = 0
+  let d = 0
+  let gh = 0
+  let ga = 0
+  for (let i = 1; i <= n; i++) {
+    const m = createMatch({ home, away, homeCfg, awayCfg, seed: i * 2654435761 % 1e9 + 7, status })
+    advance(m, { teams: [home, away], status }, 90, { withEvents: false })
+    const [a, b] = m.score
+    gh += a; ga += b
+    if (a > b) w++
+    else if (a === b) d++
+  }
+  return { win: w / n, draw: d / n, loss: (n - w - d) / n, gf: gh / n, ga: ga / n }
 }

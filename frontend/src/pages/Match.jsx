@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { buildSlots, fitOf, fitTone } from '../engine/formation.js'
-import { MAX_SUBS, advance, benchOf, createMatch, dropInjured, fillVacant, moveToVacant, ratings, reshape, step, substitute, summarize, swapPositions } from '../engine/match.js'
+import { MAX_SUBS, advance, benchOf, createMatch, dropInjured, fillVacant, moveToVacant, predict, ratings, reshape, step, substitute, summarize, swapPositions } from '../engine/match.js'
 import { TEAM_TALKS, teamTalkEffect, unavailable as outReason } from '../game/season.js'
 import Rating, { CondBar } from '../components/Rating.jsx'
 import { Crest, Flag, Kit } from '../components/Badges.jsx'
@@ -96,7 +96,7 @@ export default function Match() {
       const k = all.findIndex((s, j) => !used.has(j) && s.role === sd.slots[i])
       if (k >= 0) used.add(k)
       const s = all[k]
-      return byId[id] && { ...byId[id], sx: s?.x, sy: s?.y }
+      return byId[id] && { ...byId[id], sx: s?.x, sy: s?.y, slot: sd.slots[i] }
     }).filter(Boolean)
   })
 
@@ -205,6 +205,7 @@ export default function Match() {
               <div><span className="muted small">내 라인업</span><strong className={lineupOvr(myTeam, save.formation, save.lineup) < teamOvr(opp) ? 'bad-text' : ''}>{lineupOvr(myTeam, save.formation, save.lineup)}</strong></div>
               <div><span className="muted small">최근</span><span className="form">{recentForm(save.results, opp.id).map((f, i) => <span key={i} className={`f ${f}`}>{f}</span>)}</span></div>
             </div>
+            <Odds ctx={ctx} isHome={isHome} save={save} status={status} xi={mySide.onPitch} preFit={preFit} />
             <p className="small muted">상대 핵심: {[...opp.players].sort((a, b) => playerOvr(b) - playerOvr(a)).slice(0, 3).map((p) => `${p.name.split(' ').at(-1)}(${playerOvr(p)})`).join(' · ')}</p>
             <p className="small">내 전술 <strong>{save.formation}</strong> · 자리 적합도 {preFit}% · {MENTALITY.find((m) => m[0] === save.mentality)[1]} · 압박 {PRESSING.find((p) => p[0] === save.pressing)[1]}</p>
             <p className="small muted">상대 전형 <strong>{match.sides[1 - myIdx].tactics.formation}</strong></p>
@@ -515,6 +516,50 @@ function SubsSheet({ match, ctx, myIdx, rt, status, interrupt, kit, onSub, onFil
           {bench.length === 0 && <li className="muted small">투입할 수 있는 선수가 없습니다.</li>}
         </ul>
         {injuredOnPitch && <button className="btn ghost wide" onClick={() => { onContinueShort(true); setSel(null) }}>부상 선수 빼고 자리 비워 두기</button>}
+      </div>
+    </div>
+  )
+}
+
+/**
+ * 경기 전 예상 승률: 내 라인업·전술·사기·컨디션(내가 관리한 것) + 상대 OVR로 100경기를 미리 돌려 본다.
+ * 그날 컨디션과 경기 흐름이 매번 달라서, 낮은 확률도 실제로 일어난다.
+ */
+function Odds({ ctx, isHome, save, status, xi, preFit }) {
+  const [res, setRes] = useState(null)
+  const key = [ctx.teams[0].id, ctx.teams[1].id, save.lineup.join(), save.formation, save.mentality, save.pressing, save.line, save.tempo].join('|')
+  useEffect(() => {
+    setRes(null)
+    const t = setTimeout(() => {
+      const myCfg = { lineup: save.lineup, tactics: { formation: save.formation, mentality: save.mentality, pressing: save.pressing, line: save.line || 'normal', tempo: save.tempo || 'normal' } }
+      const n = window.innerWidth < 700 ? 70 : 120
+      setRes(predict(ctx.teams[0], ctx.teams[1], { homeCfg: isHome ? myCfg : {}, awayCfg: isHome ? {} : myCfg, status, n }))
+    }, 60)
+    return () => clearTimeout(t)
+  }, [key])
+  const avgOf = (k, fb) => Math.round(xi.reduce((s, id) => s + (status[id]?.[k] ?? fb), 0) / (xi.length || 1))
+  const morale = avgOf('morale', 50)
+  const cond = avgOf('cond', 100)
+  const pct = (v) => `${v > 0 ? '+' : ''}${v}%`
+  const moraleFx = Math.round((0.92 + 0.16 * morale / 100 - 1) * 100)
+  const condFx = Math.round((0.8 + 0.2 * cond / 100 - 1) * 100)
+  const fitFx = preFit - 100
+  const ment = MENTALITY.find((m) => m[0] === save.mentality)
+  const [w, d, l] = res ? (isHome ? [res.win, res.draw, res.loss] : [res.loss, res.draw, res.win]).map((x) => Math.round(x * 100)) : [0, 0, 0]
+  return (
+    <div className="odds">
+      <div className="odds-head"><b>예상 승률</b><span className="muted small">{res ? `예상 스코어 ${(isHome ? res.gf : res.ga).toFixed(1)} : ${(isHome ? res.ga : res.gf).toFixed(1)}` : '계산 중…'}</span></div>
+      <div className={`odds-bar ${res ? '' : 'loading'}`}>
+        <i className="w" style={{ flex: w || 1 }}>{res && `승 ${w}%`}</i>
+        <i className="d" style={{ flex: d || 1 }}>{res && `무 ${d}%`}</i>
+        <i className="l" style={{ flex: l || 1 }}>{res && `패 ${l}%`}</i>
+      </div>
+      <div className="odds-fx">
+        <span className={moraleFx < 0 ? 'bad' : moraleFx > 0 ? 'good' : ''}>🧠 사기 {morale} <b>{pct(moraleFx)}</b></span>
+        <span className={condFx < -3 ? 'bad' : ''}>🔋 컨디션 {cond}% <b>{pct(condFx)}</b></span>
+        <span className={fitFx < -3 ? 'bad' : ''}>🧩 자리 적합도 <b>{pct(fitFx)}</b></span>
+        <span>{isHome ? '🏟️ 홈 이점' : '✈️ 원정'}</span>
+        <span>{ment ? ment[1] : ''}</span>
       </div>
     </div>
   )

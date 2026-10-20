@@ -7,9 +7,11 @@ import { unavailable } from '../game/season.js'
 import NeedTeam from './NeedTeam.jsx'
 
 export const MENTALITY = [
+  ['parkbus', '🚌 버스 세우기', '골문 앞에 벽을 쌓습니다. 득점은 거의 포기'],
   ['defensive', '🛡️ 수비적', '실점은 줄이고 역습을 노립니다'],
   ['balanced', '⚖️ 균형', '공수 밸런스를 유지합니다'],
   ['attacking', '🔥 공격적', '득점력이 오르지만 뒷공간이 열립니다'],
+  ['allout', '💥 노빠꾸', '전원 공격! 넣는 만큼 먹힐 수도 있습니다'],
 ]
 export const PRESSING = [
   ['low', '낮음', '체력 소모가 적습니다'],

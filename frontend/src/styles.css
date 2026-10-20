@@ -1095,3 +1095,14 @@ html.framed body { overflow: hidden; height: 100vh; }
 .offer-warn { list-style: none; margin: 0 0 10px; padding: 0; display: grid; gap: 3px; font-size: .74rem; }
 .offer-warn li { padding: 5px 8px; border-radius: 7px; background: var(--panel-2); color: var(--muted); }
 .offer-warn li.bad { background: rgba(239, 68, 68, .14); color: #fca5a5; }
+/* 경기 전 예상 승률 */
+.odds { margin: 10px 0; padding: 10px; border-radius: 12px; background: var(--panel-2); border: 1px solid var(--line); }
+.odds-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+.odds-bar { display: flex; height: 24px; border-radius: 8px; overflow: hidden; font-size: .7rem; font-weight: 900; }
+.odds-bar i { display: grid; place-items: center; font-style: normal; color: #fff; min-width: 0; white-space: nowrap; overflow: hidden; transition: flex .4s ease; }
+.odds-bar .w { background: #16a34a; } .odds-bar .d { background: #64748b; } .odds-bar .l { background: #dc2626; }
+.odds-bar.loading i { opacity: .35; animation: pulse 1s ease-in-out infinite alternate; }
+@keyframes pulse { to { opacity: .7; } }
+.odds-fx { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; font-size: .68rem; }
+.odds-fx span { padding: 2px 7px; border-radius: 999px; background: var(--panel); color: var(--muted); }
+.odds-fx span.good { color: #86efac; } .odds-fx span.bad { color: #fca5a5; }
