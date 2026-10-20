@@ -10,6 +10,8 @@ import DeployInfo from './pages/DeployInfo.jsx'
 import Admin from './pages/Admin.jsx'
 import Inbox from './pages/Inbox.jsx'
 import Transfer from './pages/Transfer.jsx'
+import Manager from './pages/Manager.jsx'
+import ManagerAvatar from './components/ManagerAvatar.jsx'
 
 // 하단 탭 바: [경로, 라벨, 아이콘, 정확히 일치]
 const NAV = [
@@ -40,7 +42,7 @@ class PageErrorBoundary extends Component {
 }
 
 export default function App() {
-  const { data, error, myTeam, unread, seasonText } = useGame()
+  const { data, error, myTeam, unread, seasonText, manager } = useGame()
   const { pathname } = useLocation()
   // 중괄호 필수: scrollTo의 반환값(최신 브라우저는 Promise)을 cleanup으로 반환하면 다음 이동 때 React가 터진다
   // PC 휴대폰 프레임에서는 .app이 스크롤 영역이므로 둘 다 맨 위로
@@ -58,11 +60,18 @@ export default function App() {
             <small>{seasonText || '미니 축구 감독 시뮬레이션'}</small>
           </div>
         </div>
+        <div className="top-actions">
+        {manager && (
+          <Link to="/manager" className="top-avatar" aria-label="감독 프로필">
+            <ManagerAvatar look={manager.look} teamColor={myTeam?.color} size={30} bg={false} />
+          </Link>
+        )}
         {myTeam && (
           <Link to="/inbox" className="bell" aria-label={`받은 편지함${unread ? ` (새 소식 ${unread}개)` : ''}`}>
             📬{unread > 0 && <b>{unread > 9 ? '9+' : unread}</b>}
           </Link>
         )}
+        </div>
       </header>
       {myTeam && (
         <div className="team-strip" style={{ '--c': myTeam.color }}>
@@ -86,6 +95,7 @@ export default function App() {
             <Route path="/deploy" element={<DeployInfo />} />
             <Route path="/inbox" element={<Inbox />} />
             <Route path="/transfer" element={<Transfer />} />
+            <Route path="/manager" element={<Manager />} />
             <Route path="*" element={<div className="card">페이지를 찾을 수 없습니다.</div>} />
           </Routes>
           </PageErrorBoundary>

@@ -11,6 +11,7 @@ import { boardMidCheck, newBoard, nextSeason, seasonLabel, seasonReview } from '
 // 시즌 진행 상황은 서버가 아니라 브라우저 localStorage에 저장한다 (서버는 stateless).
 // v2: 프리미어리그 구단 데이터로 바뀌면서 이전 저장(가상 구단 ID)과 호환되지 않아 키를 올림
 const STORAGE_KEY = 'mini-fm-save-v1'
+const MANAGER_KEY = 'mini-fm-manager' // 감독 프로필은 세이브와 따로 (경질·팀 변경에도 유지)
 const EMPTY_SAVE = {
   league: null, // 리그 ID (예: premier-league) — null이면 index.json 기본값
   season: null, // 시즌 ID (예: 2025-26)
@@ -126,6 +127,7 @@ export function GameProvider({ children }) {
   const [data, setData] = useState(null) // { league, teams, formations, schedule }
   const [error, setError] = useState(null)
   const [save, setSave] = useState(loadSave)
+  const [manager, setManager] = useState(() => { try { return JSON.parse(localStorage.getItem(MANAGER_KEY) || 'null') } catch { return null } })
 
   // 리그·시즌이 바뀔 때마다 해당 시즌 데이터를 불러온다
   useEffect(() => {
@@ -184,6 +186,8 @@ export function GameProvider({ children }) {
     const update = (patch) => setSave((s) => ({ ...s, ...patch }))
 
     return {
+      manager,
+      saveManager(m) { setManager(m); try { localStorage.setItem(MANAGER_KEY, JSON.stringify(m)) } catch { /* 저장 실패 무시 */ } },
       data, error, save, teams, teamsById, myTeam, totalRounds, seasonOver, nextFixture, update, status,
       standings: data ? computeStandings(teams, save.results) : [],
       unread: (save.inbox || []).filter((x) => !x.read).length,
@@ -266,7 +270,7 @@ export function GameProvider({ children }) {
         })
       },
     }
-  }, [data, error, save])
+  }, [data, error, save, manager])
 
   return <GameContext.Provider value={value}>{children}</GameContext.Provider>
 }

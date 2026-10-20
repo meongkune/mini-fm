@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import PlayerCard from '../components/PlayerCard.jsx'
 import PlayerSheet from '../components/PlayerSheet.jsx'
 import { Crest } from '../components/Badges.jsx'
+import ManagerAvatar from '../components/ManagerAvatar.jsx'
 import { ink, playerOvr, short, teamOvr, useGame } from '../store.jsx'
 
 // 전력 순위에 따른 한 줄 소개 (팀 수와 관계없이 4등분)
@@ -15,7 +16,7 @@ function strengthLabel(rank, total) {
 }
 
 export default function Home() {
-  const { data, myTeam, save, standings, nextFixture, teamsById, totalRounds, seasonOver, chooseTeam, chooseSeason, quitTeam, status, unread, seasonText, review, startNextSeason } = useGame()
+  const { data, myTeam, save, standings, nextFixture, teamsById, totalRounds, seasonOver, chooseTeam, chooseSeason, quitTeam, status, unread, seasonText, review, startNextSeason, manager } = useGame()
   const [busy, setBusy] = useState(null)
   const [detail, setDetail] = useState(null)
 
@@ -32,6 +33,14 @@ export default function Home() {
             {save.sacked.history?.length > 0 && <p className="small muted">커리어: {save.sacked.history.map((h) => `${h.label} ${h.pos}위`).join(' · ')}</p>}
           </div>
         )}
+        <Link to="/manager" className={`card mgr-card ${manager ? '' : 'cta'}`}>
+          {manager ? <ManagerAvatar look={manager.look} size={64} /> : <span className="mgr-ghost">👔</span>}
+          <span className="grow">
+            <small className="muted">{manager ? '감독' : '먼저 감독을 만들어 보세요'}</small>
+            <strong>{manager ? manager.name : '감독 만들기'}</strong>
+            <em className="muted small">{manager ? '프로필 꾸미기 →' : '얼굴·헤어·수염·의상 고르기 →'}</em>
+          </span>
+        </Link>
         <div className="hero">
           <span className="eyebrow">{data.league}</span>
           <h1>맡을 팀을 고르세요</h1>
@@ -92,6 +101,13 @@ export default function Home() {
         </div>
         <div className="th-ovr"><strong>{teamOvr(myTeam)}</strong><span>OVR</span></div>
       </div>
+      {manager && (
+        <Link to="/manager" className="card mgr-strip">
+          <ManagerAvatar look={manager.look} teamColor={myTeam.color} size={52} />
+          <span className="grow"><small className="muted">감독</small><strong>{manager.name}</strong></span>
+          {save.board && <span className="muted small">보드 신뢰도 {save.board.confidence}</span>}
+        </Link>
+      )}
 
       <div className="grid-3">
         <div className="card stat"><span>순위</span><strong>{played ? `${rank}위` : '-'}</strong></div>

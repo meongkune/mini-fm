@@ -918,3 +918,24 @@ html.framed body { overflow: hidden; height: 100vh; }
 .bench-chip b { color: var(--muted); font-size: .68rem; }
 .bench-chip.out { opacity: .5; }
 .card h4 { margin: 12px 0 6px; font-size: .82rem; }
+
+/* ---------- 감독 캐릭터 ---------- */
+.mgr-avatar { flex: none; display: block; }
+.top-actions { display: flex; align-items: center; gap: 10px; }
+.top-avatar { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; overflow: hidden; background: var(--panel-2); border: 1px solid var(--line); }
+.top-avatar svg { margin-top: 6px; }
+.mgr-card, .mgr-strip { display: flex; align-items: center; gap: 12px; padding: 10px 14px; color: var(--text); }
+.mgr-card .grow, .mgr-strip .grow { flex: 1; display: grid; min-width: 0; }
+.mgr-card strong, .mgr-strip strong { font-size: 1.05rem; }
+.mgr-card em { font-style: normal; color: var(--accent); }
+.mgr-card.cta { border: 1px dashed var(--accent); background: rgba(124, 92, 255, .1); }
+.mgr-ghost { display: grid; place-items: center; width: 56px; height: 56px; border-radius: 50%; background: var(--panel-2); font-size: 1.8rem; }
+.mgr-strip { margin-top: -4px; }
+.mgr-stage { display: flex; flex-direction: column; align-items: center; gap: 8px; background: radial-gradient(240px 160px at 50% 30%, color-mix(in srgb, var(--c) 35%, transparent), var(--panel)); }
+.mgr-name { width: 70%; text-align: center; font: inherit; font-size: 1.15rem; font-weight: 900; color: var(--text); background: transparent; border: 0; border-bottom: 2px solid var(--line); padding: 4px; }
+.mgr-name:focus { outline: none; border-color: var(--accent); }
+.look-panel h4:first-child { margin-top: 0; }
+.look-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.swatches { display: flex; flex-wrap: wrap; gap: 8px; }
+.sw { width: 36px; height: 36px; border-radius: 50%; border: 2px solid rgba(255, 255, 255, .15); cursor: pointer; font-size: .6rem; font-weight: 900; color: #fff; text-shadow: 0 1px 2px rgba(0, 0, 0, .6); }
+.sw.on { border-color: #fff; box-shadow: 0 0 0 2px var(--accent); }
