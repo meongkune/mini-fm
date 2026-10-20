@@ -51,7 +51,7 @@ const COLOR_WORDS = {
   grey: '#8A8D93', gray: '#8A8D93', amber: '#FDB913', silver: '#C0C0C0', violet: '#7F3FBF', brown: '#6B3E26', pink: '#E86A92',
 }
 const colorsFrom = (clubColors = '') => {
-  const words = clubColors.toLowerCase().split('/').map((w) => w.trim())
+  const words = (clubColors || '').toLowerCase().split('/').map((w) => w.trim())
   const hex = words.map((w) => COLOR_WORDS[w] || COLOR_WORDS[w.split(' ').at(-1)]).filter(Boolean)
   return [hex[0] || '#5B5F6B', hex[1] || '#F5F5F5']
 }
