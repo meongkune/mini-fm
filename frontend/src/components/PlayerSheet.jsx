@@ -1,5 +1,6 @@
 // 선수 상세: 상태(컨디션·사기·폼·부상·징계), 시즌 기록, 선발 넣기/빼기, 개별 면담
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { fetchProfile } from '../game/wiki.js'
 import PlayerCard from './PlayerCard.jsx'
 import { Flag, nationName } from './Badges.jsx'
 import Rating, { CondBar } from './Rating.jsx'
@@ -9,6 +10,14 @@ import { useGame } from '../store.jsx'
 export default function PlayerSheet({ player, onClose, inLineup, onToggle }) {
   const { status, save, talkTo, myTeam, teams } = useGame()
   const [reply, setReply] = useState('')
+  const [profile, setProfile] = useState(null)
+  useEffect(() => {
+    if (!player) return
+    let alive = true
+    setProfile(null)
+    fetchProfile(player).then((p) => alive && setProfile(p))
+    return () => { alive = false }
+  }, [player?.id])
   if (!player) return null
   const st = status[player.id] || {}
   const ps = save.pstats?.[player.id]
@@ -37,6 +46,8 @@ export default function PlayerSheet({ player, onClose, inLineup, onToggle }) {
           </div>
         </div>
 
+        <WikiProfile profile={profile} />
+
         <h4>이번 시즌</h4>
         <div className="ps-season">
           {[['경기', ps?.apps ?? 0], ['골', ps?.g ?? 0], ['도움', ps?.a ?? 0], ['평점', ps?.apps ? (ps.rsum / ps.apps).toFixed(2) : '-'], ['MOM', ps?.mom ?? 0], ['경고', ps?.yc ?? 0]].map(([l, v]) => (
@@ -63,6 +74,32 @@ export default function PlayerSheet({ player, onClose, inLineup, onToggle }) {
           </>
         )}
       </div>
+    </div>
+  )
+}
+
+// 위키백과 프로필: 사진·한글 이름·소개·키·생년월일·출생지·실제 포지션
+function WikiProfile({ profile }) {
+  if (!profile) return <div className="wiki loading"><span className="spin" /> 위키백과에서 프로필을 찾는 중…</div>
+  if (profile.none || profile.error) return <p className="wiki none small muted">{profile.error ? '프로필을 불러오지 못했습니다 (네트워크).' : '위키백과에 이 선수 문서가 없습니다.'}</p>
+  const text = profile.koExtract || profile.extract
+  return (
+    <div className="wiki">
+      <div className="wiki-head">
+        {profile.photo && <img className="wiki-photo" src={profile.photo} alt="" loading="lazy" />}
+        <div className="grow">
+          {profile.koName && <strong className="wiki-name">{profile.koName}</strong>}
+          <span className="muted small">{profile.en}{profile.desc ? ` · ${profile.desc}` : ''}</span>
+          <div className="wiki-facts">
+            {profile.height && <span>📏 {profile.height}cm</span>}
+            {profile.born && <span>🎂 {profile.born}</span>}
+            {profile.birthplace && <span>📍 {profile.birthplace}</span>}
+            {profile.positions?.length > 0 && <span>⚽ {profile.positions.slice(0, 2).join(' · ')}</span>}
+          </div>
+        </div>
+      </div>
+      {text && <p className="wiki-text">{text.length > 320 ? `${text.slice(0, 320)}…` : text}</p>}
+      <a className="wiki-src" href={profile.koUrl || profile.url} target="_blank" rel="noreferrer">출처: 위키백과 (CC BY-SA) · 사진: 위키미디어 공용 ↗</a>
     </div>
   )
 }

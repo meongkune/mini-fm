@@ -1011,3 +1011,17 @@ html.framed body { overflow: hidden; height: 100vh; }
 .grp-team { display: flex; align-items: center; gap: 5px; text-align: left; overflow: hidden; }
 .grp-team .st-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: none; }
 .grp-team .st-rank { width: 12px; flex: none; }
+
+/* 선수 프로필 (위키백과) */
+.wiki { margin-top: 12px; padding: 10px 12px; border-radius: 12px; background: var(--panel-2); border: 1px solid var(--line); display: grid; gap: 8px; }
+.wiki.loading { color: var(--muted); font-size: .8rem; display: flex; align-items: center; gap: 8px; }
+.wiki.none { margin: 10px 0 0; }
+.spin { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--line); border-top-color: var(--accent); animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.wiki-head { display: flex; gap: 10px; align-items: flex-start; }
+.wiki-head .grow { flex: 1; min-width: 0; display: grid; gap: 3px; }
+.wiki-photo { width: 72px; height: 88px; object-fit: cover; object-position: top; border-radius: 10px; flex: none; background: var(--panel); }
+.wiki-name { font-size: 1rem; }
+.wiki-facts { display: flex; flex-wrap: wrap; gap: 4px 10px; font-size: .74rem; font-weight: 700; margin-top: 2px; }
+.wiki-text { margin: 0; font-size: .8rem; line-height: 1.6; color: #d6d0ee; }
+.wiki-src { font-size: .64rem; color: var(--muted); text-decoration: underline; }
