@@ -1,0 +1,58 @@
+# 매일 SportsAPI Pro 무료 한도(100회) 안에서 선수 능력치를 실제 데이터 기반으로 갱신 → 커밋 → GitHub Pages 재배포
+# 다 못 한 선수는 다음 날(한도 초기화 00:00 UTC 뒤) 이어서 한다. Actions 탭에서 수동 실행도 가능.
+name: Update player ratings (SportsAPI)
+
+on:
+  schedule:
+    - cron: '20 0 * * *'   # 매일 00:20 UTC (한국 09:20)
+  workflow_dispatch:
+    inputs:
+      max_calls:
+        description: '이번 실행에서 쓸 최대 요청 수 (하루 한도 100)'
+        type: string
+        default: '95'
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: sportsapi-ratings
+  cancel-in-progress: false
+
+jobs:
+  ratings:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: 능력치 갱신
+        env:
+          SPORTSAPIPRO_KEY: ${{ secrets.SPORTSAPIPRO_KEY }}
+          MAX_CALLS: ${{ inputs.max_calls || '95' }}
+        run: node tools/sportsapi_ratings.mjs | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - name: 변경 사항 커밋
+        id: commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add frontend/public/data/ratings tools/sportsapi-state.json
+          if git diff --cached --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            git commit -m "data: 선수 능력치 갱신 (SportsAPI)"
+            git pull --rebase origin main
+            git push
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: GitHub Pages 재배포
+        if: steps.commit.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run pages.yml --ref main

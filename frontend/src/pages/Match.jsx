@@ -5,7 +5,7 @@ import { MAX_SUBS, advance, benchOf, createMatch, dropInjured, fillVacant, moveT
 import { TEAM_TALKS, teamTalkEffect, unavailable as outReason } from '../game/season.js'
 import Rating, { CondBar } from '../components/Rating.jsx'
 import { Crest, Flag, Kit } from '../components/Badges.jsx'
-import { ink, kitColors, onDark, playerOvr, short, teamOvr, useGame } from '../store.jsx'
+import { ink, kitColors, lineupOvr, onDark, playerOvr, short, teamOvr, useGame } from '../store.jsx'
 import MatchPitch from './MatchPitch.jsx'
 import NeedTeam from './NeedTeam.jsx'
 import { FormationPicker, LINE_OPTS, MENTALITY, OptionGroup, PRESSING, TEMPO_OPTS } from './Tactics.jsx'
@@ -201,7 +201,8 @@ export default function Match() {
             <h3>경기 준비 <span className="muted small">{nextFixture.cup ? <b className="cup-badge">{nextFixture.comp?.icon || '🏆'} {nextFixture.label}</b> : nextFixture.label} · {isHome ? '홈' : '원정'}</span></h3>
             <div className="opp-report">
               <div><span className="muted small">상대</span><strong>{opp.name}</strong></div>
-              <div><span className="muted small">전력</span><strong>{teamOvr(opp)}</strong></div>
+              <div><span className="muted small">상대 전력</span><strong>{teamOvr(opp)}</strong></div>
+              <div><span className="muted small">내 라인업</span><strong className={lineupOvr(myTeam, save.formation, save.lineup) < teamOvr(opp) ? 'bad-text' : ''}>{lineupOvr(myTeam, save.formation, save.lineup)}</strong></div>
               <div><span className="muted small">최근</span><span className="form">{recentForm(save.results, opp.id).map((f, i) => <span key={i} className={`f ${f}`}>{f}</span>)}</span></div>
             </div>
             <p className="small muted">상대 핵심: {[...opp.players].sort((a, b) => playerOvr(b) - playerOvr(a)).slice(0, 3).map((p) => `${p.name.split(' ').at(-1)}(${playerOvr(p)})`).join(' · ')}</p>

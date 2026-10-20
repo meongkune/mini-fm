@@ -6,7 +6,7 @@ import { Crest } from '../components/Badges.jsx'
 import MgrBadge from '../components/MgrBadge.jsx'
 import { eur } from '../game/finance.js'
 import { fanLabel } from '../game/owner.js'
-import { ink, playerOvr, short, teamOvr, useGame } from '../store.jsx'
+import { ink, lineupOvr, playerOvr, short, teamOvr, useGame } from '../store.jsx'
 
 // 전력 순위에 따른 한 줄 소개 (팀 수와 관계없이 4등분)
 function strengthLabel(rank, total) {
@@ -101,7 +101,7 @@ export default function Home() {
           <h1>{myTeam.name}</h1>
           <span className="th-sub">{seasonText}{save.seasonNo > 1 ? ` · ${save.seasonNo}번째 시즌` : ''}</span>
         </div>
-        <div className="th-ovr"><strong>{teamOvr(myTeam)}</strong><span>OVR</span></div>
+        <div className="th-ovr" title={`최고 전력 ${teamOvr(myTeam)}`}><strong>{lineupOvr(myTeam, save.formation, save.lineup)}</strong><span>라인업</span></div>
       </div>
       {manager && (
         <Link to="/manager" className="card mgr-strip">

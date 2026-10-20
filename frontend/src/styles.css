@@ -668,7 +668,7 @@ html.framed body { overflow: hidden; height: 100vh; }
 .sheet-head h3 { margin: 0; }
 @keyframes slideup { from { transform: translateY(30px); opacity: 0; } to { transform: none; opacity: 1; } }
 @keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
-.pick-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.pick-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 4px; }
 .pick { width: 100%; display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--line); background: var(--panel-2); color: var(--text); font: inherit; font-size: .84rem; cursor: pointer; text-align: left; }
 .pick.on { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; background: rgba(124, 92, 255, .18); }
 .pick:disabled { opacity: .45; cursor: default; }
@@ -1074,3 +1074,24 @@ html.framed body { overflow: hidden; height: 100vh; }
 .offer-slider { display: grid; gap: 4px; margin-bottom: 14px; font-size: .8rem; font-weight: 700; }
 .offer-slider input { width: 100%; accent-color: var(--accent); }
 .offer-slider em { font-style: normal; }
+/* 라인업 상태: 지금 라인업 OVR · 자리 안 맞는 선수 */
+.lineup-status .ls-ovr { display: flex; align-items: center; gap: 14px; width: 100%; }
+.lineup-status .ls-ovr span { display: grid; line-height: 1.1; }
+.lineup-status .ls-ovr small { font-size: .62rem; color: var(--muted); }
+.lineup-status .ls-ovr b { font-size: 1.35rem; }
+.lineup-status .ls-ovr .grow { text-align: right; }
+.ls-misfit { list-style: none; margin: 4px 0 0; padding: 0; width: 100%; display: grid; gap: 3px; font-size: .74rem; }
+.ls-misfit li { padding: 4px 8px; border-radius: 7px; background: rgba(234, 179, 8, .12); color: #fde68a; }
+.ls-misfit li.bad { background: rgba(239, 68, 68, .14); color: #fca5a5; }
+/* 카드 리본: 지금 뛰는 자리 */
+.pc-slot { margin-left: 2px; padding: 0 4px; border-radius: 4px; font-style: normal; font-size: .9em; color: #fff; background: #16a34a; }
+.pc-slot.good { background: #65a30d; } .pc-slot.ok { background: #ca8a04; } .pc-slot.bad { background: #dc2626; }
+.slot-tag { display: inline-block; padding: 1px 5px; border-radius: 5px; font-size: .6rem; font-weight: 900; color: #fff; background: #16a34a; }
+.slot-tag.good { background: #65a30d; } .slot-tag.ok { background: #ca8a04; } .slot-tag.bad { background: #dc2626; }
+/* 전술 자리 고르기: 이미 선발인 선수 */
+.pick.in-xi { background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.xi-tag { flex: none; margin-left: 0; padding: 1px 6px; border-radius: 6px; font-size: .6rem; font-style: normal; font-weight: 800; color: #fff; background: var(--accent); white-space: nowrap; }
+.xi-tag.here { background: #16a34a; }
+.offer-warn { list-style: none; margin: 0 0 10px; padding: 0; display: grid; gap: 3px; font-size: .74rem; }
+.offer-warn li { padding: 5px 8px; border-radius: 7px; background: var(--panel-2); color: var(--muted); }
+.offer-warn li.bad { background: rgba(239, 68, 68, .14); color: #fca5a5; }

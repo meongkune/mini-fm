@@ -10,7 +10,7 @@ const POS = ['전체', 'GK', 'DF', 'MF', 'FW']
 const stars = (n) => '★'.repeat(n) + '☆'.repeat(5 - n)
 
 export default function FreeAgents() {
-  const { myTeam, save, teams, wageFor, offerFA } = useGame()
+  const { myTeam, save, teams, wageFor, offerFA, faPreview } = useGame()
   const [korea, setKorea] = useState(null)
   const [pos, setPos] = useState('전체')
   const [src, setSrc] = useState('korea')
@@ -62,16 +62,18 @@ export default function FreeAgents() {
           </ul>
         </div>
       )}
-      {pick && <OfferSheet player={pick} ask={wageFor(pick) * 1.1} onClose={() => setPick(null)} offerFA={offerFA} />}
+      {pick && <OfferSheet player={pick} ask={wageFor(pick) * 1.1} onClose={() => setPick(null)} offerFA={offerFA} preview={faPreview} cash={save.finance?.cash ?? 0} />}
     </>
   )
 }
 
-function OfferSheet({ player, ask, onClose, offerFA }) {
+function OfferSheet({ player, ask, onClose, offerFA, preview, cash }) {
   const [pct, setPct] = useState(100)
   const [years, setYears] = useState(player.age >= 32 ? 1 : 3)
   const [res, setRes] = useState(null)
   const wage = Math.round(ask * pct) / 100
+  const pv = preview(player, wage)
+  const fee = Math.round(wage * 0.5 * 10) / 10
   return (
     <div className="sheet-wrap" onClick={onClose}>
       <div className="sheet" onClick={(e) => e.stopPropagation()}>
@@ -87,7 +89,17 @@ function OfferSheet({ player, ask, onClose, offerFA }) {
           </select>
           <span className="small muted">계약금 {eur(Math.round(wage * 0.5 * 10) / 10)}</span>
         </div>
+        {pv && !res?.ok && (
+          <ul className="offer-warn">
+            <li className={cash < fee ? 'bad' : ''}>💰 보유 현금 {eur(cash)} · 계약금 {eur(fee)}{cash < fee ? ' — 부족!' : ''}</li>
+            <li className={wage > pv.topWage ? 'bad' : ''}>📊 팀 최고 연봉 {eur(pv.topWage)} ({pv.topName.split(' ').at(-1)}){wage > pv.topWage ? ' — 이보다 많이 주면 임금 체계가 무너집니다' : ''}</li>
+            {pv.jealous.length > 0 && <li className="bad">😤 이 선수보다 잘하는데 덜 받게 되는 선수 {pv.jealous.length}명이 반발할 수 있습니다</li>}
+            {pv.overpay >= 1.6 && <li className="bad">📰 요구액의 {Math.round(pv.overpay * 100)}% — 언론·팬이 과다 지출이라고 비판합니다</li>}
+            <li className={pv.newBill > pv.income ? 'bad' : ''}>🧾 주급 총액 {eur(pv.bill)} → {eur(pv.newBill)} / 시즌 수입 {eur(pv.income)}{pv.newBill > pv.income ? ' — 적자 구조' : ''}</li>
+          </ul>
+        )}
         {res && <p className={`notice ${res.ok ? 'ok' : 'bad'}`}>{res.ok ? '✍️ ' : ''}{res.reason}</p>}
+        {res?.ok && res.fallout?.length > 0 && <ul className="offer-warn">{res.fallout.map((f) => <li key={f} className="bad">⚠️ {f}</li>)}</ul>}
         {!res?.ok && <button className="btn wide" onClick={() => setRes(offerFA(player, years, wage))}>제안하기</button>}
         {res?.ok && <button className="btn wide" onClick={onClose}>확인</button>}
       </div>

@@ -8,7 +8,7 @@ import { cleanName, effectiveTeams } from './game/roster.js'
 import { evaluateTrade, executeTrade, windowState } from './game/trade.js'
 import { boardMidCheck, newBoard, nextSeason, seasonLabel, seasonReview } from './game/career.js'
 import { COMPS, CUP_LEAGUES, buildCups, cupKey, cupStatus, dueMatchday, myCupFixture, playMatchday } from './game/cup.js'
-import { ROSTER_MAX, checkBankruptcy, contractOf, eur, faDecision, newFinance, prizeMoney, releaseCost, renewalAsk, settleMatch, wageFor } from './game/finance.js'
+import { ROSTER_MAX, checkBankruptcy, contractOf, eur, faDecision, newFinance, prizeMoney, releaseCost, renewalAsk, settleMatch, wageFor, wageShock } from './game/finance.js'
 import { afterMatchOwner, decide } from './game/owner.js'
 import { valueOf } from './game/trade.js'
 
@@ -89,7 +89,21 @@ export function teamOvr(team) {
   return Math.round(top.reduce((s, v) => s + v, 0) / top.length)
 }
 
+const hashStr = (t) => { let h = 2166136261; for (const c of String(t)) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return h >>> 0 }
+
 export const formationNeeds = shapeNeeds
+
+/**
+ * 지금 라인업 기준 팀 OVR: 자리마다 (선수 OVR × 자리 적합도), 빈 자리는 0으로 계산
+ * → 포지션이 맞지 않는 선수를 세우거나 자리를 비우면 그만큼 떨어진다
+ */
+export function lineupOvr(team, formation, lineup) {
+  const slots = buildSlots(formation)
+  const byId = Object.fromEntries(team.players.map((p) => [p.id, p]))
+  let sum = 0
+  slots.forEach((s, i) => { const p = byId[lineup?.[i]]; if (p) sum += playerOvr(p) * fitOf(p, s.role) })
+  return Math.round(sum / slots.length)
+}
 
 /** 컨디션·출전 가능을 고려한 자동 배치 (자리 순서, 빈 자리는 null) */
 export function autoSlots(team, formation, status = {}, keep = {}) {
@@ -409,6 +423,8 @@ export function GameProvider({ children }) {
         })
         return { buyer: buyer.name, fee }
       },
+      /** FA 제안 전 미리보기: 임금 체계·주급 총액 영향 */
+      faPreview(p, wage) { return myTeam && data ? wageShock(save, myTeam, data.leagueId, p, wage) : null },
       /** FA 영입 제안 */
       offerFA(p, years, offerWage) {
         if (teams.some((t) => t.players.some((x) => x.id === p.id))) return { ok: false, reason: '이미 구단에 소속된 선수입니다.' }
@@ -418,6 +434,9 @@ export function GameProvider({ children }) {
         const d = faDecision(p, { offerWage, years, leagueId: data.leagueId, clubOvr: top.reduce((a, b) => a + b, 0) / top.length })
         if (!d.ok) return d
         const fee = Math.round(offerWage * 0.5 * 10) / 10 // 계약금
+        if ((save.finance?.cash ?? 0) < fee) return { ok: false, reason: `계약금 ${eur(fee)}을 낼 현금이 없습니다 (보유 ${eur(save.finance?.cash ?? 0)}).` }
+        const shock = wageShock(save, myTeam, data.leagueId, p, offerWage)
+        const roll = (k) => (hashStr(`${p.id}-${k}-${save.round}`) % 100) / 100
         setSave((s) => {
           const rosters = s.rosters || Object.fromEntries(teams.map((t) => [t.id, t.players.map((x) => x.id)]))
           if (Object.values(rosters).some((ids) => ids.includes(p.id))) return s // 연속 클릭으로 두 번 들어오는 것 방지
@@ -436,7 +455,27 @@ export function GameProvider({ children }) {
             inbox: [news(s.round, 'trade', `✍️ FA 영입: ${p.name}`, `${years}년 계약, 연봉 ${eur(offerWage)}, 계약금 ${eur(fee)}.`), ...(s.inbox || [])],
           }
         })
-        return { ...d, fee }
+        // 후폭풍: 임금 체계 붕괴(더 잘하는데 덜 받는 선수들 반발) · 과다 지출 비판
+        const fallout = []
+        if (shock.jealous.length) {
+          const angry = [...shock.jealous].sort((a, b) => playerOvr(b) - playerOvr(a))
+          const leaver = angry[0] && roll('out') < 0.35 ? angry[0] : null
+          setSave((s) => {
+            const st = { ...s.status }
+            for (const x of angry) st[x.id] = { morale: 60, cond: 100, ...(st[x.id] || {}), morale: Math.max(0, (st[x.id]?.morale ?? 60) - 12) }
+            if (leaver) st[leaver.id] = { ...st[leaver.id], wantsOut: true }
+            const names = angry.slice(0, 3).map((x) => x.name).join('·')
+            const item = news(s.round, 'talk', '😤 임금 체계 붕괴', `${p.name}이(가) ${eur(offerWage)}을 받는다는 소식에 ${names}${angry.length > 3 ? ` 등 ${angry.length}명` : ''}이(가) "우리가 더 잘하는데 왜 덜 받냐"며 반발합니다. (사기 -12)${leaver ? ` ${leaver.name}은(는) 결국 이적을 요청했습니다.` : ''}`)
+            return { ...s, status: st, inbox: [item, ...(s.inbox || [])] }
+          })
+          fallout.push(`기존 선수 ${angry.length}명이 반발합니다 (사기 -12)${leaver ? ` · ${leaver.name} 이적 요청` : ''}`)
+        }
+        if (shock.overpay >= 1.6) {
+          setSave((s) => ({ ...s, fans: Math.max(0, (s.fans ?? 60) - 5), inbox: [news(s.round, 'owner', '📰 "돈을 길바닥에 뿌린다"', `언론이 ${p.name}에게 요구액의 ${Math.round(shock.overpay * 100)}%를 준 계약을 맹비난합니다. (민심 -5)`), ...(s.inbox || [])] }))
+          fallout.push('과다 지출 비판 (민심 -5)')
+        }
+        if (shock.newBill > shock.income) fallout.push(`주급 총액 ${eur(shock.newBill)}이 시즌 수입 ${eur(shock.income)}을 넘어 매 경기 적자가 납니다`)
+        return { ...d, fee, fallout }
       },
       /** 직접 입력한 말로 면담 → 반응 결과 (itemId: 편지함 면담 요청에 대한 답) */
       sayTo(playerId, text, itemId = null) {

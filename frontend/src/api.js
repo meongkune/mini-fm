@@ -13,6 +13,20 @@ async function getJson(url) {
   return res.json()
 }
 
+/**
+ * 시즌 파일 + 실제 데이터 기반 능력치(data/ratings/{리그}.json, SportsAPI 시장가치·능력치로 계산한 값)를 덮어씌운다.
+ * 능력치 파일이 없거나 그 선수가 아직 없으면 원래 값을 그대로 쓴다.
+ */
+async function getSeason(file) {
+  const data = await getJson(dataUrl(file))
+  const league = file.split('/')[0]
+  if (!data.teams || file.startsWith('fa/')) return data
+  const ratings = await getJson(dataUrl(`ratings/${league}.json`)).catch(() => null)
+  const rp = ratings?.players
+  if (!rp) return data
+  return { ...data, ratingsAt: ratings.updatedAt, teams: data.teams.map((t) => ({ ...t, players: t.players.map((p) => (rp[p.id] ? { ...p, ...rp[p.id], rated: true } : p)) })) }
+}
+
 let indexCache = null
 let seasonCache = null // { key, data, teamsById, schedule }
 
@@ -28,7 +42,7 @@ export async function loadSeason(leagueId, seasonId) {
   const season = league.seasons.find((s) => s.id === (seasonId || index.default.season)) || league.seasons[0]
   const key = `${league.id}/${season.id}`
   if (seasonCache?.key !== key) {
-    const data = await getJson(dataUrl(season.file))
+    const data = await getSeason(season.file)
     seasonCache = {
       key,
       leagueId: league.id,
@@ -46,7 +60,7 @@ const current = async () => seasonCache || loadSeason()
 /** 다른 리그 시즌 파일 (현재 플레이 중인 시즌 캐시는 건드리지 않는다) */
 const fileCache = {}
 export async function loadSeasonFile(file) {
-  fileCache[file] ??= getJson(dataUrl(file))
+  fileCache[file] ??= getSeason(file)
   return fileCache[file]
 }
 

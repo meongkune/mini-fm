@@ -59,7 +59,7 @@ export function initialCash(team, leagueId) {
 export function newFinance(team, leagueId) {
   const wages = team.players.reduce((s, p) => s + wageFor(p, leagueId), 0)
   const base = r1(Math.max(8, wages * 1.15))
-  return { cash: r1(base * 0.6), base, ticket: 'normal', last: null, ledger: [], warn: 0 }
+  return { cash: r1(base * 0.15), base, ticket: 'normal', last: null, ledger: [], warn: 0 } // 시작 자금은 빠듯하게 (시즌 수입의 15%)
 }
 
 /** 주급 총액 (€M/년) */
@@ -141,3 +141,18 @@ export function faDecision(p, { offerWage, years, leagueId, clubOvr }) {
 }
 export const ROSTER_MAX = 40
 export const ROSTER_MIN = 18
+
+/**
+ * 연봉 체계 점검: 새 계약이 팀 임금 구조를 흔드는지
+ * - 기존 최고 연봉보다 많이 주면, 새 선수보다 OVR이 높은데 덜 받게 되는 선수들이 반발한다
+ * - 요구액의 1.6배 넘게 주면 언론·팬이 '돈 낭비'라고 비판한다
+ */
+export function wageShock(save, team, leagueId, p, offerWage) {
+  const rows = team.players.filter((x) => x.id !== p.id).map((x) => ({ x, wage: contractOf(save, x, leagueId).wage }))
+  const top = rows.sort((a, b) => b.wage - a.wage)[0] || null
+  const newOvr = playerOvrOf(p)
+  const jealous = rows.filter((r) => r.wage < offerWage && playerOvrOf(r.x) > newOvr).map((r) => r.x)
+  const ask = wageFor(p, leagueId) * 1.1
+  const bill = wageBill(save, team, leagueId)
+  return { topWage: top?.wage ?? 0, topName: top?.x.name ?? '', jealous, overpay: offerWage / ask, bill, newBill: r1(bill + offerWage), income: save.finance?.base || 40 }
+}

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Kit, Flag } from '../components/Badges.jsx'
 import { CondBar } from '../components/Rating.jsx'
 import { PRESETS, ROLE_LABEL, buildSlots, fitOf, fitTone, parseShape, roleOf } from '../engine/formation.js'
-import { alignLineup, autoSlots, playerOvr, useGame } from '../store.jsx'
+import { alignLineup, autoSlots, lineupOvr, playerOvr, teamOvr, useGame } from '../store.jsx'
 import { unavailable } from '../game/season.js'
 import NeedTeam from './NeedTeam.jsx'
 
@@ -109,7 +109,7 @@ export function SlotSheet({ team, formation, lineup, index, status, onPick, onCl
           <h3>{slot.role} <span className="muted small">{ROLE_LABEL[slot.role]} 자리</span></h3>
           <button className="btn ghost small" onClick={onClose}>닫기</button>
         </div>
-        <p className="small muted" style={{ marginTop: 0 }}>적합도가 낮은 선수를 넣으면 그만큼 경기력이 떨어집니다. 다른 자리에 있던 선수를 고르면 두 선수가 자리를 바꿉니다.</p>
+        <p className="small muted" style={{ marginTop: 0 }}>오른쪽 숫자는 이 자리에서 실제로 내는 능력치입니다 (OVR × 적합도). <b>선발</b> 표시가 붙은 선수를 고르면 두 선수가 자리를 맞바꿉니다.</p>
         <ul className="pick-list">
           {list.map(({ p, fit }) => {
             const st = status[p.id] || {}
@@ -117,12 +117,13 @@ export function SlotSheet({ team, formation, lineup, index, status, onPick, onCl
             const tone = fitTone(fit)
             return (
               <li key={p.id}>
-                <button className={`pick ${current === p.id ? 'on' : ''}`} disabled={out} onClick={() => onPick(p.id)}>
+                <button className={`pick ${current === p.id ? 'on' : ''} ${where[p.id] !== undefined ? 'in-xi' : ''}`} disabled={out} onClick={() => onPick(p.id)}>
                   <span className={`role-chip ${tone}`}>{roleOf(p)}</span>
                   <span className="lu-name"><Flag nation={p.nation} size={13} /> {p.name}
-                    <small className="muted"> {where[p.id] !== undefined && where[p.id] !== index ? `· 지금 ${slots[where[p.id]].role}` : ''}</small>
                     {out && <span className={`out-tag ${out.kind}`}>{out.icon} {out.label} · {out.text}</span>}
                   </span>
+                  {current === p.id && <em className="xi-tag here">이 자리</em>}
+                  {where[p.id] !== undefined && where[p.id] !== index && <em className="xi-tag">선발 {slots[where[p.id]].role}</em>}
                   <span className={`fit-label ${tone}`}>{FIT_LABEL[tone]}</span>
                   <CondBar value={st.cond} />
                   <b className="pick-ovr">{Math.round(playerOvr(p) * fit)}</b>
@@ -173,7 +174,7 @@ export default function Tactics() {
       <div className="section-head">
         <div>
           <h1>전술</h1>
-          <p className="muted">경기장의 자리를 눌러 선수를 배치하세요 · 적합도 {avgFit}%</p>
+          <p className="muted">경기장의 자리를 눌러 선수를 배치하세요 · 적합도 {avgFit}% · 라인업 OVR <b className={lineupOvr(myTeam, formation, lineup) < teamOvr(myTeam) - 2 ? 'bad-text' : ''}>{lineupOvr(myTeam, formation, lineup)}</b></p>
         </div>
         <button className="btn small" onClick={() => update({ lineup: autoSlots(myTeam, formation, status) })}>⚡ 자동 배치</button>
       </div>

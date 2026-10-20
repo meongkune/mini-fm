@@ -106,14 +106,19 @@ const NEAR = {
   DM: ['CM', 'CB'], CM: ['DM', 'AM', 'LM', 'RM'], LM: ['LW', 'CM', 'LWB', 'LB'], RM: ['RW', 'CM', 'RWB', 'RB'], AM: ['CM', 'ST', 'LW', 'RW'],
   LW: ['LM', 'RW', 'AM', 'ST'], RW: ['RM', 'LW', 'AM', 'ST'], ST: ['AM', 'LW', 'RW'], GK: [],
 }
-/** 자리 적합도: 1(본 포지션) · 0.92(비슷한 역할) · 0.82(같은 큰 포지션) · 0.6(다른 포지션) · GK 아닌데 GK 자리 0.3 */
+/**
+ * 자리 적합도: 1(본 포지션) · 0.92(비슷한 역할) · 0.82(같은 큰 포지션) · 0.65(한 줄 떨어진 포지션, 예: MF↔DF)
+ * · 0.5(공격수↔수비수) · GK와 필드 플레이어가 바뀌면 0.3
+ */
 export function fitOf(p, slotRole) {
   const r = roleOf(p)
   if (r === slotRole) return 1
   if ((slotRole === 'GK') !== (r === 'GK')) return 0.3
   if (NEAR[r]?.includes(slotRole)) return 0.92
-  if (ROLE_POS[r] === ROLE_POS[slotRole]) return 0.82
-  return 0.6
+  const a = ROLE_POS[r]
+  const b = ROLE_POS[slotRole]
+  if (a === b) return 0.82
+  return (a === 'DF' && b === 'FW') || (a === 'FW' && b === 'DF') ? 0.5 : 0.65
 }
 export const fitTone = (f) => (f >= 1 ? 'best' : f >= 0.9 ? 'good' : f >= 0.8 ? 'ok' : 'bad')
 

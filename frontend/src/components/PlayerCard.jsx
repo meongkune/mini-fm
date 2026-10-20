@@ -1,6 +1,6 @@
 import { playerOvr } from '../store.jsx'
 import { Flag, Kit } from './Badges.jsx'
-import { roleOf } from '../engine/formation.js'
+import { fitTone, roleOf } from '../engine/formation.js'
 import { unavailable } from '../game/season.js'
 
 // OVR 기준 선수 등급 — 카드 색을 정한다
@@ -16,7 +16,8 @@ const lastName = (name) => name.split(' ').at(-1)
 
 /** FC 스타일 세로형 선수 카드. size: 'sm'(스쿼드 그리드) | 'lg'(홈 가로 스크롤) */
 /** status를 주면 카드 아래에 컨디션 막대와 부상·징계·사기 표시 */
-export default function PlayerCard({ player, selected = false, onClick, size = 'sm', status = null, color = null }) {
+/** slot을 주면 본 포지션과 다른 자리에서 뛸 때 'ST→LB'처럼 표시 (색 = 적합도) */
+export default function PlayerCard({ player, selected = false, onClick, size = 'sm', status = null, color = null, slot = null }) {
   const ovr = playerOvr(player)
   const tier = tierOf(ovr)
   const out = status ? unavailable(status) : null
@@ -30,7 +31,7 @@ export default function PlayerCard({ player, selected = false, onClick, size = '
     >
       <span className="pc-top">
         <span className="pc-ovr">{ovr}</span>
-        <span className="pc-pos">{roleOf(player)}</span>
+        <span className="pc-pos">{roleOf(player)}{slot && slot.role !== roleOf(player) && <i className={`pc-slot ${fitTone(slot.fit)}`} title={`${slot.role} 자리 · 능력 ${Math.round(slot.fit * 100)}% 발휘`}>→{slot.role}</i>}</span>
         <span className="pc-flag-img"><Flag nation={player.nation} size={size === 'lg' ? 18 : 14} /></span>
       </span>
       {color ? <span className="pc-kit"><Kit color={color} number={player.number} size={size === 'lg' ? 52 : 40} /></span> : <span className="pc-badge" aria-hidden="true">{player.number}</span>}
