@@ -1074,3 +1074,10 @@ html.framed body { overflow: hidden; height: 100vh; }
 .owner-card strong { font-size: 1rem; font-weight: 900; }
 .owner-card small { display: block; font-size: .6rem; color: var(--muted); }
 .owner-card em { grid-column: 1 / -1; font-style: normal; font-size: .72rem; color: var(--accent); font-weight: 800; }
+
+/* VRoid 감독 */
+.vrm-empty { display: grid; justify-items: center; gap: 8px; padding: 24px 8px; text-align: center; font-size: .84rem; color: var(--muted); }
+.mgr-ghost.big { width: 96px; height: 96px; font-size: 3rem; }
+.vrm-err { position: absolute; margin: 12px; padding: 8px 10px; border-radius: 8px; background: rgba(239, 68, 68, .2); color: #fecaca; font-size: .8rem; }
+.mgr3d { position: relative; }
+.vrm-guide ol { padding-left: 18px; margin: 0 0 6px; font-size: .82rem; line-height: 1.7; }

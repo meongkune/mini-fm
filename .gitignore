@@ -47,3 +47,4 @@ tools/capture-window.ps1
 
 # 3D 모델 원본(가공 전) 임시 폴더
 models_in/
+frontend/public/_test/

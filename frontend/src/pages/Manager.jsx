@@ -1,57 +1,46 @@
-import { Suspense, lazy, useRef, useState } from 'react'
+// 감독 프로필: VRoid Studio로 만든 VRM 3D 감독 (파일은 이 브라우저에만 저장)
+import { Suspense, lazy, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { BEARDS_3D, BOTTOM_COLORS, GLASSES_3D, HAIRS_3D, HAIR_COLORS_3D, OUTFITS_3D, SKINS_3D, TIE_COLORS, TOP_COLORS, randomLook3D, toLook3D } from '../components/managerLook.js'
+import { deleteVrm, loadVrm, saveVrm } from '../components/vrmStore.js'
 import { useGame } from '../store.jsx'
 
-// three.js는 이 화면에서만 필요하므로 따로 불러온다 (첫 화면 로딩을 가볍게)
-const Manager3D = lazy(() => import('../components/Manager3D.jsx'))
-
-const TABS = [['face', '얼굴'], ['hair', '헤어'], ['body', '체형'], ['outfit', '의상']]
-
-function Chips({ options, value, onChange }) {
-  return (
-    <div className="look-chips">
-      {options.map(([k, label]) => <button key={k} className={`chip ${value === k ? 'on' : ''}`} onClick={() => onChange(k)}>{label}</button>)}
-    </div>
-  )
-}
-function Swatches({ colors, value, onChange, teamColor }) {
-  return (
-    <div className="swatches">
-      {colors.map((c) => {
-        const [k, label] = Array.isArray(c) ? c : [c, '']
-        const col = k === 'team' ? teamColor : k
-        return <button key={k} className={`sw ${value === k ? 'on' : ''}`} style={{ background: col }} title={label} aria-label={label || col} onClick={() => onChange(k)}>{k === 'team' ? '팀' : ''}</button>
-      })}
-    </div>
-  )
-}
-function Slider({ label, value, min, max, onChange, left, right }) {
-  return (
-    <label className="look-slider">
-      <span>{label}</span>
-      <input type="range" min={min} max={max} step="0.01" value={value} onChange={(e) => onChange(Number(e.target.value))} />
-      <small><em>{left}</em><em>{right}</em></small>
-    </label>
-  )
-}
+const ManagerVRM = lazy(() => import('../components/ManagerVRM.jsx'))
 
 export default function Manager() {
   const { manager, saveManager, myTeam, save } = useGame()
   const navigate = useNavigate()
   const view = useRef(null)
-  const [look, setLook] = useState(() => (manager?.look ? toLook3D(manager.look) : randomLook3D()))
+  const fileRef = useRef(null)
+  const [buffer, setBuffer] = useState(null)
+  const [loading, setLoading] = useState(true)
   const [name, setName] = useState(manager?.name || '')
-  const [tab, setTab] = useState('face')
   const [framing, setFraming] = useState('full')
+  const [msg, setMsg] = useState('')
   const teamColor = myTeam?.color || '#7c5cff'
-  const set = (patch) => setLook((l) => ({ ...l, ...patch, v: 3 }))
   const history = save.history || []
   const titles = history.filter((h) => h.pos === 1).length
 
+  useEffect(() => { loadVrm().then((b) => { setBuffer(b || null); setLoading(false) }) }, [])
+
+  const onFile = async (e) => {
+    const f = e.target.files?.[0]
+    if (!f) return
+    if (!/\.vrm$/i.test(f.name)) { setMsg('.vrm 파일만 올릴 수 있습니다.'); return }
+    if (f.size > 80 * 1024 * 1024) { setMsg('파일이 너무 큽니다 (80MB 이하).'); return }
+    const buf = await f.arrayBuffer()
+    try { await saveVrm(buf) } catch { setMsg('브라우저 저장 공간이 부족해 기억하지 못했습니다. (이번 화면에서는 보입니다)') }
+    setBuffer(buf)
+    setMsg(`${f.name} (${(f.size / 1024 / 1024).toFixed(1)}MB)을 불러왔습니다.`)
+    e.target.value = ''
+  }
+  const remove = async () => {
+    if (!confirm('올린 VRM 감독을 지울까요?')) return
+    await deleteVrm()
+    setBuffer(null)
+  }
   const done = () => {
-    const thumb = view.current?.capture?.(160) || manager?.thumb || null
-    saveManager({ name: name.trim() || '무명 감독', look: { ...look, v: 3 }, thumb })
+    const thumb = (buffer && view.current?.capture?.(160)) || manager?.thumb || null
+    saveManager({ ...(manager || {}), name: name.trim() || '무명 감독', thumb, vrm: !!buffer })
     navigate('/')
   }
 
@@ -60,51 +49,50 @@ export default function Manager() {
       <div className="section-head">
         <div>
           <h1>{manager ? '감독 프로필' : '감독 만들기'}</h1>
-          <p className="muted">끌어서 돌려 보고, 얼굴·헤어·체형·의상을 고르세요.</p>
+          <p className="muted">VRoid Studio로 만든 내 감독을 3D로 세웁니다.</p>
         </div>
       </div>
 
       <div className="card mgr-stage" style={{ '--c': teamColor }}>
-        <Suspense fallback={<div className="mgr3d loading" style={{ height: 340 }}>3D 감독 불러오는 중…</div>}>
-          <Manager3D ref={view} look={look} teamColor={teamColor} height={340} framing={framing} />
-        </Suspense>
-        <div className="mgr-tools">
-          <button className="chip" onClick={() => view.current?.turn(-0.8)}>⟲</button>
-          <button className={`chip ${framing === 'full' ? 'on' : ''}`} onClick={() => setFraming('full')}>전신</button>
-          <button className={`chip ${framing === 'bust' ? 'on' : ''}`} onClick={() => setFraming('bust')}>상반신</button>
-          <button className="chip" onClick={() => view.current?.wave()}>👋 인사</button>
-          <button className="chip" onClick={() => view.current?.turn(0.8)}>⟳</button>
-        </div>
+        {loading ? <div className="mgr3d loading" style={{ height: 380 }}>불러오는 중…</div> : buffer ? (
+          <>
+            <Suspense fallback={<div className="mgr3d loading" style={{ height: 380 }}>3D 감독 불러오는 중…</div>}>
+              <ManagerVRM ref={view} buffer={buffer} teamColor={teamColor} height={380} framing={framing} />
+            </Suspense>
+            <div className="mgr-tools">
+              <button className="chip" onClick={() => view.current?.turn(-0.8)}>⟲</button>
+              <button className={`chip ${framing === 'full' ? 'on' : ''}`} onClick={() => setFraming('full')}>전신</button>
+              <button className={`chip ${framing === 'bust' ? 'on' : ''}`} onClick={() => setFraming('bust')}>상반신</button>
+              <button className="chip" onClick={() => view.current?.wave()}>👋 인사</button>
+              <button className="chip" onClick={() => view.current?.turn(0.8)}>⟳</button>
+            </div>
+          </>
+        ) : (
+          <div className="vrm-empty">
+            {manager?.thumb ? <img className="mgr-thumb" src={manager.thumb} alt="" width={96} height={96} /> : <span className="mgr-ghost big">👔</span>}
+            <p>아직 3D 감독이 없습니다. 아래 순서대로 VRoid Studio에서 만들어 올려 주세요.</p>
+          </div>
+        )}
         <input className="mgr-name" value={name} maxLength={16} placeholder="감독 이름" onChange={(e) => setName(e.target.value)} />
-        <span className="muted small">{myTeam ? `${myTeam.name} 감독` : '아직 맡은 팀 없음'}{history.length ? ` · ${history.length}시즌 · 우승 ${titles}회` : ''}</span>
-        <button className="btn ghost small" onClick={() => setLook(randomLook3D())}>🎲 랜덤</button>
+        <span className="muted small">{myTeam ? `${myTeam.name} 감독 겸 구단주` : '아직 맡은 팀 없음'}{history.length ? ` · ${history.length}시즌 · 우승 ${titles}회` : ''}</span>
+        <div className="row">
+          <button className="btn small" onClick={() => fileRef.current?.click()}>{buffer ? '다른 VRM 올리기' : '📁 VRM 파일 올리기'}</button>
+          {buffer && <button className="btn ghost small" onClick={remove}>지우기</button>}
+        </div>
+        <input ref={fileRef} type="file" accept=".vrm" hidden onChange={onFile} />
+        {msg && <p className="small notice">{msg}</p>}
       </div>
 
-      <div className="seg">
-        {TABS.map(([k, l]) => <button key={k} className={tab === k ? 'on' : ''} onClick={() => setTab(k)}>{l}</button>)}
-      </div>
-
-      <div className="card look-panel">
-        {tab === 'face' && (<>
-          <h4>피부</h4><Swatches colors={SKINS_3D} value={look.skin} onChange={(skin) => set({ skin })} />
-          <h4>수염</h4><Chips options={BEARDS_3D} value={look.beard} onChange={(beard) => set({ beard })} />
-          <h4>안경</h4><Chips options={GLASSES_3D} value={look.glasses} onChange={(glasses) => set({ glasses })} />
-        </>)}
-        {tab === 'hair' && (<>
-          <h4>헤어스타일</h4><Chips options={HAIRS_3D} value={look.hair} onChange={(hair) => set({ hair })} />
-          <h4>머리·수염 색</h4><Swatches colors={HAIR_COLORS_3D} value={look.hairColor} onChange={(hairColor) => set({ hairColor })} />
-        </>)}
-        {tab === 'body' && (<>
-          <Slider label="키" value={look.height} min={0.9} max={1.1} left="작게" right="크게" onChange={(height) => set({ height })} />
-          <Slider label="체격" value={look.build} min={0.85} max={1.3} left="마름" right="건장" onChange={(build) => set({ build })} />
-          <Slider label="머리 크기" value={look.headSize} min={0.9} max={1.12} left="작게" right="크게" onChange={(headSize) => set({ headSize })} />
-        </>)}
-        {tab === 'outfit' && (<>
-          <h4>의상</h4><Chips options={OUTFITS_3D} value={look.outfit} onChange={(outfit) => set({ outfit })} />
-          <h4>상의 색</h4><Swatches colors={TOP_COLORS} value={look.top} onChange={(top) => set({ top })} teamColor={teamColor} />
-          <h4>하의 색</h4><Swatches colors={BOTTOM_COLORS} value={look.bottom} onChange={(bottom) => set({ bottom })} teamColor={teamColor} />
-          {look.outfit === 'suit' && (<><h4>넥타이</h4><Swatches colors={TIE_COLORS} value={look.tie} onChange={(tie) => set({ tie })} teamColor={teamColor} /></>)}
-        </>)}
+      <div className="card vrm-guide">
+        <h3>VRoid Studio로 감독 만들기</h3>
+        <ol>
+          <li><a className="link" href="https://vroid.com/studio" target="_blank" rel="noreferrer">vroid.com/studio</a>에서 <b>VRoid Studio</b>(무료, Windows·Mac)를 설치합니다.</li>
+          <li><b>새로 만들기 → 남성(또는 여성)</b>을 고르고 얼굴·헤어·체형을 세밀하게 다듬습니다. 수염은 얼굴 텍스처에 직접 그릴 수 있습니다.</li>
+          <li><b>의상</b> 탭에서 정장·셔츠·코트 등을 고르고 색을 바꿉니다.</li>
+          <li>오른쪽 위 <b>공유(촬영·내보내기) → VRM 내보내기</b>를 눌러 .vrm 파일로 저장합니다 (보통 10~30MB).</li>
+          <li>여기서 <b>VRM 파일 올리기</b>를 누릅니다. 휴대폰에서 하려면 파일을 폰으로 옮긴 뒤 올리면 됩니다.</li>
+        </ol>
+        <p className="small muted">올린 파일은 서버로 보내지 않고 이 브라우저에만 저장됩니다. 다른 기기에서는 다시 올려야 합니다.</p>
       </div>
 
       <button className="btn wide" onClick={done}>{manager ? '저장' : '감독 등록 →'}</button>
@@ -113,11 +101,10 @@ export default function Manager() {
         <div className="card">
           <h3>감독 커리어</h3>
           <ul className="history">
-            {history.map((h) => <li key={h.seasonNo}><span>{h.label}</span><b>{h.pos}위</b><em className={h.success ? 'ok' : 'bad'}>{h.success ? '목표 달성' : '미달'}</em>{h.pos === 1 && <small>🏆 우승</small>}</li>)}
+            {history.map((h) => <li key={h.seasonNo}><span>{h.label}</span><b>{h.pos}위</b>{h.pos === 1 && <small>🏆 우승</small>}</li>)}
           </ul>
         </div>
       )}
-      <p className="muted small">3D 모델: Quaternius "Ultimate Modular Men Pack" (CC0)</p>
     </section>
   )
 }
