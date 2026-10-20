@@ -1283,8 +1283,8 @@
   },
   {
    "id": "FCB",
-   "name": "Barça",
-   "short": "Barça",
+   "name": "FC 바르셀로나",
+   "short": "바르셀로나",
    "color": "#D7262F",
    "alt": "#132257",
    "ext": 81,
@@ -4104,8 +4104,8 @@
   },
   {
    "id": "VAL",
-   "name": "Valencia",
-   "short": "Valencia",
+   "name": "발렌시아 CF",
+   "short": "발렌시아",
    "color": "#F5F5F5",
    "alt": "#F37021",
    "ext": 95,
