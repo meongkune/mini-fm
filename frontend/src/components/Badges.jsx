@@ -52,7 +52,9 @@ const NATIONS = {
   'South Africa': ['za', '남아공'], 'South Korea': ['kr', '대한민국'], 'Korea Republic': ['kr', '대한민국'], Spain: ['es', '스페인'], Suriname: ['sr', '수리남'],
   Sweden: ['se', '스웨덴'], Switzerland: ['ch', '스위스'], Togo: ['tg', '토고'], 'Trinidad & Tobago': ['tt', '트리니다드 토바고'], Tunisia: ['tn', '튀니지'],
   Turkey: ['tr', '튀르키예'], Türkiye: ['tr', '튀르키예'], USA: ['us', '미국'], 'United States': ['us', '미국'], Ukraine: ['ua', '우크라이나'], Uruguay: ['uy', '우루과이'],
-  Uzbekistan: ['uz', '우즈베키스탄'], Venezuela: ['ve', '베네수엘라'], Wales: ['gb-wls', '웨일스'], Zambia: ['zm', '잠비아'], Zimbabwe: ['zw', '짐바브웨'],
+  Uzbekistan: ['uz', '우즈베키스탄'], Angola: ['ao', '앙골라'], Panama: ['pa', '파나마'], Honduras: ['hn', '온두라스'], 'Equatorial Guinea': ['gq', '적도 기니'],
+  'Dominican Republic': ['do', '도미니카공화국'], 'Cape Verde Islands': ['cv', '카보베르데'], 'Cape Verde': ['cv', '카보베르데'], Guadeloupe: ['gp', '과들루프'], Malaysia: ['my', '말레이시아'],
+  'Faeroe Islands': ['fo', '페로 제도'], 'Faroe Islands': ['fo', '페로 제도'], Moldova: ['md', '몰도바'], Cyprus: ['cy', '키프로스'], Mauritania: ['mr', '모리타니'], Armenia: ['am', '아르메니아'], Belarus: ['by', '벨라루스'], Benin: ['bj', '베냉'], 'Central African Republic': ['cf', '중앙아프리카'], Curaçao: ['cw', '퀴라소'], Kenya: ['ke', '케냐'], Qatar: ['qa', '카타르'], 'Saudi Arabia': ['sa', '사우디'], 'Sierra Leone': ['sl', '시에라리온'], Syria: ['sy', '시리아'], Uganda: ['ug', '우간다'], Martinique: ['mq', '마르티니크'], 'French Guiana': ['gf', '프랑스령 기아나'], Bolivia: ['bo', '볼리비아'], Azerbaijan: ['az', '아제르바이잔'], Kazakhstan: ['kz', '카자흐스탄'], Philippines: ['ph', '필리핀'], 'New Caledonia': ['nc', '뉴칼레도니아'], 'Burundi': ['bi', '부룬디'], 'Madagascar': ['mg', '마다가스카르'], 'Liberia': ['lr', '라이베리아'], 'Montserrat': ['ms', '몬트세랫'], 'Grenada': ['gd', '그레나다'], 'Bermuda': ['bm', '버뮤다'], Venezuela: ['ve', '베네수엘라'], Wales: ['gb-wls', '웨일스'], Zambia: ['zm', '잠비아'], Zimbabwe: ['zw', '짐바브웨'],
 }
 export const nationName = (nation) => NATIONS[nation]?.[1] ?? nation ?? ''
 
