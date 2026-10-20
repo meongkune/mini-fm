@@ -59,17 +59,6 @@ export default function DeviceFrame({ children }) {
 
   return (
     <div className="stage">
-      <aside className="stage-intro">
-        <span className="stage-logo">⚽</span>
-        <h1>Mini FM</h1>
-        <p>실제 유럽 리그 구단 하나를 맡아<br />전술을 짜고 한 시즌을 치르는<br />모바일 축구 감독 시뮬레이션</p>
-        <ul>
-          <li>📋 포메이션 · 경기 운영 · 압박 강도</li>
-          <li>🏟️ 3D 중계 시점 경기장과 문자 중계</li>
-          <li>🏆 실제 시즌 선수단 · 순위 구간</li>
-        </ul>
-        <p className="stage-hint">휴대폰으로 열면 이 화면 그대로 전체 화면 앱처럼 동작합니다.</p>
-      </aside>
       <div className="device-slot" style={{ width: DEVICE_W * scale, height: DEVICE_H * scale }}>
         <div className="device" style={{ width: DEVICE_W, height: DEVICE_H, transform: `scale(${scale})` }}>
           <span className="device-btn power" />
