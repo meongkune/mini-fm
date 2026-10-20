@@ -86,7 +86,7 @@ function effective(match, ctx, idx, p) {
   const sd = match.sides[idx]
   const st = ctx.status?.[p.id] || {}
   const e = sd.energy[p.id] ?? 100
-  const f = (0.8 + 0.2 * e / 100) * (0.97 + 0.06 * (st.morale ?? 50) / 100) * (1 + clamp(((st.form ?? 6.6) - 6.6) * 0.02, -0.03, 0.03)) * (1 + match.talk[idx])
+  const f = (0.8 + 0.2 * e / 100) * (0.97 + 0.06 * (st.morale ?? 50) / 100) * (1 + clamp(((st.form ?? 6.6) - 6.6) * 0.02, -0.03, 0.03)) * (1 + match.talk[idx]) * (st.sulk > 0 ? 0.94 : 1)
   return { ...p, att: p.att * f, def: p.def * f }
 }
 

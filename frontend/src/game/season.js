@@ -3,6 +3,7 @@
 import { playerOvrOf } from '../engine/engine.js'
 import { quickMatch } from '../engine/match.js'
 import { aiOfferFor, windowState } from './trade.js'
+import { reactToSpeech } from './speech.js'
 
 export const RECOVERY = 6 // 라운드 사이 기본 회복량 (+ 부족분의 30% + 지구력 보정)
 export const YELLOW_LIMIT = 5 // 경고 누적 출전 정지 기준
@@ -50,7 +51,7 @@ export function applyRound(save, { teamsById, schedule, myTeamId, mine }) {
   for (const t of teams) for (const p of t.players) {
     const s = st[p.id]
     if (!s) continue
-    if (s.inj > 0 || s.susp > 0) st[p.id] = { ...s, inj: Math.max(0, s.inj - 1), susp: Math.max(0, s.susp - 1) }
+    if (s.inj > 0 || s.susp > 0 || s.sulk > 0) st[p.id] = { ...s, inj: Math.max(0, s.inj - 1), susp: Math.max(0, s.susp - 1), sulk: Math.max(0, (s.sulk || 0) - 1) }
   }
 
   const results = []
@@ -277,4 +278,32 @@ export function applyCupMatch(save, { myTeam, mineIdx, summary, label, oppName }
   }
   inbox.push(news(save.round, 'cup', `${label} ${res > 0 ? '승리' : res < 0 ? '패배' : '무승부'} · ${gf}:${ga}`, `${oppName}와(과)의 유럽 대항전 경기 결과입니다.`))
   return { ...save, status: st, inbox: [...inbox, ...(save.inbox || [])].slice(0, 80) }
+}
+
+/**
+ * 직접 입력한 말로 면담 (편지함 면담 요청 itemId가 있으면 그 요청에 대한 답으로 처리)
+ * 결과: 사기 변화, 이적 요청, 언론 폭로(팀 전체 사기↓), 태업(3경기 경기력↓), 선발 약속
+ */
+export function customTalk(save, player, text, itemId = null) {
+  const cur = { ...defaultStatus(), ...(save.status?.[player.id] || {}) }
+  if (!itemId && cur.talkRound === save.round) return { save, result: null, blocked: '이번 라운드에는 이미 면담했습니다.' }
+  const r = reactToSpeech(player, cur, text)
+  const s = { ...cur, morale: clamp(cur.morale + r.dMorale, 0, 100), talkRound: save.round, benched: itemId ? 0 : cur.benched }
+  if (r.promise) s.promise = save.round
+  if (r.sulk) s.sulk = 3
+  const inbox = []
+  let status = { ...save.status, [player.id]: s }
+  if (r.wantsOut && !cur.wantsOut) {
+    s.wantsOut = true
+    inbox.push(news(save.round, 'request', `${player.name} 이적 요청`, `면담 뒤 ${player.name} 선수가 공식적으로 이적을 요청했습니다. ("${text.slice(0, 40)}")`, { playerId: player.id }))
+  }
+  if (r.leak) {
+    // 언론 폭로: 선수단 전체 사기 하락
+    for (const [id, st] of Object.entries(status)) if (st && id !== player.id && save.lineup?.includes(id)) status[id] = { ...st, morale: clamp((st.morale ?? 60) - 4, 0, 100) }
+    inbox.push(news(save.round, 'press', `📰 언론 폭로: "감독이 ${player.name}에게 막말"`, `${player.name} 선수가 면담 내용을 언론에 흘렸습니다. 라커룸 분위기가 나빠졌습니다. (주전 선수 사기 하락)`, { playerId: player.id }))
+  }
+  if (r.sulk) inbox.push(news(save.round, 'sulk', `${player.name} 태업 조짐`, `${player.name} 선수가 훈련에 성의를 보이지 않습니다. 앞으로 3경기 동안 경기력이 떨어집니다.`, { playerId: player.id }))
+  let next = { ...save, status, inbox: [...inbox, ...(save.inbox || [])].slice(0, 80) }
+  if (itemId) next = { ...next, inbox: next.inbox.map((x) => (x.id === itemId ? { ...x, resolved: 'custom', said: text, reply: `${r.reply} [${r.toneText}] 사기 ${r.dMorale >= 0 ? '+' : ''}${r.dMorale}${r.extra.length ? ' · ' + r.extra.join(' · ') : ''}`, read: true } : x)) }
+  return { save: next, result: r }
 }

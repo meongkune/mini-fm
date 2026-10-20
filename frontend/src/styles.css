@@ -1025,3 +1025,15 @@ html.framed body { overflow: hidden; height: 100vh; }
 .wiki-facts { display: flex; flex-wrap: wrap; gap: 4px 10px; font-size: .74rem; font-weight: 700; margin-top: 2px; }
 .wiki-text { margin: 0; font-size: .8rem; line-height: 1.6; color: #d6d0ee; }
 .wiki-src { font-size: .64rem; color: var(--muted); text-decoration: underline; }
+
+/* 면담 직접 말하기 */
+.saybox { display: grid; gap: 6px; margin-top: 6px; }
+.say-row { display: grid; grid-template-columns: 1fr auto; gap: 6px; }
+.say-row input { background: var(--panel-2); color: var(--text); border: 1px solid var(--line); border-radius: 10px; padding: 9px 10px; font: inherit; font-size: .86rem; min-width: 0; }
+.say-row input:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+.say-ex { display: flex; flex-wrap: wrap; gap: 4px; }
+.say-ex .chip { font-size: .7rem; }
+.say-res { padding: 8px 10px; border-radius: 10px; background: var(--panel-2); border-left: 3px solid var(--win); }
+.say-res.bad { border-color: var(--bad); }
+.say-res p { margin: 4px 0; font-size: .84rem; }
+.say-tags { display: flex; flex-wrap: wrap; gap: 4px; }

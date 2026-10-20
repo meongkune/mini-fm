@@ -2,11 +2,12 @@ import { useEffect } from 'react'
 import { useGame } from '../store.jsx'
 import { TALK_ACTIONS } from '../game/season.js'
 import NeedTeam from './NeedTeam.jsx'
+import SayBox from '../components/SayBox.jsx'
 
 const ICON = { talk: '💬', promise: '💔', request: '✈️', injury: '🚑', susp: '🟥', mom: '⭐', board: '🏛️', trade: '🔄', season: '🏁', youth: '🌱' }
 
 export default function Inbox() {
-  const { myTeam, save, readInbox, answerTalk, answerOffer } = useGame()
+  const { myTeam, save, readInbox, answerTalk, answerOffer, sayTo } = useGame()
   const items = save.inbox || []
   // 열어 보면 (선택이 필요한 면담을 빼고) 읽음 처리
   useEffect(() => {
@@ -42,6 +43,8 @@ export default function Inbox() {
                   ))}
                 </div>
               )}
+              {m.actions && !m.resolved && m.type === 'talk' && <SayBox placeholder="또는 직접 답하기 (예: 꼬우면 이적해라)" onSay={(t) => sayTo(m.playerId, t, m.id)} />}
+              {m.said && <p className="small muted">내가 한 말: "{m.said}"</p>}
               {m.resolved && m.reply && <p className="notice">{(m.actions || TALK_ACTIONS).find((a) => a[0] === m.resolved)?.[1] ?? '답변'} → {m.reply}</p>}
             </div>
           </li>

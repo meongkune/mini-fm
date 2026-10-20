@@ -55,7 +55,7 @@ export function buildSlots(name) {
     if (mids === 2) return i === 1 ? (n <= 2 ? 'dm' : 'mid') : 'am'
     return ['dm', 'mid', 'am'][Math.min(2, i - 1)]
   })
-  const slots = [{ role: 'GK', x: 50, y: 5 }]
+  const slots = [{ role: 'GK', x: 50, y: 9 }] // 이름표가 경기장 아래로 잘리지 않게 조금 위로
   lines.forEach((n, i) => {
     const roles = fill(LINE_ROLES[kinds[i]], n, { def: 'CB', dm: 'DM', mid: 'CM', am: 'AM', fwd: 'ST' }[kinds[i]])
     const y = k === 1 ? 50 : 22 + (i * (82 - 22)) / (k - 1)

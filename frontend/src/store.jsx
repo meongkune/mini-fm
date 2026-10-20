@@ -3,7 +3,7 @@ import { api, loadSeasonFile } from './api.js'
 import { playerOvrOf } from './engine/engine.js'
 import { available } from './engine/match.js'
 import { assignSlots, buildSlots, fitOf, shapeNeeds } from './engine/formation.js'
-import { applyCupMatch, applyRound, engineStatus, playerTalk, resolveTalk } from './game/season.js'
+import { applyCupMatch, applyRound, customTalk, engineStatus, playerTalk, resolveTalk } from './game/season.js'
 import { effectiveTeams } from './game/roster.js'
 import { evaluateTrade, executeTrade, windowState } from './game/trade.js'
 import { boardMidCheck, newBoard, nextSeason, seasonLabel, seasonReview } from './game/career.js'
@@ -301,6 +301,15 @@ export function GameProvider({ children }) {
           if (!windowState(s.round, data.schedule.length).open) return mark(s, '이적 시장이 닫혀 진행할 수 없습니다.')
           return mark(executeTrade(s, teams, s.teamId, teamId, give, get), '트레이드가 성사됐습니다.')
         })
+      },
+      /** 직접 입력한 말로 면담 → 반응 결과 (itemId: 편지함 면담 요청에 대한 답) */
+      sayTo(playerId, text, itemId = null) {
+        const player = myTeam?.players.find((p) => p.id === playerId)
+        if (!player || !text.trim()) return null
+        const r = customTalk(save, player, text.trim(), itemId)
+        if (r.blocked) return { blocked: r.blocked }
+        setSave(r.save)
+        return r.result
       },
       /** 개별 면담 → 반응 문구를 돌려준다 */
       talkTo(playerId, kind) {

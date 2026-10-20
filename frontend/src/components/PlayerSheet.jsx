@@ -5,10 +5,12 @@ import PlayerCard from './PlayerCard.jsx'
 import { Flag, nationName } from './Badges.jsx'
 import Rating, { CondBar } from './Rating.jsx'
 import { PLAYER_TALKS, moraleLabel } from '../game/season.js'
+import { personality, personalityText } from '../game/speech.js'
+import SayBox from './SayBox.jsx'
 import { useGame } from '../store.jsx'
 
 export default function PlayerSheet({ player, onClose, inLineup, onToggle }) {
-  const { status, save, talkTo, myTeam, teams } = useGame()
+  const { status, save, talkTo, myTeam, teams, sayTo } = useGame()
   const [reply, setReply] = useState('')
   const [profile, setProfile] = useState(null)
   useEffect(() => {
@@ -71,6 +73,8 @@ export default function PlayerSheet({ player, onClose, inLineup, onToggle }) {
               ))}
             </div>
             {reply && <p className="notice">{reply}</p>}
+            <h4>직접 말하기 <span className="muted small">성격: {personalityText(personality(player)).join(' · ')}</span></h4>
+            <SayBox disabled={talked} onSay={(t) => sayTo(player.id, t)} />
           </>
         )}
       </div>
