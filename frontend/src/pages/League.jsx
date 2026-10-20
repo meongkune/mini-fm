@@ -1,17 +1,19 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { playerOvr, short, useGame } from '../store.jsx'
 import Rating from '../components/Rating.jsx'
 import { tierOf } from '../components/PlayerCard.jsx'
 import { Crest, Flag } from '../components/Badges.jsx'
+import CupView from './Cup.jsx'
 
-const TABS = [['table', '팀 순위'], ['players', '개인 순위'], ['fixtures', '일정·결과']]
+const TABS = [['table', '팀 순위'], ['players', '개인 순위'], ['fixtures', '일정'], ['cup', '🏆 대항전']]
 
 export { Crest }
 
 export default function League() {
   const { data, save, standings, teamsById, myTeam, totalRounds, seasonOver, seasonText } = useGame()
-  const [tab, setTab] = useState('table')
+  const [params] = useSearchParams()
+  const [tab, setTab] = useState(params.get('tab') || 'table')
   const champion = seasonOver ? standings[0] : null
 
   return (
@@ -39,6 +41,7 @@ export default function League() {
 
       {tab === 'table' && <StandingsTable standings={standings} teamsById={teamsById} myTeam={myTeam} zones={data.zones} />}
       {tab === 'players' && <PlayerRanks pstats={save.pstats || {}} teamsById={teamsById} myTeam={myTeam} roundsPlayed={save.round} />}
+      {tab === 'cup' && <CupView />}
       {tab === 'fixtures' && <Fixtures schedule={data.schedule} results={save.results} teamsById={teamsById} myTeam={myTeam} current={save.round} />}
     </section>
   )

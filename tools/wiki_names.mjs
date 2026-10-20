@@ -15,7 +15,9 @@ async function search(q) {
 export async function koreanName(fullName, shortName) {
   try {
     const key = fold(shortName || fullName).split(/\s+/).filter((w) => w.length >= 3).sort((a, b) => b.length - a.length)[0] || fold(shortName || fullName)
-    const ok = (t) => fold(t).includes(key) || fold(t).includes(fold(shortName || '').slice(0, 5))
+    // 짧은 이름 또는 공식 이름에서 가장 긴 단어가 제목에 있어야 같은 구단으로 본다 (Barça → FC Barcelona)
+    const longKey = fold(fullName).split(/\s+/).filter((w) => w.length >= 4).sort((a, b) => b.length - a.length)[0] || key
+    const ok = (t) => fold(t).includes(key) || fold(t).includes(longKey) || fold(t).includes(fold(shortName || '').slice(0, 5))
     let title = (await search(`${shortName || fullName} football club`)).find(ok)
     if (!title) title = (await search(`${fullName} football club`)).find(ok)
     if (!title) return null

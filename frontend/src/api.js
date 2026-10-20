@@ -43,6 +43,13 @@ export async function loadSeason(leagueId, seasonId) {
 
 const current = async () => seasonCache || loadSeason()
 
+/** 다른 리그 시즌 파일 (현재 플레이 중인 시즌 캐시는 건드리지 않는다) */
+const fileCache = {}
+export async function loadSeasonFile(file) {
+  fileCache[file] ??= getJson(dataUrl(file))
+  return fileCache[file]
+}
+
 export const api = {
   /** 리그·시즌 목록 (data/index.json) */
   index: () => loadIndex(),

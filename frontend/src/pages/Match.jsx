@@ -31,10 +31,10 @@ export default function Match() {
   const [saving, setSaving] = useState(false)
   const logRef = useRef(null)
 
-  const fixtureKey = nextFixture ? `${save.round}-${nextFixture.home}-${nextFixture.away}` : ''
-  const isHome = nextFixture && myTeam ? nextFixture.home === myTeam.id : true
+  const fixtureKey = nextFixture ? `${nextFixture.cup ? 'cup' : 'lg'}-${save.round}-${nextFixture.home}-${nextFixture.away}` : ''
+  const isHome = nextFixture ? nextFixture.isHome : true
   const myIdx = isHome ? 0 : 1
-  const ctx = useMemo(() => (nextFixture ? { teams: [teamsById[nextFixture.home], teamsById[nextFixture.away]], status } : null), [fixtureKey, teamsById, status])
+  const ctx = useMemo(() => (nextFixture ? { teams: [nextFixture.homeTeam, nextFixture.awayTeam], status } : null), [fixtureKey, teamsById, status])
 
   // 킥오프 전: 양 팀 선발로 경기 상태를 미리 만들어 경기장에 세워 둔다
   useEffect(() => {
@@ -144,8 +144,8 @@ export default function Match() {
   }
   const finish = () => {
     setSaving(true)
-    finishRound({ home: home.id, away: away.id, summary: summarize(match, ctx) })
-    navigate('/league')
+    finishRound({ home: nextFixture.home, away: nextFixture.away, summary: summarize(match, ctx) })
+    navigate(nextFixture.cup ? '/league?tab=cup' : '/league')
   }
 
   const score = match.score
@@ -197,7 +197,7 @@ export default function Match() {
       <div className="card side-panel">
         {phase === 'pre' && (
           <div className="pre">
-            <h3>경기 준비 <span className="muted small">{save.round + 1}라운드 · {isHome ? '홈' : '원정'}</span></h3>
+            <h3>경기 준비 <span className="muted small">{nextFixture.cup ? <b className="cup-badge">🏆 {nextFixture.label}</b> : nextFixture.label} · {isHome ? '홈' : '원정'}</span></h3>
             <div className="opp-report">
               <div><span className="muted small">상대</span><strong>{opp.name}</strong></div>
               <div><span className="muted small">전력</span><strong>{teamOvr(opp)}</strong></div>

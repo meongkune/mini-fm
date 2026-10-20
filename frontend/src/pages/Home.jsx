@@ -84,8 +84,8 @@ export default function Home() {
 
   const rank = standings.findIndex((s) => s.id === myTeam.id) + 1
   const me = standings[rank - 1]
-  const opp = nextFixture && teamsById[nextFixture.home === myTeam.id ? nextFixture.away : nextFixture.home]
-  const isHome = nextFixture?.home === myTeam.id
+  const isHome = nextFixture?.isHome
+  const opp = nextFixture && (isHome ? nextFixture.awayTeam : nextFixture.homeTeam)
   const stars = [...myTeam.players].sort((a, b) => playerOvr(b) - playerOvr(a)).slice(0, 6)
   const played = save.results.length > 0
   const form = me.form.slice(-5)
@@ -134,7 +134,7 @@ export default function Home() {
         ) : (
           <>
             <div className="row between">
-              <span className="eyebrow">다음 경기 · {save.round + 1}/{totalRounds} 라운드</span>
+              <span className="eyebrow">{nextFixture.cup ? <b className="cup-badge">🏆 {nextFixture.label}</b> : `다음 경기 · ${save.round + 1}/${totalRounds} 라운드`}</span>
               <span className="pill">{isHome ? '홈' : '원정'}</span>
             </div>
             <div className="versus">

@@ -251,3 +251,30 @@ export function unavailable(st = {}) {
   if (st.susp > 0) return { kind: 'susp', icon: '🟥', label: '출전 정지', why: st.suspWhy || '징계', games: st.susp, text: `${st.suspWhy || '징계'} · ${st.susp}경기 정지` }
   return null
 }
+
+/** 컵 대회 경기 결과를 내 팀 선수 상태에 반영 (리그 기록 pstats는 건드리지 않는다) */
+export function applyCupMatch(save, { myTeam, mineIdx, summary, label, oppName }) {
+  const st = { ...(save.status || {}) }
+  const inbox = []
+  const [gf, ga] = mineIdx === 0 ? summary.score : [...summary.score].reverse()
+  const res = Math.sign(gf - ga)
+  for (const p of myTeam.players) {
+    const r = summary.players[p.id]
+    if (!r) continue
+    const s = { ...defaultStatus(), ...(st[p.id] || {}) }
+    s.fr = [...(s.fr || []), r.r].slice(-5)
+    s.form = Math.round((s.fr.reduce((a, b) => a + b, 0) / s.fr.length) * 100) / 100
+    s.cond = summary.energy[p.id] ?? s.cond
+    s.morale = Math.round(clamp(s.morale + (res > 0 ? 3 : res < 0 ? -3 : 0) + clamp((r.r - 6.6) * 3, -4, 4), 0, 100))
+    s.benched = 0
+    st[p.id] = s
+  }
+  for (const inj of summary.injuries) {
+    const p = myTeam.players.find((x) => x.id === inj.id)
+    if (!p) continue
+    st[p.id] = { ...defaultStatus(), ...(st[p.id] || {}), inj: Math.max(st[p.id]?.inj || 0, inj.games), injKind: inj.kind || '부상' }
+    inbox.push(news(save.round, 'injury', `${p.name} 부상 · ${inj.kind || '부상'}`, `${label} 경기 ${inj.minute}분에 다쳐 약 ${inj.games}경기 결장할 예정입니다.`, { playerId: p.id }))
+  }
+  inbox.push(news(save.round, 'cup', `${label} ${res > 0 ? '승리' : res < 0 ? '패배' : '무승부'} · ${gf}:${ga}`, `${oppName}와(과)의 유럽 대항전 경기 결과입니다.`))
+  return { ...save, status: st, inbox: [...inbox, ...(save.inbox || [])].slice(0, 80) }
+}

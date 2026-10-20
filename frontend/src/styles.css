@@ -976,3 +976,38 @@ html.framed body { overflow: hidden; height: 100vh; }
 .look-slider small { display: flex; justify-content: space-between; color: var(--muted); font-size: .66rem; }
 .look-slider em { font-style: normal; }
 .mgr-thumb { display: block; border-radius: 50%; object-fit: cover; background: var(--panel-2); }
+
+/* ---------- 유럽 대항전 ---------- */
+.cup-badge { color: #f5c542; font-weight: 900; }
+.cup-hero { display: flex; align-items: center; gap: 12px; background: linear-gradient(120deg, #1b2a6b, #10173d 60%, #2b1d56); border-color: #3b4fa8; }
+.cup-hero.out { filter: saturate(.6); }
+.cup-hero .grow { flex: 1; display: grid; gap: 2px; }
+.cup-trophy { font-size: 2rem; filter: drop-shadow(0 2px 6px rgba(245, 197, 66, .5)); }
+.cup-me { font-weight: 900; color: #93c5fd; }
+.cup-me.bad { color: #fca5a5; }
+.cup-winner { display: grid; justify-items: center; font-size: .66rem; font-weight: 900; color: #f5c542; }
+.cup-groups { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.cup-groups .card { margin: 0; }
+.st.small { font-size: .74rem; }
+.st.small td, .st.small th { padding: 6px 5px; }
+.st.small .sticky { min-width: 96px; }
+.st.small .st-name { max-width: 58px; overflow: hidden; text-overflow: ellipsis; }
+.bracket { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(150px, 1fr); gap: 10px; overflow-x: auto; padding-bottom: 6px; }
+.br-col { display: flex; flex-direction: column; justify-content: space-around; gap: 8px; }
+.br-col h4 { margin: 0 0 4px; text-align: center; font-size: .78rem; color: var(--muted); }
+.br-match { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.br-match.me { border-color: var(--accent); }
+.br-team { display: flex; align-items: center; gap: 6px; padding: 6px 8px; font-size: .76rem; }
+.br-team + .br-team { border-top: 1px solid var(--line); }
+.br-team span { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.br-team.win { font-weight: 900; }
+.br-team.lose { opacity: .5; }
+.md-head { padding: 9px 12px; font-weight: 800; font-size: .84rem; background: var(--panel-2); }
+.fx-score small { display: block; font-size: .58rem; color: var(--muted); }
+
+.st.grp { width: 100%; min-width: 0; table-layout: fixed; }
+.st.grp th:first-child { width: auto; text-align: left; }
+.st.grp th:not(:first-child), .st.grp td:not(:first-child) { width: 34px; padding: 6px 2px; }
+.grp-team { display: flex; align-items: center; gap: 5px; text-align: left; overflow: hidden; }
+.grp-team .st-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: none; }
+.grp-team .st-rank { width: 12px; flex: none; }
