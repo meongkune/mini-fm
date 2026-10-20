@@ -3,6 +3,7 @@ import { Kit, Flag } from '../components/Badges.jsx'
 import { CondBar } from '../components/Rating.jsx'
 import { PRESETS, ROLE_LABEL, buildSlots, fitOf, fitTone, parseShape, roleOf } from '../engine/formation.js'
 import { alignLineup, autoSlots, playerOvr, useGame } from '../store.jsx'
+import { unavailable } from '../game/season.js'
 import NeedTeam from './NeedTeam.jsx'
 
 export const MENTALITY = [
@@ -76,7 +77,7 @@ export function SlotPitch({ team, formation, lineup, onSlot, active = null, stat
       {slots.map((s, i) => {
         const p = byId[lineup[i]]
         const fit = p ? fitOf(p, s.role) : 0
-        const out = p && (status[p.id]?.inj > 0 || status[p.id]?.susp > 0)
+        const out = p && unavailable(status[p.id])
         return (
           <button key={i} className={`slot ${p ? `fit-${fitTone(fit)}` : 'empty'} ${active === i ? 'active' : ''} ${out ? 'out' : ''}`}
             style={{ left: `${s.x}%`, top: `${100 - s.y}%` }} onClick={() => onSlot(i)} title={ROLE_LABEL[s.role]}>
@@ -84,6 +85,7 @@ export function SlotPitch({ team, formation, lineup, onSlot, active = null, stat
             <span className="slot-role">{s.role}</span>
             {p && <span className="slot-name">{p.name.split(' ').at(-1)}</span>}
             {p && <span className="slot-ovr">{Math.round(playerOvr(p) * fit)}</span>}
+            {out && <span className={`slot-out ${out.kind}`}>{out.icon} {out.label}</span>}
           </button>
         )
       })}
@@ -111,14 +113,15 @@ export function SlotSheet({ team, formation, lineup, index, status, onPick, onCl
         <ul className="pick-list">
           {list.map(({ p, fit }) => {
             const st = status[p.id] || {}
-            const out = st.inj > 0 || st.susp > 0
+            const out = unavailable(st)
             const tone = fitTone(fit)
             return (
               <li key={p.id}>
                 <button className={`pick ${current === p.id ? 'on' : ''}`} disabled={out} onClick={() => onPick(p.id)}>
                   <span className={`role-chip ${tone}`}>{roleOf(p)}</span>
-                  <span className="lu-name"><Flag nation={p.nation} size={13} /> {p.name}{out ? (st.inj > 0 ? ' 🚑' : ' 🟥') : ''}
+                  <span className="lu-name"><Flag nation={p.nation} size={13} /> {p.name}
                     <small className="muted"> {where[p.id] !== undefined && where[p.id] !== index ? `· 지금 ${slots[where[p.id]].role}` : ''}</small>
+                    {out && <span className={`out-tag ${out.kind}`}>{out.icon} {out.label} · {out.text}</span>}
                   </span>
                   <span className={`fit-label ${tone}`}>{FIT_LABEL[tone]}</span>
                   <CondBar value={st.cond} />
@@ -191,8 +194,9 @@ export default function Tactics() {
         <h3>벤치 <span className="muted small">{bench.length}명</span></h3>
         <div className="bench">
           {bench.map((p) => (
-            <span key={p.id} className={`bench-chip ${status[p.id]?.inj > 0 || status[p.id]?.susp > 0 ? 'out' : ''}`}>
+            <span key={p.id} className={`bench-chip ${unavailable(status[p.id]) ? `out ${unavailable(status[p.id]).kind}` : ''}`} title={unavailable(status[p.id])?.text}>
               <span className="role-chip">{roleOf(p)}</span>{p.name.split(' ').at(-1)} <b>{playerOvr(p)}</b>
+              {unavailable(status[p.id]) && <i className="bench-out">{unavailable(status[p.id]).icon} {unavailable(status[p.id]).games}경기</i>}
             </span>
           ))}
         </div>

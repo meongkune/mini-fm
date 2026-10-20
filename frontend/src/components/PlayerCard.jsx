@@ -1,6 +1,7 @@
 import { playerOvr } from '../store.jsx'
 import { Flag, Kit } from './Badges.jsx'
 import { roleOf } from '../engine/formation.js'
+import { unavailable } from '../game/season.js'
 
 // OVR 기준 선수 등급 — 카드 색을 정한다
 export function tierOf(ovr) {
@@ -18,13 +19,14 @@ const lastName = (name) => name.split(' ').at(-1)
 export default function PlayerCard({ player, selected = false, onClick, size = 'sm', status = null, color = null }) {
   const ovr = playerOvr(player)
   const tier = tierOf(ovr)
+  const out = status ? unavailable(status) : null
   return (
     <button
       type="button"
-      className={`pcard tier-${tier} ${size} ${selected ? 'on' : ''} ${status && (status.inj > 0 || status.susp > 0) ? 'out' : ''}`}
+      className={`pcard tier-${tier} ${size} ${selected ? 'on' : ''} ${out ? `out ${out.kind}` : ''}`}
       onClick={onClick}
       aria-pressed={onClick ? selected : undefined}
-      title={`${player.name} · ${player.pos} · OVR ${ovr} · ${player.age}세`}
+      title={`${player.name} · ${player.pos} · OVR ${ovr} · ${player.age}세${out ? ` · ${out.label}: ${out.text}` : ''}`}
     >
       <span className="pc-top">
         <span className="pc-ovr">{ovr}</span>
@@ -39,12 +41,17 @@ export default function PlayerCard({ player, selected = false, onClick, size = '
         <span><b>{player.sta}</b><em>체력</em></span>
       </span>
       {selected && <span className="pc-check" aria-hidden="true">✓</span>}
+      {out && (
+        <span className={`pc-out ${out.kind}`}>
+          <b>{out.icon} {out.label}</b>
+          {out.why !== out.label && <small>{out.why}</small>}
+          <em>{out.games}경기</em>
+        </span>
+      )}
       {status && (
         <span className="pc-state">
           <span className="pc-cond"><i style={{ width: `${Math.round(status.cond ?? 100)}%` }} className={(status.cond ?? 100) >= 80 ? 'hi' : (status.cond ?? 100) >= 60 ? 'mid' : 'lo'} /></span>
-          {status.inj > 0 && <em className="pc-flag">🚑{status.inj}</em>}
-          {status.susp > 0 && <em className="pc-flag">🟥{status.susp}</em>}
-          {!(status.inj > 0) && !(status.susp > 0) && (status.morale ?? 60) < 40 && <em className="pc-flag">{(status.morale ?? 60) < 25 ? '😠' : '🙁'}</em>}
+          {!out && (status.morale ?? 60) < 40 && <em className="pc-flag">{(status.morale ?? 60) < 25 ? '😠' : '🙁'}</em>}
         </span>
       )}
     </button>

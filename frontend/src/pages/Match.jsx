@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { buildSlots, fitOf, fitTone } from '../engine/formation.js'
 import { MAX_SUBS, advance, benchOf, createMatch, dropInjured, fillVacant, moveToVacant, ratings, reshape, step, substitute, summarize, swapPositions } from '../engine/match.js'
-import { TEAM_TALKS, teamTalkEffect } from '../game/season.js'
+import { TEAM_TALKS, teamTalkEffect, unavailable as outReason } from '../game/season.js'
 import Rating, { CondBar } from '../components/Rating.jsx'
 import { Crest, Flag, Kit } from '../components/Badges.jsx'
 import { ink, kitColors, onDark, playerOvr, short, teamOvr, useGame } from '../store.jsx'
@@ -210,7 +210,7 @@ export default function Match() {
               <p className="small notice">🤝 선발 약속: {promised.map((p) => p.name).join(', ')} {promised.every((p) => save.lineup.includes(p.id)) ? '— 선발에 포함됨 ✓' : '— 선발에 없습니다! 약속을 어기면 사기가 크게 떨어집니다'}</p>
             )}
             {unavailable.length > 0 && (
-              <p className="small bad-text">⚠ 선발 중 {unavailable.map((id) => byId[id]?.name).join(', ')} 선수는 출전할 수 없어 같은 포지션 선수로 자동 대체됩니다.</p>
+              <p className="small bad-text">⚠ 출전할 수 없는 선발: {unavailable.map((id) => `${byId[id]?.name}(${outReason(status[id])?.label} — ${outReason(status[id])?.text})`).join(', ')}. 그 자리는 가장 알맞은 선수로 자동 대체됩니다.</p>
             )}
             <div className="row">
               <Link className="btn ghost" to="/tactics">선발·전술</Link>

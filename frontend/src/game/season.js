@@ -75,12 +75,13 @@ export function applyRound(save, { teamsById, schedule, myTeamId, mine }) {
       s.fr = [...(s.fr || []), r.r].slice(-5)
       s.form = Math.round((s.fr.reduce((a, b) => a + b, 0) / s.fr.length) * 100) / 100
       s.cond = sum.energy[id] ?? s.cond
-      if (r.rc) s.susp = Math.max(s.susp, r.yc ? 1 : 3)
-      else if (r.yc && ps[id].yc > 0 && ps[id].yc % YELLOW_LIMIT === 0) s.susp = Math.max(s.susp, 1)
+      if (r.rc) { s.susp = Math.max(s.susp, r.yc ? 1 : 3); s.suspWhy = r.yc ? '경고 누적 퇴장' : '퇴장' }
+      else if (r.yc && ps[id].yc > 0 && ps[id].yc % YELLOW_LIMIT === 0) { s.susp = Math.max(s.susp, 1); s.suspWhy = `경고 ${YELLOW_LIMIT}회 누적` }
     }
     for (const inj of sum.injuries) {
       const s = touch(inj.id)
       s.inj = Math.max(s.inj, inj.games)
+      s.injKind = inj.kind || '부상'
     }
   }
 
@@ -141,7 +142,7 @@ export function applyRound(save, { teamsById, schedule, myTeamId, mine }) {
     }
     for (const inj of mine.summary.injuries) {
       const p = my.players.find((x) => x.id === inj.id)
-      if (p) inbox.push(news(round, 'injury', `${p.name} 부상`, `${inj.minute}분에 다친 ${p.name} 선수는 약 ${inj.games}경기 결장할 예정입니다.`, { playerId: p.id }))
+      if (p) inbox.push(news(round, 'injury', `${p.name} 부상 · ${inj.kind || '부상'}`, `${inj.minute}분에 다친 ${p.name} 선수는 ${inj.kind || '부상'}으로 약 ${inj.games}경기 결장할 예정입니다.`, { playerId: p.id }))
     }
     for (const p of my.players) {
       const r = mine.summary.players[p.id]
@@ -242,4 +243,11 @@ export function playerTalk(save, playerId, kind) {
   s.morale = clamp(s.morale + dm, 0, 100)
   s.talkRound = save.round
   return { save: { ...save, status: { ...save.status, [playerId]: s } }, text: `${text} (사기 ${dm >= 0 ? '+' : ''}${dm})` }
+}
+
+/** 출전할 수 없는 이유 (없으면 null) */
+export function unavailable(st = {}) {
+  if (st.inj > 0) return { kind: 'inj', icon: '🚑', label: '부상', why: st.injKind || '부상', games: st.inj, text: `${st.injKind || '부상'} · ${st.inj}경기 결장` }
+  if (st.susp > 0) return { kind: 'susp', icon: '🟥', label: '출전 정지', why: st.suspWhy || '징계', games: st.susp, text: `${st.suspWhy || '징계'} · ${st.susp}경기 정지` }
+  return null
 }

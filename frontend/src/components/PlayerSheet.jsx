@@ -30,8 +30,8 @@ export default function PlayerSheet({ player, onClose, inLineup, onToggle }) {
             <div className="ps-row"><span>컨디션</span><b><CondBar value={st.cond} /> {Math.round(st.cond ?? 100)}%</b></div>
             <div className="ps-row"><span>사기</span><b className={`mood ${mTone}`}>{face} {mLabel}</b></div>
             <div className="ps-row"><span>최근 폼</span><b className="ps-form">{(st.fr || []).length ? st.fr.map((r, i) => <Rating key={i} value={r} />) : <span className="muted small">기록 없음</span>}</b></div>
-            {st.inj > 0 && <div className="ps-row bad"><span>부상</span><b>🚑 {st.inj}경기 결장</b></div>}
-            {st.susp > 0 && <div className="ps-row bad"><span>징계</span><b>🟥 {st.susp}경기 출전 정지</b></div>}
+            {st.inj > 0 && <div className="ps-row bad"><span>부상</span><b>🚑 {st.injKind || '부상'} · {st.inj}경기 결장</b></div>}
+            {st.susp > 0 && <div className="ps-row bad"><span>징계</span><b>🟥 {st.suspWhy || '징계'} · {st.susp}경기 출전 정지</b></div>}
             {st.wantsOut && <div className="ps-row bad"><span>상태</span><b>✈️ 이적 요청</b></div>}
             {st.promise !== undefined && <div className="ps-row"><span>약속</span><b>다음 경기 선발</b></div>}
           </div>

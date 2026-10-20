@@ -4,7 +4,7 @@ import PlayerCard from '../components/PlayerCard.jsx'
 import PlayerSheet from '../components/PlayerSheet.jsx'
 import Rating, { CondBar } from '../components/Rating.jsx'
 import { Flag } from '../components/Badges.jsx'
-import { moraleLabel } from '../game/season.js'
+import { moraleLabel, unavailable } from '../game/season.js'
 import { bestEmptySlot, formationNeeds, playerOvr, useGame } from '../store.jsx'
 import { buildSlots, roleOf } from '../engine/formation.js'
 import NeedTeam from './NeedTeam.jsx'
@@ -31,7 +31,7 @@ export default function Squad() {
 
   const toggle = (p) => {
     if (selected.has(p.id)) return update({ lineup: lineup.map((id) => (id === p.id ? null : id)) })
-    if (out(p.id)) return setMsg(`${p.name} 선수는 ${status[p.id].inj > 0 ? '부상' : '징계'}로 출전할 수 없습니다.`)
+    if (out(p.id)) return setMsg(`${p.name} 선수는 출전할 수 없습니다 — ${unavailable(status[p.id]).label}: ${unavailable(status[p.id]).text}`)
     const i = bestEmptySlot(save.formation, lineup, p)
     if (i < 0) return setMsg('빈 자리가 없습니다. 먼저 다른 선수를 빼거나 전술 화면에서 자리를 바꾸세요.')
     const next = [...lineup]
@@ -111,8 +111,9 @@ export default function Squad() {
                       <div className="sq-name">
                         <span className="lu-pos">{roleOf(p)}</span>
                         <Flag nation={p.nation} size={14} /><strong>{p.name}</strong>
-                        {st.inj > 0 && <em>🚑{st.inj}</em>}{st.susp > 0 && <em>🟥{st.susp}</em>}{st.wantsOut && <em>✈️</em>}
+                        {st.wantsOut && <em>✈️</em>}
                       </div>
+                      {unavailable(st) && <span className={`out-tag ${unavailable(st).kind}`}>{unavailable(st).icon} {unavailable(st).text}</span>}
                     </td>
                     <td><b>{playerOvr(p)}</b></td>
                     <td><CondBar value={st.cond} /></td>

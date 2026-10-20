@@ -757,7 +757,7 @@ html.framed body { overflow: hidden; height: 100vh; }
 .pc-cond i { display: block; height: 100%; border-radius: 99px; }
 .pc-cond i.hi { background: #22c55e; } .pc-cond i.mid { background: #eab308; } .pc-cond i.lo { background: #ef4444; }
 .pc-flag { font-style: normal; font-size: .6rem; font-weight: 900; padding: 0 3px; border-radius: 4px; background: rgba(0, 0, 0, .55); color: #fff; line-height: 1.5; }
-.pcard.out { filter: grayscale(.85) brightness(.75); }
+.pcard.out > *:not(.pc-out) { opacity: .45; }
 .pcard .pc-stats { margin-bottom: 6px; }
 
 .seg.inline { display: inline-grid; margin: 0; width: auto; }
@@ -948,3 +948,20 @@ html.framed body { overflow: hidden; height: 100vh; }
 .slot.empty .slot-plus { border-color: #fca5a5; color: #fca5a5; }
 .slot-energy { width: 30px; height: 3px; border-radius: 2px; background: rgba(0, 0, 0, .4); overflow: hidden; }
 .slot-energy i { display: block; height: 100%; background: #22c55e; }
+
+/* 출전 불가 이유 */
+.pc-out { position: absolute; left: 0; right: 0; top: 42%; z-index: 3; display: grid; justify-items: center; gap: 1px; padding: 5px 4px; color: #fff; text-align: center; transform: rotate(-6deg); box-shadow: 0 3px 8px rgba(0, 0, 0, .4); }
+.pc-out.inj { background: linear-gradient(90deg, #b91c1c, #ef4444); }
+.pc-out.susp { background: linear-gradient(90deg, #7f1d1d, #b91c1c); border-top: 2px solid #fca5a5; border-bottom: 2px solid #fca5a5; }
+.pc-out b { font-size: .7rem; font-weight: 900; }
+.pc-out small { font-size: .58rem; font-weight: 700; opacity: .95; }
+.pc-out em { font-style: normal; font-size: .62rem; font-weight: 900; background: rgba(0, 0, 0, .3); padding: 0 5px; border-radius: 4px; }
+.out-tag { display: inline-block; margin-top: 2px; font-size: .64rem; font-weight: 800; padding: 1px 6px; border-radius: 5px; background: rgba(239, 68, 68, .18); color: #fca5a5; border: 1px solid rgba(239, 68, 68, .5); white-space: normal; }
+.out-tag.susp { background: rgba(185, 28, 28, .25); }
+.sq-name + .out-tag { display: block; width: max-content; }
+.slot-out { position: absolute; top: 32px; left: 50%; transform: translateX(-50%); z-index: 2; font-size: .52rem; font-weight: 900; padding: 1px 4px; border-radius: 4px; background: #ef4444; color: #fff; white-space: nowrap; }
+.slot.out { filter: none; opacity: 1; }
+.slot.out .kit { opacity: .45; }
+.bench-chip.out { opacity: 1; background: rgba(239, 68, 68, .12); border: 1px solid rgba(239, 68, 68, .4); }
+.bench-out { font-style: normal; font-size: .62rem; font-weight: 900; color: #fca5a5; }
+.pick:disabled .lu-name { opacity: 1; }

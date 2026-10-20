@@ -190,7 +190,9 @@ function injure(match, ctx, idx, rng, withEvents) {
   const p = rng.weighted(cands, cands.map((x) => (x.pos === 'GK' ? 0.3 : 1) * (1.4 - (sd.energy[x.id] ?? 100) / 100)))
   sd.injured.push(p.id)
   const games = rng.weighted([1, 2, 3, 4, 6, 10], [30, 25, 18, 12, 10, 5])
-  match.injuries = [...(match.injuries || []), { id: p.id, team: idx, games, minute: match.minute }]
+  const kinds = games <= 1 ? ['타박상', '가벼운 발목 염좌', '근육 경련'] : games <= 3 ? ['햄스트링 부상', '종아리 근육 부상', '발목 염좌'] : games <= 6 ? ['허벅지 근육 파열', '무릎 인대 부상', '사타구니 부상'] : ['무릎 인대 파열', '발 골절']
+  const kind = rng.pick(kinds)
+  match.injuries = [...(match.injuries || []), { id: p.id, team: idx, games, minute: match.minute, kind }]
   if (withEvents) match.events.push({ minute: match.minute, type: 'injury', team: idx, player: p.name, text: `🚑 ${p.name}(${sd.name}) 부상! 더 뛰기 어려워 보입니다.` })
   return p
 }
