@@ -2,6 +2,7 @@
 // 브라우저 저장(save)만 바꾸고 원본 시즌 데이터(JSON)는 건드리지 않는다.
 import { playerOvrOf } from '../engine/engine.js'
 import { quickMatch } from '../engine/match.js'
+import { aiOfferFor, windowState } from './trade.js'
 
 export const RECOVERY = 6 // 라운드 사이 기본 회복량 (+ 부족분의 30% + 지구력 보정)
 export const YELLOW_LIMIT = 5 // 경고 누적 출전 정지 기준
@@ -126,6 +127,16 @@ export function applyRound(save, { teamsById, schedule, myTeamId, mine }) {
       if (s.morale < 25 && !s.wantsOut) {
         s.wantsOut = true
         inbox.push(news(round, 'request', `${p.name} 이적 요청`, `${p.name} 선수가 팀을 떠나고 싶다며 공식적으로 이적을 요청했습니다. 이적 시장에서 트레이드 카드로 쓸 수 있습니다.`, { playerId: p.id }))
+      }
+    }
+    // 이적을 원하는 선수에게 다른 구단 제안 (이적 시장이 열려 있을 때, 2라운드마다)
+    if (windowState(round + 1, schedule.length).open) {
+      for (const p of my.players) {
+        const s = st[p.id]
+        if (s?.wantsOut && (round + hash(p.id)) % 2 === 0) {
+          const offer = aiOfferFor({ ...save, status: st }, teams, myTeamId, p.id, round)
+          if (offer) inbox.push(offer)
+        }
       }
     }
     for (const inj of mine.summary.injuries) {

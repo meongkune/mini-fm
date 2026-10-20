@@ -9,6 +9,7 @@ import League from './pages/League.jsx'
 import DeployInfo from './pages/DeployInfo.jsx'
 import Admin from './pages/Admin.jsx'
 import Inbox from './pages/Inbox.jsx'
+import Transfer from './pages/Transfer.jsx'
 
 // 하단 탭 바: [경로, 라벨, 아이콘, 정확히 일치]
 const NAV = [
@@ -84,6 +85,7 @@ export default function App() {
             <Route path="/league" element={<League />} />
             <Route path="/deploy" element={<DeployInfo />} />
             <Route path="/inbox" element={<Inbox />} />
+            <Route path="/transfer" element={<Transfer />} />
             <Route path="*" element={<div className="card">페이지를 찾을 수 없습니다.</div>} />
           </Routes>
           </PageErrorBoundary>

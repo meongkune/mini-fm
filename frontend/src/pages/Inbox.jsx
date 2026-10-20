@@ -6,7 +6,7 @@ import NeedTeam from './NeedTeam.jsx'
 const ICON = { talk: '💬', promise: '💔', request: '✈️', injury: '🚑', susp: '🟥', mom: '⭐', board: '🏛️', trade: '🔄', season: '🏁', youth: '🌱' }
 
 export default function Inbox() {
-  const { myTeam, save, readInbox, answerTalk } = useGame()
+  const { myTeam, save, readInbox, answerTalk, answerOffer } = useGame()
   const items = save.inbox || []
   // 열어 보면 (선택이 필요한 면담을 빼고) 읽음 처리
   useEffect(() => {
@@ -36,13 +36,13 @@ export default function Inbox() {
               {m.actions && !m.resolved && (
                 <div className="options">
                   {m.actions.map(([k, label, desc]) => (
-                    <button key={k} className="option" onClick={() => answerTalk(m.id, k)}>
+                    <button key={k} className="option" onClick={() => (m.offer ? answerOffer(m.id, k) : answerTalk(m.id, k))}>
                       <strong>{label}</strong><span className="small muted">{desc}</span>
                     </button>
                   ))}
                 </div>
               )}
-              {m.resolved && m.reply && <p className="notice">{TALK_ACTIONS.find((a) => a[0] === m.resolved)?.[1] ?? '답변'} → {m.reply}</p>}
+              {m.resolved && m.reply && <p className="notice">{(m.actions || TALK_ACTIONS).find((a) => a[0] === m.resolved)?.[1] ?? '답변'} → {m.reply}</p>}
             </div>
           </li>
         ))}

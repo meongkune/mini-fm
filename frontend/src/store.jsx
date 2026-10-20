@@ -4,6 +4,7 @@ import { playerOvrOf } from './engine/engine.js'
 import { pickLineup } from './engine/match.js'
 import { applyRound, engineStatus, playerTalk, resolveTalk } from './game/season.js'
 import { effectiveTeams } from './game/roster.js'
+import { evaluateTrade, executeTrade, windowState } from './game/trade.js'
 
 // 시즌 진행 상황은 서버가 아니라 브라우저 localStorage에 저장한다 (서버는 stateless).
 // v2: 프리미어리그 구단 데이터로 바뀌면서 이전 저장(가상 구단 ID)과 호환되지 않아 키를 올림
@@ -161,6 +162,29 @@ export function GameProvider({ children }) {
       },
       answerTalk(id, action) {
         setSave((s) => resolveTalk(s, id, action))
+      },
+      transferWindow: data ? windowState(save.round, data.schedule.length) : { open: false },
+      /** 트레이드 제안 평가 (상대 구단 AI) */
+      proposeTrade(theirId, give, get) {
+        return evaluateTrade({ mine: teamsById[save.teamId], theirs: teamsById[theirId], give, get, status })
+      },
+      /** 트레이드 실행 */
+      doTrade(theirId, give, get) {
+        setSave((s) => executeTrade(s, teams, s.teamId, theirId, give, get))
+      },
+      /** 편지함의 상대 구단 제안에 답 */
+      answerOffer(id, action) {
+        setSave((s) => {
+          const item = s.inbox.find((x) => x.id === id)
+          if (!item?.offer || item.resolved) return s
+          const { teamId, give, get } = item.offer
+          const valid = give.every((x) => teamsById[s.teamId]?.players.some((p) => p.id === x)) && get.every((x) => teamsById[teamId]?.players.some((p) => p.id === x))
+          const mark = (sv, reply) => ({ ...sv, inbox: sv.inbox.map((x) => (x.id === id ? { ...x, resolved: action, reply, read: true } : x)) })
+          if (action !== 'accept') return mark(s, '제안을 거절했습니다.')
+          if (!valid) return mark(s, '이미 선수 구성이 바뀌어 제안이 무효가 됐습니다.')
+          if (!windowState(s.round, data.schedule.length).open) return mark(s, '이적 시장이 닫혀 진행할 수 없습니다.')
+          return mark(executeTrade(s, teams, s.teamId, teamId, give, get), '트레이드가 성사됐습니다.')
+        })
       },
       /** 개별 면담 → 반응 문구를 돌려준다 */
       talkTo(playerId, kind) {
