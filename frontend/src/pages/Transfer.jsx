@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Crest } from './League.jsx'
+import { Crest, Flag } from '../components/Badges.jsx'
 import NeedTeam from './NeedTeam.jsx'
 import { CondBar } from '../components/Rating.jsx'
 import { MAX_PER_SIDE, PATIENCE, money, potentialStars, valueOf } from '../game/trade.js'
@@ -150,7 +150,7 @@ export default function Transfer() {
                 <li key={p.id}>
                   <button className={`mk-row ${get.includes(p.id) ? 'on' : ''}`} onClick={() => toggleGet(p, t)}>
                     <Crest team={t} />
-                    <span className="mk-name"><strong>{p.name}</strong><small>{short(t)} · {p.pos} · {p.age}세{status[p.id]?.inj > 0 ? ' · 🚑' : ''}</small></span>
+                    <span className="mk-name"><strong><Flag nation={p.nation} size={14} /> {p.name}</strong><small>{short(t)} · {p.pos} · {p.age}세{status[p.id]?.inj > 0 ? ' · 🚑' : ''}</small></span>
                     <span className="mk-pot" title="스카우트 잠재력 평가">{stars(pot)}</span>
                     <span className="mk-ovr">{playerOvr(p)}</span>
                     <span className="mk-val">{money(v)}</span>
@@ -169,7 +169,7 @@ export default function Transfer() {
               <li key={p.id}>
                 <button className={`mk-row ${give.includes(p.id) ? 'on' : ''}`} onClick={() => toggleGive(p)}>
                   <span className="lu-pos">{p.pos}</span>
-                  <span className="mk-name"><strong>{p.name}{status[p.id]?.wantsOut ? ' ✈️' : ''}</strong><small>{p.age}세 · 출전 {save.pstats?.[p.id]?.apps ?? 0}경기 <CondBar value={status[p.id]?.cond} /></small></span>
+                  <span className="mk-name"><strong><Flag nation={p.nation} size={14} /> {p.name}{status[p.id]?.wantsOut ? ' ✈️' : ''}</strong><small>{p.age}세 · 출전 {save.pstats?.[p.id]?.apps ?? 0}경기 <CondBar value={status[p.id]?.cond} /></small></span>
                   <span className="mk-pot">{stars(pot)}</span>
                   <span className="mk-ovr">{playerOvr(p)}</span>
                   <span className="mk-val">{money(v)}</span>

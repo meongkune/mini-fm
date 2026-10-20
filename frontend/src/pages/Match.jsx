@@ -4,6 +4,7 @@ import { FORMATIONS } from '../engine/engine.js'
 import { MAX_SUBS, advance, benchOf, createMatch, dropInjured, pickLineup, ratings, step, substitute, summarize } from '../engine/match.js'
 import { TEAM_TALKS, teamTalkEffect } from '../game/season.js'
 import Rating, { CondBar } from '../components/Rating.jsx'
+import { Crest, Flag, Kit } from '../components/Badges.jsx'
 import { ink, kitColors, onDark, playerOvr, short, teamOvr, useGame } from '../store.jsx'
 import MatchPitch from './MatchPitch.jsx'
 import NeedTeam from './NeedTeam.jsx'
@@ -141,13 +142,13 @@ export default function Match() {
     <section>
       <div className="bcast">
         <div className="bc-team" style={{ '--c': home.color, '--ink': ink(home.color) }}>
-          <span className="bc-id">{home.id}</span><span className="bc-name">{short(home)}</span>
+          <span className="bc-crest"><Crest team={home} size={24} /></span><span className="bc-name">{short(home)}</span>
           {S[0].red > 0 && <span className="bc-red">{'▮'.repeat(S[0].red)}</span>}
         </div>
         <div className="bc-score"><b>{score[0]}</b><i /><b>{score[1]}</b></div>
         <div className="bc-team away" style={{ '--c': away.color, '--ink': ink(away.color) }}>
           {S[1].red > 0 && <span className="bc-red">{'▮'.repeat(S[1].red)}</span>}
-          <span className="bc-name">{short(away)}</span><span className="bc-id">{away.id}</span>
+          <span className="bc-name">{short(away)}</span><span className="bc-crest"><Crest team={away} size={24} /></span>
         </div>
       </div>
       <div className="bc-sub">
@@ -354,10 +355,10 @@ function LineupPanel({ match, ctx, kits, rt, myIdx, status }) {
     const off = s.to !== null
     return (
       <li key={p.id} className={`lu ${off ? 'off' : ''}`}>
-        <span className="lu-num" style={{ '--c': kits[side].color, '--ink': ink(kits[side].color) }}>{p.number}</span>
+        <Kit color={kits[side].color} number={p.number} size={26} />
         <span className="lu-pos">{p.pos}</span>
         <span className="lu-name">
-          {p.name}
+          <Flag nation={p.nation} size={13} /> {p.name}
           <span className="lu-ev">
             {'⚽'.repeat(s.g)}{s.a ? '🅰️'.repeat(s.a) : ''}{s.yc ? '🟨' : ''}{s.rc ? '🟥' : ''}
             {sd.injured.includes(p.id) ? '🚑' : ''}

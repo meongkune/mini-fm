@@ -1,19 +1,13 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ink, playerOvr, short, useGame } from '../store.jsx'
+import { playerOvr, short, useGame } from '../store.jsx'
 import Rating from '../components/Rating.jsx'
 import { tierOf } from '../components/PlayerCard.jsx'
+import { Crest, Flag } from '../components/Badges.jsx'
 
 const TABS = [['table', '팀 순위'], ['players', '개인 순위'], ['fixtures', '일정·결과']]
 
-export function Crest({ team, size = 22 }) {
-  if (!team) return null
-  return (
-    <span className="crest-sm" style={{ '--c': team.color, '--ink': ink(team.color), width: size, height: size }}>
-      {team.id.slice(0, 3)}
-    </span>
-  )
-}
+export { Crest }
 
 export default function League() {
   const { data, save, standings, teamsById, myTeam, totalRounds, seasonOver, seasonText } = useGame()
@@ -159,7 +153,7 @@ function PlayerRanks({ pstats, teamsById, myTeam, roundsPlayed }) {
                     <td className="left">
                       <div className="pr-player">
                         <Crest team={teamsById[r.p.teamId]} />
-                        <div><strong>{r.p.name}</strong><small>{short(teamsById[r.p.teamId])} · {r.p.pos}</small></div>
+                        <div><strong><Flag nation={r.p.nation} size={14} /> {r.p.name}</strong><small>{short(teamsById[r.p.teamId])} · {r.p.pos}</small></div>
                       </div>
                     </td>
                     <td>{r.s.apps}</td>

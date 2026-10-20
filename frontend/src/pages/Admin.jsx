@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import { loadIndex } from '../api.js'
 import { checkAccess, DATA_DIR, defaultRepo, readFile, writeFile } from '../github.js'
 import { tierOf } from '../components/PlayerCard.jsx'
+import { Crest } from '../components/Badges.jsx'
 import { ink, playerOvr } from '../store.jsx'
 
 const POS = ['GK', 'DF', 'MF', 'FW']
@@ -265,7 +266,7 @@ export default function Admin() {
               const edited = changes.filter((c) => c.team === t.name).length
               return (
                 <button key={t.id} className="admin-team" style={{ '--c': t.color, '--ink': ink(t.color) }} onClick={() => setTeamId(t.id)}>
-                  <span className="crest">{t.id.slice(0, 3)}</span>
+                  <Crest team={t} size={34} />
                   <span className="grow">
                     <strong>{t.name}</strong>
                     <small>{t.players.length}명</small>

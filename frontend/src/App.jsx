@@ -93,7 +93,7 @@ export default function App() {
       </main>
 
       <footer>
-        비공식 팬 프로젝트입니다. 구단·선수 이름은 2025-26 시즌 기준이며 능력치·경기 결과는 게임용 임의 값으로, 실제 구단·리그와 관계없습니다.
+        비공식 팬 프로젝트입니다. 구단 엠블럼은 각 구단의 상표이며 이미지는 football-data.org, 국기는 flagcdn.com에서 불러옵니다. 능력치·경기 결과는 게임용 값으로 실제 구단·리그와 관계없습니다.
       </footer>
 
       <nav className="tabbar" aria-label="주요 메뉴">

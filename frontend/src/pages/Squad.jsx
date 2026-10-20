@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import PlayerCard from '../components/PlayerCard.jsx'
 import PlayerSheet from '../components/PlayerSheet.jsx'
 import Rating, { CondBar } from '../components/Rating.jsx'
+import { Flag } from '../components/Badges.jsx'
 import { moraleLabel } from '../game/season.js'
 import { formationNeeds, playerOvr, useGame } from '../store.jsx'
 import NeedTeam from './NeedTeam.jsx'
@@ -80,7 +81,7 @@ export default function Squad() {
               <div key={pos} className="squad-group">
                 <h3>{POS_LABEL[pos]} <span className="muted small">{counts[pos]}/{needs[pos]} 선발</span></h3>
                 <div className="card-grid">
-                  {players.map((p) => <PlayerCard key={p.id} player={p} status={status[p.id]} selected={selected.has(p.id)} onClick={() => toggle(p)} />)}
+                  {players.map((p) => <PlayerCard key={p.id} player={p} color={myTeam.color} status={status[p.id]} selected={selected.has(p.id)} onClick={() => toggle(p)} />)}
                 </div>
               </div>
             )
@@ -102,7 +103,7 @@ export default function Squad() {
                     <td className="left">
                       <div className="sq-name">
                         <span className="lu-pos">{p.pos}</span>
-                        <strong>{p.name}</strong>
+                        <Flag nation={p.nation} size={14} /><strong>{p.name}</strong>
                         {st.inj > 0 && <em>🚑{st.inj}</em>}{st.susp > 0 && <em>🟥{st.susp}</em>}{st.wantsOut && <em>✈️</em>}
                       </div>
                     </td>

@@ -1,4 +1,5 @@
 import { playerOvr } from '../store.jsx'
+import { Flag, Kit } from './Badges.jsx'
 
 // OVR 기준 선수 등급 — 카드 색을 정한다
 export function tierOf(ovr) {
@@ -13,7 +14,7 @@ const lastName = (name) => name.split(' ').at(-1)
 
 /** FC 스타일 세로형 선수 카드. size: 'sm'(스쿼드 그리드) | 'lg'(홈 가로 스크롤) */
 /** status를 주면 카드 아래에 컨디션 막대와 부상·징계·사기 표시 */
-export default function PlayerCard({ player, selected = false, onClick, size = 'sm', status = null }) {
+export default function PlayerCard({ player, selected = false, onClick, size = 'sm', status = null, color = null }) {
   const ovr = playerOvr(player)
   const tier = tierOf(ovr)
   return (
@@ -27,8 +28,9 @@ export default function PlayerCard({ player, selected = false, onClick, size = '
       <span className="pc-top">
         <span className="pc-ovr">{ovr}</span>
         <span className="pc-pos">{player.pos}</span>
+        <span className="pc-flag-img"><Flag nation={player.nation} size={size === 'lg' ? 18 : 14} /></span>
       </span>
-      <span className="pc-badge" aria-hidden="true">{player.number}</span>
+      {color ? <span className="pc-kit"><Kit color={color} number={player.number} size={size === 'lg' ? 52 : 40} /></span> : <span className="pc-badge" aria-hidden="true">{player.number}</span>}
       <span className="pc-name">{lastName(player.name)}</span>
       <span className="pc-stats">
         <span><b>{player.att}</b><em>공격</em></span>

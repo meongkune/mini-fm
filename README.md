@@ -320,4 +320,4 @@ aws ec2 describe-network-interfaces --network-interface-ids $ENI --query 'Networ
 
 ## 면책 조항
 
-비공식 팬 프로젝트입니다. 구단·선수 이름은 2025-26 시즌 기준이며 일부는 실제와 다를 수 있고, 능력치와 경기 결과는 규칙에 따라 생성한 게임용 값입니다. 선수 명단은 [football-data.org](https://www.football-data.org/) 데이터를 사용합니다. 구단 로고·엠블럼은 사용하지 않았으며 프리미어리그 및 각 구단과 관련이 없습니다.
+비공식·비상업 팬 프로젝트입니다. 구단 이름·엠블럼은 각 구단의 상표이며, 엠블럼 이미지는 [football-data.org](https://www.football-data.org/)가 제공하는 주소에서, 국기는 [flagcdn.com](https://flagcdn.com/)에서 불러와 표시만 합니다(레포에 저장하지 않음). 선수 명단은 football-data.org 데이터를 사용하고, 능력치와 경기 결과는 규칙에 따라 생성한 게임용 값입니다. 프리미어리그 및 각 구단과 관련이 없습니다.

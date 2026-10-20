@@ -1,12 +1,13 @@
 // 선수 상세: 상태(컨디션·사기·폼·부상·징계), 시즌 기록, 선발 넣기/빼기, 개별 면담
 import { useState } from 'react'
 import PlayerCard from './PlayerCard.jsx'
+import { Flag, nationName } from './Badges.jsx'
 import Rating, { CondBar } from './Rating.jsx'
 import { PLAYER_TALKS, moraleLabel } from '../game/season.js'
 import { useGame } from '../store.jsx'
 
 export default function PlayerSheet({ player, onClose, inLineup, onToggle }) {
-  const { status, save, talkTo, myTeam } = useGame()
+  const { status, save, talkTo, myTeam, teams } = useGame()
   const [reply, setReply] = useState('')
   if (!player) return null
   const st = status[player.id] || {}
@@ -23,9 +24,9 @@ export default function PlayerSheet({ player, onClose, inLineup, onToggle }) {
           <button className="btn ghost small" onClick={onClose}>닫기</button>
         </div>
         <div className="ps-top">
-          <PlayerCard player={player} size="lg" />
+          <PlayerCard player={player} size="lg" color={teams.find((t) => t.players.some((p) => p.id === player.id))?.color} />
           <div className="ps-status">
-            <div className="ps-row"><span>나이 · 국적</span><b>{player.age}세{player.nation ? ` · ${player.nation}` : ''}</b></div>
+            <div className="ps-row"><span>나이 · 국적</span><b>{player.age}세 <Flag nation={player.nation} size={16} /> {nationName(player.nation)}</b></div>
             <div className="ps-row"><span>컨디션</span><b><CondBar value={st.cond} /> {Math.round(st.cond ?? 100)}%</b></div>
             <div className="ps-row"><span>사기</span><b className={`mood ${mTone}`}>{face} {mLabel}</b></div>
             <div className="ps-row"><span>최근 폼</span><b className="ps-form">{(st.fr || []).length ? st.fr.map((r, i) => <Rating key={i} value={r} />) : <span className="muted small">기록 없음</span>}</b></div>

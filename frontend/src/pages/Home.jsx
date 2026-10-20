@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import PlayerCard from '../components/PlayerCard.jsx'
 import PlayerSheet from '../components/PlayerSheet.jsx'
+import { Crest } from '../components/Badges.jsx'
 import { ink, playerOvr, short, teamOvr, useGame } from '../store.jsx'
 
 // 전력 순위에 따른 한 줄 소개 (팀 수와 관계없이 4등분)
@@ -11,12 +12,6 @@ function strengthLabel(rank, total) {
   if (q < 0.5) return '상위권 전력'
   if (q < 0.75) return '중위권 전력'
   return '언더독 · 도전 모드'
-}
-
-function Crest({ team, size = 40 }) {
-  return (
-    <span className="crest" style={{ '--c': team.color, color: ink(team.color), width: size, height: size }}>{team.id}</span>
-  )
 }
 
 export default function Home() {
@@ -65,7 +60,7 @@ export default function Home() {
             <button key={t.id} className="team-card" style={{ '--c': t.color, '--ink': ink(t.color) }} disabled={!!busy}
               onClick={async () => { setBusy(t.id); await chooseTeam(t.id); setBusy(null) }}>
               <span className="tc-top">
-                <span className="tc-id">{t.id}</span>
+                <span className="tc-crest"><Crest team={t} size={30} /></span>
                 <span className="tc-ovr">{teamOvr(t)}</span>
               </span>
               <strong>{t.name}</strong>
@@ -89,7 +84,8 @@ export default function Home() {
   return (
     <section>
       <div className="team-hero" style={{ '--c': myTeam.color, '--ink': ink(myTeam.color) }}>
-        <div>
+        <span className="th-crest"><Crest team={myTeam} size={54} /></span>
+        <div className="th-text">
           <span className="th-label">내 팀</span>
           <h1>{myTeam.name}</h1>
           <span className="th-sub">{seasonText}{save.seasonNo > 1 ? ` · ${save.seasonNo}번째 시즌` : ''}</span>
@@ -145,7 +141,7 @@ export default function Home() {
         <Link className="link" to="/squad">전체 보기 →</Link>
       </div>
       <div className="scroll-row" style={{ marginBottom: 16 }}>
-        {stars.map((p) => <PlayerCard key={p.id} player={p} size="lg" status={status[p.id]} onClick={() => setDetail(p)} />)}
+        {stars.map((p) => <PlayerCard key={p.id} player={p} size="lg" color={myTeam.color} status={status[p.id]} onClick={() => setDetail(p)} />)}
       </div>
 
       {detail && <PlayerSheet player={detail} onClose={() => setDetail(null)} />}
