@@ -1,6 +1,6 @@
 /* =====================================================================
    Mini FM — 모바일 우선 스타일
-   기준 규격: 폭 360~430px (PC에서는 가운데 430px 휴대폰 프레임으로 표시)
+   기준 규격: 폭 360~430px (PC에서는 390×844 휴대폰 목업을 화면 높이에 맞춰 확대해 표시)
    ===================================================================== */
 :root {
   --app-w: 430px;
@@ -26,6 +26,9 @@
   --bad: #ef4444;
   --radius: 14px;
   --tilt: 46deg;
+  /* 노치·제스처 바 여백: 실제 폰은 기기 값, PC 목업에서는 아래 .framed에서 덮어씀 */
+  --safe-top: env(safe-area-inset-top);
+  --safe-bottom: env(safe-area-inset-bottom);
   color-scheme: dark;
 }
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -51,10 +54,7 @@ code, .mono { font-family: ui-monospace, 'Cascadia Code', Consolas, monospace; f
   position: relative; display: flex; flex-direction: column;
   width: 100%; max-width: var(--app-w); min-height: 100vh; margin: 0 auto;
   background: radial-gradient(600px 300px at 10% -5%, #2b2160 0%, transparent 60%), var(--bg);
-  padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom));
-}
-@media (min-width: 480px) {
-  .app { border-left: 1px solid var(--line); border-right: 1px solid var(--line); box-shadow: 0 0 60px rgba(0, 0, 0, .6); }
+  padding-bottom: calc(var(--tabbar-h) + var(--safe-bottom));
 }
 main { flex: 1; padding: 14px 14px 20px; }
 footer { text-align: center; color: var(--muted); font-size: .68rem; padding: 10px 16px 14px; border-top: 1px solid var(--line); }
@@ -63,7 +63,7 @@ footer { text-align: center; color: var(--muted); font-size: .68rem; padding: 10
 .topbar {
   position: sticky; top: 0; z-index: 10;
   display: flex; align-items: center; justify-content: space-between; gap: 8px;
-  padding: 10px 14px; background: rgba(20, 17, 31, .92); backdrop-filter: blur(10px);
+  padding: calc(10px + var(--safe-top)) 14px 10px; background: rgba(20, 17, 31, .92); backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--line);
 }
 .brand { display: flex; align-items: center; gap: 8px; min-width: 0; }
@@ -81,8 +81,8 @@ footer { text-align: center; color: var(--muted); font-size: .68rem; padding: 10
 /* 하단 탭 바 */
 .tabbar {
   position: fixed; left: 50%; bottom: 0; z-index: 20; transform: translateX(-50%);
-  width: 100%; max-width: var(--app-w); height: calc(var(--tabbar-h) + env(safe-area-inset-bottom));
-  padding-bottom: env(safe-area-inset-bottom);
+  width: 100%; max-width: var(--app-w); height: calc(var(--tabbar-h) + var(--safe-bottom));
+  padding-bottom: var(--safe-bottom);
   display: grid; grid-template-columns: repeat(6, 1fr);
   background: rgba(16, 13, 26, .97); backdrop-filter: blur(10px); border-top: 1px solid var(--line);
 }
@@ -555,3 +555,55 @@ select { background: var(--panel-2); color: var(--text); border: 1px solid var(-
 .pstats label { display: grid; gap: 2px; font-size: .64rem; color: var(--muted); font-weight: 700; }
 .pstats input { padding: 6px 4px; text-align: center; }
 .changes { margin: 0 0 10px; padding-left: 18px; font-size: .8rem; line-height: 1.6; max-height: 260px; overflow: auto; }
+
+/* ---------- PC: 휴대폰 목업 (DeviceFrame) ---------- */
+html.framed { --safe-top: 0px; --safe-bottom: 18px; }
+html.framed body { overflow: hidden; height: 100vh; }
+.stage {
+  height: 100vh; display: flex; align-items: center; justify-content: center; gap: clamp(32px, 6vw, 110px);
+  background:
+    radial-gradient(900px 600px at 15% 20%, rgba(124, 92, 255, .35), transparent 60%),
+    radial-gradient(800px 600px at 90% 90%, rgba(34, 197, 94, .14), transparent 60%),
+    #0a0812;
+}
+.stage-intro { max-width: 380px; color: var(--text); }
+.stage-logo { display: inline-grid; place-items: center; width: 64px; height: 64px; border-radius: 18px; font-size: 2.2rem; background: linear-gradient(145deg, #8f74ff, #3a2a9e); box-shadow: 0 12px 30px rgba(124, 92, 255, .35); }
+.stage-intro h1 { font-size: 2.6rem; margin: 16px 0 6px; letter-spacing: -.5px; }
+.stage-intro p { color: var(--muted); line-height: 1.7; margin: 0 0 18px; }
+.stage-intro ul { list-style: none; padding: 0; margin: 0 0 22px; display: grid; gap: 10px; font-weight: 700; font-size: .95rem; }
+.stage-intro .stage-hint { font-size: .8rem; border-left: 3px solid var(--accent); padding-left: 10px; }
+@media (max-width: 1100px) { .stage-intro { display: none; } }
+
+.device-slot { position: relative; flex: none; }
+.device {
+  position: absolute; top: 0; left: 0; transform-origin: top left;
+  border-radius: 62px; padding: 13px;
+  background: linear-gradient(145deg, #3a3842, #17161c 40%, #2b2a31);
+  box-shadow: 0 0 0 2px #55535e, 0 40px 90px rgba(0, 0, 0, .65), inset 0 0 0 2px #0d0c10;
+}
+.device-btn { position: absolute; width: 4px; border-radius: 2px; background: #3d3b45; }
+.device-btn.power { right: -4px; top: 210px; height: 92px; }
+.device-btn.vol-up { left: -4px; top: 180px; height: 62px; }
+.device-btn.vol-down { left: -4px; top: 256px; height: 62px; }
+.screen {
+  position: relative; overflow: hidden; border-radius: 50px; background: var(--bg);
+  display: flex; flex-direction: column;
+  transform: translateZ(0); /* 안쪽 position: fixed(탭 바 등)를 화면 기준으로 */
+}
+.statusbar {
+  flex: none; height: 50px; padding: 0 30px 0 36px; display: flex; align-items: center; justify-content: space-between;
+  font-weight: 700; font-size: .95rem; color: #fff; background: rgba(20, 17, 31, .98); position: relative; z-index: 30;
+}
+.sb-icons { display: flex; align-items: center; gap: 6px; }
+.sb-icons svg { fill: #fff; }
+.sb-battery { position: relative; width: 26px; height: 13px; border: 1.5px solid rgba(255, 255, 255, .55); border-radius: 4px; padding: 1.5px; }
+.sb-battery::after { content: ''; position: absolute; right: -4px; top: 3.5px; width: 2px; height: 4px; border-radius: 0 1px 1px 0; background: rgba(255, 255, 255, .55); }
+.sb-battery i { display: block; width: 78%; height: 100%; border-radius: 2px; background: #fff; }
+.island { position: absolute; top: 11px; left: 50%; transform: translateX(-50%); width: 120px; height: 34px; border-radius: 20px; background: #000; z-index: 40; }
+.home-indicator { position: absolute; bottom: 7px; left: 50%; transform: translateX(-50%); width: 134px; height: 5px; border-radius: 3px; background: rgba(255, 255, 255, .85); z-index: 40; pointer-events: none; }
+.screen .app {
+  flex: 1; min-height: 0; max-width: none; overflow-y: auto; overscroll-behavior: contain;
+  scrollbar-width: none;
+}
+.screen .app::-webkit-scrollbar { display: none; }
+.screen .tabbar { max-width: none; }

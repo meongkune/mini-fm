@@ -1,4 +1,4 @@
-import { Component, useEffect } from 'react'
+import { Component, useEffect, useRef } from 'react'
 import { NavLink, Route, Routes, useLocation } from 'react-router-dom'
 import { useGame } from './store.jsx'
 import Home from './pages/Home.jsx'
@@ -41,11 +41,13 @@ export default function App() {
   const { data, error, myTeam } = useGame()
   const { pathname } = useLocation()
   // 중괄호 필수: scrollTo의 반환값(최신 브라우저는 Promise)을 cleanup으로 반환하면 다음 이동 때 React가 터진다
-  useEffect(() => { window.scrollTo(0, 0) }, [pathname])
+  // PC 휴대폰 프레임에서는 .app이 스크롤 영역이므로 둘 다 맨 위로
+  const appRef = useRef(null)
+  useEffect(() => { window.scrollTo(0, 0); appRef.current?.scrollTo(0, 0) }, [pathname])
   const isAdmin = pathname.startsWith('/admin')
 
   return (
-    <div className="app">
+    <div className="app" ref={appRef}>
       <header className="topbar">
         <div className="brand">
           <span className="logo">⚽</span>

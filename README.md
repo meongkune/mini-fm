@@ -257,7 +257,7 @@ aws ec2 describe-network-interfaces --network-interface-ids $ENI --query 'Networ
 | 📋 전술 · 👥 스쿼드 | 포메이션 4종, 경기 운영·압박 강도, 하프타임 전술 변경, 선발 11명 선택·자동 선발 |
 | 🏆 리그 | 리그·시즌 선택, 실제 구단 수 그대로 더블 라운드 로빈(프리미어리그 20팀 38라운드), 순위 구간(UCL·UEL·강등)·최근 5경기·득점 순위 |
 | 📡 상태 | ECS: 헬스 체크·가동 시간·Task·컨테이너 정보 / Pages: 빌드 버전·빌드 시각·데이터 출처 |
-| 📱 모바일 우선 | 폭 360~430px 기준, 하단 탭 바, PC에서는 휴대폰 프레임 |
+| 📱 모바일 우선 | 폭 360~430px 기준, 하단 탭 바, 노치·제스처 바 여백(safe-area), 홈 화면에 추가하면 앱처럼 전체 화면(PWA). PC에서는 휴대폰 목업을 화면 높이에 맞춰 표시 |
 
 **스택:** React 18 · React Router 6 · Vite 5 / Python 3.12 · Flask 3.1 · gunicorn 23
 
