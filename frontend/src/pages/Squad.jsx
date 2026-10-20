@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { api } from '../api.js'
 import PlayerCard from '../components/PlayerCard.jsx'
 import { formationNeeds, playerOvr, useGame } from '../store.jsx'
 import NeedTeam from './NeedTeam.jsx'
@@ -7,7 +6,7 @@ import NeedTeam from './NeedTeam.jsx'
 const POS_LABEL = { GK: '골키퍼', DF: '수비수', MF: '미드필더', FW: '공격수' }
 
 export default function Squad() {
-  const { myTeam, save, update } = useGame()
+  const { myTeam, save, update, autoPick } = useGame()
   const [msg, setMsg] = useState('')
   if (!myTeam) return <NeedTeam />
 
@@ -23,9 +22,8 @@ export default function Squad() {
     else update({ lineup: [...save.lineup, p.id] })
   }
 
-  const auto = async () => {
-    const { lineup } = await api.autoLineup(myTeam.id, save.formation)
-    update({ lineup })
+  const auto = () => {
+    update({ lineup: autoPick(save.formation) })
     setMsg(`${save.formation}에 맞춰 베스트 11을 자동 선발했습니다.`)
   }
 

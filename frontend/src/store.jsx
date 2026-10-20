@@ -1,5 +1,9 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import { api } from './api.js'
+import { playerOvrOf } from './engine/engine.js'
+import { pickLineup } from './engine/match.js'
+import { applyRound, engineStatus, resolveTalk } from './game/season.js'
+import { effectiveTeams } from './game/roster.js'
 
 // 시즌 진행 상황은 서버가 아니라 브라우저 localStorage에 저장한다 (서버는 stateless).
 // v2: 프리미어리그 구단 데이터로 바뀌면서 이전 저장(가상 구단 ID)과 호환되지 않아 키를 올림
@@ -15,6 +19,16 @@ const EMPTY_SAVE = {
   lineup: [],
   round: 0,
   results: [],
+  // 감독 모드
+  seasonNo: 1, // 같은 시즌 데이터로 몇 번째 시즌인지
+  status: {}, // 선수 상태: 컨디션·사기·폼·부상·징계
+  pstats: {}, // 선수 시즌 기록: 출전·골·도움·평점·클린시트·카드·MOM
+  inbox: [], // 받은 편지함
+  rosters: null, // 트레이드로 바뀐 선수단 { teamId: [playerId] }
+  mods: {}, // 성장·노화로 바뀐 능력치
+  youth: [], // 유스 입단 선수
+  history: [], // 지난 시즌 기록
+  board: null, // 보드 목표·신뢰도
 }
 
 function loadSave() {
@@ -25,12 +39,7 @@ function loadSave() {
   }
 }
 
-export function playerOvr(p) {
-  if (p.pos === 'GK') return p.def
-  if (p.pos === 'DF') return Math.round(p.def * 0.8 + p.att * 0.2)
-  if (p.pos === 'FW') return Math.round(p.att * 0.8 + p.def * 0.2)
-  return Math.round((p.att + p.def) / 2)
-}
+export const playerOvr = playerOvrOf
 
 // 좁은 화면용 짧은 구단명 (예: 맨체스터 유나이티드 → 맨유)
 export const short = (team) => team?.short || team?.name || ''
@@ -101,9 +110,9 @@ export function GameProvider({ children }) {
       const sel = await api.selectSeason(save.league, save.season)
       const [t, s, index] = await Promise.all([api.teams(), api.schedule(), api.index()])
       // 시즌 데이터를 다시 가져와 선수 ID가 바뀌었으면 선발을 자동으로 다시 고른다
-      const team = t.teams.find((x) => x.id === save.teamId)
+      const team = effectiveTeams(t.teams, save).find((x) => x.id === save.teamId)
       const staleLineup = team && save.lineup.some((id) => !team.players.some((p) => p.id === id))
-      const fresh = staleLineup ? (await api.autoLineup(team.id, save.formation)).lineup : null
+      const fresh = staleLineup ? pickLineup(team, save.formation, {}) : null
       if (!alive) return
       setData({ ...t, schedule: s.rounds, index, leagueId: sel.leagueId, seasonId: sel.seasonId })
       setSave((cur) => {
@@ -123,7 +132,9 @@ export function GameProvider({ children }) {
   }, [save])
 
   const value = useMemo(() => {
-    const teamsById = data ? Object.fromEntries(data.teams.map((t) => [t.id, t])) : {}
+    const teams = data ? effectiveTeams(data.teams, save) : []
+    const teamsById = Object.fromEntries(teams.map((t) => [t.id, t]))
+    const status = data ? engineStatus(save, teams) : {}
     const myTeam = save.teamId ? teamsById[save.teamId] : null
     const totalRounds = data ? data.schedule.length : 0
     const seasonOver = data ? save.round >= totalRounds : false
@@ -134,30 +145,36 @@ export function GameProvider({ children }) {
     const update = (patch) => setSave((s) => ({ ...s, ...patch }))
 
     return {
-      data, error, save, teamsById, myTeam, totalRounds, seasonOver, nextFixture, update,
-      standings: data ? computeStandings(data.teams, save.results) : [],
-      async chooseTeam(teamId) {
-        const { lineup } = await api.autoLineup(teamId, '4-4-2')
+      data, error, save, teams, teamsById, myTeam, totalRounds, seasonOver, nextFixture, update, status,
+      standings: data ? computeStandings(teams, save.results) : [],
+      unread: (save.inbox || []).filter((x) => !x.read).length,
+      /** 컨디션·부상·징계를 고려한 베스트 11 */
+      autoPick(formation = save.formation, teamId = save.teamId) {
+        return pickLineup(teamsById[teamId], formation, status)
+      },
+      chooseTeam(teamId) {
+        const lineup = pickLineup(teamsById[teamId], '4-4-2', {})
         setSave((s) => ({ ...EMPTY_SAVE, league: s.league, season: s.season, teamId, lineup }))
+      },
+      readInbox(id) {
+        setSave((s) => ({ ...s, inbox: s.inbox.map((x) => (x.id === id || id === 'all' ? { ...x, read: true } : x)) }))
+      },
+      answerTalk(id, action) {
+        setSave((s) => resolveTalk(s, id, action))
       },
       /** 리그·시즌 변경 — 진행 중인 시즌 기록은 초기화된다 */
       chooseSeason(league, season) {
         setSave({ ...EMPTY_SAVE, league, season })
       },
       resetSeason() {
-        setSave((s) => ({ ...s, round: 0, results: [] }))
+        setSave((s) => ({ ...s, round: 0, results: [], status: {}, pstats: {}, inbox: [] }))
       },
       quitTeam() {
         setSave((s) => ({ ...EMPTY_SAVE, league: s.league, season: s.season }))
       },
-      async finishRound(myResult) {
-        const { results } = await api.playRound(save.round, save.teamId)
-        const round = save.round
-        setSave((s) => ({
-          ...s,
-          round: s.round + 1,
-          results: [...s.results, { round, ...myResult, mine: true }, ...results.map((r) => ({ round, ...r }))],
-        }))
+      /** 내 경기 요약을 넣고 라운드 마무리 (다른 경기는 여기서 시뮬레이션) */
+      finishRound(mine) {
+        setSave((s) => applyRound(s, { teamsById, schedule: data.schedule, myTeamId: s.teamId, mine }))
       },
     }
   }, [data, error, save])

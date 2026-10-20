@@ -1,4 +1,3 @@
-import { api } from '../api.js'
 import { formationNeeds, useGame } from '../store.jsx'
 import NeedTeam from './NeedTeam.jsx'
 
@@ -53,13 +52,12 @@ export function OptionGroup({ options, value, onChange, cols }) {
 }
 
 export default function Tactics() {
-  const { data, myTeam, save, update } = useGame()
+  const { data, myTeam, save, update, autoPick } = useGame()
   if (!myTeam) return <NeedTeam />
 
-  const changeFormation = async (formation) => {
+  const changeFormation = (formation) => {
     // 포메이션을 바꾸면 그에 맞는 베스트 11로 자동 재선발
-    const { lineup } = await api.autoLineup(myTeam.id, formation)
-    update({ formation, lineup })
+    update({ formation, lineup: autoPick(formation) })
   }
   const needs = formationNeeds(save.formation)
 
