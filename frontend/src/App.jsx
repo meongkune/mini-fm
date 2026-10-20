@@ -12,7 +12,7 @@ import Inbox from './pages/Inbox.jsx'
 import Transfer from './pages/Transfer.jsx'
 import Manager from './pages/Manager.jsx'
 import Club from './pages/Club.jsx'
-import ManagerAvatar from './components/ManagerAvatar.jsx'
+import MgrBadge from './components/MgrBadge.jsx'
 
 // 하단 탭 바: [경로, 라벨, 아이콘, 정확히 일치]
 const NAV = [
@@ -64,7 +64,7 @@ export default function App() {
         <div className="top-actions">
         {manager && (
           <Link to="/manager" className="top-avatar" aria-label="감독 프로필">
-            {manager.thumb ? <img className="mgr-thumb" src={manager.thumb} alt="" width={34} height={34} /> : <ManagerAvatar look={manager.look} teamColor={myTeam?.color} size={30} bg={false} />}
+            <MgrBadge name={manager.name} color={myTeam?.color} size={32} />
           </Link>
         )}
         {myTeam && (

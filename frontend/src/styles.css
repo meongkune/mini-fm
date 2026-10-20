@@ -929,13 +929,12 @@ html.framed body { overflow: hidden; height: 100vh; }
 .mgr-card strong, .mgr-strip strong { font-size: 1.05rem; }
 .mgr-card em { font-style: normal; color: var(--accent); }
 .mgr-card.cta { border: 1px dashed var(--accent); background: rgba(124, 92, 255, .1); }
+.mgr-badge { display: grid; place-items: center; flex: none; border-radius: 50%; font-weight: 900; color: #fff; background: linear-gradient(145deg, color-mix(in srgb, var(--c) 85%, #fff), color-mix(in srgb, var(--c) 70%, #000)); box-shadow: inset 0 0 0 2px rgba(255,255,255,.25); text-shadow: 0 1px 2px rgba(0,0,0,.4); }
 .mgr-ghost { display: grid; place-items: center; width: 56px; height: 56px; border-radius: 50%; background: var(--panel-2); font-size: 1.8rem; }
 .mgr-strip { margin-top: -4px; }
 .mgr-stage { display: flex; flex-direction: column; align-items: center; gap: 8px; background: radial-gradient(240px 160px at 50% 30%, color-mix(in srgb, var(--c) 35%, transparent), var(--panel)); }
 .mgr-name { width: 70%; text-align: center; font: inherit; font-size: 1.15rem; font-weight: 900; color: var(--text); background: transparent; border: 0; border-bottom: 2px solid var(--line); padding: 4px; }
 .mgr-name:focus { outline: none; border-color: var(--accent); }
-.look-panel h4:first-child { margin-top: 0; }
-.look-chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .swatches { display: flex; flex-wrap: wrap; gap: 8px; }
 .sw { width: 36px; height: 36px; border-radius: 50%; border: 2px solid rgba(255, 255, 255, .15); cursor: pointer; font-size: .6rem; font-weight: 900; color: #fff; text-shadow: 0 1px 2px rgba(0, 0, 0, .6); }
 .sw.on { border-color: #fff; box-shadow: 0 0 0 2px var(--accent); }
@@ -967,15 +966,6 @@ html.framed body { overflow: hidden; height: 100vh; }
 .pick:disabled .lu-name { opacity: 1; }
 
 /* 3D 감독 */
-.mgr3d { width: 100%; border-radius: 14px; overflow: hidden; touch-action: pan-y; cursor: grab; background: radial-gradient(60% 55% at 50% 45%, color-mix(in srgb, var(--c, #7c5cff) 30%, transparent), transparent 75%); }
-.mgr3d.loading { display: grid; place-items: center; color: var(--muted); font-size: .85rem; }
-.mgr3d canvas { display: block; }
-.mgr-tools { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
-.look-slider { display: grid; gap: 4px; margin-bottom: 14px; font-size: .8rem; font-weight: 700; }
-.look-slider input { width: 100%; accent-color: var(--accent); }
-.look-slider small { display: flex; justify-content: space-between; color: var(--muted); font-size: .66rem; }
-.look-slider em { font-style: normal; }
-.mgr-thumb { display: block; border-radius: 50%; object-fit: cover; background: var(--panel-2); }
 
 /* ---------- 유럽 대항전 ---------- */
 .cup-badge { color: #f5c542; font-weight: 900; }
@@ -1076,8 +1066,3 @@ html.framed body { overflow: hidden; height: 100vh; }
 .owner-card em { grid-column: 1 / -1; font-style: normal; font-size: .72rem; color: var(--accent); font-weight: 800; }
 
 /* VRoid 감독 */
-.vrm-empty { display: grid; justify-items: center; gap: 8px; padding: 24px 8px; text-align: center; font-size: .84rem; color: var(--muted); }
-.mgr-ghost.big { width: 96px; height: 96px; font-size: 3rem; }
-.vrm-err { position: absolute; margin: 12px; padding: 8px 10px; border-radius: 8px; background: rgba(239, 68, 68, .2); color: #fecaca; font-size: .8rem; }
-.mgr3d { position: relative; }
-.vrm-guide ol { padding-left: 18px; margin: 0 0 6px; font-size: .82rem; line-height: 1.7; }

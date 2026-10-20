@@ -16,6 +16,7 @@ import { valueOf } from './game/trade.js'
 // v2: 프리미어리그 구단 데이터로 바뀌면서 이전 저장(가상 구단 ID)과 호환되지 않아 키를 올림
 const STORAGE_KEY = 'mini-fm-save-v1'
 const MANAGER_KEY = 'mini-fm-manager' // 감독 프로필은 세이브와 따로 (경질·팀 변경에도 유지)
+try { indexedDB.deleteDatabase('mini-fm') } catch { /* 예전 VRM 감독 파일 정리 */ }
 const EMPTY_SAVE = {
   league: null, // 리그 ID (예: premier-league) — null이면 index.json 기본값
   season: null, // 시즌 ID (예: 2025-26)
