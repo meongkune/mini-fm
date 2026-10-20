@@ -51,6 +51,18 @@
      "teams": 20
     }
    ]
+  },
+  {
+   "id": "eredivisie",
+   "name": "에레디비시",
+   "country": "네덜란드",
+   "seasons": [
+    {
+     "id": "2025-26",
+     "file": "eredivisie/2025-26.json",
+     "teams": 18
+    }
+   ]
   }
  ]
 }
