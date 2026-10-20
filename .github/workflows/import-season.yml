@@ -54,6 +54,7 @@ jobs:
             echo "changed=false" >> "$GITHUB_OUTPUT"
           else
             git commit -m "data: ${{ inputs.competition }} ${{ inputs.season }} 시즌 데이터 가져오기"
+            git pull --rebase origin main  # 다른 가져오기·편집 커밋이 먼저 올라갔어도 이어서 push
             git push
             echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
