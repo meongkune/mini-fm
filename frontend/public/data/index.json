@@ -75,6 +75,18 @@
      "teams": 24
     }
    ]
+  },
+  {
+   "id": "brasileirao",
+   "name": "브라질레이랑",
+   "country": "브라질",
+   "seasons": [
+    {
+     "id": "2025",
+     "file": "brasileirao/2025.json",
+     "teams": 20
+    }
+   ]
   }
  ]
 }
