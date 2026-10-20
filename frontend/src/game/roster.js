@@ -6,12 +6,12 @@ import { inferRoles } from '../engine/formation.js'
 export function effectiveTeams(baseTeams, save) {
   const all = {}
   for (const t of baseTeams) for (const p of t.players) all[p.id] = p
-  for (const p of [...(save.youth || []), ...(save.signed || [])]) all[p.id] = p
+  for (const p of [...(save.youth || []), ...(save.signed || [])]) all[p.id] = { ...p, name: cleanName(p.name) }
   const mods = save.mods || {}
   const withMods = (p) => (mods[p.id] ? { ...p, ...mods[p.id] } : p)
   return baseTeams.map((t) => {
     const ids = save.rosters?.[t.id]
-    const players = ids ? ids.map((id) => all[id]).filter(Boolean) : t.players
+    const players = ids ? [...new Set(ids)].map((id) => all[id]).filter(Boolean) : t.players // 같은 선수가 두 번 들어가지 않게
     // 세부 포지션이 없는 선수는 팀 안 능력치 성향으로 역할을 정한다
     return { ...t, players: inferRoles(players.map(withMods)) }
   })
@@ -21,3 +21,6 @@ export function effectiveTeams(baseTeams, save) {
 export function teamOfPlayer(teams, id) {
   return teams.find((t) => t.players.some((p) => p.id === id))?.id ?? null
 }
+
+/** "이인규 (축구 선수)" 같은 위키 표기에서 괄호 설명을 뗀다 */
+export const cleanName = (n = '') => n.replace(/\s*\([^)]*\)\s*$/, '').trim() || n

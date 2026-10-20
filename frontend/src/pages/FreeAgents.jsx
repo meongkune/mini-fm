@@ -1,4 +1,4 @@
-// FA 시장: 위키데이터 K리그 한국 선수 + 방출·계약 만료 선수. 연봉·기간을 제시하면 선수가 판단한다
+// FA 시장: K리그 한국 선수 + 방출·계약 만료 선수. 연봉·기간을 제시하면 선수가 판단한다
 import { useEffect, useMemo, useState } from 'react'
 import { loadSeasonFile } from '../api.js'
 import { Flag } from '../components/Badges.jsx'
@@ -77,7 +77,7 @@ function OfferSheet({ player, ask, onClose, offerFA }) {
       <div className="sheet" onClick={(e) => e.stopPropagation()}>
         <div className="sheet-head"><h3>{player.name} 영입 제안</h3><button className="btn ghost small" onClick={onClose}>닫기</button></div>
         <p className="small muted" style={{ marginTop: 0 }}>{player.nameEn && player.nameEn !== player.name ? `${player.nameEn} · ` : ''}{player.age}세 · {player.role || player.pos} · OVR {playerOvr(player)} · {player.lastClub || 'FA'}</p>
-        <label className="look-slider"><span>연봉 {eur(wage)}/년 <em className="muted">(요구 수준의 {pct}%)</em></span>
+        <label className="offer-slider"><span>연봉 {eur(wage)}/년 <em className="muted">(요구 수준의 {pct}%)</em></span>
           <input type="range" min={60} max={180} step={5} value={pct} onChange={(e) => { setPct(Number(e.target.value)); setRes(null) }} />
         </label>
         <div className="row">

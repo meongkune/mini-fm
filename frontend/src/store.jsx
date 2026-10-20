@@ -4,7 +4,7 @@ import { playerOvrOf } from './engine/engine.js'
 import { available } from './engine/match.js'
 import { assignSlots, buildSlots, fitOf, shapeNeeds } from './engine/formation.js'
 import { applyCupMatch, applyRound, customTalk, engineStatus, news, playerTalk, resolveTalk } from './game/season.js'
-import { effectiveTeams } from './game/roster.js'
+import { cleanName, effectiveTeams } from './game/roster.js'
 import { evaluateTrade, executeTrade, windowState } from './game/trade.js'
 import { boardMidCheck, newBoard, nextSeason, seasonLabel, seasonReview } from './game/career.js'
 import { COMPS, CUP_LEAGUES, buildCups, cupKey, cupStatus, dueMatchday, myCupFixture, playMatchday } from './game/cup.js'
@@ -49,7 +49,11 @@ const EMPTY_SAVE = {
 
 function loadSave() {
   try {
-    return { ...EMPTY_SAVE, ...JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}') }
+    const s = { ...EMPTY_SAVE, ...JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}') }
+    // 예전 버그로 생긴 중복 영입·괄호 붙은 이름 정리
+    if (s.rosters) s.rosters = Object.fromEntries(Object.entries(s.rosters).map(([k, ids]) => [k, [...new Set(ids)]]))
+    if (s.signed) s.signed = s.signed.map((p) => ({ ...p, name: cleanName(p.name) }))
+    return s
   } catch {
     return EMPTY_SAVE
   }
@@ -407,6 +411,7 @@ export function GameProvider({ children }) {
       },
       /** FA 영입 제안 */
       offerFA(p, years, offerWage) {
+        if (teams.some((t) => t.players.some((x) => x.id === p.id))) return { ok: false, reason: '이미 구단에 소속된 선수입니다.' }
         const size = myTeam.players.length
         if (size >= ROSTER_MAX) return { ok: false, reason: `로스터가 가득 찼습니다 (${ROSTER_MAX}명). 먼저 방출하세요.` }
         const top = myTeam.players.map(playerOvr).sort((a, b) => b - a).slice(0, 11)
@@ -415,6 +420,7 @@ export function GameProvider({ children }) {
         const fee = Math.round(offerWage * 0.5 * 10) / 10 // 계약금
         setSave((s) => {
           const rosters = s.rosters || Object.fromEntries(teams.map((t) => [t.id, t.players.map((x) => x.id)]))
+          if (Object.values(rosters).some((ids) => ids.includes(p.id))) return s // 연속 클릭으로 두 번 들어오는 것 방지
           const used = new Set(myTeam.players.map((x) => x.number))
           const number = Array.from({ length: 98 }, (_, i) => i + 2).find((n) => !used.has(n))
           const signedP = { ...p, number, from: undefined }
@@ -422,7 +428,7 @@ export function GameProvider({ children }) {
             ...s,
             signed: [...(s.signed || []).filter((x) => x.id !== p.id), signedP],
             released: (s.released || []).filter((x) => x.id !== p.id),
-            rosters: { ...rosters, [s.teamId]: [...rosters[s.teamId], p.id] },
+            rosters: { ...rosters, [s.teamId]: [...rosters[s.teamId].filter((id) => id !== p.id), p.id] },
             contracts: { ...s.contracts, [p.id]: { until: (s.seasonNo || 1) + years - 1, wage: offerWage } },
             finance: { ...s.finance, cash: Math.round((s.finance.cash - fee) * 10) / 10 },
             status: { ...s.status, [p.id]: { morale: 72, cond: 100 } },
