@@ -5,12 +5,12 @@ on:
   workflow_dispatch:
     inputs:
       competition:
-        description: '리그 (PL=프리미어리그, PD=라리가, BL1=분데스리가, SA=세리에 A, FL1=리그 1)'
+        description: '리그 (PL=프리미어리그, PD=라리가, BL1=분데스리가, SA=세리에 A, FL1=리그 1, DED=에레디비시, PPL=포르투갈, ELC=챔피언십, BSA=브라질)'
         type: choice
-        options: [PL, PD, BL1, SA, FL1]
+        options: [PL, PD, BL1, SA, FL1, DED, PPL, ELC, BSA]
         default: PL
       season:
-        description: '시즌 시작 연도 (예: 2025 → 2025-26 시즌)'
+        description: '시즌 시작 연도 (예: 2025 → 2025-26 시즌, 브라질은 2025 시즌)'
         type: string
         default: '2025'
       make_default:
