@@ -9,7 +9,7 @@ import MatchPitch from './MatchPitch.jsx'
 import NeedTeam from './NeedTeam.jsx'
 import { MENTALITY, OptionGroup, PRESSING } from './Tactics.jsx'
 
-const SPEEDS = { '보통': 220, '빠르게': 70 }
+const SPEEDS = { '1x': 220, '3x': 70 }
 // 상황별로 1분이 흐르는 시간 배수 — 슈팅·골 장면은 천천히 보여준다
 const TICK_MULT = { build: 1, card: 2.5, miss: 4.5, save: 4.5, goal: 10 }
 const POS_ORDER = { GK: 0, DF: 1, MF: 2, FW: 3 }
@@ -22,7 +22,7 @@ export default function Match() {
   const rerender = () => setVersion((v) => v + 1)
   const [phase, setPhase] = useState('pre') // pre → live → ht → live → ft
   const [paused, setPaused] = useState(false)
-  const [speed, setSpeed] = useState('보통')
+  const [speed, setSpeed] = useState('1x')
   const [sheet, setSheet] = useState(null) // 'subs' | 'tactics'
   const [interrupt, setInterrupt] = useState(null)
   const [talk, setTalk] = useState(null)
@@ -193,13 +193,13 @@ export default function Match() {
         {phase === 'live' && (
           <div className="ctrl">
             <button className="btn small" onClick={() => setPaused((p) => !p)}>{paused ? '▶ 재개' : '⏸ 멈춤'}</button>
-            <button className="btn small ghost" onClick={() => { setPaused(true); setSheet('subs') }}>🔁 교체 {mySide.subsLeft}</button>
+            <button className="btn small ghost" onClick={() => { setPaused(true); setSheet('subs') }}>🔁 {mySide.subsLeft}</button>
             <button className="btn small ghost" onClick={() => { setPaused(true); setSheet('tactics') }}>📋 전술</button>
             <span className="grow" />
             {Object.keys(SPEEDS).map((s) => (
               <button key={s} className={`chip ${speed === s ? 'on' : ''}`} onClick={() => setSpeed(s)}>{s}</button>
             ))}
-            <button className="chip" onClick={skip}>⏭</button>
+            <button className="chip" onClick={skip} aria-label="하프·경기 끝까지 건너뛰기">⏭</button>
           </div>
         )}
 

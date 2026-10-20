@@ -673,3 +673,79 @@ html.framed body { overflow: hidden; height: 100vh; }
 .pick:disabled { opacity: .45; cursor: default; }
 .pick-go { font-size: .72rem; font-weight: 900; color: var(--accent); }
 .screen .sheet-wrap .sheet { max-width: none; }
+
+/* ---------- 리그 (포털 스포츠 순위 화면 스타일) ---------- */
+.tabs-line { display: flex; border-bottom: 1px solid var(--line); margin: 0 -14px 12px; padding: 0 14px; position: sticky; top: calc(58px + var(--safe-top)); z-index: 5; background: var(--bg); }
+.tabs-line button { flex: 1; background: none; border: 0; color: var(--muted); font: inherit; font-weight: 800; font-size: .9rem; padding: 11px 4px; cursor: pointer; border-bottom: 2.5px solid transparent; margin-bottom: -1px; }
+.tabs-line button.on { color: var(--text); border-bottom-color: var(--accent); }
+.card.flush { padding: 0; overflow: hidden; }
+.crest-sm { flex: none; display: inline-grid; place-items: center; border-radius: 6px; background: var(--c); color: var(--ink); font-size: .5rem; font-weight: 900; letter-spacing: .2px; box-shadow: inset 0 -2px 0 rgba(0, 0, 0, .2); vertical-align: middle; }
+
+.st-scroll { overflow-x: auto; scrollbar-width: none; }
+.st-scroll::-webkit-scrollbar { display: none; }
+.st { border-collapse: separate; border-spacing: 0; width: max-content; min-width: 100%; font-size: .82rem; font-variant-numeric: tabular-nums; }
+.st th { font-size: .68rem; font-weight: 700; color: var(--muted); padding: 9px 8px; background: var(--panel-2); white-space: nowrap; }
+.st td { padding: 9px 8px; text-align: center; border-top: 1px solid rgba(255, 255, 255, .05); white-space: nowrap; }
+.st .sticky { position: sticky; left: 0; z-index: 1; text-align: left; background: var(--panel); min-width: 128px; box-shadow: 1px 0 0 var(--line); }
+.st th.sticky { background: var(--panel-2); }
+.st td.sticky { display: flex; align-items: center; gap: 7px; }
+.st-rank { position: relative; width: 20px; text-align: center; font-weight: 800; }
+.st-rank[style]::before { content: ''; position: absolute; left: -8px; top: -3px; bottom: -3px; width: 3px; border-radius: 2px; background: var(--zone); }
+.st-name { font-weight: 700; }
+.st .pts { font-weight: 900; color: var(--text); }
+.st th.pts { color: var(--accent); }
+.st .plus { color: #4ade80; }
+.st .minus { color: #f87171; }
+.st tr.me td { background: rgba(124, 92, 255, .16); }
+.st tr.me td.sticky { background: #2a2350; }
+.form5 { display: inline-flex; gap: 3px; }
+.f5 { display: grid; place-items: center; width: 19px; height: 19px; border-radius: 50%; font-size: .58rem; font-style: normal; font-weight: 900; color: #fff; }
+.f5.W { background: #2563eb; }
+.f5.D { background: #6b7280; }
+.f5.L { background: #dc2626; }
+.zone-legend.pad { padding: 10px 14px 12px; margin: 0; border-top: 1px solid var(--line); }
+
+.chips-scroll { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; margin-bottom: 12px; padding-bottom: 2px; }
+.chips-scroll::-webkit-scrollbar { display: none; }
+.chips-scroll .chip { flex: none; }
+
+.podium { display: grid; grid-template-columns: 1fr 1.12fr 1fr; align-items: end; gap: 8px; margin-bottom: 12px; }
+.pod { position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 14px 6px 10px; border-radius: 14px; text-align: center; color: var(--tier-ink); background: var(--tier-bg); box-shadow: 0 8px 18px rgba(0, 0, 0, .35), inset 0 1px 0 rgba(255, 255, 255, .35); min-width: 0; }
+.pod.tier-elite { --tier-bg: linear-gradient(160deg, #a58bff 0%, #6a4cf0 48%, #3a2a9e 100%); --tier-ink: #fff; }
+.pod.tier-gold { --tier-bg: linear-gradient(160deg, #fbe7a1 0%, #e6bb52 50%, #b5862a 100%); --tier-ink: #3a2a00; }
+.pod.tier-silver { --tier-bg: linear-gradient(160deg, #f4f6fa 0%, #c6cad4 52%, #8d93a1 100%); --tier-ink: #22252c; }
+.pod.tier-bronze { --tier-bg: linear-gradient(160deg, #f0c09c 0%, #c98b5a 52%, #8f5a35 100%); --tier-ink: #351a07; }
+.pod-1 { padding-top: 22px; }
+.pod.me { outline: 2px solid #fff; outline-offset: 2px; }
+.pod-rank { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font-size: .78rem; font-weight: 900; background: #14111f; color: #fff; border: 2px solid currentColor; }
+.pod-1 .pod-rank { background: #f5c542; color: #3a2a00; border-color: #fff; width: 28px; height: 28px; top: -12px; }
+.pod-name { font-size: .86rem; font-weight: 900; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pod-team { font-size: .66rem; font-weight: 700; opacity: .8; }
+.pod-val { font-size: 1.5rem; font-weight: 900; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.pod-val small { font-size: .7rem; margin-left: 2px; }
+
+.pr { width: 100%; border-collapse: collapse; font-size: .82rem; font-variant-numeric: tabular-nums; }
+.pr th { font-size: .68rem; color: var(--muted); font-weight: 700; padding: 9px 8px; background: var(--panel-2); }
+.pr td { padding: 8px; text-align: center; border-top: 1px solid rgba(255, 255, 255, .05); }
+.pr .left { text-align: left; }
+.pr-rank { width: 34px; font-weight: 800; color: var(--muted); }
+.pr-player { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.pr-player strong { display: block; font-size: .84rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 190px; }
+.pr-player small { display: block; font-size: .66rem; color: var(--muted); }
+.pr-val { font-weight: 900; font-size: .95rem; width: 58px; }
+.pr tr.me td { background: rgba(124, 92, 255, .16); }
+
+.round-nav { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
+.round-nav .btn { flex: none; width: 40px; }
+.round-nav strong { display: flex; align-items: center; gap: 6px; }
+.round-nav em { font-style: normal; }
+.fx { display: grid; grid-template-columns: 1fr 64px 1fr; align-items: center; gap: 6px; padding: 11px 12px; border-top: 1px solid rgba(255, 255, 255, .05); font-size: .84rem; }
+.fx:first-child { border-top: 0; }
+.fx.me { background: rgba(124, 92, 255, .14); }
+.fx-team { display: flex; align-items: center; gap: 6px; font-weight: 700; min-width: 0; color: var(--muted); }
+.fx-team.home { justify-content: flex-end; }
+.fx-team.win { color: var(--text); font-weight: 900; }
+.fx-score { text-align: center; font-weight: 900; font-size: 1rem; font-variant-numeric: tabular-nums; }
+.fx-goals { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 64px 1fr; font-size: .66rem; color: var(--muted); }
+.fx-goals span:first-child { text-align: right; }
+.fx-goals span:last-child { grid-column: 3; }

@@ -212,8 +212,8 @@ export function step(match, ctx, { withEvents = true } = {}) {
   const shoot = (long) => {
     const shooters = r[atk].xi.filter((p) => p.pos !== 'GK')
     if (!shooters.length) return
-    const w = long ? { FW: 1.2, MF: 2.0, DF: 0.6 } : { FW: 3.0, MF: 1.4, DF: 0.35 }
-    const shooter = rng.weighted(shooters, shooters.map((p) => w[p.pos] * p.att))
+    const w = long ? { FW: 1.2, MF: 1.7, DF: 0.6 } : { FW: 3.0, MF: 1.15, DF: 0.55 }
+    const shooter = rng.weighted(shooters, shooters.map((p) => w[p.pos] * p.att * p.att / 70)) // 공격력이 높은 선수일수록 슈팅 기회가 많다
     const helpers = shooters.filter((p) => p.id !== shooter.id)
     const assister = helpers.length && rng.random() < (long ? 0.35 : 0.78) ? rng.weighted(helpers, helpers.map((p) => ({ MF: 2.2, FW: 1.6, DF: 0.7 })[p.pos] * p.att)) : null
     S[atk].shots++
