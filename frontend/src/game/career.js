@@ -52,7 +52,7 @@ export function seasonReview(save, standings) {
   const pos = standings.findIndex((s) => s.id === save.teamId) + 1
   const success = pos <= b.pos
   const fails = success ? 0 : (b.fails || 0) + 1
-  const sacked = fails >= 2
+  const sacked = false // 구단주 겸 감독: 보드 경질 대신 파산이 게임 오버
   return { pos, success, fails, sacked, target: b }
 }
 
@@ -149,10 +149,10 @@ export function nextSeason(save, { teams, baseTeams, standings, country, baseSea
   const usedNums = new Set(my.players.map((p) => p.number))
   const youth = youthPool
   const newcomers = []
-  for (let i = 0; i < 2; i++) {
+  for (let i = 0; i < (save.owner?.youthBoost ? 3 : 2); i++) {
     const number = [30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43].find((n) => !usedNums.has(n)) ?? 50 + i
     usedNums.add(number)
-    const p = { ...makeYouth(save.teamId, i, 54 + Math.round(rnd(`${save.teamId}${no}l${i}`) * 10), 16 + (i % 2)), number }
+    const p = { ...makeYouth(save.teamId, i, (save.owner?.youthBoost ? 60 : 54) + Math.round(rnd(`${save.teamId}${no}l${i}`) * 10), 16 + (i % 2)), number }
     youth.push(p)
     newcomers.push(p)
     rosters[save.teamId] = [...rosters[save.teamId], p.id]

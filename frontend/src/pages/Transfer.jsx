@@ -1,4 +1,6 @@
 import { useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
+import FreeAgents from './FreeAgents.jsx'
 import { Crest, Flag } from '../components/Badges.jsx'
 import NeedTeam from './NeedTeam.jsx'
 import { CondBar } from '../components/Rating.jsx'
@@ -11,7 +13,8 @@ const stars = (n) => '★'.repeat(n) + '☆'.repeat(5 - n)
 
 export default function Transfer() {
   const { myTeam, teams, teamsById, status, save, update, proposeTrade, doTrade, transferWindow, totalRounds } = useGame()
-  const [tab, setTab] = useState('buy')
+  const [params] = useSearchParams()
+  const [tab, setTab] = useState(params.get('tab') || 'buy')
   const [pos, setPos] = useState('전체')
   const [teamFilter, setTeamFilter] = useState('all')
   const [sort, setSort] = useState('ovr')
@@ -84,6 +87,7 @@ export default function Transfer() {
         <p className="notice">지금은 이적 시장이 닫혀 있습니다. {transferWindow.next !== null ? `${transferWindow.next + 1}라운드부터 겨울 이적 시장이 열립니다.` : '시즌이 끝나고 다음 시즌 초반에 다시 열립니다.'} 선수 탐색은 계속할 수 있습니다.</p>
       )}
 
+      {tab !== 'fa' && (<>
       {/* 협상 테이블 */}
       <div className="card deal">
         <div className="deal-cols">
@@ -123,12 +127,16 @@ export default function Transfer() {
           </button>
         </div>
       </div>
+      </>)}
       {toast && <p className="toast">{toast}</p>}
 
       <div className="tabs-line">
         <button className={tab === 'buy' ? 'on' : ''} onClick={() => setTab('buy')}>영입 대상 찾기</button>
         <button className={tab === 'sell' ? 'on' : ''} onClick={() => setTab('sell')}>내 선수 내보내기</button>
+        <button className={tab === 'fa' ? 'on' : ''} onClick={() => setTab('fa')}>FA 시장</button>
       </div>
+
+      {tab === 'fa' && <FreeAgents />}
 
       {tab === 'buy' && (
         <>

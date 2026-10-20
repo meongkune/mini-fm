@@ -1037,3 +1037,40 @@ html.framed body { overflow: hidden; height: 100vh; }
 .say-res.bad { border-color: var(--bad); }
 .say-res p { margin: 4px 0; font-size: .84rem; }
 .say-tags { display: flex; flex-wrap: wrap; gap: 4px; }
+
+/* ---------- 구단주 ---------- */
+.good-text { color: #86efac; }
+.owner-top { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+.owner-top .card { margin: 0; display: grid; gap: 3px; }
+.owner-top span { font-size: .7rem; color: var(--muted); font-weight: 700; }
+.owner-top strong { font-size: 1.4rem; font-weight: 900; font-variant-numeric: tabular-nums; }
+.owner-top small { font-size: .66rem; color: var(--muted); }
+.own-cash.neg strong { color: #fca5a5; }
+.own-fans.bad strong, .own-fans.worst strong { color: #fca5a5; }
+.ledger-items { display: flex; flex-wrap: wrap; gap: 6px; font-size: .72rem; font-weight: 700; }
+.ledger-items .plus { color: #86efac; } .ledger-items .minus { color: #fca5a5; }
+.ledger-chart { display: flex; align-items: flex-end; gap: 3px; height: 50px; margin-top: 10px; border-bottom: 1px solid var(--line); }
+.ledger-chart i { flex: 1; border-radius: 3px 3px 0 0; min-height: 2px; }
+.ledger-chart i.plus { background: #22c55e; } .ledger-chart i.minus { background: #ef4444; }
+.decisions { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.decision { display: grid; gap: 3px; text-align: left; padding: 9px 10px; border-radius: 12px; border: 1px solid var(--line); background: var(--panel-2); color: var(--text); font: inherit; cursor: pointer; }
+.decision strong { font-size: .8rem; }
+.decision em { font-style: normal; font-size: .62rem; font-weight: 800; color: var(--muted); }
+.decision.risk-높음 { border-left: 3px solid #ef4444; } .decision.risk-중간 { border-left: 3px solid #eab308; } .decision.risk-낮음 { border-left: 3px solid #22c55e; }
+.decision:disabled { opacity: .45; cursor: default; }
+.contract-list { list-style: none; margin: 0; padding: 0; }
+.contract-row { width: 100%; display: flex; align-items: center; gap: 8px; padding: 8px 2px; border: 0; border-top: 1px solid rgba(255, 255, 255, .05); background: none; color: var(--text); font: inherit; font-size: .8rem; cursor: pointer; text-align: left; }
+.ct-wage { flex: none; color: var(--muted); font-size: .72rem; width: 70px; text-align: right; }
+.ct-left { flex: none; width: 62px; text-align: right; font-size: .7rem; font-weight: 800; }
+.ct-left.warn { color: #fca5a5; }
+.contract-box { margin-top: 12px; padding: 10px 12px; border-radius: 12px; background: var(--panel-2); display: grid; gap: 8px; }
+.contract-box h4 { margin: 0; }
+.ct-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; text-align: center; }
+.ct-grid span { display: block; font-size: .62rem; color: var(--muted); }
+.ct-grid b { font-size: .86rem; }
+.renew { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.owner-card { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; text-align: center; color: var(--text); padding: 12px; }
+.owner-card span { display: block; font-size: .62rem; color: var(--muted); font-weight: 700; }
+.owner-card strong { font-size: 1rem; font-weight: 900; }
+.owner-card small { display: block; font-size: .6rem; color: var(--muted); }
+.owner-card em { grid-column: 1 / -1; font-style: normal; font-size: .72rem; color: var(--accent); font-weight: 800; }

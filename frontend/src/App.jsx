@@ -11,6 +11,7 @@ import Admin from './pages/Admin.jsx'
 import Inbox from './pages/Inbox.jsx'
 import Transfer from './pages/Transfer.jsx'
 import Manager from './pages/Manager.jsx'
+import Club from './pages/Club.jsx'
 import ManagerAvatar from './components/ManagerAvatar.jsx'
 
 // 하단 탭 바: [경로, 라벨, 아이콘, 정확히 일치]
@@ -20,7 +21,7 @@ const NAV = [
   ['/tactics', '전술', '📋'],
   ['/match', '경기', '⚽'],
   ['/league', '리그', '🏆'],
-  ['/deploy', '상태', '📡'],
+  ['/club', '구단', '🏛️'],
 ]
 
 // 페이지에서 오류가 나도 앱 전체가 빈 화면이 되지 않도록 메시지와 복구 버튼을 보여준다
@@ -96,6 +97,7 @@ export default function App() {
             <Route path="/inbox" element={<Inbox />} />
             <Route path="/transfer" element={<Transfer />} />
             <Route path="/manager" element={<Manager />} />
+            <Route path="/club" element={<Club />} />
             <Route path="*" element={<div className="card">페이지를 찾을 수 없습니다.</div>} />
           </Routes>
           </PageErrorBoundary>

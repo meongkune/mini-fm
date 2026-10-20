@@ -7,10 +7,12 @@ import Rating, { CondBar } from './Rating.jsx'
 import { PLAYER_TALKS, moraleLabel } from '../game/season.js'
 import { personality, personalityText } from '../game/speech.js'
 import SayBox from './SayBox.jsx'
+import { eur, yearsLeft } from '../game/finance.js'
 import { useGame } from '../store.jsx'
 
 export default function PlayerSheet({ player, onClose, inLineup, onToggle }) {
-  const { status, save, talkTo, myTeam, teams, sayTo } = useGame()
+  const { status, save, talkTo, myTeam, teams, sayTo, contractOf, renewalAsk, renew, releaseCost, release, forceSell } = useGame()
+  const [deal, setDeal] = useState(null)
   const [reply, setReply] = useState('')
   const [profile, setProfile] = useState(null)
   useEffect(() => {
@@ -64,6 +66,10 @@ export default function PlayerSheet({ player, onClose, inLineup, onToggle }) {
                 {inLineup ? '선발에서 빼기' : st.inj > 0 || st.susp > 0 ? '출전 불가' : '선발에 넣기'}
               </button>
             )}
+            <ContractBox player={player} save={save} contractOf={contractOf} renewalAsk={renewalAsk} renew={renew} releaseCost={releaseCost}
+              onRelease={() => { if (confirm(`${player.name}을(를) 방출할까요? 위약금 ${eur(releaseCost(player))}`)) { release(player); onClose() } }}
+              onSell={() => { if (confirm(`${player.name}을(를) 감독·선수 의사와 상관없이 즉시 팔까요? (가치의 60~120%)`)) { setDeal(forceSell(player)) } }} />
+            {deal && <p className="notice ok">💸 {deal.buyer}에 {eur(deal.fee)}에 팔았습니다. <button className="linkish" onClick={onClose}>닫기</button></p>}
             <h4>개별 면담 <span className="muted small">{talked ? '이번 라운드 면담 완료' : '라운드당 1회 · 최근 폼에 맞는 말을 해야 효과가 있습니다'}</span></h4>
             <div className="options">
               {PLAYER_TALKS.map(([k, label, desc]) => (
@@ -104,6 +110,38 @@ function WikiProfile({ profile }) {
       </div>
       {text && <p className="wiki-text">{text.length > 320 ? `${text.slice(0, 320)}…` : text}</p>}
       <a className="wiki-src" href={profile.koUrl || profile.url} target="_blank" rel="noreferrer">출처: 위키백과 (CC BY-SA) · 사진: 위키미디어 공용 ↗</a>
+    </div>
+  )
+}
+
+// 계약: 남은 기간·연봉, 재계약 제안, 방출, 강제 매각
+function ContractBox({ player, save, contractOf, renewalAsk, renew, onRelease, onSell, releaseCost }) {
+  const c = contractOf(player)
+  const left = yearsLeft(save, c)
+  const ask = renewalAsk(player)
+  const [years, setYears] = useState(Math.min(2, ask.maxYears || 1))
+  const [done, setDone] = useState(false)
+  return (
+    <div className="contract-box">
+      <h4>계약</h4>
+      <div className="ct-grid">
+        <div><span>연봉</span><b>{eur(c.wage)}</b></div>
+        <div><span>남은 기간</span><b className={left <= 1 ? 'bad-text' : ''}>{left <= 1 ? '이번 시즌까지' : `${left}년`}</b></div>
+        <div><span>방출 위약금</span><b>{eur(releaseCost(player))}</b></div>
+      </div>
+      {ask.refuse ? <p className="small bad-text">재계약 불가: {ask.refuse}</p> : !done ? (
+        <div className="renew">
+          <span className="small">재계약 요구 연봉 <b>{eur(ask.wage)}</b>/년 ·</span>
+          <select value={years} onChange={(e) => setYears(Number(e.target.value))}>
+            {Array.from({ length: ask.maxYears }, (_, i) => i + 1).map((y) => <option key={y} value={y}>{y}년 연장</option>)}
+          </select>
+          <button className="btn small" onClick={() => { renew(player, years, ask.wage); setDone(true) }}>재계약</button>
+        </div>
+      ) : <p className="small good-text">✍️ 재계약 완료</p>}
+      <div className="row">
+        <button className="btn ghost small" onClick={onRelease}>🚪 방출</button>
+        <button className="btn ghost small" onClick={onSell}>💸 강제 매각</button>
+      </div>
     </div>
   )
 }

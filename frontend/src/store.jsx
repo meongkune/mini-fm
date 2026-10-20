@@ -3,11 +3,14 @@ import { api, loadSeasonFile } from './api.js'
 import { playerOvrOf } from './engine/engine.js'
 import { available } from './engine/match.js'
 import { assignSlots, buildSlots, fitOf, shapeNeeds } from './engine/formation.js'
-import { applyCupMatch, applyRound, customTalk, engineStatus, playerTalk, resolveTalk } from './game/season.js'
+import { applyCupMatch, applyRound, customTalk, engineStatus, news, playerTalk, resolveTalk } from './game/season.js'
 import { effectiveTeams } from './game/roster.js'
 import { evaluateTrade, executeTrade, windowState } from './game/trade.js'
 import { boardMidCheck, newBoard, nextSeason, seasonLabel, seasonReview } from './game/career.js'
 import { CUP_LEAGUES, buildCup, cupKey, cupStatus, dueMatchday, myCupFixture, playMatchday } from './game/cup.js'
+import { ROSTER_MAX, checkBankruptcy, contractOf, eur, faDecision, newFinance, prizeMoney, releaseCost, renewalAsk, settleMatch, wageFor } from './game/finance.js'
+import { afterMatchOwner, decide } from './game/owner.js'
+import { valueOf } from './game/trade.js'
 
 // 시즌 진행 상황은 서버가 아니라 브라우저 localStorage에 저장한다 (서버는 stateless).
 // v2: 프리미어리그 구단 데이터로 바뀌면서 이전 저장(가상 구단 ID)과 호환되지 않아 키를 올림
@@ -34,6 +37,12 @@ const EMPTY_SAVE = {
   mods: {}, // 성장·노화로 바뀐 능력치
   youth: [], // 유스 입단 선수
   history: [], // 지난 시즌 기록
+  finance: null, // 구단 재정 { cash, ticket, last, ledger }
+  fans: 60, // 팬 민심 0~100
+  owner: {}, // 구단주 결정 상태
+  contracts: {}, // 선수 계약 { until(시즌 번호), wage(€M/년) }
+  signed: [], // FA로 영입한 선수
+  released: [], // 방출한 선수 (다시 FA 시장에)
   board: null, // 보드 목표·신뢰도
 }
 
@@ -170,6 +179,23 @@ export function GameProvider({ children }) {
     if (data && save.teamId && !save.board) setSave((s) => ({ ...s, board: newBoard(effectiveTeams(data.teams, s), s.teamId) }))
   }, [data, save.teamId, save.board])
 
+  // 구단주 모드: 재정 시작, 내 선수 모두에게 계약을 고정 (없으면 생성)
+  useEffect(() => {
+    if (!data || !save.teamId) return
+    const team = effectiveTeams(data.teams, save).find((t) => t.id === save.teamId)
+    if (!team) return
+    const missing = team.players.filter((p) => !save.contracts?.[p.id])
+    if (save.finance?.base && !missing.length) return
+    setSave((s) => {
+      const contracts = { ...(s.contracts || {}) }
+      for (const p of missing) contracts[p.id] = contractOf(s, p, data.leagueId)
+      const fresh = newFinance(team, data.leagueId)
+      // 예전 재정(수입 기준 없음)은 수입 기준만 채운다
+      const finance = s.finance ? { ...s.finance, base: s.finance.base || fresh.base, cash: s.finance.base ? s.finance.cash : fresh.cash } : fresh
+      return { ...s, contracts, finance, fans: s.fans ?? 60 }
+    })
+  }, [data, save.teamId, save.rosters, save.signed?.length, save.youth?.length, save.finance?.base ? 1 : 0])
+
   // 유럽 대항전: 시즌마다 참가팀을 뽑고(다른 리그 파일을 읽어서) 대진을 만든다
   const seasonNo = save.seasonNo || 1
   useEffect(() => {
@@ -266,6 +292,21 @@ export function GameProvider({ children }) {
           if (r.review.sacked) {
             return { ...EMPTY_SAVE, league: s.league, season: s.season, sacked: { team: s.teamId, history: r.save.history } }
           }
+          // 구단주 결산: 순위 상금, 사채 상환, 계약 만료 선수 이탈
+          const pos = standingsNow.findIndex((x) => x.id === s.teamId) + 1
+          const prize = prizeMoney(pos, standingsNow.length, s.finance?.base || 40)
+          const repay = Math.min(s.owner?.debt || 0, Math.round(((s.owner?.debt || 0) / 2) * 10) / 10)
+          const finance = { ...(r.save.finance || {}), cash: Math.round(((r.save.finance?.cash || 0) + prize - repay) * 10) / 10 }
+          const owner = { ...(r.save.owner || {}), debt: Math.round(((s.owner?.debt || 0) - repay) * 10) / 10, used: {}, youthBoost: false, sponsorBoost: 0 }
+          const leaving = Object.entries(s.contracts || {}).filter(([id, c]) => c.until < (s.seasonNo || 1) + 1 && r.save.rosters?.[s.teamId]?.includes(id)).map(([id]) => id)
+          const byIdNow = Object.fromEntries(teams.flatMap((t) => t.players).map((p) => [p.id, p]))
+          const rosters = { ...r.save.rosters, [s.teamId]: r.save.rosters[s.teamId].filter((id) => !leaving.includes(id)) }
+          const released = [...(s.released || []), ...leaving.map((id) => byIdNow[id]).filter(Boolean).map((p) => ({ ...p, from: s.teamId }))]
+          const closing = [
+            news(0, 'finance', `💼 시즌 결산: 상금 ${eur(prize)}`, `${pos}위 상금 ${eur(prize)}${repay ? ` · 사채 상환 ${eur(repay)}` : ''}. 현재 현금 ${eur(finance.cash)}.`),
+            ...(leaving.length ? [news(0, 'contract', `📄 계약 만료 ${leaving.length}명 이탈`, `${leaving.map((id) => byIdNow[id]?.name).join(', ')} 선수가 계약이 끝나 팀을 떠났습니다. FA 시장에서 다시 영입할 수 있습니다.`)] : []),
+          ]
+          r.save = { ...r.save, finance, owner, rosters, released, lineup: r.save.lineup.map((id) => (leaving.includes(id) ? null : id)), inbox: [...closing, ...(r.save.inbox || [])].slice(0, 80) }
           const nextTeams = effectiveTeams(data.teams, r.save)
           const mine = nextTeams.find((t) => t.id === s.teamId)
           const keep = Object.fromEntries(r.save.lineup.map((id, i) => [i, id]).filter(([, id]) => id && mine.players.some((p) => p.id === id)))
@@ -302,6 +343,89 @@ export function GameProvider({ children }) {
           return mark(executeTrade(s, teams, s.teamId, teamId, give, get), '트레이드가 성사됐습니다.')
         })
       },
+      /** 구단주 결정 실행 → { title, text, good } */
+      ownerDecide(key) {
+        const r = decide(save, key, { team: myTeam, leagueId: data.leagueId })
+        setSave(r.save)
+        return r
+      },
+      setTicket(ticket) { setSave((s) => ({ ...s, finance: { ...s.finance, ticket } })) },
+      contractOf: (p) => contractOf(save, p, data?.leagueId),
+      wageFor: (p) => wageFor(p, data?.leagueId),
+      renewalAsk: (p) => renewalAsk(save, p, data?.leagueId, status[p.id]),
+      /** 재계약 */
+      renew(p, years, wage) {
+        setSave((s) => ({
+          ...s,
+          contracts: { ...s.contracts, [p.id]: { until: (s.seasonNo || 1) + years, wage } },
+          status: { ...s.status, [p.id]: { ...(s.status?.[p.id] || {}), morale: Math.min(100, (s.status?.[p.id]?.morale ?? 60) + 6) } },
+          inbox: [news(s.round, 'contract', `✍️ ${p.name} 재계약`, `${years}년 연장, 연봉 ${eur(wage)}.`), ...(s.inbox || [])],
+        }))
+      },
+      releaseCost: (p) => releaseCost(save, p, data?.leagueId),
+      /** 방출: 위약금을 내고 FA로 내보낸다 */
+      release(p) {
+        const cost = releaseCost(save, p, data.leagueId)
+        setSave((s) => {
+          const rosters = s.rosters || Object.fromEntries(teams.map((t) => [t.id, t.players.map((x) => x.id)]))
+          return {
+            ...s,
+            rosters: { ...rosters, [s.teamId]: rosters[s.teamId].filter((id) => id !== p.id) },
+            lineup: s.lineup.map((id) => (id === p.id ? null : id)),
+            finance: { ...s.finance, cash: Math.round((s.finance.cash - cost) * 10) / 10 },
+            released: [...(s.released || []), { ...p, from: s.teamId }],
+            fans: Math.max(0, (s.fans ?? 60) - (playerOvr(p) >= 80 ? 4 : 0)),
+            inbox: [news(s.round, 'contract', `🚪 ${p.name} 방출`, `위약금 ${eur(cost)}을 내고 계약을 해지했습니다.`), ...(s.inbox || [])],
+          }
+        })
+      },
+      /** 강제 매각: 감독·선수 의사와 상관없이 AI 구단에 즉시 판다 (가치의 60~120%) */
+      forceSell(p) {
+        const others = teams.filter((t) => t.id !== save.teamId)
+        const buyer = others.sort((a, b) => a.players.filter((x) => x.pos === p.pos).length - b.players.filter((x) => x.pos === p.pos).length)[0]
+        const k = 0.6 + ((p.id.length * 7 + save.round * 13) % 60) / 100
+        const fee = Math.round(valueOf(p, status[p.id]) * k * 10) / 10
+        const star = [...myTeam.players].sort((a, b) => playerOvr(b) - playerOvr(a)).slice(0, 3).some((x) => x.id === p.id)
+        setSave((s) => {
+          const rosters = s.rosters || Object.fromEntries(teams.map((t) => [t.id, t.players.map((x) => x.id)]))
+          return {
+            ...s,
+            rosters: { ...rosters, [s.teamId]: rosters[s.teamId].filter((id) => id !== p.id), [buyer.id]: [...rosters[buyer.id], p.id] },
+            lineup: s.lineup.map((id) => (id === p.id ? null : id)),
+            finance: { ...s.finance, cash: Math.round((s.finance.cash + fee) * 10) / 10 },
+            fans: Math.max(0, (s.fans ?? 60) - (star ? 10 : 2)),
+            inbox: [news(s.round, 'trade', `💸 ${p.name} 강제 매각`, `${buyer.name}에 ${eur(fee)}을 받고 팔았습니다.${star ? ' 핵심 선수를 판 구단주에게 팬들이 분노합니다. (민심 -10)' : ''}`), ...(s.inbox || [])],
+          }
+        })
+        return { buyer: buyer.name, fee }
+      },
+      /** FA 영입 제안 */
+      offerFA(p, years, offerWage) {
+        const size = myTeam.players.length
+        if (size >= ROSTER_MAX) return { ok: false, reason: `로스터가 가득 찼습니다 (${ROSTER_MAX}명). 먼저 방출하세요.` }
+        const top = myTeam.players.map(playerOvr).sort((a, b) => b - a).slice(0, 11)
+        const d = faDecision(p, { offerWage, years, leagueId: data.leagueId, clubOvr: top.reduce((a, b) => a + b, 0) / top.length })
+        if (!d.ok) return d
+        const fee = Math.round(offerWage * 0.5 * 10) / 10 // 계약금
+        setSave((s) => {
+          const rosters = s.rosters || Object.fromEntries(teams.map((t) => [t.id, t.players.map((x) => x.id)]))
+          const used = new Set(myTeam.players.map((x) => x.number))
+          const number = Array.from({ length: 98 }, (_, i) => i + 2).find((n) => !used.has(n))
+          const signedP = { ...p, number, from: undefined }
+          return {
+            ...s,
+            signed: [...(s.signed || []).filter((x) => x.id !== p.id), signedP],
+            released: (s.released || []).filter((x) => x.id !== p.id),
+            rosters: { ...rosters, [s.teamId]: [...rosters[s.teamId], p.id] },
+            contracts: { ...s.contracts, [p.id]: { until: (s.seasonNo || 1) + years - 1, wage: offerWage } },
+            finance: { ...s.finance, cash: Math.round((s.finance.cash - fee) * 10) / 10 },
+            status: { ...s.status, [p.id]: { morale: 72, cond: 100 } },
+            fans: Math.min(100, (s.fans ?? 60) + (playerOvr(p) >= 75 ? 3 : 1)),
+            inbox: [news(s.round, 'trade', `✍️ FA 영입: ${p.name}`, `${years}년 계약, 연봉 ${eur(offerWage)}, 계약금 ${eur(fee)}.`), ...(s.inbox || [])],
+          }
+        })
+        return { ...d, fee }
+      },
       /** 직접 입력한 말로 면담 → 반응 결과 (itemId: 편지함 면담 요청에 대한 답) */
       sayTo(playerId, text, itemId = null) {
         const player = myTeam?.players.find((p) => p.id === playerId)
@@ -336,13 +460,22 @@ export function GameProvider({ children }) {
             const r = playMatchday(s.cup, md, allTeams, engineStatus(s, Object.values(allTeams)), { home: nextFixture.home, away: nextFixture.away, summary: mine.summary }, seasonNo)
             const mineIdx = nextFixture.isHome ? 0 : 1
             const opp = mineIdx === 0 ? nextFixture.awayTeam : nextFixture.homeTeam
-            return applyCupMatch({ ...s, cup: r.cup }, { myTeam, mineIdx, summary: mine.summary, label: `${cup.name} ${md.label}`, oppName: opp.name })
+            const after = applyCupMatch({ ...s, cup: r.cup }, { myTeam, mineIdx, summary: mine.summary, label: `${cup.name} ${md.label}`, oppName: opp.name })
+            const [gf, ga] = mineIdx === 0 ? mine.summary.score : [...mine.summary.score].reverse()
+            const money = settleMatch(after, { team: myTeam, leagueId: data.leagueId, home: nextFixture.isHome, result: Math.sign(gf - ga), totalRounds: data.schedule.length, cupStage: md.stage })
+            return afterMatchOwner({ ...after, ...money }, Math.sign(gf - ga))
           })
           return
         }
         setSave((s) => {
           const next = applyRound(s, { teamsById, schedule: data.schedule, myTeamId: s.teamId, mine })
-          return boardMidCheck(next, computeStandings(teams, next.results), data.schedule.length)
+          const mineIdx = mine.home === s.teamId ? 0 : 1
+          const [gf, ga] = mineIdx === 0 ? mine.summary.score : [...mine.summary.score].reverse()
+          const money = settleMatch(next, { team: myTeam, leagueId: data.leagueId, home: mineIdx === 0, result: Math.sign(gf - ga), totalRounds: data.schedule.length })
+          const owned = afterMatchOwner({ ...next, ...money }, Math.sign(gf - ga))
+          const b = checkBankruptcy(owned, data.leagueId)
+          if (b.bankrupt) return { ...EMPTY_SAVE, league: s.league, season: s.season, sacked: { team: s.teamId, history: s.history, bankrupt: true, cash: b.save.finance.cash } }
+          return b.save
         })
       },
     }

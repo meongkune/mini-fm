@@ -6,7 +6,7 @@ import { inferRoles } from '../engine/formation.js'
 export function effectiveTeams(baseTeams, save) {
   const all = {}
   for (const t of baseTeams) for (const p of t.players) all[p.id] = p
-  for (const p of save.youth || []) all[p.id] = p
+  for (const p of [...(save.youth || []), ...(save.signed || [])]) all[p.id] = p
   const mods = save.mods || {}
   const withMods = (p) => (mods[p.id] ? { ...p, ...mods[p.id] } : p)
   return baseTeams.map((t) => {

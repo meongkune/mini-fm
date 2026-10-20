@@ -45,6 +45,7 @@ export default function Match() {
     const oppCfg = {} // 상대는 구단 고유 전형 + 자동 배치
     matchRef.current = createMatch({ home: ctx.teams[0], away: ctx.teams[1], homeCfg: isHome ? myCfg : oppCfg, awayCfg: isHome ? oppCfg : myCfg, status, myIdx })
     matchRef.current.key = fixtureKey
+    if ((save.owner?.campUntil ?? -1) >= save.round) matchRef.current.talk[myIdx] += 0.025 // 구단주 지옥 훈련 효과
     setPhase('pre'); setTalk(null); setInterrupt(null); setPaused(false)
     rerender()
   }, [fixtureKey, save.lineup.join(), save.formation])

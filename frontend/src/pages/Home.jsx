@@ -4,6 +4,8 @@ import PlayerCard from '../components/PlayerCard.jsx'
 import PlayerSheet from '../components/PlayerSheet.jsx'
 import { Crest } from '../components/Badges.jsx'
 import ManagerAvatar from '../components/ManagerAvatar.jsx'
+import { eur } from '../game/finance.js'
+import { fanLabel } from '../game/owner.js'
 import { ink, playerOvr, short, teamOvr, useGame } from '../store.jsx'
 
 // 전력 순위에 따른 한 줄 소개 (팀 수와 관계없이 4등분)
@@ -28,8 +30,8 @@ export default function Home() {
       <section>
         {save.sacked && (
           <div className="card sacked">
-            <strong>🏛️ 경질 통보</strong>
-            <p>{teamsById[save.sacked.team]?.name} 보드가 두 시즌 연속 목표 미달을 이유로 감독직 해임을 결정했습니다. 새로운 팀에서 다시 시작하세요.</p>
+            <strong>{save.sacked.bankrupt ? '💸 구단 파산' : '🏛️ 경질 통보'}</strong>
+            <p>{save.sacked.bankrupt ? `${teamsById[save.sacked.team]?.name}이(가) 빚을 감당하지 못하고 파산했습니다 (현금 ${Math.round(save.sacked.cash)}M). 다른 구단을 인수해 다시 시작하세요.` : `${teamsById[save.sacked.team]?.name} 보드가 두 시즌 연속 목표 미달을 이유로 감독직 해임을 결정했습니다. 새로운 팀에서 다시 시작하세요.`}</p>
             {save.sacked.history?.length > 0 && <p className="small muted">커리어: {save.sacked.history.map((h) => `${h.label} ${h.pos}위`).join(' · ')}</p>}
           </div>
         )}
@@ -126,7 +128,7 @@ export default function Home() {
       </div>
 
       <TeamStatus team={myTeam} status={status} lineup={save.lineup} inbox={save.inbox || []} unread={unread} />
-      {save.board && !seasonOver && <BoardCard board={save.board} rank={played ? rank : null} />}
+      {save.finance && <OwnerCard finance={save.finance} fans={save.fans ?? 60} />}
 
       <div className="card next-match">
         {seasonOver ? (
@@ -234,5 +236,17 @@ function SeasonEnd({ review, rank, history, onNext }) {
         </ul>
       )}
     </div>
+  )
+}
+
+function OwnerCard({ finance, fans }) {
+  const [face, label] = fanLabel(fans)
+  return (
+    <Link to="/club" className="card owner-card">
+      <div><span>현금</span><strong className={finance.cash < 0 ? 'bad-text' : ''}>{eur(finance.cash)}</strong></div>
+      <div><span>팬 민심</span><strong>{face} {fans}</strong><small>{label}</small></div>
+      <div><span>지난 경기</span><strong className={(finance.last?.net ?? 0) >= 0 ? 'good-text' : 'bad-text'}>{finance.last ? `${finance.last.net >= 0 ? '+' : ''}${eur(finance.last.net)}` : '-'}</strong></div>
+      <em>🏛️ 구단 운영 →</em>
+    </Link>
   )
 }
