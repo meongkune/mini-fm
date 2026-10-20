@@ -249,7 +249,7 @@ export function mergeManual(prev, next) {
   })
   return { season: { ...next, teams }, warnings }
 }
-const pickEdit = ({ name, pos, number, age, att, def, sta }) => ({ name, pos, number, age, att, def, sta })
+const pickEdit = ({ name, pos, role, number, age, att, def, sta }) => ({ name, pos, ...(role ? { role } : {}), number, age, att, def, sta })
 
 async function get(url, token) {
   const res = await fetch(url, { headers: { 'X-Auth-Token': token } })

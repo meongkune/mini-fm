@@ -1,14 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { FORMATIONS } from '../engine/engine.js'
-import { MAX_SUBS, advance, benchOf, createMatch, dropInjured, pickLineup, ratings, step, substitute, summarize } from '../engine/match.js'
+import { buildSlots, fitOf } from '../engine/formation.js'
+import { MAX_SUBS, advance, benchOf, createMatch, dropInjured, ratings, reshape, step, substitute, summarize } from '../engine/match.js'
 import { TEAM_TALKS, teamTalkEffect } from '../game/season.js'
 import Rating, { CondBar } from '../components/Rating.jsx'
 import { Crest, Flag, Kit } from '../components/Badges.jsx'
 import { ink, kitColors, onDark, playerOvr, short, teamOvr, useGame } from '../store.jsx'
 import MatchPitch from './MatchPitch.jsx'
 import NeedTeam from './NeedTeam.jsx'
-import { MENTALITY, OptionGroup, PRESSING } from './Tactics.jsx'
+import { FormationPicker, LINE_OPTS, MENTALITY, OptionGroup, PRESSING, TEMPO_OPTS } from './Tactics.jsx'
 
 const SPEEDS = { '1x': 220, '3x': 70 }
 // 상황별로 1분이 흐르는 시간 배수 — 슈팅·골 장면은 천천히 보여준다
@@ -41,14 +41,14 @@ export default function Match() {
     if (!ctx || !myTeam) return
     // 경기가 시작된 뒤에는(전술 변경으로 save가 바뀌어도) 다시 만들지 않는다
     if (matchRef.current?.key === fixtureKey && matchRef.current.minute > 0) return
-    const myCfg = { lineup: save.lineup, tactics: { formation: save.formation, mentality: save.mentality, pressing: save.pressing } }
-    const oppTeam = ctx.teams[1 - myIdx]
-    const oppCfg = { lineup: pickLineup(oppTeam, '4-4-2', status) }
+    const myCfg = { lineup: save.lineup, tactics: { formation: save.formation, mentality: save.mentality, pressing: save.pressing, line: save.line || 'normal', tempo: save.tempo || 'normal' } }
+    const oppCfg = {} // 상대는 구단 고유 전형 + 자동 배치
     matchRef.current = createMatch({ home: ctx.teams[0], away: ctx.teams[1], homeCfg: isHome ? myCfg : oppCfg, awayCfg: isHome ? oppCfg : myCfg, status, myIdx })
     matchRef.current.key = fixtureKey
     setPhase('pre'); setTalk(null); setInterrupt(null); setPaused(false)
     rerender()
   }, [fixtureKey, save.lineup.join(), save.formation])
+
 
   const match = matchRef.current
   const lastTick = match?.timeline.at(-1)
@@ -86,7 +86,17 @@ export default function Match() {
   const rt = ratings(match, ctx)
   const S = match.stats
   const live = phase === 'live' && match.minute > 0
-  const lineups = match.sides.map((sd) => sd.onPitch.map((id) => byId[id]).filter(Boolean))
+  // 경기장 배치: 포메이션 자리 좌표를 선수에게 붙인다
+  const lineups = match.sides.map((sd) => {
+    const all = buildSlots(sd.tactics.formation)
+    const used = new Set()
+    return sd.onPitch.map((id, i) => {
+      const k = all.findIndex((s, j) => !used.has(j) && s.role === sd.slots[i])
+      if (k >= 0) used.add(k)
+      const s = all[k]
+      return byId[id] && { ...byId[id], sx: s?.x, sy: s?.y }
+    }).filter(Boolean)
+  })
 
   const kickoff = () => { setPhase('live'); rerender() }
   const skip = () => {
@@ -104,8 +114,17 @@ export default function Match() {
     setTalk({ kind, ...r })
   }
   const setTactics = (patch) => {
-    update(patch)
-    mySide.tactics = { ...mySide.tactics, ...patch }
+    if (patch.formation) {
+      reshape(match, ctx, myIdx, patch.formation)
+      // 저장된 선발도 새 전형의 자리 순서로 맞춘다
+      const roles = buildSlots(patch.formation).map((s) => s.role)
+      const used = new Set()
+      const lineup = roles.map((r) => { const i = mySide.slots.findIndex((x, j) => !used.has(j) && x === r); if (i < 0) return null; used.add(i); return mySide.onPitch[i] })
+      update({ formation: patch.formation, lineup })
+    } else {
+      update(patch)
+      mySide.tactics = { ...mySide.tactics, ...patch }
+    }
     rerender()
   }
   const doSub = (outId, inId) => {
@@ -132,7 +151,8 @@ export default function Match() {
   const caption = live && lastKey && match.minute - lastKey.minute <= 2 ? lastKey : null
   const clockLabel = phase === 'pre' ? '킥오프 전' : phase === 'ht' ? 'HT' : phase === 'ft' ? 'FT' : `${match.minute}'`
   const started = phase !== 'pre'
-  const unavailable = save.lineup.filter((id) => status[id]?.inj > 0 || status[id]?.susp > 0)
+  const unavailable = save.lineup.filter((id) => id && (status[id]?.inj > 0 || status[id]?.susp > 0))
+  const preFit = Math.round((mySide.onPitch.reduce((s, id, i) => s + fitOf(byId[id], mySide.slots[i]), 0) / (mySide.onPitch.length || 1)) * 100)
   const promised = myTeam.players.filter((p) => save.status?.[p.id]?.promise === save.round)
   const opp = ctx.teams[1 - myIdx]
   const mom = phase === 'ft' ? Object.keys(rt).sort((a, b) => rt[b] - rt[a])[0] : null
@@ -181,7 +201,8 @@ export default function Match() {
               <div><span className="muted small">최근</span><span className="form">{recentForm(save.results, opp.id).map((f, i) => <span key={i} className={`f ${f}`}>{f}</span>)}</span></div>
             </div>
             <p className="small muted">상대 핵심: {[...opp.players].sort((a, b) => playerOvr(b) - playerOvr(a)).slice(0, 3).map((p) => `${p.name.split(' ').at(-1)}(${playerOvr(p)})`).join(' · ')}</p>
-            <p className="small">내 전술 <strong>{save.formation}</strong> · {MENTALITY.find((m) => m[0] === save.mentality)[1]} · 압박 {PRESSING.find((p) => p[0] === save.pressing)[1]}</p>
+            <p className="small">내 전술 <strong>{save.formation}</strong> · 자리 적합도 {preFit}% · {MENTALITY.find((m) => m[0] === save.mentality)[1]} · 압박 {PRESSING.find((p) => p[0] === save.pressing)[1]}</p>
+            <p className="small muted">상대 전형 <strong>{match.sides[1 - myIdx].tactics.formation}</strong></p>
             {promised.length > 0 && (
               <p className="small notice">🤝 선발 약속: {promised.map((p) => p.name).join(', ')} {promised.every((p) => save.lineup.includes(p.id)) ? '— 선발에 포함됨 ✓' : '— 선발에 없습니다! 약속을 어기면 사기가 크게 떨어집니다'}</p>
             )}
@@ -189,7 +210,7 @@ export default function Match() {
               <p className="small bad-text">⚠ 선발 중 {unavailable.map((id) => byId[id]?.name).join(', ')} 선수는 출전할 수 없어 같은 포지션 선수로 자동 대체됩니다.</p>
             )}
             <div className="row">
-              <Link className="btn ghost" to="/squad">선발 조정</Link>
+              <Link className="btn ghost" to="/tactics">선발·전술</Link>
               <button className="btn" onClick={kickoff}>⚽ 킥오프</button>
             </div>
           </div>
@@ -281,12 +302,16 @@ export default function Match() {
         <div className="sheet-wrap" onClick={() => setSheet(null)}>
           <div className="sheet" onClick={(e) => e.stopPropagation()}>
             <div className="sheet-head"><h3>전술 변경</h3><button className="btn ghost small" onClick={() => setSheet(null)}>완료</button></div>
-            <h4>포메이션 <span className="muted small">(선수 배치는 그대로 — 포지션 수가 다르면 경기력 감소)</span></h4>
-            <OptionGroup options={Object.keys(FORMATIONS).map((f) => [f, f, ''])} value={mySide.tactics.formation} onChange={(formation) => setTactics({ formation })} cols={4} />
+            <h4>포메이션 <span className="muted small">(뛰고 있는 선수들이 새 자리로 재배치됩니다)</span></h4>
+            <FormationPicker value={mySide.tactics.formation} onChange={(formation) => setTactics({ formation })} />
             <h4>경기 운영</h4>
             <OptionGroup options={MENTALITY} value={mySide.tactics.mentality} onChange={(mentality) => setTactics({ mentality })} />
             <h4>압박 강도</h4>
             <OptionGroup options={PRESSING} value={mySide.tactics.pressing} onChange={(pressing) => setTactics({ pressing })} />
+            <h4>수비 라인</h4>
+            <OptionGroup options={LINE_OPTS} value={mySide.tactics.line || 'normal'} onChange={(line) => setTactics({ line })} />
+            <h4>템포</h4>
+            <OptionGroup options={TEMPO_OPTS} value={mySide.tactics.tempo || 'normal'} onChange={(tempo) => setTactics({ tempo })} />
           </div>
         </div>
       )}
@@ -356,7 +381,7 @@ function LineupPanel({ match, ctx, kits, rt, myIdx, status }) {
     return (
       <li key={p.id} className={`lu ${off ? 'off' : ''}`}>
         <Kit color={kits[side].color} number={p.number} size={26} />
-        <span className="lu-pos">{p.pos}</span>
+        <span className="lu-pos">{sd.slots[sd.onPitch.indexOf(p.id)] || p.pos}</span>
         <span className="lu-name">
           <Flag nation={p.nation} size={13} /> {p.name}
           <span className="lu-ev">
@@ -391,9 +416,11 @@ function SubsSheet({ match, ctx, myIdx, rt, status, interrupt, onSub, onClose, o
   const sd = match.sides[myIdx]
   const team = ctx.teams[myIdx]
   const [outId, setOutId] = useState(interrupt?.playerId ?? null)
-  const onPitch = sd.onPitch.map((id) => team.players.find((p) => p.id === id)).filter(Boolean).sort((a, b) => POS_ORDER[a.pos] - POS_ORDER[b.pos])
+  const roleAt = (id) => sd.slots[sd.onPitch.indexOf(id)]
+  const onPitch = sd.onPitch.map((id) => team.players.find((p) => p.id === id)).filter(Boolean)
   const out = onPitch.find((p) => p.id === outId)
-  const bench = benchOf(match, ctx, myIdx).sort((a, b) => (out && (a.pos === out.pos) !== (b.pos === out.pos) ? (a.pos === out.pos ? -1 : 1) : 0) || POS_ORDER[a.pos] - POS_ORDER[b.pos] || playerOvr(b) - playerOvr(a))
+  const outRole = out ? roleAt(out.id) : null
+  const bench = benchOf(match, ctx, myIdx).sort((a, b) => (outRole ? playerOvr(b) * fitOf(b, outRole) - playerOvr(a) * fitOf(a, outRole) : 0) || POS_ORDER[a.pos] - POS_ORDER[b.pos] || playerOvr(b) - playerOvr(a))
   return (
     <div className="sheet-wrap" onClick={onClose}>
       <div className="sheet" onClick={(e) => e.stopPropagation()}>
@@ -408,7 +435,7 @@ function SubsSheet({ match, ctx, myIdx, rt, status, interrupt, onSub, onClose, o
           {onPitch.map((p) => (
             <li key={p.id}>
               <button className={`pick ${outId === p.id ? 'on' : ''}`} onClick={() => setOutId(p.id)}>
-                <span className="lu-pos">{p.pos}</span>
+                <span className="lu-pos">{roleAt(p.id)}</span>
                 <span className="lu-name">{p.name}{sd.injured.includes(p.id) ? ' 🚑' : ''}{match.ps[p.id]?.yc ? ' 🟨' : ''}</span>
                 <CondBar value={sd.energy[p.id]} />
                 <Rating value={rt[p.id]} />
@@ -416,13 +443,13 @@ function SubsSheet({ match, ctx, myIdx, rt, status, interrupt, onSub, onClose, o
             </li>
           ))}
         </ul>
-        <h4>② 들어갈 선수 {out && <span className="muted small">— {out.pos} 우선</span>}</h4>
+        <h4>② 들어갈 선수 {out && <span className="muted small">— {outRole} 자리 적합도 순</span>}</h4>
         <ul className="pick-list">
           {bench.map((p) => (
             <li key={p.id}>
               <button className="pick" disabled={!outId || sd.subsLeft <= 0} onClick={() => { if (onSub(outId, p.id)) setOutId(null) }}>
                 <span className="lu-pos">{p.pos}</span>
-                <span className="lu-name">{p.name} <span className="muted small">OVR {playerOvr(p)}</span></span>
+                <span className="lu-name">{p.name} <span className="muted small">{p.role} · {outRole ? `${Math.round(playerOvr(p) * fitOf(p, outRole))} (${outRole})` : `OVR ${playerOvr(p)}`}</span></span>
                 <CondBar value={status[p.id]?.cond} />
                 <span className="pick-go">투입</span>
               </button>

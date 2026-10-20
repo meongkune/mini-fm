@@ -5,6 +5,7 @@ import { loadIndex } from '../api.js'
 import { checkAccess, DATA_DIR, defaultRepo, readFile, writeFile } from '../github.js'
 import { tierOf } from '../components/PlayerCard.jsx'
 import { Crest } from '../components/Badges.jsx'
+import { ROLE_LABEL, ROLE_POS } from '../engine/formation.js'
 import { ink, playerOvr } from '../store.jsx'
 
 const POS = ['GK', 'DF', 'MF', 'FW']
@@ -45,7 +46,7 @@ export function validateTeam(team) {
 export function diffSeason(before, after) {
   const lines = []
   const prevTeams = Object.fromEntries(before.teams.map((t) => [t.id, t]))
-  const fields = ['name', 'pos', 'number', 'age', 'att', 'def', 'sta']
+  const fields = ['name', 'pos', 'role', 'number', 'age', 'att', 'def', 'sta']
   for (const t of after.teams) {
     const o = prevTeams[t.id]
     if (!o) continue
@@ -376,6 +377,12 @@ function TeamEditor({ team, issues, onBack, onTeam, onPlayer, onAdd, onRemove })
                         <input type="number" inputMode="numeric" value={p[k]} onChange={(e) => onPlayer(p.id, k, num(e.target.value))} />
                       </label>
                     ))}
+                    <label><span>세부</span>
+                      <select value={p.role || ''} onChange={(e) => onPlayer(p.id, 'role', e.target.value || undefined)} title="세부 포지션 (비우면 자동 추정)">
+                        <option value="">자동</option>
+                        {Object.keys(ROLE_LABEL).filter((r) => ROLE_POS[r] === p.pos).map((r) => <option key={r} value={r}>{r}</option>)}
+                      </select>
+                    </label>
                   </div>
                 </div>
               )

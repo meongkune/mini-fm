@@ -2,9 +2,16 @@
 // 경기 상태(match)는 순수 객체라 저장·복원이 되고, 중간에 교체·전술 변경·하프타임 지시를 넣을 수 있다.
 // 팀 데이터(선수 능력치)는 상태에 넣지 않고 매번 ctx로 받는다: ctx = { teams: [home, away], status }
 //   status[playerId] = { cond: 0~100(컨디션), morale: 0~100(사기), form: 평균 평점 } — 없으면 기본값
-import { FORMATIONS, MENTALITY, PRESSING, playerOvrOf } from './engine.js'
+import { MENTALITY, PRESSING, playerOvrOf } from './engine.js'
+import { ROLE_POS, assignSlots, buildSlots, fitOf, shapeMods } from './formation.js'
 
-const DEFAULT_TACTICS = { formation: '4-4-2', mentality: 'balanced', pressing: 'normal' }
+const DEFAULT_TACTICS = { formation: '4-4-2', mentality: 'balanced', pressing: 'normal', line: 'normal', tempo: 'normal' }
+// 팀 지시: 수비 라인 높이, 템포
+export const LINE = { low: { mid: -3, def: 3, offside: 0.6 }, normal: { mid: 0, def: 0, offside: 1 }, high: { mid: 3, def: -2, offside: 1.7 } }
+export const TEMPO = { slow: { att: -2, mid: 2, acc: 0.03, drain: 0.95 }, normal: { att: 0, mid: 0, acc: 0, drain: 1 }, fast: { att: 3, mid: -1, acc: -0.03, drain: 1.1 } }
+// AI 구단 전형: 구단마다 고정 (다양한 상대를 만나도록)
+const AI_SHAPES = ['4-4-2', '4-3-3', '4-2-3-1', '4-1-4-1', '3-5-2', '4-4-1-1', '4-3-3', '4-2-3-1']
+export const aiFormation = (teamId) => AI_SHAPES[[...String(teamId)].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7) % AI_SHAPES.length]
 export const MAX_SUBS = 5
 
 // ── 난수: 상태에 정수 하나만 저장 (mulberry32) ──
@@ -34,45 +41,27 @@ const emptyPs = (from) => ({ from, to: null, g: 0, a: 0, sh: 0, sot: 0, kp: 0, t
 /** 출전 가능 여부 (부상·징계) */
 export const available = (status, id) => !(status?.[id]?.inj > 0) && !(status?.[id]?.susp > 0)
 
-/** 컨디션·출전 가능을 고려한 베스트 11 */
-export function pickLineup(team, formation = '4-4-2', status = {}, { useCondition = true } = {}) {
-  const [df, mf, fw] = (FORMATIONS[formation] || FORMATIONS['4-4-2']).slots
-  const need = { GK: 1, DF: df, MF: mf, FW: fw }
-  const score = (p) => playerOvrOf(p) * (useCondition ? 0.72 + 0.28 * ((status[p.id]?.cond ?? 100) / 100) : 1)
-  const pool = team.players.filter((p) => available(status, p.id))
-  const ids = []
-  for (const [pos, n] of Object.entries(need)) {
-    ids.push(...pool.filter((p) => p.pos === pos).sort((a, b) => score(b) - score(a)).slice(0, n).map((p) => p.id))
-  }
-  // 포지션 인원이 모자라면(부상 등) 남은 선수 중 능력치 순으로 채운다
-  for (const p of pool.filter((x) => !ids.includes(x.id) && x.pos !== 'GK').sort((a, b) => score(b) - score(a))) {
-    if (ids.length >= 11) break
-    ids.push(p.id)
-  }
-  return ids
+/** 컨디션·출전 가능을 고려해 포메이션 자리마다 선수를 배정 (자리 순서 = 포메이션 자리 순서) */
+export function pickLineup(team, formation = '4-4-2', status = {}, { useCondition = true, keep = {} } = {}) {
+  return assignSlots(team, formation, { status, useCondition, keep, available: (id) => available(status, id) }).filter(Boolean)
 }
 
 export function createMatch({ home, away, homeCfg = {}, awayCfg = {}, seed, status = {}, myIdx = null }) {
   const sideState = (team, cfg) => {
     const tactics = { ...DEFAULT_TACTICS, ...(cfg.tactics || {}) }
+    if (!cfg.tactics?.formation && !cfg.lineup) tactics.formation = aiFormation(team.id)
     const byId = Object.fromEntries(team.players.map((p) => [p.id, p]))
-    const wanted = (cfg.lineup || []).filter((id) => byId[id]).slice(0, 11)
-    let onPitch
-    if (wanted.length < 11) onPitch = pickLineup(team, tactics.formation, status)
-    else {
-      // 출전할 수 없는 선수 자리만 같은 포지션의 가장 좋은 선수로 바꾼다
-      onPitch = wanted.filter((id) => available(status, id))
-      const best = pickLineup(team, tactics.formation, status)
-      for (const id of wanted.filter((x) => !available(status, x))) {
-        const pos = byId[id].pos
-        const sub = team.players.filter((p) => p.pos === pos && !onPitch.includes(p.id) && available(status, p.id)).sort((a, b) => playerOvrOf(b) - playerOvrOf(a))[0]
-          || best.map((x) => byId[x]).find((p) => !onPitch.includes(p.id))
-        if (sub) onPitch.push(sub.id)
-      }
-    }
+    // 정해 둔 자리는 그대로, 비었거나 출전할 수 없는 자리만 가장 알맞은 선수로 채운다
+    const keep = {}
+    ;(cfg.lineup || []).slice(0, 11).forEach((id, i) => { if (id && byId[id] && available(status, id)) keep[i] = id })
+    const slots = buildSlots(tactics.formation).map((x) => x.role)
+    const ids = assignSlots(team, tactics.formation, { status, keep, available: (id) => available(status, id) })
+    const onPitch = []
+    const slotRoles = []
+    ids.forEach((id, i) => { if (id) { onPitch.push(id); slotRoles.push(slots[i]) } })
     const energy = {}
     for (const p of team.players) energy[p.id] = status[p.id]?.cond ?? 100
-    return { teamId: team.id, name: team.short || team.name, tactics, onPitch, subsLeft: MAX_SUBS, subs: [], sentOff: [], injured: [], yellows: {}, energy }
+    return { teamId: team.id, name: team.short || team.name, tactics, onPitch, slots: slotRoles, subsLeft: MAX_SUBS, subs: [], sentOff: [], injured: [], yellows: {}, energy }
   }
   const s = seed ?? Math.floor(Math.random() * 1e9) + 1
   const match = {
@@ -105,23 +94,33 @@ function sideRatings(match, ctx, idx) {
   const sd = match.sides[idx]
   const team = ctx.teams[idx]
   const byId = Object.fromEntries(team.players.map((p) => [p.id, p]))
-  const xi = sd.onPitch.map((id) => byId[id]).filter(Boolean).map((p) => effective(match, ctx, idx, p))
+  // 자리 적합도만큼 능력치가 깎이고, 엔진에서는 '자리의' 포지션으로 뛴다
+  const xi = []
+  sd.onPitch.forEach((id, i) => {
+    const p = byId[id]
+    if (!p) return
+    const e = effective(match, ctx, idx, p)
+    const fit = fitOf(p, sd.slots[i])
+    xi.push({ ...e, att: e.att * fit, def: e.def * fit, pos: ROLE_POS[sd.slots[i]], realPos: p.pos })
+  })
   const g = Object.fromEntries(['GK', 'DF', 'MF', 'FW'].map((pos) => [pos, xi.filter((p) => p.pos === pos)]))
-  const f = FORMATIONS[sd.tactics.formation] || FORMATIONS['4-4-2']
+  const f = shapeMods(sd.tactics.formation)
   const m = MENTALITY[sd.tactics.mentality] || MENTALITY.balanced
   const pr = PRESSING[sd.tactics.pressing] || PRESSING.normal
-  const [df, mf, fw] = f.slots
-  const mismatch = Math.abs(g.DF.length - df) + Math.abs(g.MF.length - mf) + Math.abs(g.FW.length - fw)
+  const ln = LINE[sd.tactics.line] || LINE.normal
+  const tp = TEMPO[sd.tactics.tempo] || TEMPO.normal
   const missing = 11 - xi.length // 퇴장·부상으로 빈 자리
-  const penalty = mismatch * 2.5 + (g.GK.length !== 1 ? 15 : 0) + missing * 6
+  const penalty = (g.GK.length !== 1 ? 15 : 0) + missing * 6
   return {
     xi,
-    attack: avg([...g.FW.map((p) => p.att), ...g.FW.map((p) => p.att), ...g.MF.map((p) => p.att)]) + f.att + m.att - penalty,
-    midfield: avg(g.MF.map((p) => (p.att + p.def) / 2)) + f.mid + pr.mid - penalty,
-    defense: avg([...g.DF.map((p) => p.def), ...g.DF.map((p) => p.def), ...g.MF.map((p) => p.def)]) + f.def + m.def - penalty,
+    attack: avg([...g.FW.map((p) => p.att), ...g.FW.map((p) => p.att), ...g.MF.map((p) => p.att)]) + f.att + m.att + tp.att - penalty,
+    midfield: avg(g.MF.map((p) => (p.att + p.def) / 2)) + f.mid + pr.mid + ln.mid + tp.mid - penalty,
+    defense: avg([...g.DF.map((p) => p.def), ...g.DF.map((p) => p.def), ...g.MF.map((p) => p.def)]) + f.def + m.def + ln.def - penalty,
     keeper: avg(g.GK.map((p) => p.def), 40),
     gk: g.GK[0] || null,
-    drain: pr.drain,
+    drain: pr.drain * tp.drain,
+    acc: tp.acc,
+    offside: ln.offside,
   }
 }
 
@@ -136,7 +135,8 @@ const MISS_LINES = [(p, t) => `${p}(${t})의 슛이 골대를 살짝 벗어납�
 
 function removeFromPitch(match, idx, id, minute) {
   const sd = match.sides[idx]
-  sd.onPitch = sd.onPitch.filter((x) => x !== id)
+  const i = sd.onPitch.indexOf(id)
+  if (i >= 0) { sd.onPitch = sd.onPitch.filter((_, j) => j !== i); sd.slots = sd.slots.filter((_, j) => j !== i) }
   if (match.ps[id]) match.ps[id].to = minute
 }
 
@@ -172,14 +172,11 @@ function aiSubs(match, ctx, idx) {
   const team = ctx.teams[idx]
   const byId = Object.fromEntries(team.players.map((p) => [p.id, p]))
   const bench = () => benchOf(match, ctx, idx)
-  const bestFor = (pos) => {
-    const b = bench()
-    return b.filter((p) => p.pos === pos).sort((a, c) => playerOvrOf(c) - playerOvrOf(a))[0] || b.filter((p) => p.pos !== 'GK').sort((a, c) => playerOvrOf(c) - playerOvrOf(a))[0]
-  }
+  const bestFor = (role) => bench().filter((p) => p.pos !== 'GK' || role === 'GK').sort((a, c) => playerOvrOf(c) * fitOf(c, role) - playerOvrOf(a) * fitOf(a, role))[0]
   if ([60, 70, 80].includes(match.minute)) {
     const tired = sd.onPitch.map((id) => byId[id]).filter((p) => p && p.pos !== 'GK').sort((a, b) => sd.energy[a.id] - sd.energy[b.id])[0]
     if (tired && sd.energy[tired.id] < 82) {
-      const sub = bestFor(tired.pos)
+      const sub = bestFor(sd.slots[sd.onPitch.indexOf(tired.id)])
       if (sub) substitute(match, ctx, idx, tired.id, sub.id, { auto: true })
     }
   }
@@ -210,7 +207,7 @@ export function step(match, ctx, { withEvents = true } = {}) {
   const S = match.stats
   S[atk].poss++
   const n = 8 + Math.floor(rng.random() * 6)
-  const acc = clamp(0.8 + (r[atk].midfield - r[dfn].midfield) / 200, 0.65, 0.93)
+  const acc = clamp(0.8 + (r[atk].midfield - r[dfn].midfield) / 200 + r[atk].acc, 0.62, 0.94)
   S[atk].passes += n
   S[atk].passesOk += Math.round(n * acc)
   const tick = { m: minute, t: atk, k: 'build' }
@@ -290,8 +287,8 @@ export function step(match, ctx, { withEvents = true } = {}) {
         Object.assign(tick, { k: 'card', p: fouler.id })
         if (withEvents) match.events.push({ minute, type: 'card', team: dfn, player: fouler.name, text: `🟨 ${fouler.name}(${names[dfn]}) 경고. 거친 태클이었습니다.` })
       }
-    } else if (x < 0.32) {
-      S[atk].offsides++
+    } else if (x < 0.27 + 0.05 * r[dfn].offside) {
+      S[atk].offsides++ // 수비 라인이 높을수록 상대가 오프사이드에 자주 걸린다
     } else if (x < 0.43) {
       shoot(true)
     } else if (x < 0.75 && defenders.length) {
@@ -310,8 +307,9 @@ export function step(match, ctx, { withEvents = true } = {}) {
       if (p) {
         if (idx === match.myIdx) interrupt = { type: 'injury', playerId: p.id, name: p.name }
         else {
-          const bench = benchOf(match, ctx, idx)
-          const sub = bench.filter((x) => x.pos === p.pos).sort((x, y) => playerOvrOf(y) - playerOvrOf(x))[0] || bench.filter((x) => x.pos !== 'GK')[0]
+          const role = match.sides[idx].slots[match.sides[idx].onPitch.indexOf(p.id)]
+          const bench = benchOf(match, ctx, idx).filter((x) => x.pos !== 'GK' || role === 'GK')
+          const sub = bench.sort((x, y) => playerOvrOf(y) * fitOf(y, role) - playerOvrOf(x) * fitOf(x, role))[0]
           if (sub && match.sides[idx].subsLeft > 0) substitute(match, ctx, idx, p.id, sub.id, { auto: true })
           else removeFromPitch(match, idx, p.id, minute)
         }
@@ -344,6 +342,19 @@ export function advance(match, ctx, toMinute, opts) {
     if (it) return it
   }
   return null
+}
+
+/** 경기 중 포메이션 변경: 뛰고 있는 선수들을 새 자리에 다시 배정 */
+export function reshape(match, ctx, idx, formation) {
+  const sd = match.sides[idx]
+  const team = ctx.teams[idx]
+  const playing = { players: sd.onPitch.map((id) => team.players.find((p) => p.id === id)).filter(Boolean) }
+  const slots = buildSlots(formation).map((x) => x.role)
+  const ids = assignSlots(playing, formation, { useCondition: false })
+  sd.onPitch = []
+  sd.slots = []
+  ids.forEach((id, i) => { if (id) { sd.onPitch.push(id); sd.slots.push(slots[i]) } })
+  sd.tactics = { ...sd.tactics, formation }
 }
 
 /** 내 팀이 다친 선수를 교체하지 않고 계속하면 빈 자리로 뛴다 */

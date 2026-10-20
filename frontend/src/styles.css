@@ -551,7 +551,8 @@ select { background: var(--panel-2); color: var(--text); border: 1px solid var(-
 .povr.tier-bronze { background: var(--tier-bronze); color: var(--tier-bronze-ink); }
 .pdel { height: 34px; border-radius: 8px; border: 1px solid var(--line); background: transparent; color: var(--muted); font-size: 1.1rem; cursor: pointer; }
 .pdel:hover { color: var(--bad); border-color: var(--bad); }
-.pstats { grid-column: 2 / -1; display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.pstats { grid-column: 2 / -1; display: grid; grid-template-columns: repeat(4, 1fr) 1.2fr; gap: 6px; }
+.pstats select { padding: 6px 2px; }
 .pstats label { display: grid; gap: 2px; font-size: .64rem; color: var(--muted); font-weight: 700; }
 .pstats input { padding: 6px 4px; text-align: center; }
 .changes { margin: 0 0 10px; padding-left: 18px; font-size: .8rem; line-height: 1.6; max-height: 260px; overflow: auto; }
@@ -882,3 +883,38 @@ html.framed body { overflow: hidden; height: 100vh; }
 .lu .kit { margin-right: -2px; }
 .lu-name .flag, .sq-name .flag, .mk-name .flag, .pr-player .flag { margin-right: 2px; }
 .admin-team .crest-img, .admin-team .crest-sm { width: 34px; height: 34px; }
+
+/* ---------- 전술: 포메이션 자리 배치 ---------- */
+.custom-shape { display: grid; grid-template-columns: 1fr auto; gap: 6px; }
+.slot-pitch { position: relative; aspect-ratio: 68 / 92; border-radius: 12px; overflow: hidden; background: repeating-linear-gradient(180deg, #2f8a4a 0 9%, #2a7d43 9% 18%); box-shadow: inset 0 0 0 2px rgba(255, 255, 255, .55); margin: 4px 0 8px; }
+.sp-lines i { position: absolute; border: 2px solid rgba(255, 255, 255, .5); }
+.sp-lines .half { left: 0; right: 0; top: 50%; border-width: 2px 0 0; }
+.sp-lines .circle { left: 50%; top: 50%; width: 26%; aspect-ratio: 1; border-radius: 50%; transform: translate(-50%, -50%); }
+.sp-lines .box { left: 22%; right: 22%; height: 15%; }
+.sp-lines .box.top { top: -2px; border-top: 0; }
+.sp-lines .box.bottom { bottom: -2px; border-bottom: 0; }
+.slot { position: absolute; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 3px 4px; border: 0; background: none; color: #fff; font: inherit; cursor: pointer; z-index: 1; width: 64px; }
+.slot .kit { border-radius: 8px; padding: 1px; }
+.slot.fit-best .kit { box-shadow: 0 0 0 2px #22c55e; }
+.slot.fit-good .kit { box-shadow: 0 0 0 2px #a3e635; }
+.slot.fit-ok .kit { box-shadow: 0 0 0 2px #eab308; }
+.slot.fit-bad .kit { box-shadow: 0 0 0 2px #ef4444; }
+.slot.active .kit, .slot.active .slot-plus { outline: 2px solid #fff; outline-offset: 2px; }
+.slot.out { filter: grayscale(.9); opacity: .7; }
+.slot-plus { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; border: 2px dashed rgba(255, 255, 255, .8); font-weight: 900; background: rgba(0, 0, 0, .2); }
+.slot-role { font-size: .54rem; font-weight: 900; letter-spacing: .4px; padding: 0 4px; border-radius: 4px; background: rgba(0, 0, 0, .45); }
+.slot-name { font-size: .64rem; font-weight: 800; max-width: 64px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 1px 2px rgba(0, 0, 0, .8); }
+.slot-ovr { position: absolute; top: 0; right: 6px; font-size: .56rem; font-weight: 900; padding: 0 3px; border-radius: 4px; background: #14111f; }
+.fit-legend { display: flex; flex-wrap: wrap; gap: 10px; font-size: .66rem; color: var(--muted); }
+.fit-dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 4px; vertical-align: -1px; }
+.fit-dot.best { background: #22c55e; } .fit-dot.good { background: #a3e635; } .fit-dot.ok { background: #eab308; } .fit-dot.bad { background: #ef4444; }
+.role-chip { flex: none; display: inline-grid; place-items: center; min-width: 30px; padding: 1px 4px; border-radius: 5px; font-size: .6rem; font-weight: 900; background: var(--panel); border: 1px solid var(--line); color: var(--text); }
+.role-chip.best { border-color: #22c55e; color: #86efac; } .role-chip.good { border-color: #a3e635; color: #d9f99d; } .role-chip.ok { border-color: #eab308; color: #fde68a; } .role-chip.bad { border-color: #ef4444; color: #fca5a5; }
+.fit-label { flex: none; font-size: .62rem; font-weight: 800; }
+.fit-label.best { color: #86efac; } .fit-label.good { color: #d9f99d; } .fit-label.ok { color: #fde68a; } .fit-label.bad { color: #fca5a5; }
+.pick-ovr { flex: none; min-width: 26px; text-align: right; font-variant-numeric: tabular-nums; }
+.bench { display: flex; flex-wrap: wrap; gap: 6px; }
+.bench-chip { display: inline-flex; align-items: center; gap: 5px; padding: 4px 8px 4px 4px; border-radius: 99px; background: var(--panel-2); font-size: .74rem; }
+.bench-chip b { color: var(--muted); font-size: .68rem; }
+.bench-chip.out { opacity: .5; }
+.card h4 { margin: 12px 0 6px; font-size: .82rem; }

@@ -1,5 +1,6 @@
 import { playerOvr } from '../store.jsx'
 import { Flag, Kit } from './Badges.jsx'
+import { roleOf } from '../engine/formation.js'
 
 // OVR 기준 선수 등급 — 카드 색을 정한다
 export function tierOf(ovr) {
@@ -27,7 +28,7 @@ export default function PlayerCard({ player, selected = false, onClick, size = '
     >
       <span className="pc-top">
         <span className="pc-ovr">{ovr}</span>
-        <span className="pc-pos">{player.pos}</span>
+        <span className="pc-pos">{roleOf(player)}</span>
         <span className="pc-flag-img"><Flag nation={player.nation} size={size === 'lg' ? 18 : 14} /></span>
       </span>
       {color ? <span className="pc-kit"><Kit color={color} number={player.number} size={size === 'lg' ? 52 : 40} /></span> : <span className="pc-badge" aria-hidden="true">{player.number}</span>}

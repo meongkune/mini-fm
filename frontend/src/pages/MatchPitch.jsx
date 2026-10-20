@@ -18,6 +18,15 @@ const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v))
 
 function basePositions(xi, side) {
   const out = {}
+  // 포메이션 자리 좌표(sx: 0 왼쪽~100 오른쪽, sy: 0 우리 골문~100 상대 골문)가 있으면 그대로 쓴다 (자기 진영 안)
+  if (xi.length && xi.every((p) => p.sx !== undefined)) {
+    for (const p of xi) {
+      const x = 2 + p.sy * 0.57
+      const y = 4 + p.sx * 0.6
+      out[p.id] = { x: side === 0 ? x : W - x, y: side === 0 ? y : H - y, side, pos: p.pos }
+    }
+    return out
+  }
   for (const pos of ['GK', 'DF', 'MF', 'FW']) {
     const row = xi.filter((p) => p.pos === pos)
     row.forEach((p, i) => {

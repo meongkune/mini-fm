@@ -114,7 +114,7 @@ export function executeTrade(save, teams, myTeamId, theirId, give, get) {
     ...save,
     rosters,
     status,
-    lineup: save.lineup.filter((id) => !give.includes(id)),
+    lineup: save.lineup.map((id) => (give.includes(id) ? null : id)),
     tradeLog: [...(save.tradeLog || []), { round: save.round, with: theirId, give, get }],
     inbox: [item, ...(save.inbox || [])],
   }

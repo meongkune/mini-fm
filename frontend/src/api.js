@@ -1,7 +1,8 @@
 // 데이터·경기 계산 계층
 // 서버 없이 동작한다: 리그·시즌 데이터는 정적 JSON(public/data)에서 읽고, 경기는 브라우저의 엔진이 계산한다.
 // (Docker/ECS 버전처럼 Flask가 함께 있으면 /api/meta로 서버 정보도 보여준다.)
-import { FORMATIONS, autoLineup as engineAutoLineup, roundRobin } from './engine/engine.js'
+import { autoLineup as engineAutoLineup, roundRobin } from './engine/engine.js'
+import { PRESETS } from './engine/formation.js'
 
 const BASE = import.meta.env.BASE_URL // GitHub Pages면 '/mini-fm/', Docker면 '/'
 const dataUrl = (file) => `${BASE}data/${file}`
@@ -52,7 +53,7 @@ export const api = {
   },
   async teams() {
     const { data } = await current()
-    return { league: `${data.league.name} ${data.season}`, leagueInfo: data.league, season: data.season, zones: data.zones || [], teams: data.teams, formations: Object.keys(FORMATIONS) }
+    return { league: `${data.league.name} ${data.season}`, leagueInfo: data.league, season: data.season, zones: data.zones || [], teams: data.teams, formations: PRESETS.map(([f]) => f) }
   },
   async schedule() {
     const { schedule } = await current()

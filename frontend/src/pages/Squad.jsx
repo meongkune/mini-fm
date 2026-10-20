@@ -5,7 +5,8 @@ import PlayerSheet from '../components/PlayerSheet.jsx'
 import Rating, { CondBar } from '../components/Rating.jsx'
 import { Flag } from '../components/Badges.jsx'
 import { moraleLabel } from '../game/season.js'
-import { formationNeeds, playerOvr, useGame } from '../store.jsx'
+import { bestEmptySlot, formationNeeds, playerOvr, useGame } from '../store.jsx'
+import { buildSlots, roleOf } from '../engine/formation.js'
 import NeedTeam from './NeedTeam.jsx'
 
 const POS_LABEL = { GK: '골키퍼', DF: '수비수', MF: '미드필더', FW: '공격수' }
@@ -18,19 +19,25 @@ export default function Squad() {
   if (!myTeam) return <NeedTeam />
 
   const needs = formationNeeds(save.formation)
-  const selected = new Set(save.lineup)
+  const slotCount = buildSlots(save.formation).length
+  const lineup = Array.from({ length: slotCount }, (_, i) => save.lineup[i] ?? null)
+  const selected = new Set(lineup.filter(Boolean))
   const counts = { GK: 0, DF: 0, MF: 0, FW: 0 }
   myTeam.players.forEach((p) => { if (selected.has(p.id)) counts[p.pos]++ })
-  const ok = save.lineup.length === 11 && Object.keys(needs).every((k) => counts[k] === needs[k])
+  const ok = selected.size === 11 && Object.keys(needs).every((k) => counts[k] === needs[k])
   const out = (id) => status[id]?.inj > 0 || status[id]?.susp > 0
-  const blocked = save.lineup.filter(out)
-  const tired = save.lineup.filter((id) => (status[id]?.cond ?? 100) < 70 && !out(id))
+  const blocked = lineup.filter((id) => id && out(id))
+  const tired = lineup.filter((id) => id && (status[id]?.cond ?? 100) < 70 && !out(id))
 
   const toggle = (p) => {
-    if (selected.has(p.id)) update({ lineup: save.lineup.filter((id) => id !== p.id) })
-    else if (out(p.id)) setMsg(`${p.name} 선수는 ${status[p.id].inj > 0 ? '부상' : '징계'}로 출전할 수 없습니다.`)
-    else if (save.lineup.length >= 11) setMsg('선발은 11명까지입니다. 먼저 다른 선수를 빼세요.')
-    else update({ lineup: [...save.lineup, p.id] })
+    if (selected.has(p.id)) return update({ lineup: lineup.map((id) => (id === p.id ? null : id)) })
+    if (out(p.id)) return setMsg(`${p.name} 선수는 ${status[p.id].inj > 0 ? '부상' : '징계'}로 출전할 수 없습니다.`)
+    const i = bestEmptySlot(save.formation, lineup, p)
+    if (i < 0) return setMsg('빈 자리가 없습니다. 먼저 다른 선수를 빼거나 전술 화면에서 자리를 바꾸세요.')
+    const next = [...lineup]
+    next[i] = p.id
+    update({ lineup: next })
+    setMsg(`${p.name} → ${buildSlots(save.formation)[i].role} 자리`)
   }
 
   const auto = () => {
@@ -49,7 +56,7 @@ export default function Squad() {
       </div>
 
       <div className={`card lineup-status ${ok && !blocked.length ? 'ok' : 'warn'}`}>
-        <strong>선발 {save.lineup.length} / 11</strong>
+        <strong>선발 {selected.size} / 11</strong>
         {Object.entries(needs).map(([pos, n]) => (
           <span key={pos} className={counts[pos] === n ? 'ok' : 'warn'}>{pos} {counts[pos]}/{n}</span>
         ))}
@@ -102,7 +109,7 @@ export default function Squad() {
                     <td className="sq-sel">{selected.has(p.id) ? '●' : ''}</td>
                     <td className="left">
                       <div className="sq-name">
-                        <span className="lu-pos">{p.pos}</span>
+                        <span className="lu-pos">{roleOf(p)}</span>
                         <Flag nation={p.nation} size={14} /><strong>{p.name}</strong>
                         {st.inj > 0 && <em>🚑{st.inj}</em>}{st.susp > 0 && <em>🟥{st.susp}</em>}{st.wantsOut && <em>✈️</em>}
                       </div>
