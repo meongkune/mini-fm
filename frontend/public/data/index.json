@@ -15,6 +15,18 @@
      "teams": 20
     }
    ]
+  },
+  {
+   "id": "bundesliga",
+   "name": "분데스리가",
+   "country": "독일",
+   "seasons": [
+    {
+     "id": "2025-26",
+     "file": "bundesliga/2025-26.json",
+     "teams": 18
+    }
+   ]
   }
  ]
 }
