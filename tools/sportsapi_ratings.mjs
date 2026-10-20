@@ -114,7 +114,10 @@ try {
     }
     if (!Object.keys(L.teams).length) {
       const d = await tryGet(`/api/tournament/${ut}/season/${L.season}/standings`)
-      for (const row of (d?.standings || d || [])[0]?.rows || []) L.teams[row.team.id] = { name: row.team.name, done: null }
+      // 순위표 형식: 평평한 목록 [{teamId, teamName}] 또는 그룹 [{rows: [{team: {id, name}}]}]
+      const st = d?.standings || []
+      const rows = st[0]?.rows ? st.flatMap((g) => g.rows.map((r) => ({ teamId: r.team.id, teamName: r.team.name }))) : st
+      for (const row of rows) L.teams[row.teamId] = { name: row.teamName, done: null }
       saveState()
     }
     const r = ratingsOf(lid)
