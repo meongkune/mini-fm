@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { buildSlots, fitOf } from '../engine/formation.js'
-import { MAX_SUBS, advance, benchOf, createMatch, dropInjured, ratings, reshape, step, substitute, summarize } from '../engine/match.js'
+import { buildSlots, fitOf, fitTone } from '../engine/formation.js'
+import { MAX_SUBS, advance, benchOf, createMatch, dropInjured, fillVacant, moveToVacant, ratings, reshape, step, substitute, summarize, swapPositions } from '../engine/match.js'
 import { TEAM_TALKS, teamTalkEffect } from '../game/season.js'
 import Rating, { CondBar } from '../components/Rating.jsx'
 import { Crest, Flag, Kit } from '../components/Badges.jsx'
@@ -51,6 +51,7 @@ export default function Match() {
 
 
   const match = matchRef.current
+  if (import.meta.env.DEV) window.__match = match // 개발 중 디버깅용
   const lastTick = match?.timeline.at(-1)
   const delay = SPEEDS[speed] * (TICK_MULT[lastTick?.k] || 1)
 
@@ -135,9 +136,11 @@ export default function Match() {
     }
     return false
   }
-  const continueShort = () => {
+  const continueShort = (keepOpen = false) => {
     if (interrupt) dropInjured(match, myIdx, interrupt.playerId)
-    setInterrupt(null); setSheet(null); rerender()
+    setInterrupt(null)
+    if (!keepOpen) setSheet(null)
+    rerender()
   }
   const finish = () => {
     setSaving(true)
@@ -292,9 +295,13 @@ export default function Match() {
 
       {sheet === 'subs' && (
         <SubsSheet
-          match={match} ctx={ctx} myIdx={myIdx} rt={rt} status={status} interrupt={interrupt}
+          match={match} ctx={ctx} myIdx={myIdx} rt={rt} status={status} interrupt={interrupt} kit={kits[myIdx].color}
           onSub={doSub}
-          onClose={() => { if (interrupt) continueShort(); else setSheet(null) }}
+          onFill={(role, inId) => { const ok = fillVacant(match, ctx, myIdx, role, inId); rerender(); return ok }}
+          onSwap={(a, b) => { swapPositions(match, ctx, myIdx, a, b); rerender() }}
+          onMove={(a, role) => { moveToVacant(match, ctx, myIdx, a, role); rerender() }}
+          onRestore={(snap) => { Object.assign(mySide, snap); match.events.push({ minute: match.minute, type: 'info', text: '↩️ 위치 변경을 되돌렸습니다' }); rerender() }}
+          onClose={() => { if (interrupt && mySide.onPitch.includes(interrupt.playerId)) continueShort(); else { setInterrupt(null); setSheet(null) } }}
           onContinueShort={continueShort}
         />
       )}
@@ -412,52 +419,100 @@ function LineupPanel({ match, ctx, kits, rt, myIdx, status }) {
   )
 }
 
-function SubsSheet({ match, ctx, myIdx, rt, status, interrupt, onSub, onClose, onContinueShort }) {
+// 교체·위치 변경: 경기장 자리를 눌러 고른 뒤
+//  - 다른 선수 자리를 누르면 두 선수 위치 맞바꾸기 (교체 카드 안 씀)
+//  - 빈 자리를 누르면 그 자리로 이동 (원래 자리가 빈 자리가 됨)
+//  - 벤치 선수를 누르면 교체 (빈 자리면 채우기) — 교체 카드 1장
+function SubsSheet({ match, ctx, myIdx, rt, status, interrupt, kit, onSub, onFill, onSwap, onMove, onRestore, onClose, onContinueShort }) {
   const sd = match.sides[myIdx]
   const team = ctx.teams[myIdx]
-  const [outId, setOutId] = useState(interrupt?.playerId ?? null)
-  const roleAt = (id) => sd.slots[sd.onPitch.indexOf(id)]
-  const onPitch = sd.onPitch.map((id) => team.players.find((p) => p.id === id)).filter(Boolean)
-  const out = onPitch.find((p) => p.id === outId)
-  const outRole = out ? roleAt(out.id) : null
-  const bench = benchOf(match, ctx, myIdx).sort((a, b) => (outRole ? playerOvr(b) * fitOf(b, outRole) - playerOvr(a) * fitOf(a, outRole) : 0) || POS_ORDER[a.pos] - POS_ORDER[b.pos] || playerOvr(b) - playerOvr(a))
+  const byId = Object.fromEntries(team.players.map((p) => [p.id, p]))
+  const [sel, setSel] = useState(interrupt ? { kind: 'p', idx: sd.onPitch.indexOf(interrupt.playerId) } : null)
+  const [msg, setMsg] = useState('')
+  const [undo, setUndo] = useState(null) // 마지막 위치 변경 전 상태
+  const snapshot = () => ({ slots: [...sd.slots], vacant: [...(sd.vacant || [])] })
+
+  // 자리 좌표: 현재 전형의 자리에 뛰는 선수·빈 자리를 역할 순서대로 맞춘다
+  const all = buildSlots(sd.tactics.formation)
+  const used = new Set()
+  const place = (role) => { const k = all.findIndex((x, j) => !used.has(j) && x.role === role); if (k >= 0) { used.add(k); return all[k] } return { x: 50, y: 50 } }
+  const entries = [
+    ...sd.onPitch.map((id, i) => ({ kind: 'p', idx: i, id, role: sd.slots[i], ...place(sd.slots[i]) })),
+    ...(sd.vacant || []).map((role, v) => ({ kind: 'v', v, role, ...place(role) })),
+  ]
+  const same = (a, b) => a && b && a.kind === b.kind && (a.kind === 'p' ? a.idx === b.idx : a.v === b.v)
+  const selRole = sel ? (sel.kind === 'p' ? sd.slots[sel.idx] : sd.vacant[sel.v]) : null
+
+  const tapSlot = (e) => {
+    setMsg('')
+    if (!sel) return setSel(e)
+    if (same(sel, e)) return setSel(null)
+    if (sel.kind === 'p' && e.kind === 'p') { setUndo(snapshot()); onSwap(sel.idx, e.idx); setMsg('두 선수의 위치를 바꿨습니다.'); return setSel(null) }
+    if (sel.kind === 'p' && e.kind === 'v') { setUndo(snapshot()); onMove(sel.idx, e.role); setMsg(`${e.role} 자리로 옮겼습니다. 비게 된 자리에 교체 선수를 넣을 수 있습니다.`); return setSel(null) }
+    if (sel.kind === 'v' && e.kind === 'p') { setUndo(snapshot()); onMove(e.idx, sel.role); setMsg(`${sel.role} 자리로 옮겼습니다.`); return setSel(null) }
+    return setSel(e)
+  }
+  const tapBench = (p) => {
+    if (!sel) return setMsg('먼저 경기장에서 바꿀 자리를 고르세요.')
+    if (sd.subsLeft <= 0) return setMsg('교체 카드를 모두 썼습니다.')
+    const ok = sel.kind === 'v' ? onFill(sel.role, p.id) : onSub(sd.onPitch[sel.idx], p.id)
+    if (ok) { setMsg(`${p.name} 투입`); setSel(null); setUndo(null) } // 교체는 되돌릴 수 없다
+  }
+  const injuredOnPitch = interrupt && sd.onPitch.includes(interrupt.playerId)
+  const bench = benchOf(match, ctx, myIdx).sort((a, b) => (selRole ? playerOvr(b) * fitOf(b, selRole) - playerOvr(a) * fitOf(a, selRole) : 0) || POS_ORDER[a.pos] - POS_ORDER[b.pos] || playerOvr(b) - playerOvr(a))
+
   return (
     <div className="sheet-wrap" onClick={onClose}>
       <div className="sheet" onClick={(e) => e.stopPropagation()}>
         <div className="sheet-head">
-          <h3>교체 <span className="muted small">남은 횟수 {sd.subsLeft}/{MAX_SUBS}</span></h3>
-          <button className="btn ghost small" onClick={onClose}>{interrupt ? '교체 없이 계속' : '닫기'}</button>
+          <h3>교체·위치 <span className="muted small">교체 {sd.subsLeft}/{MAX_SUBS} · {sd.onPitch.length}명 출전</span></h3>
+          <button className="btn ghost small" onClick={onClose}>{injuredOnPitch ? '10명으로 계속' : '닫기'}</button>
         </div>
-        {interrupt && <p className="notice bad">🚑 {interrupt.name} 선수가 다쳤습니다. 교체하지 않으면 한 명 적게 뜁니다.</p>}
-        {sd.subsLeft <= 0 && <p className="notice">교체 카드를 모두 썼습니다.</p>}
-        <h4>① 뺄 선수</h4>
-        <ul className="pick-list">
-          {onPitch.map((p) => (
-            <li key={p.id}>
-              <button className={`pick ${outId === p.id ? 'on' : ''}`} onClick={() => setOutId(p.id)}>
-                <span className="lu-pos">{roleAt(p.id)}</span>
-                <span className="lu-name">{p.name}{sd.injured.includes(p.id) ? ' 🚑' : ''}{match.ps[p.id]?.yc ? ' 🟨' : ''}</span>
-                <CondBar value={sd.energy[p.id]} />
-                <Rating value={rt[p.id]} />
+        {injuredOnPitch && <p className="notice bad">🚑 {interrupt.name} 선수가 다쳤습니다. 바로 교체하거나, 다른 선수를 그 자리로 옮기고 빈 자리를 채우거나, 일단 10명으로 계속한 뒤 나중에 채울 수 있습니다.</p>}
+        <p className="small muted" style={{ margin: '0 0 6px' }}>
+          {!sel ? '① 경기장에서 자리를 누르세요.' : sel.kind === 'v' ? `② ${sel.role} 빈 자리 — 벤치 선수를 넣거나 경기장의 다른 선수를 눌러 이 자리로 옮기세요.` : `② ${byId[sd.onPitch[sel.idx]]?.name} (${selRole}) — 다른 선수를 누르면 위치 교환, 빈 자리를 누르면 이동, 벤치 선수를 누르면 교체.`}
+        </p>
+        <div className="slot-pitch small">
+          <div className="sp-lines" aria-hidden="true"><i className="half" /><i className="circle" /><i className="box top" /><i className="box bottom" /></div>
+          {entries.map((e) => {
+            const p = e.kind === 'p' ? byId[e.id] : null
+            const fit = p ? fitOf(p, e.role) : 0
+            const hurt = p && sd.injured.includes(p.id)
+            return (
+              <button key={e.kind + (e.kind === 'p' ? e.idx : e.v)} className={`slot ${p ? `fit-${fitTone(fit)}` : 'empty'} ${same(sel, e) ? 'active' : ''} ${hurt ? 'hurt' : ''}`}
+                style={{ left: `${e.x}%`, top: `${100 - e.y}%` }} onClick={() => tapSlot(e)}>
+                {p ? <Kit color={kit} number={p.number} size={26} /> : <span className="slot-plus">+</span>}
+                <span className="slot-role">{e.role}</span>
+                {p && <span className="slot-name">{hurt ? '🚑 ' : ''}{p.name.split(' ').at(-1)}</span>}
+                {p && <span className="slot-energy"><i style={{ width: `${Math.round(sd.energy[p.id] ?? 100)}%` }} /></span>}
               </button>
-            </li>
-          ))}
-        </ul>
-        <h4>② 들어갈 선수 {out && <span className="muted small">— {outRole} 자리 적합도 순</span>}</h4>
+            )
+          })}
+        </div>
+        {msg && (
+          <p className="small notice row between">
+            <span>{msg}</span>
+            {undo && <button className="linkish" onClick={() => { onRestore(undo); setUndo(null); setMsg('위치 변경을 되돌렸습니다.') }}>↩️ 되돌리기</button>}
+          </p>
+        )}
+        <h4>벤치 {selRole && <span className="muted small">— {selRole} 자리 적합도 순</span>}</h4>
         <ul className="pick-list">
-          {bench.map((p) => (
-            <li key={p.id}>
-              <button className="pick" disabled={!outId || sd.subsLeft <= 0} onClick={() => { if (onSub(outId, p.id)) setOutId(null) }}>
-                <span className="lu-pos">{p.pos}</span>
-                <span className="lu-name">{p.name} <span className="muted small">{p.role} · {outRole ? `${Math.round(playerOvr(p) * fitOf(p, outRole))} (${outRole})` : `OVR ${playerOvr(p)}`}</span></span>
-                <CondBar value={status[p.id]?.cond} />
-                <span className="pick-go">투입</span>
-              </button>
-            </li>
-          ))}
+          {bench.map((p) => {
+            const fit = selRole ? fitOf(p, selRole) : 1
+            return (
+              <li key={p.id}>
+                <button className="pick" disabled={sd.subsLeft <= 0} onClick={() => tapBench(p)}>
+                  <span className={`role-chip ${selRole ? fitTone(fit) : ''}`}>{p.role}</span>
+                  <span className="lu-name"><Flag nation={p.nation} size={13} /> {p.name}</span>
+                  <CondBar value={status[p.id]?.cond} />
+                  <b className="pick-ovr">{Math.round(playerOvr(p) * fit)}</b>
+                </button>
+              </li>
+            )
+          })}
           {bench.length === 0 && <li className="muted small">투입할 수 있는 선수가 없습니다.</li>}
         </ul>
-        {interrupt && <button className="btn ghost wide" onClick={onContinueShort}>교체 없이 10명으로 계속</button>}
+        {injuredOnPitch && <button className="btn ghost wide" onClick={() => { onContinueShort(true); setSel(null) }}>부상 선수 빼고 자리 비워 두기</button>}
       </div>
     </div>
   )

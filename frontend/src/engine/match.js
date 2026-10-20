@@ -61,7 +61,7 @@ export function createMatch({ home, away, homeCfg = {}, awayCfg = {}, seed, stat
     ids.forEach((id, i) => { if (id) { onPitch.push(id); slotRoles.push(slots[i]) } })
     const energy = {}
     for (const p of team.players) energy[p.id] = status[p.id]?.cond ?? 100
-    return { teamId: team.id, name: team.short || team.name, tactics, onPitch, slots: slotRoles, subsLeft: MAX_SUBS, subs: [], sentOff: [], injured: [], yellows: {}, energy }
+    return { teamId: team.id, name: team.short || team.name, tactics, onPitch, slots: slotRoles, vacant: [], subsLeft: MAX_SUBS, subs: [], sentOff: [], injured: [], yellows: {}, energy }
   }
   const s = seed ?? Math.floor(Math.random() * 1e9) + 1
   const match = {
@@ -351,15 +351,67 @@ export function reshape(match, ctx, idx, formation) {
   const playing = { players: sd.onPitch.map((id) => team.players.find((p) => p.id === id)).filter(Boolean) }
   const slots = buildSlots(formation).map((x) => x.role)
   const ids = assignSlots(playing, formation, { useCondition: false })
+  const fillable = (sd.vacant || []).length // 퇴장으로 빈 자리는 채울 수 없고, 부상으로 비운 자리 수만 유지
   sd.onPitch = []
   sd.slots = []
-  ids.forEach((id, i) => { if (id) { sd.onPitch.push(id); sd.slots.push(slots[i]) } })
+  sd.vacant = []
+  ids.forEach((id, i) => {
+    if (id) { sd.onPitch.push(id); sd.slots.push(slots[i]) } else if (sd.vacant.length < fillable) sd.vacant.push(slots[i])
+  })
   sd.tactics = { ...sd.tactics, formation }
 }
 
 /** 내 팀이 다친 선수를 교체하지 않고 계속하면 빈 자리로 뛴다 */
 export function dropInjured(match, idx, id) {
-  if (match.sides[idx].onPitch.includes(id)) removeFromPitch(match, idx, id, match.minute)
+  const sd = match.sides[idx]
+  const i = sd.onPitch.indexOf(id)
+  if (i < 0) return
+  const role = sd.slots[i]
+  removeFromPitch(match, idx, id, match.minute)
+  sd.vacant = [...(sd.vacant || []), role]
+}
+
+/** 빈 자리(부상으로 비운 자리)에 교체 선수 투입 — 교체 카드 1장 */
+export function fillVacant(match, ctx, idx, role, inId) {
+  const sd = match.sides[idx]
+  const v = (sd.vacant || []).indexOf(role)
+  if (v < 0 || sd.subsLeft <= 0) return false
+  if (match.ps[inId] || !available(ctx.status, inId) || sd.injured.includes(inId)) return false
+  const pIn = ctx.teams[idx].players.find((p) => p.id === inId)
+  if (!pIn) return false
+  sd.vacant = sd.vacant.filter((_, j) => j !== v)
+  sd.onPitch = [...sd.onPitch, inId]
+  sd.slots = [...sd.slots, role]
+  sd.subsLeft--
+  sd.subs.push({ minute: match.minute, out: null, in: inId })
+  match.ps[inId] = emptyPs(match.minute)
+  match.events.push({ minute: match.minute, type: 'sub', team: idx, text: `🔁 ${sd.name} 교체: ${pIn.name} 투입 (${role} 빈 자리)` })
+  return true
+}
+
+/** 뛰고 있는 두 선수의 자리 맞바꾸기 (교체 카드 안 씀) */
+export function swapPositions(match, ctx, idx, a, b) {
+  const sd = match.sides[idx]
+  if (a === b || a < 0 || b < 0 || a >= sd.onPitch.length || b >= sd.onPitch.length) return false
+  const slots = [...sd.slots]
+  ;[slots[a], slots[b]] = [slots[b], slots[a]]
+  sd.slots = slots
+  const name = (id) => ctx.teams[idx].players.find((p) => p.id === id)?.name ?? ''
+  match.events.push({ minute: match.minute, type: 'info', text: `↔️ ${sd.name} 위치 변경: ${name(sd.onPitch[a])} → ${slots[a]}, ${name(sd.onPitch[b])} → ${slots[b]}` })
+  return true
+}
+
+/** 뛰고 있는 선수를 빈 자리로 옮긴다 (원래 자리가 빈 자리가 됨) */
+export function moveToVacant(match, ctx, idx, a, role) {
+  const sd = match.sides[idx]
+  const v = (sd.vacant || []).indexOf(role)
+  if (v < 0 || a < 0 || a >= sd.onPitch.length) return false
+  const old = sd.slots[a]
+  sd.slots = sd.slots.map((r, j) => (j === a ? role : r))
+  sd.vacant = sd.vacant.map((r, j) => (j === v ? old : r))
+  const name = ctx.teams[idx].players.find((p) => p.id === sd.onPitch[a])?.name ?? ''
+  match.events.push({ minute: match.minute, type: 'info', text: `↔️ ${sd.name} 위치 변경: ${name} ${old} → ${role} (${old} 자리 비움)` })
+  return true
 }
 
 /** 선수 평점 (6.0 기준, 3.0~10.0). 경기 중에도 지금까지 기준으로 계산할 수 있다 */

@@ -939,3 +939,12 @@ html.framed body { overflow: hidden; height: 100vh; }
 .swatches { display: flex; flex-wrap: wrap; gap: 8px; }
 .sw { width: 36px; height: 36px; border-radius: 50%; border: 2px solid rgba(255, 255, 255, .15); cursor: pointer; font-size: .6rem; font-weight: 900; color: #fff; text-shadow: 0 1px 2px rgba(0, 0, 0, .6); }
 .sw.on { border-color: #fff; box-shadow: 0 0 0 2px var(--accent); }
+
+/* 교체·위치 시트의 작은 경기장 */
+.slot-pitch.small { aspect-ratio: 68 / 80; margin: 2px 0 6px; }
+.slot-pitch.small .slot { width: 58px; }
+.slot.hurt .kit { box-shadow: 0 0 0 2px #ef4444; animation: hurt 1s ease-in-out infinite; }
+@keyframes hurt { 50% { box-shadow: 0 0 0 4px rgba(239, 68, 68, .4); } }
+.slot.empty .slot-plus { border-color: #fca5a5; color: #fca5a5; }
+.slot-energy { width: 30px; height: 3px; border-radius: 2px; background: rgba(0, 0, 0, .4); overflow: hidden; }
+.slot-energy i { display: block; height: 100%; background: #22c55e; }
