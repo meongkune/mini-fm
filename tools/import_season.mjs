@@ -61,6 +61,24 @@ export function mapPosition(pos) {
   return null
 }
 
+// 세부 포지션(역할): API가 "Defence"처럼 넓게만 주면 null → 앱에서 능력치로 추정
+export function mapRole(pos) {
+  const p = (pos || '').toLowerCase()
+  if (p.includes('goal')) return 'GK'
+  if (p.includes('left') && p.includes('back')) return 'LB'
+  if (p.includes('right') && p.includes('back')) return 'RB'
+  if (p.includes('centre-back') || p.includes('center-back') || p.includes('centre back')) return 'CB'
+  if (p.includes('defensive mid')) return 'DM'
+  if (p.includes('attacking mid')) return 'AM'
+  if (p.includes('left mid')) return 'LM'
+  if (p.includes('right mid')) return 'RM'
+  if (p.includes('central mid')) return 'CM'
+  if (p.includes('left wing')) return 'LW'
+  if (p.includes('right wing')) return 'RW'
+  if (p.includes('forward') || p.includes('striker')) return 'ST'
+  return null
+}
+
 // 문자열 → 0~1 고정 난수 (FNV-1a + mulberry32)
 function seeded(str) {
   let h = 2166136261
@@ -146,6 +164,7 @@ export function transform({ competition, seasonYear, teamsResp, prevStandingsRes
           id: `${tla}-${p.id}`, // API 선수 ID 기반이라 다시 가져와도 같은 선수는 같은 ID
           name: p.name,
           pos: p.pos,
+          ...(mapRole(p.position) ? { role: mapRole(p.position) } : {}),
           number: Number(p.shirtNumber) || 0,
           age,
           att: clamp(b + ab + (rnd() - 0.5) * 12),
