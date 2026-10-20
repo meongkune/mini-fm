@@ -39,6 +39,18 @@
      "teams": 20
     }
    ]
+  },
+  {
+   "id": "serie-a",
+   "name": "세리에 A",
+   "country": "이탈리아",
+   "seasons": [
+    {
+     "id": "2025-26",
+     "file": "serie-a/2025-26.json",
+     "teams": 20
+    }
+   ]
   }
  ]
 }
