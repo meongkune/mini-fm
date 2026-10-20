@@ -346,8 +346,8 @@
   },
   {
    "id": "BRE",
-   "name": "FC 디나모 브레스트",
-   "short": "브레스트",
+   "name": "스타드 브레스투아 29",
+   "short": "브레스투아",
    "color": "#F5F5F5",
    "alt": "#D7262F",
    "ext": 512,
@@ -2229,8 +2229,8 @@
   },
   {
    "id": "PSG",
-   "name": "PSG",
-   "short": "PSG",
+   "name": "파리 생제르맹 FC",
+   "short": "파리 생제르맹",
    "color": "#D7262F",
    "alt": "#1F4FB0",
    "ext": 524,
