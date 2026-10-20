@@ -77,30 +77,34 @@ const ours = {}
 for (const l of index.leagues) {
   if (!TOURNAMENTS[l.id]) continue
   const season = JSON.parse(fs.readFileSync(path.join(DATA, l.seasons[0].file), 'utf8'))
-  ours[l.id] = season.teams.flatMap((t) => t.players)
+  ours[l.id] = season.teams.flatMap((t) => t.players.map((p) => ({ ...p, lid: l.id })))
 }
+// 이적·강등으로 리그가 바뀐 선수도 찾도록 전체 리그에서 매칭한다
+const everyone = Object.values(ours).flat()
+const R = {}
+const ratingsFor = (lid) => (R[lid] ||= ratingsOf(lid))
 fs.mkdirSync(OUT, { recursive: true })
 const ratingsOf = (lid) => { const f = path.join(OUT, `${lid}.json`); return fs.existsSync(f) ? JSON.parse(fs.readFileSync(f, 'utf8')) : { players: {} } }
 const writeRatings = (lid, r) => fs.writeFileSync(path.join(OUT, `${lid}.json`), JSON.stringify({ source: 'SportsAPI Pro 시장가치·능력치로 계산한 게임용 값', updatedAt: today, players: r.players }, null, 0) + '\n')
 
-/** SportsAPI 선수 → 우리 선수 (이름이 같거나, 성·이니셜이 같고 나이 차 1 이하) */
+/**
+ * SportsAPI 선수 → 우리 선수
+ * 1) 이름이 같고 나이 차 1 이하  2) 성·이름 첫 글자가 같고 나이 차 1 이하
+ * 3) 우리 데이터가 한 단어 이름(예: Martinelli, Rodri)이면 그 단어가 상대 이름에 있고 나이 차 1 이하 — 후보가 하나일 때만
+ */
 function matchPlayer(list, sp) {
   const full = norm(sp.name)
   const age = ageOf(sp.dateOfBirthTimestamp)
-  const exact = list.filter((p) => norm(p.name) === full)
-  if (exact.length === 1) return exact[0]
+  const near = (p) => age === null || p.age == null || Math.abs(p.age - age) <= 1
+  const one = (c) => (c.length === 1 ? c[0] : null)
   const parts = full.split(' ')
-  const last = parts.at(-1)
-  const cand = list.filter((p) => {
-    const q = norm(p.name).split(' ')
-    return q.at(-1) === last && q[0][0] === parts[0][0] && (age === null || Math.abs((p.age ?? age) - age) <= 1)
-  })
-  return cand.length === 1 ? cand[0] : null
+  return one(list.filter((p) => norm(p.name) === full && near(p)))
+    || one(list.filter((p) => { const q = norm(p.name).split(' '); return q.length > 1 && q.at(-1) === parts.at(-1) && q[0][0] === parts[0][0] && near(p) }))
+    || one(list.filter((p) => { const q = norm(p.name).split(' '); return q.length === 1 && parts.includes(q[0]) && near(p) }))
 }
 
 let matched = 0
 let attrDone = 0
-const cache = {} // 2단계에서 고친 리그별 결과 (끝날 때 저장)
 try {
   // 1단계: 시즌·팀 목록·명단
   for (const [lid, ut] of Object.entries(TOURNAMENTS)) {
@@ -120,24 +124,23 @@ try {
       for (const row of rows) L.teams[row.teamId] = { name: row.teamName, done: null }
       saveState()
     }
-    const r = ratingsOf(lid)
     for (const [tid, t] of Object.entries(L.teams)) {
-      if (t.done) continue
+      if (t.done && (Date.parse(today) - Date.parse(t.done)) / 864e5 < 60) continue // 60일 지나면 다시 받아 이적·부상 반영
       const d = await tryGet(`/api/teams/${tid}/players`)
       for (const { player: sp } of d?.players || []) {
-        const p = matchPlayer(ours[lid], sp)
+        const p = matchPlayer(everyone, sp)
         const mv = sp.proposedMarketValueRaw?.value ?? sp.proposedMarketValue
         if (!p || !mv) continue
         const role = ROLE[sp.positionsDetailed?.[0]]
         const useRole = role && ROLE_POS[role] === p.pos ? role : p.role
         const age = ageOf(sp.dateOfBirthTimestamp) ?? p.age
         const ovr = ovrFrom(mv, age, useRole)
-        r.players[p.id] = { ...split(ovr, p.pos, GAP[useRole] ?? 0), ...(useRole ? { role: useRole } : {}) }
-        state.players[p.id] = { sid: sp.id, lid, ovr, attr: state.players[p.id]?.attr || null }
+        ratingsFor(p.lid).players[p.id] = { ...split(ovr, p.pos, GAP[useRole] ?? 0), ...(useRole ? { role: useRole } : {}) }
+        state.players[p.id] = { sid: sp.id, lid: p.lid, ovr, attr: state.players[p.id]?.attr || null }
         matched++
       }
       t.done = today
-      writeRatings(lid, r)
+      for (const [l, r] of Object.entries(R)) writeRatings(l, r)
       saveState()
       console.log(`  ${lid} · ${t.name}: 명단 반영`)
     }
@@ -149,7 +152,7 @@ try {
     const cur = (d?.playerAttributeOverviews || []).sort((a, b) => a.yearShift - b.yearShift)[0]
     s.attr = today
     if (cur && cur.position !== 'G') {
-      const r = (cache[s.lid] ||= ratingsOf(s.lid))
+      const r = ratingsFor(s.lid)
       const p = ours[s.lid].find((x) => x.id === pid)
       const gap = Math.max(-28, Math.min(28, ((cur.attacking + cur.creativity) / 2 - cur.defending) * 0.45))
       r.players[pid] = { ...r.players[pid], ...split(s.ovr, p.pos, gap) }
@@ -162,7 +165,7 @@ try {
   if (!e.budget) throw e
   console.log(`⏸ ${e.message} — 내일 이어서 진행합니다`)
 } finally {
-  for (const [lid, r] of Object.entries(cache)) writeRatings(lid, r)
+  for (const [lid, r] of Object.entries(R)) writeRatings(lid, r)
   saveState()
 }
 console.log(`요청 ${calls}회 · 명단 매칭 ${matched}명 · 레이더 보정 ${attrDone}명 · 남은 요청 ${remaining}`)
