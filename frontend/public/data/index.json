@@ -87,6 +87,18 @@
      "teams": 20
     }
    ]
+  },
+  {
+   "id": "ligue-1",
+   "name": "리그 1",
+   "country": "프랑스",
+   "seasons": [
+    {
+     "id": "2025-26",
+     "file": "ligue-1/2025-26.json",
+     "teams": 18
+    }
+   ]
   }
  ]
 }
