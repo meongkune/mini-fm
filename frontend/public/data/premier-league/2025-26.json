@@ -5,7 +5,7 @@
   "country": "잉글랜드"
  },
  "season": "2025-26",
- "updatedAt": "2026-10-19",
+ "updatedAt": "2026-10-20",
  "source": "football-data.org (PL 2025)",
  "zones": [
   {
@@ -5599,12 +5599,13 @@
      "name": "Romelle Donovan",
      "pos": "FW",
      "number": 29,
-     "age": 51,
+     "age": 19,
      "att": 71,
      "def": 44,
      "sta": 68,
      "nation": "England",
-     "ext": 191077
+     "ext": 191077,
+     "manual": true
     }
    ]
   },
