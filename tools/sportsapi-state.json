@@ -352,62 +352,402 @@
     },
     "1648": {
      "name": "RC Lens",
-     "done": null
+     "done": "2026-10-21"
     },
     "1649": {
      "name": "Olympique Lyonnais",
-     "done": null
+     "done": "2026-10-21"
     },
     "1652": {
      "name": "Troyes",
-     "done": null
+     "done": "2026-10-21"
     },
     "1653": {
      "name": "AS Monaco",
-     "done": null
+     "done": "2026-10-21"
     },
     "1656": {
      "name": "Lorient",
-     "done": null
+     "done": "2026-10-21"
     },
     "1658": {
      "name": "Stade Rennais",
-     "done": null
+     "done": "2026-10-21"
     },
     "1659": {
      "name": "RC Strasbourg",
-     "done": null
+     "done": "2026-10-21"
     },
     "1661": {
      "name": "Nice",
-     "done": null
+     "done": "2026-10-21"
     },
     "1662": {
      "name": "Le Havre",
-     "done": null
+     "done": "2026-10-21"
     },
     "1672": {
      "name": "Le Mans",
-     "done": null
+     "done": "2026-10-21"
     },
     "1681": {
      "name": "Toulouse",
-     "done": null
+     "done": "2026-10-21"
     },
     "1684": {
      "name": "Angers",
-     "done": null
+     "done": "2026-10-21"
     },
     "1715": {
      "name": "Stade Brestois",
-     "done": null
+     "done": "2026-10-21"
     },
     "6070": {
      "name": "Paris FC",
-     "done": null
+     "done": "2026-10-21"
     }
    },
    "season": 96127
+  },
+  "eredivisie": {
+   "teams": {
+    "2948": {
+     "name": "FC Utrecht",
+     "done": "2026-10-21"
+    },
+    "2950": {
+     "name": "AZ Alkmaar",
+     "done": "2026-10-21"
+    },
+    "2951": {
+     "name": "FC Groningen",
+     "done": "2026-10-21"
+    },
+    "2952": {
+     "name": "PSV Eindhoven",
+     "done": "2026-10-21"
+    },
+    "2953": {
+     "name": "AFC Ajax",
+     "done": "2026-10-21"
+    },
+    "2955": {
+     "name": "FC Twente",
+     "done": "2026-10-21"
+    },
+    "2957": {
+     "name": "Fortuna Sittard",
+     "done": "2026-10-21"
+    },
+    "2959": {
+     "name": "Feyenoord",
+     "done": "2026-10-21"
+    },
+    "2960": {
+     "name": "Sparta Rotterdam",
+     "done": "2026-10-21"
+    },
+    "2961": {
+     "name": "Willem II Tilburg",
+     "done": "2026-10-21"
+    },
+    "2962": {
+     "name": "NEC Nijmegen",
+     "done": "2026-10-21"
+    },
+    "2964": {
+     "name": "SC Heerenveen",
+     "done": "2026-10-21"
+    },
+    "2966": {
+     "name": "ADO Den Haag",
+     "done": "2026-10-21"
+    },
+    "2967": {
+     "name": "Excelsior",
+     "done": "2026-10-21"
+    },
+    "2970": {
+     "name": "SC Cambuur",
+     "done": "2026-10-21"
+    },
+    "2971": {
+     "name": "PEC Zwolle",
+     "done": "2026-10-21"
+    },
+    "2972": {
+     "name": "SC Telstar",
+     "done": "2026-10-21"
+    },
+    "2979": {
+     "name": "Go Ahead Eagles",
+     "done": "2026-10-21"
+    }
+   },
+   "season": 96143
+  },
+  "primeira-liga": {
+   "teams": {
+    "2999": {
+     "name": "Sporting Braga",
+     "done": "2026-10-21"
+    },
+    "3001": {
+     "name": "Sporting CP",
+     "done": "2026-10-21"
+    },
+    "3002": {
+     "name": "FC Porto",
+     "done": "2026-10-21"
+    },
+    "3006": {
+     "name": "Benfica",
+     "done": "2026-10-21"
+    },
+    "3007": {
+     "name": "CS Marítimo",
+     "done": "2026-10-21"
+    },
+    "3009": {
+     "name": "Vitória SC",
+     "done": "2026-10-21"
+    },
+    "3010": {
+     "name": "Gil Vicente",
+     "done": "2026-10-21"
+    },
+    "3011": {
+     "name": "Santa Clara",
+     "done": "2026-10-21"
+    },
+    "3013": {
+     "name": "CD Nacional",
+     "done": "2026-10-21"
+    },
+    "3014": {
+     "name": "Moreirense",
+     "done": "2026-10-21"
+    },
+    "3022": {
+     "name": "Académico Viseu FC",
+     "done": "2026-10-21"
+    },
+    "3035": {
+     "name": "CF Estrela Amadora",
+     "done": "2026-10-21"
+    },
+    "3036": {
+     "name": "Rio Ave",
+     "done": "2026-10-21"
+    },
+    "4500": {
+     "name": "Estoril Praia",
+     "done": "2026-10-21"
+    },
+    "25777": {
+     "name": "FC Arouca",
+     "done": "2026-10-21"
+    },
+    "36365": {
+     "name": "Casa Pia",
+     "done": "2026-10-21"
+    },
+    "49531": {
+     "name": "Famalicão",
+     "done": "2026-10-21"
+    },
+    "190328": {
+     "name": "FC Alverca",
+     "done": "2026-10-21"
+    }
+   },
+   "season": 97436
+  },
+  "championship": {
+   "teams": {
+    "1": {
+     "name": "Queens Park Rangers",
+     "done": "2026-10-21"
+    },
+    "2": {
+     "name": "Portsmouth",
+     "done": "2026-10-21"
+    },
+    "3": {
+     "name": "Wolverhampton",
+     "done": "2026-10-21"
+    },
+    "5": {
+     "name": "Bolton Wanderers",
+     "done": "2026-10-21"
+    },
+    "6": {
+     "name": "Burnley",
+     "done": "2026-10-21"
+    },
+    "8": {
+     "name": "West Bromwich Albion",
+     "done": "2026-10-21"
+    },
+    "9": {
+     "name": "Birmingham City",
+     "done": "2026-10-21"
+    },
+    "15": {
+     "name": "Sheffield United",
+     "done": "2026-10-21"
+    },
+    "21": {
+     "name": "Preston North End",
+     "done": "2026-10-21"
+    },
+    "24": {
+     "name": "Watford",
+     "done": "2026-10-21"
+    },
+    "25": {
+     "name": "Millwall",
+     "done": "2026-10-21"
+    },
+    "27": {
+     "name": "Derby County",
+     "done": "2026-10-21"
+    },
+    "29": {
+     "name": "Stoke City",
+     "done": "2026-10-21"
+    },
+    "36": {
+     "name": "Middlesbrough",
+     "done": "2026-10-21"
+    },
+    "37": {
+     "name": "West Ham United",
+     "done": "2026-10-21"
+    },
+    "45": {
+     "name": "Southampton",
+     "done": "2026-10-21"
+    },
+    "46": {
+     "name": "Blackburn Rovers",
+     "done": "2026-10-21"
+    },
+    "47": {
+     "name": "Charlton Athletic",
+     "done": "2026-10-21"
+    },
+    "58": {
+     "name": "Bristol City",
+     "done": "2026-10-21"
+    },
+    "61": {
+     "name": "Cardiff City",
+     "done": "2026-10-21"
+    },
+    "64": {
+     "name": "Wrexham",
+     "done": "2026-10-21"
+    },
+    "74": {
+     "name": "Swansea City",
+     "done": "2026-10-21"
+    },
+    "92": {
+     "name": "Lincoln City",
+     "done": "2026-10-21"
+    },
+    "263": {
+     "name": "Norwich City",
+     "done": "2026-10-21"
+    }
+   },
+   "season": 97037
+  },
+  "brasileirao": {
+   "teams": {
+    "1954": {
+     "name": "Cruzeiro",
+     "done": "2026-10-21"
+    },
+    "1955": {
+     "name": "Bahia",
+     "done": "2026-10-21"
+    },
+    "1957": {
+     "name": "Corinthians",
+     "done": "2026-10-21"
+    },
+    "1958": {
+     "name": "Botafogo",
+     "done": "2026-10-21"
+    },
+    "1961": {
+     "name": "Fluminense",
+     "done": "2026-10-21"
+    },
+    "1962": {
+     "name": "Vitória",
+     "done": "2026-10-21"
+    },
+    "1963": {
+     "name": "Palmeiras",
+     "done": "2026-10-21"
+    },
+    "1966": {
+     "name": "Internacional",
+     "done": "2026-10-21"
+    },
+    "1967": {
+     "name": "Athletico",
+     "done": "2026-10-21"
+    },
+    "1968": {
+     "name": "Santos",
+     "done": "2026-10-21"
+    },
+    "1974": {
+     "name": "Vasco da Gama",
+     "done": "2026-10-21"
+    },
+    "1977": {
+     "name": "Atlético Mineiro",
+     "done": "2026-10-21"
+    },
+    "1981": {
+     "name": "São Paulo",
+     "done": "2026-10-21"
+    },
+    "1982": {
+     "name": "Coritiba",
+     "done": null
+    },
+    "1999": {
+     "name": "Red Bull Bragantino",
+     "done": null
+    },
+    "2012": {
+     "name": "Remo",
+     "done": null
+    },
+    "5926": {
+     "name": "Grêmio",
+     "done": null
+    },
+    "5981": {
+     "name": "Flamengo",
+     "done": null
+    },
+    "21845": {
+     "name": "Chapecoense",
+     "done": null
+    },
+    "21982": {
+     "name": "Mirassol",
+     "done": null
+    }
+   },
+   "season": 87678
   }
  },
  "players": {
@@ -898,9 +1238,9 @@
    "attr": null
   },
   "TOT-148289": {
-   "sid": 997183,
+   "sid": 996916,
    "lid": "premier-league",
-   "ovr": 83,
+   "ovr": 66,
    "attr": null
   },
   "NEW-2563": {
@@ -1312,9 +1652,9 @@
    "attr": null
   },
   "AVL-3141": {
-   "sid": 158263,
+   "sid": 794312,
    "lid": "premier-league",
-   "ovr": 85,
+   "ovr": 74,
    "attr": null
   },
   "CHE-175910": {
@@ -1498,9 +1838,9 @@
    "attr": null
   },
   "AVL-204460": {
-   "sid": 1138445,
+   "sid": 1402922,
    "lid": "premier-league",
-   "ovr": 60,
+   "ovr": 72,
    "attr": null
   },
   "SUN-83599": {
@@ -2152,9 +2492,9 @@
    "attr": null
   },
   "BOU-203356": {
-   "sid": 1464966,
+   "sid": 1521566,
    "lid": "premier-league",
-   "ovr": 82,
+   "ovr": 67,
    "attr": null
   },
   "BOU-137047": {
@@ -2272,9 +2612,9 @@
    "attr": null
   },
   "MAL-185178": {
-   "sid": 1183542,
+   "sid": 1083277,
    "lid": "la-liga",
-   "ovr": 70,
+   "ovr": 63,
    "attr": null
   },
   "ESP-81168": {
@@ -3250,9 +3590,9 @@
    "attr": null
   },
   "RMA-7887": {
-   "sid": 835485,
+   "sid": 867583,
    "lid": "la-liga",
-   "ovr": 84,
+   "ovr": 75,
    "attr": null
   },
   "RMA-102343": {
@@ -3604,9 +3944,9 @@
    "attr": null
   },
   "ELC-206810": {
-   "sid": 1092515,
+   "sid": 1211005,
    "lid": "la-liga",
-   "ovr": 67,
+   "ovr": 63,
    "attr": null
   },
   "ELC-151557": {
@@ -7396,9 +7736,9 @@
    "attr": null
   },
   "PSG-144570": {
-   "sid": 989768,
+   "sid": 1116955,
    "lid": "ligue-1",
-   "ovr": 85,
+   "ovr": 68,
    "attr": null
   },
   "PSG-3225": {
@@ -7507,6 +7847,7728 @@
    "sid": 987491,
    "lid": "ligue-1",
    "ovr": 73,
+   "attr": null
+  },
+  "RCL-16077": {
+   "sid": 795228,
+   "lid": "ligue-1",
+   "ovr": 79,
+   "attr": null
+  },
+  "RCL-3370": {
+   "sid": 148824,
+   "lid": "ligue-1",
+   "ovr": 79,
+   "attr": null
+  },
+  "RCL-151264": {
+   "sid": 1029018,
+   "lid": "ligue-1",
+   "ovr": 76,
+   "attr": null
+  },
+  "RCL-64837": {
+   "sid": 788921,
+   "lid": "ligue-1",
+   "ovr": 75,
+   "attr": null
+  },
+  "RCL-129098": {
+   "sid": 966849,
+   "lid": "ligue-1",
+   "ovr": 77,
+   "attr": null
+  },
+  "RCL-15704": {
+   "sid": 822708,
+   "lid": "ligue-1",
+   "ovr": 75,
+   "attr": null
+  },
+  "RCL-268900": {
+   "sid": 1423504,
+   "lid": "ligue-1",
+   "ovr": 73,
+   "attr": null
+  },
+  "RCL-8717": {
+   "sid": 787827,
+   "lid": "ligue-1",
+   "ovr": 77,
+   "attr": null
+  },
+  "RCL-8372": {
+   "sid": 579576,
+   "lid": "ligue-1",
+   "ovr": 76,
+   "attr": null
+  },
+  "WHU-79903": {
+   "sid": 945217,
+   "lid": "premier-league",
+   "ovr": 82,
+   "attr": null
+  },
+  "RCL-188148": {
+   "sid": 1099117,
+   "lid": "ligue-1",
+   "ovr": 79,
+   "attr": null
+  },
+  "RCL-216398": {
+   "sid": 1399503,
+   "lid": "ligue-1",
+   "ovr": 72,
+   "attr": null
+  },
+  "RCL-8449": {
+   "sid": 123226,
+   "lid": "ligue-1",
+   "ovr": 70,
+   "attr": null
+  },
+  "RCL-8579": {
+   "sid": 14841,
+   "lid": "ligue-1",
+   "ovr": 67,
+   "attr": null
+  },
+  "JUV-73215": {
+   "sid": 835480,
+   "lid": "serie-a",
+   "ovr": 82,
+   "attr": null
+  },
+  "LYO-121312": {
+   "sid": 957604,
+   "lid": "ligue-1",
+   "ovr": 81,
+   "attr": null
+  },
+  "LYO-184726": {
+   "sid": 1202024,
+   "lid": "ligue-1",
+   "ovr": 76,
+   "attr": null
+  },
+  "REN-48595": {
+   "sid": 905352,
+   "lid": "ligue-1",
+   "ovr": 79,
+   "attr": null
+  },
+  "LYO-175845": {
+   "sid": 979118,
+   "lid": "ligue-1",
+   "ovr": 81,
+   "attr": null
+  },
+  "LYO-366": {
+   "sid": 343067,
+   "lid": "ligue-1",
+   "ovr": 80,
+   "attr": null
+  },
+  "LYO-215864": {
+   "sid": 1195782,
+   "lid": "ligue-1",
+   "ovr": 75,
+   "attr": null
+  },
+  "LYO-142456": {
+   "sid": 1022084,
+   "lid": "ligue-1",
+   "ovr": 76,
+   "attr": null
+  },
+  "LYO-3208": {
+   "sid": 158243,
+   "lid": "ligue-1",
+   "ovr": 78,
+   "attr": null
+  },
+  "LYO-8723": {
+   "sid": 758168,
+   "lid": "ligue-1",
+   "ovr": 80,
+   "attr": null
+  },
+  "LYO-178964": {
+   "sid": 973838,
+   "lid": "ligue-1",
+   "ovr": 78,
+   "attr": null
+  },
+  "MIL-256424": {
+   "sid": 1409700,
+   "lid": "serie-a",
+   "ovr": 76,
+   "attr": null
+  },
+  "LYO-137655": {
+   "sid": 1014540,
+   "lid": "ligue-1",
+   "ovr": 77,
+   "attr": null
+  },
+  "EST-75196": {
+   "sid": 943525,
+   "lid": "primeira-liga",
+   "ovr": 76,
+   "attr": null
+  },
+  "LYO-79776": {
+   "sid": 791046,
+   "lid": "ligue-1",
+   "ovr": 80,
+   "attr": null
+  },
+  "LYO-733": {
+   "sid": 788180,
+   "lid": "ligue-1",
+   "ovr": 73,
+   "attr": null
+  },
+  "LYO-261256": {
+   "sid": 1481174,
+   "lid": "ligue-1",
+   "ovr": 56,
+   "attr": null
+  },
+  "FCL-182169": {
+   "sid": 1130307,
+   "lid": "ligue-1",
+   "ovr": 69,
+   "attr": null
+  },
+  "PAU-276437": {
+   "sid": 1082541,
+   "lid": "brasileirao",
+   "ovr": 67,
+   "attr": null
+  },
+  "BRE-187530": {
+   "sid": 1400993,
+   "lid": "ligue-1",
+   "ovr": 74,
+   "attr": null
+  },
+  "CSC-262199": {
+   "sid": 980421,
+   "lid": "brasileirao",
+   "ovr": 66,
+   "attr": null
+  },
+  "ASM-128040": {
+   "sid": 962883,
+   "lid": "ligue-1",
+   "ovr": 78,
+   "attr": null
+  },
+  "ASM-131040": {
+   "sid": 934237,
+   "lid": "ligue-1",
+   "ovr": 85,
+   "attr": null
+  },
+  "ASM-177260": {
+   "sid": 1083007,
+   "lid": "ligue-1",
+   "ovr": 79,
+   "attr": null
+  },
+  "NAN-170412": {
+   "sid": 999070,
+   "lid": "ligue-1",
+   "ovr": 81,
+   "attr": null
+  },
+  "ASM-204269": {
+   "sid": 1389846,
+   "lid": "ligue-1",
+   "ovr": 83,
+   "attr": null
+  },
+  "ASM-3683": {
+   "sid": 318963,
+   "lid": "ligue-1",
+   "ovr": 80,
+   "attr": null
+  },
+  "ASM-15100": {
+   "sid": 155818,
+   "lid": "ligue-1",
+   "ovr": 80,
+   "attr": null
+  },
+  "ASM-6687": {
+   "sid": 770677,
+   "lid": "ligue-1",
+   "ovr": 82,
+   "attr": null
+  },
+  "ASM-244898": {
+   "sid": 1410148,
+   "lid": "ligue-1",
+   "ovr": 78,
+   "attr": null
+  },
+  "ASM-67965": {
+   "sid": 825846,
+   "lid": "ligue-1",
+   "ovr": 80,
+   "attr": null
+  },
+  "ASM-154607": {
+   "sid": 1090694,
+   "lid": "ligue-1",
+   "ovr": 80,
+   "attr": null
+  },
+  "ASM-81039": {
+   "sid": 946158,
+   "lid": "ligue-1",
+   "ovr": 78,
+   "attr": null
+  },
+  "ASM-3314": {
+   "sid": 146101,
+   "lid": "ligue-1",
+   "ovr": 76,
+   "attr": null
+  },
+  "FCM-212866": {
+   "sid": 1471683,
+   "lid": "ligue-1",
+   "ovr": 76,
+   "attr": null
+  },
+  "ASM-188481": {
+   "sid": 1407848,
+   "lid": "ligue-1",
+   "ovr": 75,
+   "attr": null
+  },
+  "ASM-6696": {
+   "sid": 15219,
+   "lid": "ligue-1",
+   "ovr": 79,
+   "attr": null
+  },
+  "ASM-9535": {
+   "sid": 868964,
+   "lid": "ligue-1",
+   "ovr": 76,
+   "attr": null
+  },
+  "FCL-72551": {
+   "sid": 875548,
+   "lid": "ligue-1",
+   "ovr": 70,
+   "attr": null
+  },
+  "SPO-283132": {
+   "sid": 1002343,
+   "lid": "primeira-liga",
+   "ovr": 72,
+   "attr": null
+  },
+  "FCL-213749": {
+   "sid": 1405239,
+   "lid": "ligue-1",
+   "ovr": 69,
+   "attr": null
+  },
+  "AZ-153974": {
+   "sid": 1087931,
+   "lid": "eredivisie",
+   "ovr": 72,
+   "attr": null
+  },
+  "FCL-8437": {
+   "sid": 802138,
+   "lid": "ligue-1",
+   "ovr": 75,
+   "attr": null
+  },
+  "NIC-279671": {
+   "sid": 1893993,
+   "lid": "ligue-1",
+   "ovr": 65,
+   "attr": null
+  },
+  "FCL-290088": {
+   "sid": 2359766,
+   "lid": "ligue-1",
+   "ovr": 67,
+   "attr": null
+  },
+  "FCL-188658": {
+   "sid": 1402217,
+   "lid": "ligue-1",
+   "ovr": 73,
+   "attr": null
+  },
+  "FCL-150424": {
+   "sid": 954059,
+   "lid": "ligue-1",
+   "ovr": 60,
+   "attr": null
+  },
+  "FCL-106791": {
+   "sid": 993952,
+   "lid": "ligue-1",
+   "ovr": 77,
+   "attr": null
+  },
+  "FCL-172520": {
+   "sid": 1131540,
+   "lid": "ligue-1",
+   "ovr": 74,
+   "attr": null
+  },
+  "FCL-177695": {
+   "sid": 879618,
+   "lid": "ligue-1",
+   "ovr": 77,
+   "attr": null
+  },
+  "WAT-156630": {
+   "sid": 982316,
+   "lid": "championship",
+   "ovr": 70,
+   "attr": null
+  },
+  "FCL-187473": {
+   "sid": 1103079,
+   "lid": "ligue-1",
+   "ovr": 69,
+   "attr": null
+  },
+  "FCL-9534": {
+   "sid": 149656,
+   "lid": "ligue-1",
+   "ovr": 77,
+   "attr": null
+  },
+  "FCL-8771": {
+   "sid": 583312,
+   "lid": "ligue-1",
+   "ovr": 69,
+   "attr": null
+  },
+  "FCL-8554": {
+   "sid": 80392,
+   "lid": "ligue-1",
+   "ovr": 67,
+   "attr": null
+  },
+  "REN-149850": {
+   "sid": 966621,
+   "lid": "ligue-1",
+   "ovr": 84,
+   "attr": null
+  },
+  "SUN-178644": {
+   "sid": 1168588,
+   "lid": "premier-league",
+   "ovr": 77,
+   "attr": null
+  },
+  "HAC-133190": {
+   "sid": 1001458,
+   "lid": "ligue-1",
+   "ovr": 77,
+   "attr": null
+  },
+  "REN-575": {
+   "sid": 848458,
+   "lid": "ligue-1",
+   "ovr": 74,
+   "attr": null
+  },
+  "REN-10201": {
+   "sid": 847983,
+   "lid": "ligue-1",
+   "ovr": 80,
+   "attr": null
+  },
+  "REN-3540": {
+   "sid": 286909,
+   "lid": "ligue-1",
+   "ovr": 78,
+   "attr": null
+  },
+  "REN-96869": {
+   "sid": 806076,
+   "lid": "ligue-1",
+   "ovr": 78,
+   "attr": null
+  },
+  "REN-8695": {
+   "sid": 581314,
+   "lid": "ligue-1",
+   "ovr": 79,
+   "attr": null
+  },
+  "REN-246322": {
+   "sid": 1445628,
+   "lid": "ligue-1",
+   "ovr": 75,
+   "attr": null
+  },
+  "REN-8542": {
+   "sid": 916041,
+   "lid": "ligue-1",
+   "ovr": 79,
+   "attr": null
+  },
+  "RCL-8706": {
+   "sid": 231946,
+   "lid": "ligue-1",
+   "ovr": 76,
+   "attr": null
+  },
+  "REN-272594": {
+   "sid": 1597145,
+   "lid": "ligue-1",
+   "ovr": 77,
+   "attr": null
+  },
+  "TOU-150797": {
+   "sid": 1020744,
+   "lid": "ligue-1",
+   "ovr": 80,
+   "attr": null
+  },
+  "REN-160410": {
+   "sid": 1102502,
+   "lid": "ligue-1",
+   "ovr": 78,
+   "attr": null
+  },
+  "BEN-262856": {
+   "sid": 1432417,
+   "lid": "primeira-liga",
+   "ovr": 69,
+   "attr": null
+  },
+  "REN-150751": {
+   "sid": 991479,
+   "lid": "ligue-1",
+   "ovr": 79,
+   "attr": null
+  },
+  "REN-8316": {
+   "sid": 164055,
+   "lid": "ligue-1",
+   "ovr": 81,
+   "attr": null
+  },
+  "RC-203561": {
+   "sid": 1410925,
+   "lid": "ligue-1",
+   "ovr": 82,
+   "attr": null
+  },
+  "CSC-270341": {
+   "sid": 1485371,
+   "lid": "brasileirao",
+   "ovr": 74,
+   "attr": null
+  },
+  "RBL-206744": {
+   "sid": 1494826,
+   "lid": "bundesliga",
+   "ovr": 77,
+   "attr": null
+  },
+  "RC-206809": {
+   "sid": 1407484,
+   "lid": "ligue-1",
+   "ovr": 73,
+   "attr": null
+  },
+  "AJA-151552": {
+   "sid": 1047484,
+   "lid": "ligue-1",
+   "ovr": 72,
+   "attr": null
+  },
+  "HSV-220468": {
+   "sid": 1546267,
+   "lid": "bundesliga",
+   "ovr": 71,
+   "attr": null
+  },
+  "CHE-165314": {
+   "sid": 1110006,
+   "lid": "premier-league",
+   "ovr": 75,
+   "attr": null
+  },
+  "RC-244929": {
+   "sid": 1605921,
+   "lid": "ligue-1",
+   "ovr": 77,
+   "attr": null
+  },
+  "BMG-136733": {
+   "sid": 989056,
+   "lid": "bundesliga",
+   "ovr": 75,
+   "attr": null
+  },
+  "RC-210644": {
+   "sid": 1153355,
+   "lid": "ligue-1",
+   "ovr": 71,
+   "attr": null
+  },
+  "RC-204426": {
+   "sid": 1190938,
+   "lid": "ligue-1",
+   "ovr": 80,
+   "attr": null
+  },
+  "TOU-192686": {
+   "sid": 1410217,
+   "lid": "ligue-1",
+   "ovr": 74,
+   "attr": null
+  },
+  "RC-144643": {
+   "sid": 962068,
+   "lid": "ligue-1",
+   "ovr": 78,
+   "attr": null
+  },
+  "RC-147878": {
+   "sid": 1049517,
+   "lid": "ligue-1",
+   "ovr": 79,
+   "attr": null
+  },
+  "RC-205551": {
+   "sid": 1426597,
+   "lid": "ligue-1",
+   "ovr": 76,
+   "attr": null
+  },
+  "CHE-153828": {
+   "sid": 962053,
+   "lid": "premier-league",
+   "ovr": 81,
+   "attr": null
+  },
+  "WOB-180827": {
+   "sid": 1107591,
+   "lid": "bundesliga",
+   "ovr": 81,
+   "attr": null
+  },
+  "NIC-98601": {
+   "sid": 962064,
+   "lid": "ligue-1",
+   "ovr": 72,
+   "attr": null
+  },
+  "NIC-249675": {
+   "sid": 1214843,
+   "lid": "ligue-1",
+   "ovr": 63,
+   "attr": null
+  },
+  "NIC-123508": {
+   "sid": 985923,
+   "lid": "ligue-1",
+   "ovr": 79,
+   "attr": null
+  },
+  "GIR-3656": {
+   "sid": 35612,
+   "lid": "la-liga",
+   "ovr": 75,
+   "attr": null
+  },
+  "NIC-76723": {
+   "sid": 944164,
+   "lid": "ligue-1",
+   "ovr": 79,
+   "attr": null
+  },
+  "NIC-123206": {
+   "sid": 993455,
+   "lid": "ligue-1",
+   "ovr": 74,
+   "attr": null
+  },
+  "FCM-752": {
+   "sid": 842391,
+   "lid": "ligue-1",
+   "ovr": 75,
+   "attr": null
+  },
+  "BMG-98746": {
+   "sid": 962409,
+   "lid": "bundesliga",
+   "ovr": 74,
+   "attr": null
+  },
+  "NIC-8355": {
+   "sid": 250133,
+   "lid": "ligue-1",
+   "ovr": 75,
+   "attr": null
+  },
+  "FCL-566": {
+   "sid": 296434,
+   "lid": "ligue-1",
+   "ovr": 75,
+   "attr": null
+  },
+  "NIC-245563": {
+   "sid": 926506,
+   "lid": "ligue-1",
+   "ovr": 72,
+   "attr": null
+  },
+  "NIC-168667": {
+   "sid": 1120615,
+   "lid": "ligue-1",
+   "ovr": 75,
+   "attr": null
+  },
+  "NIC-99394": {
+   "sid": 919027,
+   "lid": "ligue-1",
+   "ovr": 73,
+   "attr": null
+  },
+  "REN-147893": {
+   "sid": 1049515,
+   "lid": "ligue-1",
+   "ovr": 75,
+   "attr": null
+  },
+  "NIC-172057": {
+   "sid": 985934,
+   "lid": "ligue-1",
+   "ovr": 77,
+   "attr": null
+  },
+  "NIC-192153": {
+   "sid": 1469180,
+   "lid": "ligue-1",
+   "ovr": 76,
+   "attr": null
+  },
+  "TOR-133292": {
+   "sid": 941179,
+   "lid": "serie-a",
+   "ovr": 72,
+   "attr": null
+  },
+  "NIC-8608": {
+   "sid": 845183,
+   "lid": "ligue-1",
+   "ovr": 79,
+   "attr": null
+  },
+  "WBA-4072": {
+   "sid": 852145,
+   "lid": "championship",
+   "ovr": 74,
+   "attr": null
+  },
+  "HAC-111230": {
+   "sid": 910076,
+   "lid": "ligue-1",
+   "ovr": 65,
+   "attr": null
+  },
+  "RC-182091": {
+   "sid": 1197153,
+   "lid": "ligue-1",
+   "ovr": 75,
+   "attr": null
+  },
+  "HAC-204279": {
+   "sid": 1490783,
+   "lid": "ligue-1",
+   "ovr": 70,
+   "attr": null
+  },
+  "HAC-263479": {
+   "sid": 1895829,
+   "lid": "ligue-1",
+   "ovr": 59,
+   "attr": null
+  },
+  "HAC-113230": {
+   "sid": 873221,
+   "lid": "ligue-1",
+   "ovr": 75,
+   "attr": null
+  },
+  "HAC-148288": {
+   "sid": 1824137,
+   "lid": "ligue-1",
+   "ovr": 69,
+   "attr": null
+  },
+  "LIL-9222": {
+   "sid": 878898,
+   "lid": "ligue-1",
+   "ovr": 72,
+   "attr": null
+  },
+  "FCM-456": {
+   "sid": 802159,
+   "lid": "ligue-1",
+   "ovr": 75,
+   "attr": null
+  },
+  "TOU-3362": {
+   "sid": 123388,
+   "lid": "ligue-1",
+   "ovr": 72,
+   "attr": null
+  },
+  "FEY-129381": {
+   "sid": 957937,
+   "lid": "eredivisie",
+   "ovr": 73,
+   "attr": null
+  },
+  "TOU-182406": {
+   "sid": 1002267,
+   "lid": "ligue-1",
+   "ovr": 71,
+   "attr": null
+  },
+  "TOU-81229": {
+   "sid": 878938,
+   "lid": "ligue-1",
+   "ovr": 78,
+   "attr": null
+  },
+  "TOU-250994": {
+   "sid": 1198264,
+   "lid": "ligue-1",
+   "ovr": 68,
+   "attr": null
+  },
+  "TOU-192688": {
+   "sid": 863133,
+   "lid": "ligue-1",
+   "ovr": 75,
+   "attr": null
+  },
+  "TOU-283443": {
+   "sid": 2193194,
+   "lid": "ligue-1",
+   "ovr": 75,
+   "attr": null
+  },
+  "MIL-202533": {
+   "sid": 1424191,
+   "lid": "serie-a",
+   "ovr": 71,
+   "attr": null
+  },
+  "TOU-77803": {
+   "sid": 922759,
+   "lid": "ligue-1",
+   "ovr": 77,
+   "attr": null
+  },
+  "TOU-24190": {
+   "sid": 798124,
+   "lid": "ligue-1",
+   "ovr": 75,
+   "attr": null
+  },
+  "TOU-178669": {
+   "sid": 1154630,
+   "lid": "ligue-1",
+   "ovr": 79,
+   "attr": null
+  },
+  "SCB-137515": {
+   "sid": 1014048,
+   "lid": "primeira-liga",
+   "ovr": 72,
+   "attr": null
+  },
+  "ANG-185033": {
+   "sid": 1392829,
+   "lid": "ligue-1",
+   "ovr": 75,
+   "attr": null
+  },
+  "ANG-746": {
+   "sid": 580642,
+   "lid": "ligue-1",
+   "ovr": 73,
+   "attr": null
+  },
+  "ANG-178075": {
+   "sid": 1195241,
+   "lid": "ligue-1",
+   "ovr": 75,
+   "attr": null
+  },
+  "ANG-53397": {
+   "sid": 190883,
+   "lid": "ligue-1",
+   "ovr": 74,
+   "attr": null
+  },
+  "ANG-177021": {
+   "sid": 1172936,
+   "lid": "ligue-1",
+   "ovr": 73,
+   "attr": null
+  },
+  "ANG-532": {
+   "sid": 794373,
+   "lid": "ligue-1",
+   "ovr": 71,
+   "attr": null
+  },
+  "ANG-113702": {
+   "sid": 1049538,
+   "lid": "ligue-1",
+   "ovr": 76,
+   "attr": null
+  },
+  "ANG-1020": {
+   "sid": 363042,
+   "lid": "ligue-1",
+   "ovr": 72,
+   "attr": null
+  },
+  "ANG-190546": {
+   "sid": 1442036,
+   "lid": "ligue-1",
+   "ovr": 68,
+   "attr": null
+  },
+  "NAN-3240": {
+   "sid": 48535,
+   "lid": "ligue-1",
+   "ovr": 77,
+   "attr": null
+  },
+  "ANG-186084": {
+   "sid": 963201,
+   "lid": "ligue-1",
+   "ovr": 64,
+   "attr": null
+  },
+  "ANG-244934": {
+   "sid": 1651830,
+   "lid": "ligue-1",
+   "ovr": 60,
+   "attr": null
+  },
+  "BRE-43707": {
+   "sid": 557166,
+   "lid": "ligue-1",
+   "ovr": 73,
+   "attr": null
+  },
+  "BRE-723": {
+   "sid": 343971,
+   "lid": "ligue-1",
+   "ovr": 75,
+   "attr": null
+  },
+  "LIL-212975": {
+   "sid": 1512354,
+   "lid": "ligue-1",
+   "ovr": 71,
+   "attr": null
+  },
+  "BRE-175942": {
+   "sid": 1156353,
+   "lid": "ligue-1",
+   "ovr": 78,
+   "attr": null
+  },
+  "BRE-218249": {
+   "sid": 1410231,
+   "lid": "ligue-1",
+   "ovr": 69,
+   "attr": null
+  },
+  "BRE-125677": {
+   "sid": 976396,
+   "lid": "ligue-1",
+   "ovr": 75,
+   "attr": null
+  },
+  "BRE-8465": {
+   "sid": 787889,
+   "lid": "ligue-1",
+   "ovr": 71,
+   "attr": null
+  },
+  "BRE-76145": {
+   "sid": 861324,
+   "lid": "ligue-1",
+   "ovr": 75,
+   "attr": null
+  },
+  "BRE-227982": {
+   "sid": 1499870,
+   "lid": "ligue-1",
+   "ovr": 65,
+   "attr": null
+  },
+  "BRE-171659": {
+   "sid": 1129382,
+   "lid": "ligue-1",
+   "ovr": 74,
+   "attr": null
+  },
+  "BRE-8778": {
+   "sid": 141080,
+   "lid": "ligue-1",
+   "ovr": 73,
+   "attr": null
+  },
+  "BRE-273433": {
+   "sid": 1894085,
+   "lid": "ligue-1",
+   "ovr": 76,
+   "attr": null
+  },
+  "BRE-441": {
+   "sid": 328035,
+   "lid": "ligue-1",
+   "ovr": 76,
+   "attr": null
+  },
+  "HAC-1004": {
+   "sid": 287887,
+   "lid": "ligue-1",
+   "ovr": 75,
+   "attr": null
+  },
+  "WAT-44441": {
+   "sid": 798176,
+   "lid": "championship",
+   "ovr": 73,
+   "attr": null
+  },
+  "AJA-552": {
+   "sid": 927005,
+   "lid": "ligue-1",
+   "ovr": 80,
+   "attr": null
+  },
+  "PFC-106896": {
+   "sid": 940328,
+   "lid": "ligue-1",
+   "ovr": 73,
+   "attr": null
+  },
+  "PFC-8381": {
+   "sid": 802142,
+   "lid": "ligue-1",
+   "ovr": 74,
+   "attr": null
+  },
+  "FCL-177248": {
+   "sid": 1174462,
+   "lid": "ligue-1",
+   "ovr": 79,
+   "attr": null
+  },
+  "PFC-108520": {
+   "sid": 1049442,
+   "lid": "ligue-1",
+   "ovr": 78,
+   "attr": null
+  },
+  "PFC-8352": {
+   "sid": 352802,
+   "lid": "ligue-1",
+   "ovr": 75,
+   "attr": null
+  },
+  "PFC-129221": {
+   "sid": 1507384,
+   "lid": "ligue-1",
+   "ovr": 74,
+   "attr": null
+  },
+  "PFC-277673": {
+   "sid": 1961626,
+   "lid": "ligue-1",
+   "ovr": 77,
+   "attr": null
+  },
+  "PFC-8439": {
+   "sid": 801306,
+   "lid": "ligue-1",
+   "ovr": 78,
+   "attr": null
+  },
+  "PFC-565": {
+   "sid": 795508,
+   "lid": "ligue-1",
+   "ovr": 70,
+   "attr": null
+  },
+  "PFC-116150": {
+   "sid": 981168,
+   "lid": "ligue-1",
+   "ovr": 74,
+   "attr": null
+  },
+  "PFC-8808": {
+   "sid": 362014,
+   "lid": "ligue-1",
+   "ovr": 74,
+   "attr": null
+  },
+  "PFC-169339": {
+   "sid": 982319,
+   "lid": "ligue-1",
+   "ovr": 78,
+   "attr": null
+  },
+  "PFC-245430": {
+   "sid": 1426221,
+   "lid": "ligue-1",
+   "ovr": 74,
+   "attr": null
+  },
+  "PFC-8900": {
+   "sid": 844744,
+   "lid": "ligue-1",
+   "ovr": 69,
+   "attr": null
+  },
+  "PFC-3175": {
+   "sid": 38440,
+   "lid": "ligue-1",
+   "ovr": 80,
+   "attr": null
+  },
+  "PFC-138022": {
+   "sid": 1015872,
+   "lid": "ligue-1",
+   "ovr": 76,
+   "attr": null
+  },
+  "EXC-189609": {
+   "sid": 1211982,
+   "lid": "eredivisie",
+   "ovr": 64,
+   "attr": null
+  },
+  "UTR-182186": {
+   "sid": 1214695,
+   "lid": "eredivisie",
+   "ovr": 67,
+   "attr": null
+  },
+  "TEL-244046": {
+   "sid": 1548834,
+   "lid": "eredivisie",
+   "ovr": 64,
+   "attr": null
+  },
+  "WOB-140414": {
+   "sid": 1016810,
+   "lid": "bundesliga",
+   "ovr": 69,
+   "attr": null
+  },
+  "LIL-170451": {
+   "sid": 1130111,
+   "lid": "ligue-1",
+   "ovr": 71,
+   "attr": null
+  },
+  "UTR-148291": {
+   "sid": 1105700,
+   "lid": "eredivisie",
+   "ovr": 72,
+   "attr": null
+  },
+  "UTR-7564": {
+   "sid": 855854,
+   "lid": "eredivisie",
+   "ovr": 74,
+   "attr": null
+  },
+  "UTR-128339": {
+   "sid": 1000548,
+   "lid": "eredivisie",
+   "ovr": 75,
+   "attr": null
+  },
+  "UTR-67901": {
+   "sid": 856648,
+   "lid": "eredivisie",
+   "ovr": 72,
+   "attr": null
+  },
+  "UTR-190433": {
+   "sid": 1142574,
+   "lid": "eredivisie",
+   "ovr": 61,
+   "attr": null
+  },
+  "HEE-7684": {
+   "sid": 138842,
+   "lid": "eredivisie",
+   "ovr": 70,
+   "attr": null
+  },
+  "EXC-117956": {
+   "sid": 910053,
+   "lid": "eredivisie",
+   "ovr": 69,
+   "attr": null
+  },
+  "NOR-70093": {
+   "sid": 872307,
+   "lid": "championship",
+   "ovr": 69,
+   "attr": null
+  },
+  "UTR-8902": {
+   "sid": 794990,
+   "lid": "eredivisie",
+   "ovr": 72,
+   "attr": null
+  },
+  "UTR-115370": {
+   "sid": 837010,
+   "lid": "eredivisie",
+   "ovr": 70,
+   "attr": null
+  },
+  "TEL-219280": {
+   "sid": 1418395,
+   "lid": "eredivisie",
+   "ovr": 66,
+   "attr": null
+  },
+  "TEL-244256": {
+   "sid": 1047396,
+   "lid": "eredivisie",
+   "ovr": 67,
+   "attr": null
+  },
+  "UTR-180855": {
+   "sid": 347726,
+   "lid": "eredivisie",
+   "ovr": 76,
+   "attr": null
+  },
+  "AZ-176746": {
+   "sid": 1153117,
+   "lid": "eredivisie",
+   "ovr": 78,
+   "attr": null
+  },
+  "AZ-203263": {
+   "sid": 1148468,
+   "lid": "eredivisie",
+   "ovr": 72,
+   "attr": null
+  },
+  "AZ-7432": {
+   "sid": 914392,
+   "lid": "eredivisie",
+   "ovr": 72,
+   "attr": null
+  },
+  "AZ-191223": {
+   "sid": 1405756,
+   "lid": "eredivisie",
+   "ovr": 78,
+   "attr": null
+  },
+  "PIS-7690": {
+   "sid": 857480,
+   "lid": "serie-a",
+   "ovr": 75,
+   "attr": null
+  },
+  "AZ-178402": {
+   "sid": 1145989,
+   "lid": "eredivisie",
+   "ovr": 73,
+   "attr": null
+  },
+  "GRO-154590": {
+   "sid": 1090328,
+   "lid": "eredivisie",
+   "ovr": 75,
+   "attr": null
+  },
+  "AZ-81552": {
+   "sid": 922018,
+   "lid": "eredivisie",
+   "ovr": 80,
+   "attr": null
+  },
+  "VOL-188075": {
+   "sid": 1146002,
+   "lid": "eredivisie",
+   "ovr": 72,
+   "attr": null
+  },
+  "AZ-8886": {
+   "sid": 116946,
+   "lid": "eredivisie",
+   "ovr": 73,
+   "attr": null
+  },
+  "AZ-246145": {
+   "sid": 1638685,
+   "lid": "eredivisie",
+   "ovr": 74,
+   "attr": null
+  },
+  "AZ-142616": {
+   "sid": 1028330,
+   "lid": "eredivisie",
+   "ovr": 71,
+   "attr": null
+  },
+  "AZ-175823": {
+   "sid": 1145982,
+   "lid": "eredivisie",
+   "ovr": 77,
+   "attr": null
+  },
+  "AZ-136163": {
+   "sid": 1008111,
+   "lid": "eredivisie",
+   "ovr": 74,
+   "attr": null
+  },
+  "EXC-177064": {
+   "sid": 1145987,
+   "lid": "eredivisie",
+   "ovr": 71,
+   "attr": null
+  },
+  "AZ-67899": {
+   "sid": 893559,
+   "lid": "eredivisie",
+   "ovr": 76,
+   "attr": null
+  },
+  "AZ-182029": {
+   "sid": 1145999,
+   "lid": "eredivisie",
+   "ovr": 74,
+   "attr": null
+  },
+  "GOA-17014": {
+   "sid": 837072,
+   "lid": "eredivisie",
+   "ovr": 78,
+   "attr": null
+  },
+  "AZ-7433": {
+   "sid": 40963,
+   "lid": "eredivisie",
+   "ovr": 71,
+   "attr": null
+  },
+  "AZ-53417": {
+   "sid": 97401,
+   "lid": "eredivisie",
+   "ovr": 67,
+   "attr": null
+  },
+  "GRO-188914": {
+   "sid": 1413536,
+   "lid": "eredivisie",
+   "ovr": 74,
+   "attr": null
+  },
+  "PAR-135009": {
+   "sid": 1004790,
+   "lid": "serie-a",
+   "ovr": 74,
+   "attr": null
+  },
+  "GRO-41302": {
+   "sid": 907520,
+   "lid": "eredivisie",
+   "ovr": 70,
+   "attr": null
+  },
+  "GRO-290883": {
+   "sid": 2360419,
+   "lid": "eredivisie",
+   "ovr": 62,
+   "attr": null
+  },
+  "GRO-190468": {
+   "sid": 1441117,
+   "lid": "eredivisie",
+   "ovr": 70,
+   "attr": null
+  },
+  "GRO-189599": {
+   "sid": 1424404,
+   "lid": "eredivisie",
+   "ovr": 69,
+   "attr": null
+  },
+  "GRO-204719": {
+   "sid": 1400656,
+   "lid": "eredivisie",
+   "ovr": 59,
+   "attr": null
+  },
+  "CSC-161042": {
+   "sid": 1384241,
+   "lid": "brasileirao",
+   "ovr": 67,
+   "attr": null
+  },
+  "GRO-218389": {
+   "sid": 1121402,
+   "lid": "eredivisie",
+   "ovr": 72,
+   "attr": null
+  },
+  "SPA-4286": {
+   "sid": 795135,
+   "lid": "eredivisie",
+   "ovr": 65,
+   "attr": null
+  },
+  "LYO-1835": {
+   "sid": 356352,
+   "lid": "ligue-1",
+   "ovr": 72,
+   "attr": null
+  },
+  "GRO-45647": {
+   "sid": 827103,
+   "lid": "eredivisie",
+   "ovr": 69,
+   "attr": null
+  },
+  "GRO-228985": {
+   "sid": 1592993,
+   "lid": "eredivisie",
+   "ovr": 63,
+   "attr": null
+  },
+  "GRO-218463": {
+   "sid": 1481249,
+   "lid": "eredivisie",
+   "ovr": 62,
+   "attr": null
+  },
+  "GRO-10111": {
+   "sid": 809408,
+   "lid": "eredivisie",
+   "ovr": 77,
+   "attr": null
+  },
+  "GRO-186577": {
+   "sid": 1004481,
+   "lid": "eredivisie",
+   "ovr": 59,
+   "attr": null
+  },
+  "NEC-176714": {
+   "sid": 1066313,
+   "lid": "eredivisie",
+   "ovr": 57,
+   "attr": null
+  },
+  "PSV-119731": {
+   "sid": 986395,
+   "lid": "eredivisie",
+   "ovr": 81,
+   "attr": null
+  },
+  "PSV-181984": {
+   "sid": 1212550,
+   "lid": "eredivisie",
+   "ovr": 78,
+   "attr": null
+  },
+  "TWE-7455": {
+   "sid": 804901,
+   "lid": "eredivisie",
+   "ovr": 73,
+   "attr": null
+  },
+  "PSV-15781": {
+   "sid": 812145,
+   "lid": "eredivisie",
+   "ovr": 79,
+   "attr": null
+  },
+  "JUV-3446": {
+   "sid": 126588,
+   "lid": "serie-a",
+   "ovr": 75,
+   "attr": null
+  },
+  "PSV-176932": {
+   "sid": 1146018,
+   "lid": "eredivisie",
+   "ovr": 78,
+   "attr": null
+  },
+  "PSV-7688": {
+   "sid": 845798,
+   "lid": "eredivisie",
+   "ovr": 80,
+   "attr": null
+  },
+  "NEC-217935": {
+   "sid": 1184054,
+   "lid": "eredivisie",
+   "ovr": 78,
+   "attr": null
+  },
+  "AZ-115116": {
+   "sid": 980671,
+   "lid": "eredivisie",
+   "ovr": 80,
+   "attr": null
+  },
+  "PSV-8443": {
+   "sid": 192308,
+   "lid": "eredivisie",
+   "ovr": 76,
+   "attr": null
+  },
+  "PSV-283059": {
+   "sid": 1886213,
+   "lid": "eredivisie",
+   "ovr": 75,
+   "attr": null
+  },
+  "SPA-254376": {
+   "sid": 1648751,
+   "lid": "eredivisie",
+   "ovr": 70,
+   "attr": null
+  },
+  "PSV-97534": {
+   "sid": 906021,
+   "lid": "eredivisie",
+   "ovr": 81,
+   "attr": null
+  },
+  "PSV-7451": {
+   "sid": 893499,
+   "lid": "eredivisie",
+   "ovr": 81,
+   "attr": null
+  },
+  "SUN-7468": {
+   "sid": 856739,
+   "lid": "premier-league",
+   "ovr": 81,
+   "attr": null
+  },
+  "PSV-221412": {
+   "sid": 1184317,
+   "lid": "eredivisie",
+   "ovr": 75,
+   "attr": null
+  },
+  "PSV-184642": {
+   "sid": 1046960,
+   "lid": "eredivisie",
+   "ovr": 78,
+   "attr": null
+  },
+  "PSV-9770": {
+   "sid": 844234,
+   "lid": "eredivisie",
+   "ovr": 80,
+   "attr": null
+  },
+  "PSV-7443": {
+   "sid": 825838,
+   "lid": "eredivisie",
+   "ovr": 75,
+   "attr": null
+  },
+  "PSV-142790": {
+   "sid": 1014222,
+   "lid": "eredivisie",
+   "ovr": 75,
+   "attr": null
+  },
+  "PSV-136350": {
+   "sid": 927366,
+   "lid": "eredivisie",
+   "ovr": 80,
+   "attr": null
+  },
+  "PSV-7673": {
+   "sid": 227192,
+   "lid": "eredivisie",
+   "ovr": 76,
+   "attr": null
+  },
+  "PSV-188079": {
+   "sid": 1445965,
+   "lid": "eredivisie",
+   "ovr": 60,
+   "attr": null
+  },
+  "BVB-148": {
+   "sid": 226978,
+   "lid": "bundesliga",
+   "ovr": 79,
+   "attr": null
+  },
+  "AJA-273341": {
+   "sid": 1403090,
+   "lid": "eredivisie",
+   "ovr": 71,
+   "attr": null
+  },
+  "WOL-120981": {
+   "sid": 987734,
+   "lid": "premier-league",
+   "ovr": 81,
+   "attr": null
+  },
+  "AJA-7570": {
+   "sid": 795761,
+   "lid": "eredivisie",
+   "ovr": 77,
+   "attr": null
+  },
+  "AJA-130053": {
+   "sid": 878599,
+   "lid": "eredivisie",
+   "ovr": 73,
+   "attr": null
+  },
+  "ASM-166249": {
+   "sid": 1110842,
+   "lid": "ligue-1",
+   "ovr": 80,
+   "attr": null
+  },
+  "BET-3705": {
+   "sid": 359272,
+   "lid": "la-liga",
+   "ovr": 77,
+   "attr": null
+  },
+  "TOT-8410": {
+   "sid": 844842,
+   "lid": "premier-league",
+   "ovr": 78,
+   "attr": null
+  },
+  "AJA-282165": {
+   "sid": 1931396,
+   "lid": "eredivisie",
+   "ovr": 73,
+   "attr": null
+  },
+  "AJA-190731": {
+   "sid": 1155158,
+   "lid": "eredivisie",
+   "ovr": 76,
+   "attr": null
+  },
+  "AJA-7841": {
+   "sid": 97410,
+   "lid": "eredivisie",
+   "ovr": 75,
+   "attr": null
+  },
+  "ASM-1612": {
+   "sid": 845170,
+   "lid": "ligue-1",
+   "ovr": 78,
+   "attr": null
+  },
+  "GIR-7899": {
+   "sid": 44864,
+   "lid": "la-liga",
+   "ovr": 75,
+   "attr": null
+  },
+  "ASM-6493": {
+   "sid": 281277,
+   "lid": "ligue-1",
+   "ovr": 77,
+   "attr": null
+  },
+  "AJA-156856": {
+   "sid": 1000228,
+   "lid": "eredivisie",
+   "ovr": 78,
+   "attr": null
+  },
+  "AJA-184716": {
+   "sid": 1120315,
+   "lid": "eredivisie",
+   "ovr": 73,
+   "attr": null
+  },
+  "GRO-217464": {
+   "sid": 1470010,
+   "lid": "eredivisie",
+   "ovr": 72,
+   "attr": null
+  },
+  "AJA-188830": {
+   "sid": 970860,
+   "lid": "eredivisie",
+   "ovr": 75,
+   "attr": null
+  },
+  "AJA-7679": {
+   "sid": 836673,
+   "lid": "eredivisie",
+   "ovr": 71,
+   "attr": null
+  },
+  "GIR-3173": {
+   "sid": 88625,
+   "lid": "la-liga",
+   "ovr": 80,
+   "attr": null
+  },
+  "AJA-9854": {
+   "sid": 843250,
+   "lid": "eredivisie",
+   "ovr": 74,
+   "attr": null
+  },
+  "AJA-7697": {
+   "sid": 252215,
+   "lid": "eredivisie",
+   "ovr": 75,
+   "attr": null
+  },
+  "TWE-3558": {
+   "sid": 190435,
+   "lid": "eredivisie",
+   "ovr": 72,
+   "attr": null
+  },
+  "TWE-246352": {
+   "sid": 1634542,
+   "lid": "eredivisie",
+   "ovr": 58,
+   "attr": null
+  },
+  "TWE-124715": {
+   "sid": 989882,
+   "lid": "eredivisie",
+   "ovr": 76,
+   "attr": null
+  },
+  "GRO-186400": {
+   "sid": 1146623,
+   "lid": "eredivisie",
+   "ovr": 75,
+   "attr": null
+  },
+  "TWE-167635": {
+   "sid": 1160026,
+   "lid": "eredivisie",
+   "ovr": 71,
+   "attr": null
+  },
+  "TWE-153600": {
+   "sid": 1048430,
+   "lid": "eredivisie",
+   "ovr": 73,
+   "attr": null
+  },
+  "PSV-218390": {
+   "sid": 1542618,
+   "lid": "eredivisie",
+   "ovr": 64,
+   "attr": null
+  },
+  "TWE-217937": {
+   "sid": 1142678,
+   "lid": "eredivisie",
+   "ovr": 75,
+   "attr": null
+  },
+  "TWE-79901": {
+   "sid": 945233,
+   "lid": "eredivisie",
+   "ovr": 73,
+   "attr": null
+  },
+  "TWE-81022": {
+   "sid": 946506,
+   "lid": "eredivisie",
+   "ovr": 78,
+   "attr": null
+  },
+  "TWE-190596": {
+   "sid": 1091923,
+   "lid": "eredivisie",
+   "ovr": 74,
+   "attr": null
+  },
+  "TWE-7350": {
+   "sid": 196082,
+   "lid": "eredivisie",
+   "ovr": 71,
+   "attr": null
+  },
+  "GOA-186571": {
+   "sid": 1133233,
+   "lid": "eredivisie",
+   "ovr": 69,
+   "attr": null
+  },
+  "TWE-154793": {
+   "sid": 1091627,
+   "lid": "eredivisie",
+   "ovr": 70,
+   "attr": null
+  },
+  "HER-7578": {
+   "sid": 2622,
+   "lid": "eredivisie",
+   "ovr": 67,
+   "attr": null
+  },
+  "SPA-7250": {
+   "sid": 610396,
+   "lid": "eredivisie",
+   "ovr": 75,
+   "attr": null
+  },
+  "TWE-7286": {
+   "sid": 94835,
+   "lid": "eredivisie",
+   "ovr": 77,
+   "attr": null
+  },
+  "HER-167699": {
+   "sid": 1118181,
+   "lid": "eredivisie",
+   "ovr": 66,
+   "attr": null
+  },
+  "VOL-136381": {
+   "sid": 1008697,
+   "lid": "eredivisie",
+   "ovr": 66,
+   "attr": null
+  },
+  "SIT-102339": {
+   "sid": 929633,
+   "lid": "eredivisie",
+   "ovr": 72,
+   "attr": null
+  },
+  "SIT-160443": {
+   "sid": 1048011,
+   "lid": "eredivisie",
+   "ovr": 70,
+   "attr": null
+  },
+  "SIT-137048": {
+   "sid": 1010846,
+   "lid": "eredivisie",
+   "ovr": 66,
+   "attr": null
+  },
+  "FEY-214172": {
+   "sid": 1196520,
+   "lid": "eredivisie",
+   "ovr": 65,
+   "attr": null
+  },
+  "SIT-7361": {
+   "sid": 366942,
+   "lid": "eredivisie",
+   "ovr": 66,
+   "attr": null
+  },
+  "SIT-171440": {
+   "sid": 1132766,
+   "lid": "eredivisie",
+   "ovr": 68,
+   "attr": null
+  },
+  "SIT-244801": {
+   "sid": 1112604,
+   "lid": "eredivisie",
+   "ovr": 65,
+   "attr": null
+  },
+  "FEC-269804": {
+   "sid": 978563,
+   "lid": "brasileirao",
+   "ovr": 74,
+   "attr": null
+  },
+  "SIT-7558": {
+   "sid": 377206,
+   "lid": "eredivisie",
+   "ovr": 63,
+   "attr": null
+  },
+  "SIT-149037": {
+   "sid": 961686,
+   "lid": "eredivisie",
+   "ovr": 64,
+   "attr": null
+  },
+  "SIT-31986": {
+   "sid": 862479,
+   "lid": "eredivisie",
+   "ovr": 67,
+   "attr": null
+  },
+  "SIT-7373": {
+   "sid": 146871,
+   "lid": "eredivisie",
+   "ovr": 72,
+   "attr": null
+  },
+  "SIT-7434": {
+   "sid": 128992,
+   "lid": "eredivisie",
+   "ovr": 66,
+   "attr": null
+  },
+  "FEY-265472": {
+   "sid": 1918931,
+   "lid": "eredivisie",
+   "ovr": 69,
+   "attr": null
+  },
+  "FEY-157781": {
+   "sid": 1095731,
+   "lid": "eredivisie",
+   "ovr": 78,
+   "attr": null
+  },
+  "FEY-99952": {
+   "sid": 886242,
+   "lid": "eredivisie",
+   "ovr": 77,
+   "attr": null
+  },
+  "BRE-7799": {
+   "sid": 826139,
+   "lid": "premier-league",
+   "ovr": 77,
+   "attr": null
+  },
+  "FEY-80161": {
+   "sid": 944467,
+   "lid": "eredivisie",
+   "ovr": 77,
+   "attr": null
+  },
+  "UTR-215554": {
+   "sid": 1433802,
+   "lid": "eredivisie",
+   "ovr": 78,
+   "attr": null
+  },
+  "FEY-169190": {
+   "sid": 1121400,
+   "lid": "eredivisie",
+   "ovr": 79,
+   "attr": null
+  },
+  "FEY-126149": {
+   "sid": 979221,
+   "lid": "eredivisie",
+   "ovr": 73,
+   "attr": null
+  },
+  "NIC-16990": {
+   "sid": 928033,
+   "lid": "ligue-1",
+   "ovr": 76,
+   "attr": null
+  },
+  "FEY-275067": {
+   "sid": 1939011,
+   "lid": "eredivisie",
+   "ovr": 67,
+   "attr": null
+  },
+  "FEY-176299": {
+   "sid": 1144138,
+   "lid": "eredivisie",
+   "ovr": 77,
+   "attr": null
+  },
+  "FEY-113595": {
+   "sid": 942213,
+   "lid": "eredivisie",
+   "ovr": 77,
+   "attr": null
+  },
+  "FEY-7465": {
+   "sid": 787640,
+   "lid": "eredivisie",
+   "ovr": 74,
+   "attr": null
+  },
+  "PAL-170698": {
+   "sid": 1094179,
+   "lid": "brasileirao",
+   "ovr": 83,
+   "attr": null
+  },
+  "FEY-179504": {
+   "sid": 1127916,
+   "lid": "eredivisie",
+   "ovr": 73,
+   "attr": null
+  },
+  "FEY-53317": {
+   "sid": 794013,
+   "lid": "eredivisie",
+   "ovr": 71,
+   "attr": null
+  },
+  "FEY-7471": {
+   "sid": 797279,
+   "lid": "eredivisie",
+   "ovr": 69,
+   "attr": null
+  },
+  "FEY-25610": {
+   "sid": 307364,
+   "lid": "eredivisie",
+   "ovr": 67,
+   "attr": null
+  },
+  "SPA-133204": {
+   "sid": 1050672,
+   "lid": "eredivisie",
+   "ovr": 67,
+   "attr": null
+  },
+  "SPA-243902": {
+   "sid": 1137227,
+   "lid": "eredivisie",
+   "ovr": 64,
+   "attr": null
+  },
+  "CD-176614": {
+   "sid": 1464519,
+   "lid": "primeira-liga",
+   "ovr": 66,
+   "attr": null
+  },
+  "SPA-161068": {
+   "sid": 1002479,
+   "lid": "eredivisie",
+   "ovr": 70,
+   "attr": null
+  },
+  "TEL-245618": {
+   "sid": 1638564,
+   "lid": "eredivisie",
+   "ovr": 67,
+   "attr": null
+  },
+  "SPA-7592": {
+   "sid": 827662,
+   "lid": "eredivisie",
+   "ovr": 70,
+   "attr": null
+  },
+  "SPA-7470": {
+   "sid": 99960,
+   "lid": "eredivisie",
+   "ovr": 67,
+   "attr": null
+  },
+  "SPA-218262": {
+   "sid": 1101593,
+   "lid": "eredivisie",
+   "ovr": 64,
+   "attr": null
+  },
+  "SPA-149054": {
+   "sid": 1046143,
+   "lid": "eredivisie",
+   "ovr": 67,
+   "attr": null
+  },
+  "SPA-231030": {
+   "sid": 966299,
+   "lid": "eredivisie",
+   "ovr": 69,
+   "attr": null
+  },
+  "SPA-254333": {
+   "sid": 1648759,
+   "lid": "eredivisie",
+   "ovr": 71,
+   "attr": null
+  },
+  "VOL-221767": {
+   "sid": 1523582,
+   "lid": "eredivisie",
+   "ovr": 64,
+   "attr": null
+  },
+  "FCA-7620": {
+   "sid": 339879,
+   "lid": "primeira-liga",
+   "ovr": 69,
+   "attr": null
+  },
+  "SPA-220689": {
+   "sid": 1517610,
+   "lid": "eredivisie",
+   "ovr": 53,
+   "attr": null
+  },
+  "SPA-9778": {
+   "sid": 139149,
+   "lid": "eredivisie",
+   "ovr": 68,
+   "attr": null
+  },
+  "UTR-7345": {
+   "sid": 252027,
+   "lid": "eredivisie",
+   "ovr": 69,
+   "attr": null
+  },
+  "SPA-151104": {
+   "sid": 1067956,
+   "lid": "eredivisie",
+   "ovr": 57,
+   "attr": null
+  },
+  "SPA-7304": {
+   "sid": 385708,
+   "lid": "eredivisie",
+   "ovr": 68,
+   "attr": null
+  },
+  "AZ-246558": {
+   "sid": 1590941,
+   "lid": "eredivisie",
+   "ovr": 68,
+   "attr": null
+  },
+  "RBB-179845": {
+   "sid": 944200,
+   "lid": "brasileirao",
+   "ovr": 77,
+   "attr": null
+  },
+  "AZ-171428": {
+   "sid": 1119294,
+   "lid": "eredivisie",
+   "ovr": 63,
+   "attr": null
+  },
+  "OXF-7254": {
+   "sid": 361788,
+   "lid": "championship",
+   "ovr": 67,
+   "attr": null
+  },
+  "NEC-21733": {
+   "sid": 35208,
+   "lid": "eredivisie",
+   "ovr": 70,
+   "attr": null
+  },
+  "SIT-7574": {
+   "sid": 855847,
+   "lid": "eredivisie",
+   "ovr": 71,
+   "attr": null
+  },
+  "NEC-182241": {
+   "sid": 1214957,
+   "lid": "eredivisie",
+   "ovr": 73,
+   "attr": null
+  },
+  "NEC-290975": {
+   "sid": 1500993,
+   "lid": "eredivisie",
+   "ovr": 58,
+   "attr": null
+  },
+  "NEC-145276": {
+   "sid": 1019011,
+   "lid": "eredivisie",
+   "ovr": 63,
+   "attr": null
+  },
+  "ZWO-167455": {
+   "sid": 815080,
+   "lid": "eredivisie",
+   "ovr": 68,
+   "attr": null
+  },
+  "NEC-97164": {
+   "sid": 897603,
+   "lid": "eredivisie",
+   "ovr": 75,
+   "attr": null
+  },
+  "NEC-184259": {
+   "sid": 978823,
+   "lid": "eredivisie",
+   "ovr": 70,
+   "attr": null
+  },
+  "NEC-282514": {
+   "sid": 2193004,
+   "lid": "eredivisie",
+   "ovr": 52,
+   "attr": null
+  },
+  "ATA-7555": {
+   "sid": 856638,
+   "lid": "serie-a",
+   "ovr": 70,
+   "attr": null
+  },
+  "BVB-263672": {
+   "sid": 1418620,
+   "lid": "bundesliga",
+   "ovr": 69,
+   "attr": null
+  },
+  "FCP-250544": {
+   "sid": 1142587,
+   "lid": "primeira-liga",
+   "ovr": 68,
+   "attr": null
+  },
+  "NEC-177433": {
+   "sid": 1177177,
+   "lid": "eredivisie",
+   "ovr": 74,
+   "attr": null
+  },
+  "NEC-7726": {
+   "sid": 842275,
+   "lid": "eredivisie",
+   "ovr": 71,
+   "attr": null
+  },
+  "NEC-2119": {
+   "sid": 70930,
+   "lid": "eredivisie",
+   "ovr": 67,
+   "attr": null
+  },
+  "NEC-126924": {
+   "sid": 990798,
+   "lid": "eredivisie",
+   "ovr": 78,
+   "attr": null
+  },
+  "HEE-7476": {
+   "sid": 825843,
+   "lid": "eredivisie",
+   "ovr": 71,
+   "attr": null
+  },
+  "ANG-278228": {
+   "sid": 2142283,
+   "lid": "ligue-1",
+   "ovr": 66,
+   "attr": null
+  },
+  "HEE-210841": {
+   "sid": 1015627,
+   "lid": "eredivisie",
+   "ovr": 77,
+   "attr": null
+  },
+  "HEE-82116": {
+   "sid": 996986,
+   "lid": "eredivisie",
+   "ovr": 68,
+   "attr": null
+  },
+  "HEE-246586": {
+   "sid": 1627623,
+   "lid": "eredivisie",
+   "ovr": 75,
+   "attr": null
+  },
+  "HEE-137564": {
+   "sid": 1014408,
+   "lid": "eredivisie",
+   "ovr": 71,
+   "attr": null
+  },
+  "HEE-280290": {
+   "sid": 1425327,
+   "lid": "eredivisie",
+   "ovr": 62,
+   "attr": null
+  },
+  "NEC-131178": {
+   "sid": 961685,
+   "lid": "eredivisie",
+   "ovr": 70,
+   "attr": null
+  },
+  "HEE-171627": {
+   "sid": 1133678,
+   "lid": "eredivisie",
+   "ovr": 68,
+   "attr": null
+  },
+  "TWE-151518": {
+   "sid": 1014288,
+   "lid": "eredivisie",
+   "ovr": 71,
+   "attr": null
+  },
+  "HEE-172254": {
+   "sid": 1129996,
+   "lid": "eredivisie",
+   "ovr": 64,
+   "attr": null
+  },
+  "HEE-127930": {
+   "sid": 1064426,
+   "lid": "eredivisie",
+   "ovr": 73,
+   "attr": null
+  },
+  "HEE-171410": {
+   "sid": 1132765,
+   "lid": "eredivisie",
+   "ovr": 73,
+   "attr": null
+  },
+  "HEE-53313": {
+   "sid": 847072,
+   "lid": "eredivisie",
+   "ovr": 71,
+   "attr": null
+  },
+  "BET-244238": {
+   "sid": 1621035,
+   "lid": "la-liga",
+   "ovr": 60,
+   "attr": null
+  },
+  "HEE-3053": {
+   "sid": 339339,
+   "lid": "eredivisie",
+   "ovr": 68,
+   "attr": null
+  },
+  "TSG-245825": {
+   "sid": 1440627,
+   "lid": "bundesliga",
+   "ovr": 68,
+   "attr": null
+  },
+  "AZ-255429": {
+   "sid": 1170900,
+   "lid": "eredivisie",
+   "ovr": 69,
+   "attr": null
+  },
+  "HER-112779": {
+   "sid": 930295,
+   "lid": "eredivisie",
+   "ovr": 64,
+   "attr": null
+  },
+  "EXC-261269": {
+   "sid": 1198088,
+   "lid": "eredivisie",
+   "ovr": 59,
+   "attr": null
+  },
+  "EXC-191155": {
+   "sid": 1384483,
+   "lid": "eredivisie",
+   "ovr": 70,
+   "attr": null
+  },
+  "EXC-179498": {
+   "sid": 1048487,
+   "lid": "eredivisie",
+   "ovr": 68,
+   "attr": null
+  },
+  "EXC-171956": {
+   "sid": 1126595,
+   "lid": "eredivisie",
+   "ovr": 67,
+   "attr": null
+  },
+  "EXC-144629": {
+   "sid": 1031721,
+   "lid": "eredivisie",
+   "ovr": 68,
+   "attr": null
+  },
+  "EXC-81965": {
+   "sid": 946950,
+   "lid": "eredivisie",
+   "ovr": 66,
+   "attr": null
+  },
+  "EXC-149181": {
+   "sid": 1048906,
+   "lid": "eredivisie",
+   "ovr": 65,
+   "attr": null
+  },
+  "EXC-53496": {
+   "sid": 367118,
+   "lid": "eredivisie",
+   "ovr": 71,
+   "attr": null
+  },
+  "AZ-203079": {
+   "sid": 1213381,
+   "lid": "eredivisie",
+   "ovr": 66,
+   "attr": null
+  },
+  "GOA-56849": {
+   "sid": 877840,
+   "lid": "eredivisie",
+   "ovr": 64,
+   "attr": null
+  },
+  "AMA-80336": {
+   "sid": 943595,
+   "lid": "primeira-liga",
+   "ovr": 68,
+   "attr": null
+  },
+  "ZWO-9701": {
+   "sid": 847073,
+   "lid": "eredivisie",
+   "ovr": 69,
+   "attr": null
+  },
+  "ZWO-7729": {
+   "sid": 235538,
+   "lid": "eredivisie",
+   "ovr": 69,
+   "attr": null
+  },
+  "ZWO-7723": {
+   "sid": 333571,
+   "lid": "eredivisie",
+   "ovr": 68,
+   "attr": null
+  },
+  "ZWO-67920": {
+   "sid": 876233,
+   "lid": "eredivisie",
+   "ovr": 68,
+   "attr": null
+  },
+  "ZWO-7499": {
+   "sid": 846003,
+   "lid": "eredivisie",
+   "ovr": 66,
+   "attr": null
+  },
+  "ZWO-214428": {
+   "sid": 1509752,
+   "lid": "eredivisie",
+   "ovr": 61,
+   "attr": null
+  },
+  "ZWO-7744": {
+   "sid": 803021,
+   "lid": "eredivisie",
+   "ovr": 67,
+   "attr": null
+  },
+  "ZWO-176975": {
+   "sid": 1049446,
+   "lid": "eredivisie",
+   "ovr": 63,
+   "attr": null
+  },
+  "UTR-7548": {
+   "sid": 46900,
+   "lid": "eredivisie",
+   "ovr": 69,
+   "attr": null
+  },
+  "ZWO-202714": {
+   "sid": 927155,
+   "lid": "eredivisie",
+   "ovr": 69,
+   "attr": null
+  },
+  "ZWO-175970": {
+   "sid": 1145525,
+   "lid": "eredivisie",
+   "ovr": 66,
+   "attr": null
+  },
+  "ZWO-67905": {
+   "sid": 856636,
+   "lid": "eredivisie",
+   "ovr": 73,
+   "attr": null
+  },
+  "ZWO-186393": {
+   "sid": 1394059,
+   "lid": "eredivisie",
+   "ovr": 55,
+   "attr": null
+  },
+  "GRO-57281": {
+   "sid": 940979,
+   "lid": "eredivisie",
+   "ovr": 62,
+   "attr": null
+  },
+  "TEL-273131": {
+   "sid": 2007289,
+   "lid": "eredivisie",
+   "ovr": 58,
+   "attr": null
+  },
+  "TEL-117796": {
+   "sid": 987077,
+   "lid": "eredivisie",
+   "ovr": 64,
+   "attr": null
+  },
+  "TEL-184643": {
+   "sid": 1066319,
+   "lid": "eredivisie",
+   "ovr": 67,
+   "attr": null
+  },
+  "TEL-226917": {
+   "sid": 1084609,
+   "lid": "eredivisie",
+   "ovr": 66,
+   "attr": null
+  },
+  "TEL-177052": {
+   "sid": 1150154,
+   "lid": "eredivisie",
+   "ovr": 63,
+   "attr": null
+  },
+  "TEL-7354": {
+   "sid": 385300,
+   "lid": "eredivisie",
+   "ovr": 66,
+   "attr": null
+  },
+  "HEE-263863": {
+   "sid": 1801303,
+   "lid": "eredivisie",
+   "ovr": 55,
+   "attr": null
+  },
+  "TEL-282877": {
+   "sid": 1469273,
+   "lid": "eredivisie",
+   "ovr": 57,
+   "attr": null
+  },
+  "GRO-71983": {
+   "sid": 76160,
+   "lid": "eredivisie",
+   "ovr": 68,
+   "attr": null
+  },
+  "TEL-92124": {
+   "sid": 955148,
+   "lid": "eredivisie",
+   "ovr": 59,
+   "attr": null
+  },
+  "TEL-171423": {
+   "sid": 268701,
+   "lid": "eredivisie",
+   "ovr": 71,
+   "attr": null
+  },
+  "TEL-102186": {
+   "sid": 916942,
+   "lid": "eredivisie",
+   "ovr": 61,
+   "attr": null
+  },
+  "GOA-102404": {
+   "sid": 973716,
+   "lid": "eredivisie",
+   "ovr": 66,
+   "attr": null
+  },
+  "GOA-144445": {
+   "sid": 841420,
+   "lid": "eredivisie",
+   "ovr": 67,
+   "attr": null
+  },
+  "GOA-117884": {
+   "sid": 907517,
+   "lid": "eredivisie",
+   "ovr": 71,
+   "attr": null
+  },
+  "GOA-180531": {
+   "sid": 1022552,
+   "lid": "eredivisie",
+   "ovr": 62,
+   "attr": null
+  },
+  "GOA-121280": {
+   "sid": 987647,
+   "lid": "eredivisie",
+   "ovr": 71,
+   "attr": null
+  },
+  "GOA-151613": {
+   "sid": 909960,
+   "lid": "eredivisie",
+   "ovr": 73,
+   "attr": null
+  },
+  "GOA-10139": {
+   "sid": 891795,
+   "lid": "eredivisie",
+   "ovr": 72,
+   "attr": null
+  },
+  "GOA-279695": {
+   "sid": 2180363,
+   "lid": "eredivisie",
+   "ovr": 60,
+   "attr": null
+  },
+  "GOA-7303": {
+   "sid": 932555,
+   "lid": "eredivisie",
+   "ovr": 70,
+   "attr": null
+  },
+  "GOA-149091": {
+   "sid": 1046722,
+   "lid": "eredivisie",
+   "ovr": 70,
+   "attr": null
+  },
+  "GOA-31140": {
+   "sid": 842536,
+   "lid": "eredivisie",
+   "ovr": 70,
+   "attr": null
+  },
+  "GOA-7682": {
+   "sid": 793742,
+   "lid": "eredivisie",
+   "ovr": 70,
+   "attr": null
+  },
+  "GOA-214155": {
+   "sid": 1119473,
+   "lid": "eredivisie",
+   "ovr": 59,
+   "attr": null
+  },
+  "GOA-9931": {
+   "sid": 133168,
+   "lid": "eredivisie",
+   "ovr": 67,
+   "attr": null
+  },
+  "GOA-187178": {
+   "sid": 1171238,
+   "lid": "eredivisie",
+   "ovr": 53,
+   "attr": null
+  },
+  "TOU-44055": {
+   "sid": 792318,
+   "lid": "ligue-1",
+   "ovr": 68,
+   "attr": null
+  },
+  "SIT-7486": {
+   "sid": 70927,
+   "lid": "eredivisie",
+   "ovr": 68,
+   "attr": null
+  },
+  "GOA-177271": {
+   "sid": 1130708,
+   "lid": "eredivisie",
+   "ovr": 54,
+   "attr": null
+  },
+  "CD-165583": {
+   "sid": 1031567,
+   "lid": "primeira-liga",
+   "ovr": 78,
+   "attr": null
+  },
+  "SCB-45401": {
+   "sid": 314380,
+   "lid": "primeira-liga",
+   "ovr": 80,
+   "attr": null
+  },
+  "WOB-16335": {
+   "sid": 826069,
+   "lid": "bundesliga",
+   "ovr": 74,
+   "attr": null
+  },
+  "CD-168766": {
+   "sid": 1046794,
+   "lid": "primeira-liga",
+   "ovr": 75,
+   "attr": null
+  },
+  "SCB-102579": {
+   "sid": 914772,
+   "lid": "primeira-liga",
+   "ovr": 74,
+   "attr": null
+  },
+  "SCB-178756": {
+   "sid": 1120039,
+   "lid": "primeira-liga",
+   "ovr": 76,
+   "attr": null
+  },
+  "SCB-186516": {
+   "sid": 1396015,
+   "lid": "primeira-liga",
+   "ovr": 75,
+   "attr": null
+  },
+  "SCB-3249": {
+   "sid": 6562,
+   "lid": "primeira-liga",
+   "ovr": 69,
+   "attr": null
+  },
+  "KOE-150087": {
+   "sid": 1064842,
+   "lid": "bundesliga",
+   "ovr": 71,
+   "attr": null
+  },
+  "SCB-180185": {
+   "sid": 1134430,
+   "lid": "primeira-liga",
+   "ovr": 75,
+   "attr": null
+  },
+  "SCB-180150": {
+   "sid": 877918,
+   "lid": "primeira-liga",
+   "ovr": 78,
+   "attr": null
+  },
+  "SCB-273888": {
+   "sid": 1184326,
+   "lid": "primeira-liga",
+   "ovr": 71,
+   "attr": null
+  },
+  "SCB-469": {
+   "sid": 868235,
+   "lid": "primeira-liga",
+   "ovr": 75,
+   "attr": null
+  },
+  "SCB-180320": {
+   "sid": 959592,
+   "lid": "primeira-liga",
+   "ovr": 74,
+   "attr": null
+  },
+  "SCB-166538": {
+   "sid": 965263,
+   "lid": "primeira-liga",
+   "ovr": 78,
+   "attr": null
+  },
+  "SCB-146987": {
+   "sid": 997173,
+   "lid": "primeira-liga",
+   "ovr": 76,
+   "attr": null
+  },
+  "MOR-245259": {
+   "sid": 1142578,
+   "lid": "primeira-liga",
+   "ovr": 72,
+   "attr": null
+  },
+  "SCB-13911": {
+   "sid": 887754,
+   "lid": "primeira-liga",
+   "ovr": 74,
+   "attr": null
+  },
+  "SCB-275026": {
+   "sid": 1195449,
+   "lid": "primeira-liga",
+   "ovr": 69,
+   "attr": null
+  },
+  "TON-182049": {
+   "sid": 1394935,
+   "lid": "primeira-liga",
+   "ovr": 76,
+   "attr": null
+  },
+  "SCB-37817": {
+   "sid": 344159,
+   "lid": "primeira-liga",
+   "ovr": 68,
+   "attr": null
+  },
+  "SPO-32386": {
+   "sid": 914213,
+   "lid": "primeira-liga",
+   "ovr": 82,
+   "attr": null
+  },
+  "WAT-176991": {
+   "sid": 1144687,
+   "lid": "championship",
+   "ovr": 76,
+   "attr": null
+  },
+  "SPO-186459": {
+   "sid": 903679,
+   "lid": "primeira-liga",
+   "ovr": 80,
+   "attr": null
+  },
+  "SCB-121007": {
+   "sid": 966575,
+   "lid": "primeira-liga",
+   "ovr": 83,
+   "attr": null
+  },
+  "SPO-128825": {
+   "sid": 1001140,
+   "lid": "primeira-liga",
+   "ovr": 84,
+   "attr": null
+  },
+  "SHE-245211": {
+   "sid": 1634144,
+   "lid": "championship",
+   "ovr": 64,
+   "attr": null
+  },
+  "SPO-270551": {
+   "sid": 1410209,
+   "lid": "primeira-liga",
+   "ovr": 76,
+   "attr": null
+  },
+  "BET-212861": {
+   "sid": 1137814,
+   "lid": "la-liga",
+   "ovr": 80,
+   "attr": null
+  },
+  "SPO-45463": {
+   "sid": 352882,
+   "lid": "primeira-liga",
+   "ovr": 73,
+   "attr": null
+  },
+  "AVS-192912": {
+   "sid": 1067648,
+   "lid": "primeira-liga",
+   "ovr": 72,
+   "attr": null
+  },
+  "SPO-28770": {
+   "sid": 929193,
+   "lid": "primeira-liga",
+   "ovr": 84,
+   "attr": null
+  },
+  "SPO-137045": {
+   "sid": 1166952,
+   "lid": "primeira-liga",
+   "ovr": 74,
+   "attr": null
+  },
+  "SPO-178768": {
+   "sid": 989841,
+   "lid": "primeira-liga",
+   "ovr": 79,
+   "attr": null
+  },
+  "SPO-32014": {
+   "sid": 253809,
+   "lid": "primeira-liga",
+   "ovr": 80,
+   "attr": null
+  },
+  "CDN-178927": {
+   "sid": 1167067,
+   "lid": "primeira-liga",
+   "ovr": 76,
+   "attr": null
+  },
+  "MIL-39635": {
+   "sid": 892141,
+   "lid": "serie-a",
+   "ovr": 81,
+   "attr": null
+  },
+  "FCP-1166": {
+   "sid": 882664,
+   "lid": "primeira-liga",
+   "ovr": 80,
+   "attr": null
+  },
+  "FCP-127034": {
+   "sid": 992567,
+   "lid": "primeira-liga",
+   "ovr": 81,
+   "attr": null
+  },
+  "FCP-2126": {
+   "sid": 191188,
+   "lid": "primeira-liga",
+   "ovr": 79,
+   "attr": null
+  },
+  "FCP-153629": {
+   "sid": 1066560,
+   "lid": "primeira-liga",
+   "ovr": 83,
+   "attr": null
+  },
+  "FCP-221262": {
+   "sid": 1406639,
+   "lid": "primeira-liga",
+   "ovr": 81,
+   "attr": null
+  },
+  "FCP-150519": {
+   "sid": 1010505,
+   "lid": "primeira-liga",
+   "ovr": 82,
+   "attr": null
+  },
+  "FCP-7448": {
+   "sid": 804472,
+   "lid": "primeira-liga",
+   "ovr": 78,
+   "attr": null
+  },
+  "MOR-178712": {
+   "sid": 1006995,
+   "lid": "primeira-liga",
+   "ovr": 69,
+   "attr": null
+  },
+  "FCP-147286": {
+   "sid": 976037,
+   "lid": "primeira-liga",
+   "ovr": 84,
+   "attr": null
+  },
+  "FCP-8086": {
+   "sid": 286085,
+   "lid": "primeira-liga",
+   "ovr": 78,
+   "attr": null
+  },
+  "FCP-45671": {
+   "sid": 913401,
+   "lid": "primeira-liga",
+   "ovr": 78,
+   "attr": null
+  },
+  "FCP-125160": {
+   "sid": 987510,
+   "lid": "primeira-liga",
+   "ovr": 73,
+   "attr": null
+  },
+  "FCP-216825": {
+   "sid": 1146484,
+   "lid": "primeira-liga",
+   "ovr": 71,
+   "attr": null
+  },
+  "FCP-98611": {
+   "sid": 985138,
+   "lid": "primeira-liga",
+   "ovr": 77,
+   "attr": null
+  },
+  "FCP-37362": {
+   "sid": 843115,
+   "lid": "primeira-liga",
+   "ovr": 87,
+   "attr": null
+  },
+  "FCP-45217": {
+   "sid": 116372,
+   "lid": "primeira-liga",
+   "ovr": 72,
+   "attr": null
+  },
+  "BEN-67299": {
+   "sid": 795236,
+   "lid": "primeira-liga",
+   "ovr": 84,
+   "attr": null
+  },
+  "BEN-182123": {
+   "sid": 1201395,
+   "lid": "primeira-liga",
+   "ovr": 80,
+   "attr": null
+  },
+  "BEN-16748": {
+   "sid": 252577,
+   "lid": "primeira-liga",
+   "ovr": 77,
+   "attr": null
+  },
+  "TOT-15884": {
+   "sid": 364612,
+   "lid": "premier-league",
+   "ovr": 81,
+   "attr": null
+  },
+  "BEN-8128": {
+   "sid": 823631,
+   "lid": "primeira-liga",
+   "ovr": 79,
+   "attr": null
+  },
+  "BEN-38088": {
+   "sid": 228364,
+   "lid": "primeira-liga",
+   "ovr": 79,
+   "attr": null
+  },
+  "KOE-127401": {
+   "sid": 801263,
+   "lid": "bundesliga",
+   "ovr": 78,
+   "attr": null
+  },
+  "BEN-158894": {
+   "sid": 1087316,
+   "lid": "primeira-liga",
+   "ovr": 79,
+   "attr": null
+  },
+  "BEN-194008": {
+   "sid": 1085740,
+   "lid": "primeira-liga",
+   "ovr": 76,
+   "attr": null
+  },
+  "ATL-63": {
+   "sid": 580550,
+   "lid": "la-liga",
+   "ovr": 76,
+   "attr": null
+  },
+  "BEN-177842": {
+   "sid": 983542,
+   "lid": "primeira-liga",
+   "ovr": 82,
+   "attr": null
+  },
+  "UTR-125524": {
+   "sid": 991679,
+   "lid": "eredivisie",
+   "ovr": 79,
+   "attr": null
+  },
+  "PAR-176730": {
+   "sid": 1155423,
+   "lid": "serie-a",
+   "ovr": 78,
+   "attr": null
+  },
+  "BEN-70583": {
+   "sid": 850976,
+   "lid": "primeira-liga",
+   "ovr": 78,
+   "attr": null
+  },
+  "BEN-175753": {
+   "sid": 993101,
+   "lid": "primeira-liga",
+   "ovr": 78,
+   "attr": null
+  },
+  "BEN-111481": {
+   "sid": 966616,
+   "lid": "primeira-liga",
+   "ovr": 84,
+   "attr": null
+  },
+  "BEN-153846": {
+   "sid": 983550,
+   "lid": "primeira-liga",
+   "ovr": 80,
+   "attr": null
+  },
+  "FEC-264055": {
+   "sid": 1083404,
+   "lid": "brasileirao",
+   "ovr": 60,
+   "attr": null
+  },
+  "VAS-33160": {
+   "sid": 282233,
+   "lid": "brasileirao",
+   "ovr": 64,
+   "attr": null
+  },
+  "HER-130178": {
+   "sid": 996988,
+   "lid": "eredivisie",
+   "ovr": 64,
+   "attr": null
+  },
+  "LIL-186692": {
+   "sid": 1087352,
+   "lid": "ligue-1",
+   "ovr": 64,
+   "attr": null
+  },
+  "VAS-169566": {
+   "sid": 1021721,
+   "lid": "brasileirao",
+   "ovr": 76,
+   "attr": null
+  },
+  "LEI-180215": {
+   "sid": 929975,
+   "lid": "championship",
+   "ovr": 71,
+   "attr": null
+  },
+  "GUI-149724": {
+   "sid": 1063255,
+   "lid": "primeira-liga",
+   "ovr": 66,
+   "attr": null
+  },
+  "GUI-243569": {
+   "sid": 1468082,
+   "lid": "primeira-liga",
+   "ovr": 74,
+   "attr": null
+  },
+  "GUI-145346": {
+   "sid": 1035280,
+   "lid": "primeira-liga",
+   "ovr": 73,
+   "attr": null
+  },
+  "GUI-191259": {
+   "sid": 1002367,
+   "lid": "primeira-liga",
+   "ovr": 73,
+   "attr": null
+  },
+  "GUI-170076": {
+   "sid": 1130363,
+   "lid": "primeira-liga",
+   "ovr": 64,
+   "attr": null
+  },
+  "GUI-280042": {
+   "sid": 1166097,
+   "lid": "primeira-liga",
+   "ovr": 67,
+   "attr": null
+  },
+  "GUI-45514": {
+   "sid": 785808,
+   "lid": "primeira-liga",
+   "ovr": 72,
+   "attr": null
+  },
+  "GUI-191013": {
+   "sid": 1161004,
+   "lid": "primeira-liga",
+   "ovr": 72,
+   "attr": null
+  },
+  "GUI-177044": {
+   "sid": 1133568,
+   "lid": "primeira-liga",
+   "ovr": 72,
+   "attr": null
+  },
+  "GUI-274548": {
+   "sid": 1148442,
+   "lid": "primeira-liga",
+   "ovr": 70,
+   "attr": null
+  },
+  "GUI-180163": {
+   "sid": 1168093,
+   "lid": "primeira-liga",
+   "ovr": 68,
+   "attr": null
+  },
+  "GUI-293863": {
+   "sid": 1972885,
+   "lid": "primeira-liga",
+   "ovr": 60,
+   "attr": null
+  },
+  "GUI-246248": {
+   "sid": 1175004,
+   "lid": "primeira-liga",
+   "ovr": 67,
+   "attr": null
+  },
+  "SWA-213296": {
+   "sid": 1645868,
+   "lid": "championship",
+   "ovr": 59,
+   "attr": null
+  },
+  "NAN-170915": {
+   "sid": 2723962,
+   "lid": "ligue-1",
+   "ovr": 57,
+   "attr": null
+  },
+  "BEN-246194": {
+   "sid": 1146008,
+   "lid": "primeira-liga",
+   "ovr": 68,
+   "attr": null
+  },
+  "SAN-276246": {
+   "sid": 1032547,
+   "lid": "brasileirao",
+   "ovr": 69,
+   "attr": null
+  },
+  "GIL-37160": {
+   "sid": 611880,
+   "lid": "primeira-liga",
+   "ovr": 69,
+   "attr": null
+  },
+  "GIL-180125": {
+   "sid": 1084746,
+   "lid": "primeira-liga",
+   "ovr": 73,
+   "attr": null
+  },
+  "GIL-267932": {
+   "sid": 1537180,
+   "lid": "primeira-liga",
+   "ovr": 66,
+   "attr": null
+  },
+  "GIL-177301": {
+   "sid": 1445615,
+   "lid": "primeira-liga",
+   "ovr": 63,
+   "attr": null
+  },
+  "GIL-188094": {
+   "sid": 1138915,
+   "lid": "primeira-liga",
+   "ovr": 66,
+   "attr": null
+  },
+  "GIL-260041": {
+   "sid": 1799336,
+   "lid": "primeira-liga",
+   "ovr": 67,
+   "attr": null
+  },
+  "GIL-98160": {
+   "sid": 949449,
+   "lid": "primeira-liga",
+   "ovr": 65,
+   "attr": null
+  },
+  "SPO-277088": {
+   "sid": 1477659,
+   "lid": "primeira-liga",
+   "ovr": 67,
+   "attr": null
+  },
+  "GIL-9125": {
+   "sid": 800348,
+   "lid": "primeira-liga",
+   "ovr": 68,
+   "attr": null
+  },
+  "FCA-275631": {
+   "sid": 1520738,
+   "lid": "primeira-liga",
+   "ovr": 61,
+   "attr": null
+  },
+  "GIL-245428": {
+   "sid": 1426239,
+   "lid": "primeira-liga",
+   "ovr": 54,
+   "attr": null
+  },
+  "GIL-184454": {
+   "sid": 1391229,
+   "lid": "primeira-liga",
+   "ovr": 61,
+   "attr": null
+  },
+  "CD-181456": {
+   "sid": 1799251,
+   "lid": "primeira-liga",
+   "ovr": 69,
+   "attr": null
+  },
+  "CD-193668": {
+   "sid": 1836052,
+   "lid": "primeira-liga",
+   "ovr": 62,
+   "attr": null
+  },
+  "SCB-275993": {
+   "sid": 1828923,
+   "lid": "primeira-liga",
+   "ovr": 64,
+   "attr": null
+  },
+  "CD-278474": {
+   "sid": 2155276,
+   "lid": "primeira-liga",
+   "ovr": 66,
+   "attr": null
+  },
+  "CD-80878": {
+   "sid": 851277,
+   "lid": "primeira-liga",
+   "ovr": 73,
+   "attr": null
+  },
+  "CD-129463": {
+   "sid": 989385,
+   "lid": "primeira-liga",
+   "ovr": 64,
+   "attr": null
+  },
+  "SPO-194860": {
+   "sid": 1429932,
+   "lid": "primeira-liga",
+   "ovr": 57,
+   "attr": null
+  },
+  "CSC-161037": {
+   "sid": 1105841,
+   "lid": "brasileirao",
+   "ovr": 73,
+   "attr": null
+  },
+  "CD-169655": {
+   "sid": 883908,
+   "lid": "primeira-liga",
+   "ovr": 66,
+   "attr": null
+  },
+  "CD-124982": {
+   "sid": 991358,
+   "lid": "primeira-liga",
+   "ovr": 69,
+   "attr": null
+  },
+  "CD-32569": {
+   "sid": 838502,
+   "lid": "primeira-liga",
+   "ovr": 65,
+   "attr": null
+  },
+  "CDN-1232": {
+   "sid": 832672,
+   "lid": "primeira-liga",
+   "ovr": 70,
+   "attr": null
+  },
+  "CD-181527": {
+   "sid": 1186955,
+   "lid": "primeira-liga",
+   "ovr": 63,
+   "attr": null
+  },
+  "CSC-179844": {
+   "sid": 1652393,
+   "lid": "brasileirao",
+   "ovr": 54,
+   "attr": null
+  },
+  "CDN-1362": {
+   "sid": 822510,
+   "lid": "primeira-liga",
+   "ovr": 70,
+   "attr": null
+  },
+  "CDN-270035": {
+   "sid": 1011997,
+   "lid": "primeira-liga",
+   "ovr": 65,
+   "attr": null
+  },
+  "CDN-179837": {
+   "sid": 1020610,
+   "lid": "primeira-liga",
+   "ovr": 69,
+   "attr": null
+  },
+  "CDN-147456": {
+   "sid": 902051,
+   "lid": "primeira-liga",
+   "ovr": 64,
+   "attr": null
+  },
+  "CDN-43565": {
+   "sid": 851030,
+   "lid": "primeira-liga",
+   "ovr": 65,
+   "attr": null
+  },
+  "CDN-188089": {
+   "sid": 1393991,
+   "lid": "primeira-liga",
+   "ovr": 63,
+   "attr": null
+  },
+  "CDN-169570": {
+   "sid": 1188028,
+   "lid": "primeira-liga",
+   "ovr": 66,
+   "attr": null
+  },
+  "CDN-1437": {
+   "sid": 822509,
+   "lid": "primeira-liga",
+   "ovr": 70,
+   "attr": null
+  },
+  "CDN-181512": {
+   "sid": 926869,
+   "lid": "primeira-liga",
+   "ovr": 68,
+   "attr": null
+  },
+  "CDN-37727": {
+   "sid": 806515,
+   "lid": "primeira-liga",
+   "ovr": 61,
+   "attr": null
+  },
+  "CDN-231219": {
+   "sid": 1394244,
+   "lid": "primeira-liga",
+   "ovr": 58,
+   "attr": null
+  },
+  "CDN-243604": {
+   "sid": 344181,
+   "lid": "primeira-liga",
+   "ovr": 66,
+   "attr": null
+  },
+  "CDN-249175": {
+   "sid": 1819304,
+   "lid": "primeira-liga",
+   "ovr": 64,
+   "attr": null
+  },
+  "MOR-264054": {
+   "sid": 1471229,
+   "lid": "primeira-liga",
+   "ovr": 64,
+   "attr": null
+  },
+  "MOR-275027": {
+   "sid": 1188685,
+   "lid": "primeira-liga",
+   "ovr": 64,
+   "attr": null
+  },
+  "MOR-191985": {
+   "sid": 1166006,
+   "lid": "primeira-liga",
+   "ovr": 69,
+   "attr": null
+  },
+  "MOR-191408": {
+   "sid": 1142254,
+   "lid": "primeira-liga",
+   "ovr": 69,
+   "attr": null
+  },
+  "MOR-263535": {
+   "sid": 1001848,
+   "lid": "primeira-liga",
+   "ovr": 65,
+   "attr": null
+  },
+  "MOR-274500": {
+   "sid": 2030567,
+   "lid": "primeira-liga",
+   "ovr": 61,
+   "attr": null
+  },
+  "MOR-105208": {
+   "sid": 1082948,
+   "lid": "primeira-liga",
+   "ovr": 67,
+   "attr": null
+  },
+  "MOR-263709": {
+   "sid": 1489200,
+   "lid": "primeira-liga",
+   "ovr": 64,
+   "attr": null
+  },
+  "MOR-213097": {
+   "sid": 1153099,
+   "lid": "primeira-liga",
+   "ovr": 68,
+   "attr": null
+  },
+  "MOR-262652": {
+   "sid": 1395583,
+   "lid": "primeira-liga",
+   "ovr": 71,
+   "attr": null
+  },
+  "MOR-188084": {
+   "sid": 1160980,
+   "lid": "primeira-liga",
+   "ovr": 74,
+   "attr": null
+  },
+  "MOR-13839": {
+   "sid": 931485,
+   "lid": "primeira-liga",
+   "ovr": 67,
+   "attr": null
+  },
+  "MOR-271514": {
+   "sid": 1175474,
+   "lid": "primeira-liga",
+   "ovr": 62,
+   "attr": null
+  },
+  "MOR-52791": {
+   "sid": 788197,
+   "lid": "primeira-liga",
+   "ovr": 68,
+   "attr": null
+  },
+  "PAL-1490": {
+   "sid": 885179,
+   "lid": "brasileirao",
+   "ovr": 76,
+   "attr": null
+  },
+  "GET-290371": {
+   "sid": 1520814,
+   "lid": "la-liga",
+   "ovr": 58,
+   "attr": null
+  },
+  "CRU-1250": {
+   "sid": 245159,
+   "lid": "brasileirao",
+   "ovr": 68,
+   "attr": null
+  },
+  "COV-181936": {
+   "sid": 1089161,
+   "lid": "championship",
+   "ovr": 67,
+   "attr": null
+  },
+  "FLA-1077": {
+   "sid": 1101424,
+   "lid": "brasileirao",
+   "ovr": 61,
+   "attr": null
+  },
+  "AMA-182080": {
+   "sid": 1158547,
+   "lid": "primeira-liga",
+   "ovr": 73,
+   "attr": null
+  },
+  "AMA-291311": {
+   "sid": 2368703,
+   "lid": "primeira-liga",
+   "ovr": 71,
+   "attr": null
+  },
+  "SEV-213257": {
+   "sid": 591750,
+   "lid": "la-liga",
+   "ovr": 69,
+   "attr": null
+  },
+  "AMA-151113": {
+   "sid": 1090543,
+   "lid": "primeira-liga",
+   "ovr": 73,
+   "attr": null
+  },
+  "AMA-277809": {
+   "sid": 2058164,
+   "lid": "primeira-liga",
+   "ovr": 64,
+   "attr": null
+  },
+  "FAM-213107": {
+   "sid": 1903241,
+   "lid": "primeira-liga",
+   "ovr": 62,
+   "attr": null
+  },
+  "AMA-209792": {
+   "sid": 1210450,
+   "lid": "primeira-liga",
+   "ovr": 63,
+   "attr": null
+  },
+  "AMA-122432": {
+   "sid": 989449,
+   "lid": "primeira-liga",
+   "ovr": 64,
+   "attr": null
+  },
+  "AMA-187322": {
+   "sid": 1146225,
+   "lid": "primeira-liga",
+   "ovr": 69,
+   "attr": null
+  },
+  "AMA-80875": {
+   "sid": 851283,
+   "lid": "primeira-liga",
+   "ovr": 64,
+   "attr": null
+  },
+  "AMA-136782": {
+   "sid": 1002565,
+   "lid": "primeira-liga",
+   "ovr": 70,
+   "attr": null
+  },
+  "AMA-143609": {
+   "sid": 1017590,
+   "lid": "primeira-liga",
+   "ovr": 66,
+   "attr": null
+  },
+  "FAM-11587": {
+   "sid": 190137,
+   "lid": "primeira-liga",
+   "ovr": 70,
+   "attr": null
+  },
+  "BOT-179157": {
+   "sid": 1119887,
+   "lid": "brasileirao",
+   "ovr": 75,
+   "attr": null
+  },
+  "AMA-231213": {
+   "sid": 929640,
+   "lid": "primeira-liga",
+   "ovr": 61,
+   "attr": null
+  },
+  "RIO-243745": {
+   "sid": 1094384,
+   "lid": "primeira-liga",
+   "ovr": 68,
+   "attr": null
+  },
+  "RIO-247235": {
+   "sid": 1499082,
+   "lid": "primeira-liga",
+   "ovr": 71,
+   "attr": null
+  },
+  "RIO-211519": {
+   "sid": 1485103,
+   "lid": "primeira-liga",
+   "ovr": 62,
+   "attr": null
+  },
+  "RIO-185179": {
+   "sid": 1020203,
+   "lid": "primeira-liga",
+   "ovr": 68,
+   "attr": null
+  },
+  "RIO-111896": {
+   "sid": 1393242,
+   "lid": "primeira-liga",
+   "ovr": 67,
+   "attr": null
+  },
+  "COR-203412": {
+   "sid": 1105850,
+   "lid": "brasileirao",
+   "ovr": 66,
+   "attr": null
+  },
+  "RIO-209594": {
+   "sid": 1005992,
+   "lid": "primeira-liga",
+   "ovr": 74,
+   "attr": null
+  },
+  "RIO-15990": {
+   "sid": 848521,
+   "lid": "primeira-liga",
+   "ovr": 73,
+   "attr": null
+  },
+  "RIO-81950": {
+   "sid": 946909,
+   "lid": "primeira-liga",
+   "ovr": 66,
+   "attr": null
+  },
+  "RIO-276192": {
+   "sid": 2034540,
+   "lid": "primeira-liga",
+   "ovr": 67,
+   "attr": null
+  },
+  "RIO-250593": {
+   "sid": 1467139,
+   "lid": "primeira-liga",
+   "ovr": 68,
+   "attr": null
+  },
+  "RIO-193588": {
+   "sid": 1173124,
+   "lid": "primeira-liga",
+   "ovr": 64,
+   "attr": null
+  },
+  "RIO-188099": {
+   "sid": 1478890,
+   "lid": "primeira-liga",
+   "ovr": 61,
+   "attr": null
+  },
+  "EST-37555": {
+   "sid": 834247,
+   "lid": "primeira-liga",
+   "ovr": 70,
+   "attr": null
+  },
+  "RIO-114150": {
+   "sid": 938292,
+   "lid": "primeira-liga",
+   "ovr": 76,
+   "attr": null
+  },
+  "RIO-110864": {
+   "sid": 905406,
+   "lid": "primeira-liga",
+   "ovr": 66,
+   "attr": null
+  },
+  "RIO-135116": {
+   "sid": 1005270,
+   "lid": "primeira-liga",
+   "ovr": 69,
+   "attr": null
+  },
+  "EST-553": {
+   "sid": 930246,
+   "lid": "primeira-liga",
+   "ovr": 79,
+   "attr": null
+  },
+  "ALV-248958": {
+   "sid": 1190120,
+   "lid": "primeira-liga",
+   "ovr": 64,
+   "attr": null
+  },
+  "EST-213075": {
+   "sid": 1513647,
+   "lid": "primeira-liga",
+   "ovr": 58,
+   "attr": null
+  },
+  "EST-636": {
+   "sid": 826210,
+   "lid": "primeira-liga",
+   "ovr": 74,
+   "attr": null
+  },
+  "EST-16752": {
+   "sid": 548044,
+   "lid": "primeira-liga",
+   "ovr": 75,
+   "attr": null
+  },
+  "EST-135650": {
+   "sid": 920684,
+   "lid": "primeira-liga",
+   "ovr": 75,
+   "attr": null
+  },
+  "EST-8569": {
+   "sid": 858705,
+   "lid": "primeira-liga",
+   "ovr": 68,
+   "attr": null
+  },
+  "EST-37554": {
+   "sid": 357734,
+   "lid": "primeira-liga",
+   "ovr": 68,
+   "attr": null
+  },
+  "EST-175853": {
+   "sid": 994532,
+   "lid": "primeira-liga",
+   "ovr": 66,
+   "attr": null
+  },
+  "EST-141472": {
+   "sid": 986726,
+   "lid": "primeira-liga",
+   "ovr": 73,
+   "attr": null
+  },
+  "EST-243570": {
+   "sid": 1511977,
+   "lid": "primeira-liga",
+   "ovr": 66,
+   "attr": null
+  },
+  "EST-153884": {
+   "sid": 1083104,
+   "lid": "primeira-liga",
+   "ovr": 63,
+   "attr": null
+  },
+  "EST-7821": {
+   "sid": 93796,
+   "lid": "primeira-liga",
+   "ovr": 70,
+   "attr": null
+  },
+  "EST-213111": {
+   "sid": 1513619,
+   "lid": "primeira-liga",
+   "ovr": 62,
+   "attr": null
+  },
+  "FCA-152585": {
+   "sid": 1185196,
+   "lid": "primeira-liga",
+   "ovr": 67,
+   "attr": null
+  },
+  "FCA-81391": {
+   "sid": 913728,
+   "lid": "primeira-liga",
+   "ovr": 72,
+   "attr": null
+  },
+  "FCA-161005": {
+   "sid": 1510444,
+   "lid": "primeira-liga",
+   "ovr": 67,
+   "attr": null
+  },
+  "FCA-180178": {
+   "sid": 1000680,
+   "lid": "primeira-liga",
+   "ovr": 63,
+   "attr": null
+  },
+  "FCA-169128": {
+   "sid": 1105857,
+   "lid": "primeira-liga",
+   "ovr": 73,
+   "attr": null
+  },
+  "FCA-182405": {
+   "sid": 1191120,
+   "lid": "primeira-liga",
+   "ovr": 70,
+   "attr": null
+  },
+  "FCA-92089": {
+   "sid": 955133,
+   "lid": "primeira-liga",
+   "ovr": 71,
+   "attr": null
+  },
+  "FCA-143641": {
+   "sid": 973517,
+   "lid": "primeira-liga",
+   "ovr": 70,
+   "attr": null
+  },
+  "FCA-270595": {
+   "sid": 1893864,
+   "lid": "primeira-liga",
+   "ovr": 66,
+   "attr": null
+  },
+  "FCA-214415": {
+   "sid": 1126965,
+   "lid": "primeira-liga",
+   "ovr": 68,
+   "attr": null
+  },
+  "FCA-136929": {
+   "sid": 996932,
+   "lid": "primeira-liga",
+   "ovr": 66,
+   "attr": null
+  },
+  "FCA-191142": {
+   "sid": 1014259,
+   "lid": "primeira-liga",
+   "ovr": 66,
+   "attr": null
+  },
+  "FCA-80899": {
+   "sid": 943713,
+   "lid": "primeira-liga",
+   "ovr": 68,
+   "attr": null
+  },
+  "GUI-28976": {
+   "sid": 844409,
+   "lid": "primeira-liga",
+   "ovr": 65,
+   "attr": null
+  },
+  "FCA-140169": {
+   "sid": 964609,
+   "lid": "primeira-liga",
+   "ovr": 72,
+   "attr": null
+  },
+  "FCA-151938": {
+   "sid": 902050,
+   "lid": "primeira-liga",
+   "ovr": 68,
+   "attr": null
+  },
+  "FCA-53121": {
+   "sid": 863637,
+   "lid": "primeira-liga",
+   "ovr": 70,
+   "attr": null
+  },
+  "FCA-100703": {
+   "sid": 789933,
+   "lid": "primeira-liga",
+   "ovr": 73,
+   "attr": null
+  },
+  "FCA-202404": {
+   "sid": 1165190,
+   "lid": "primeira-liga",
+   "ovr": 61,
+   "attr": null
+  },
+  "BEN-177322": {
+   "sid": 998870,
+   "lid": "primeira-liga",
+   "ovr": 66,
+   "attr": null
+  },
+  "BEN-251296": {
+   "sid": 1158353,
+   "lid": "primeira-liga",
+   "ovr": 69,
+   "attr": null
+  },
+  "CAS-45116": {
+   "sid": 826054,
+   "lid": "primeira-liga",
+   "ovr": 72,
+   "attr": null
+  },
+  "CAS-14003": {
+   "sid": 157023,
+   "lid": "primeira-liga",
+   "ovr": 64,
+   "attr": null
+  },
+  "VOL-231106": {
+   "sid": 1520752,
+   "lid": "eredivisie",
+   "ovr": 63,
+   "attr": null
+  },
+  "CAS-11702": {
+   "sid": 158597,
+   "lid": "primeira-liga",
+   "ovr": 67,
+   "attr": null
+  },
+  "CAS-39959": {
+   "sid": 892170,
+   "lid": "primeira-liga",
+   "ovr": 70,
+   "attr": null
+  },
+  "FAM-45511": {
+   "sid": 352874,
+   "lid": "primeira-liga",
+   "ovr": 67,
+   "attr": null
+  },
+  "CAS-37728": {
+   "sid": 851276,
+   "lid": "primeira-liga",
+   "ovr": 66,
+   "attr": null
+  },
+  "CAS-270882": {
+   "sid": 1464186,
+   "lid": "primeira-liga",
+   "ovr": 63,
+   "attr": null
+  },
+  "CAS-294326": {
+   "sid": 2551196,
+   "lid": "primeira-liga",
+   "ovr": 57,
+   "attr": null
+  },
+  "CAS-99358": {
+   "sid": 963990,
+   "lid": "primeira-liga",
+   "ovr": 68,
+   "attr": null
+  },
+  "CAS-138218": {
+   "sid": 1015932,
+   "lid": "primeira-liga",
+   "ovr": 70,
+   "attr": null
+  },
+  "CAS-171386": {
+   "sid": 1151667,
+   "lid": "primeira-liga",
+   "ovr": 69,
+   "attr": null
+  },
+  "CAS-263516": {
+   "sid": 1091103,
+   "lid": "primeira-liga",
+   "ovr": 65,
+   "attr": null
+  },
+  "CAS-33894": {
+   "sid": 821628,
+   "lid": "primeira-liga",
+   "ovr": 76,
+   "attr": null
+  },
+  "CAM-189371": {
+   "sid": 1139990,
+   "lid": "brasileirao",
+   "ovr": 68,
+   "attr": null
+  },
+  "CAS-246140": {
+   "sid": 1067290,
+   "lid": "primeira-liga",
+   "ovr": 65,
+   "attr": null
+  },
+  "PSG-286945": {
+   "sid": 1937851,
+   "lid": "ligue-1",
+   "ovr": 64,
+   "attr": null
+  },
+  "FAM-262588": {
+   "sid": 1120040,
+   "lid": "primeira-liga",
+   "ovr": 64,
+   "attr": null
+  },
+  "FAM-7533": {
+   "sid": 836676,
+   "lid": "primeira-liga",
+   "ovr": 74,
+   "attr": null
+  },
+  "FAM-207131": {
+   "sid": 1493216,
+   "lid": "primeira-liga",
+   "ovr": 66,
+   "attr": null
+  },
+  "AMA-154435": {
+   "sid": 1090646,
+   "lid": "primeira-liga",
+   "ovr": 70,
+   "attr": null
+  },
+  "FAM-169260": {
+   "sid": 1002443,
+   "lid": "primeira-liga",
+   "ovr": 69,
+   "attr": null
+  },
+  "FAM-112965": {
+   "sid": 977676,
+   "lid": "primeira-liga",
+   "ovr": 75,
+   "attr": null
+  },
+  "FAM-126147": {
+   "sid": 991924,
+   "lid": "primeira-liga",
+   "ovr": 73,
+   "attr": null
+  },
+  "FAM-176011": {
+   "sid": 886204,
+   "lid": "primeira-liga",
+   "ovr": 78,
+   "attr": null
+  },
+  "FAM-37556": {
+   "sid": 788203,
+   "lid": "primeira-liga",
+   "ovr": 71,
+   "attr": null
+  },
+  "VAS-176241": {
+   "sid": 1116593,
+   "lid": "brasileirao",
+   "ovr": 73,
+   "attr": null
+  },
+  "ALV-137985": {
+   "sid": 1015826,
+   "lid": "primeira-liga",
+   "ovr": 75,
+   "attr": null
+  },
+  "ALV-280037": {
+   "sid": 1405454,
+   "lid": "primeira-liga",
+   "ovr": 63,
+   "attr": null
+  },
+  "SAN-1380": {
+   "sid": 329069,
+   "lid": "brasileirao",
+   "ovr": 71,
+   "attr": null
+  },
+  "SPO-229418": {
+   "sid": 1588180,
+   "lid": "primeira-liga",
+   "ovr": 64,
+   "attr": null
+  },
+  "ALV-203421": {
+   "sid": 904849,
+   "lid": "primeira-liga",
+   "ovr": 67,
+   "attr": null
+  },
+  "ALV-264461": {
+   "sid": 1915110,
+   "lid": "primeira-liga",
+   "ovr": 64,
+   "attr": null
+  },
+  "ALV-249393": {
+   "sid": 1120043,
+   "lid": "primeira-liga",
+   "ovr": 68,
+   "attr": null
+  },
+  "CRU-146253": {
+   "sid": 1046496,
+   "lid": "brasileirao",
+   "ovr": 66,
+   "attr": null
+  },
+  "ALV-246741": {
+   "sid": 1158067,
+   "lid": "primeira-liga",
+   "ovr": 71,
+   "attr": null
+  },
+  "GUI-204127": {
+   "sid": 1922597,
+   "lid": "primeira-liga",
+   "ovr": 75,
+   "attr": null
+  },
+  "ALV-110897": {
+   "sid": 1031485,
+   "lid": "primeira-liga",
+   "ovr": 65,
+   "attr": null
+  },
+  "ALV-263600": {
+   "sid": 1063375,
+   "lid": "primeira-liga",
+   "ovr": 68,
+   "attr": null
+  },
+  "ALV-253528": {
+   "sid": 1476213,
+   "lid": "primeira-liga",
+   "ovr": 62,
+   "attr": null
+  },
+  "ALV-33620": {
+   "sid": 125625,
+   "lid": "primeira-liga",
+   "ovr": 65,
+   "attr": null
+  },
+  "ALV-212863": {
+   "sid": 1506777,
+   "lid": "primeira-liga",
+   "ovr": 63,
+   "attr": null
+  },
+  "ALV-146351": {
+   "sid": 1018555,
+   "lid": "primeira-liga",
+   "ovr": 69,
+   "attr": null
+  },
+  "QPR-245317": {
+   "sid": 1632572,
+   "lid": "championship",
+   "ovr": 75,
+   "attr": null
+  },
+  "QPR-118793": {
+   "sid": 981046,
+   "lid": "championship",
+   "ovr": 70,
+   "attr": null
+  },
+  "QPR-4029": {
+   "sid": 809512,
+   "lid": "championship",
+   "ovr": 75,
+   "attr": null
+  },
+  "QPR-24214": {
+   "sid": 938306,
+   "lid": "championship",
+   "ovr": 75,
+   "attr": null
+  },
+  "QPR-73159": {
+   "sid": 905356,
+   "lid": "championship",
+   "ovr": 73,
+   "attr": null
+  },
+  "REN-34522": {
+   "sid": 292665,
+   "lid": "ligue-1",
+   "ovr": 71,
+   "attr": null
+  },
+  "QPR-126909": {
+   "sid": 992301,
+   "lid": "championship",
+   "ovr": 68,
+   "attr": null
+  },
+  "QPR-167655": {
+   "sid": 1118185,
+   "lid": "championship",
+   "ovr": 71,
+   "attr": null
+  },
+  "QPR-4037": {
+   "sid": 842562,
+   "lid": "championship",
+   "ovr": 67,
+   "attr": null
+  },
+  "FIO-133787": {
+   "sid": 914691,
+   "lid": "serie-a",
+   "ovr": 72,
+   "attr": null
+  },
+  "SUN-172123": {
+   "sid": 1014987,
+   "lid": "premier-league",
+   "ovr": 74,
+   "attr": null
+  },
+  "QPR-141661": {
+   "sid": 1012415,
+   "lid": "championship",
+   "ovr": 75,
+   "attr": null
+  },
+  "QPR-26375": {
+   "sid": 914891,
+   "lid": "championship",
+   "ovr": 75,
+   "attr": null
+  },
+  "NAC-67887": {
+   "sid": 858242,
+   "lid": "eredivisie",
+   "ovr": 68,
+   "attr": null
+  },
+  "QPR-4052": {
+   "sid": 791984,
+   "lid": "championship",
+   "ovr": 69,
+   "attr": null
+  },
+  "QPR-218370": {
+   "sid": 1434768,
+   "lid": "championship",
+   "ovr": 66,
+   "attr": null
+  },
+  "SHE-189628": {
+   "sid": 1154937,
+   "lid": "championship",
+   "ovr": 70,
+   "attr": null
+  },
+  "QPR-245354": {
+   "sid": 1634305,
+   "lid": "championship",
+   "ovr": 55,
+   "attr": null
+  },
+  "ALV-172231": {
+   "sid": 1100957,
+   "lid": "primeira-liga",
+   "ovr": 72,
+   "attr": null
+  },
+  "POR-175883": {
+   "sid": 1153108,
+   "lid": "championship",
+   "ovr": 60,
+   "attr": null
+  },
+  "POR-247375": {
+   "sid": 1149851,
+   "lid": "championship",
+   "ovr": 61,
+   "attr": null
+  },
+  "POR-14631": {
+   "sid": 557614,
+   "lid": "championship",
+   "ovr": 67,
+   "attr": null
+  },
+  "GET-178634": {
+   "sid": 1087476,
+   "lid": "la-liga",
+   "ovr": 70,
+   "attr": null
+  },
+  "VAS-179017": {
+   "sid": 1089677,
+   "lid": "brasileirao",
+   "ovr": 69,
+   "attr": null
+  },
+  "POR-4004": {
+   "sid": 291483,
+   "lid": "championship",
+   "ovr": 72,
+   "attr": null
+  },
+  "POR-146092": {
+   "sid": 982559,
+   "lid": "championship",
+   "ovr": 66,
+   "attr": null
+  },
+  "POR-4275": {
+   "sid": 190863,
+   "lid": "championship",
+   "ovr": 69,
+   "attr": null
+  },
+  "CAS-171553": {
+   "sid": 1131015,
+   "lid": "primeira-liga",
+   "ovr": 64,
+   "attr": null
+  },
+  "POR-5819": {
+   "sid": 816519,
+   "lid": "championship",
+   "ovr": 65,
+   "attr": null
+  },
+  "POR-127875": {
+   "sid": 1198145,
+   "lid": "championship",
+   "ovr": 71,
+   "attr": null
+  },
+  "POR-149170": {
+   "sid": 993445,
+   "lid": "championship",
+   "ovr": 69,
+   "attr": null
+  },
+  "POR-4155": {
+   "sid": 892396,
+   "lid": "championship",
+   "ovr": 67,
+   "attr": null
+  },
+  "POR-5091": {
+   "sid": 284427,
+   "lid": "championship",
+   "ovr": 65,
+   "attr": null
+  },
+  "NAC-84069": {
+   "sid": 939460,
+   "lid": "eredivisie",
+   "ovr": 70,
+   "attr": null
+  },
+  "POR-10701": {
+   "sid": 799389,
+   "lid": "championship",
+   "ovr": 74,
+   "attr": null
+  },
+  "POR-6082": {
+   "sid": 788264,
+   "lid": "championship",
+   "ovr": 61,
+   "attr": null
+  },
+  "SUN-8467": {
+   "sid": 218160,
+   "lid": "premier-league",
+   "ovr": 72,
+   "attr": null
+  },
+  "WOL-276066": {
+   "sid": 1899647,
+   "lid": "premier-league",
+   "ovr": 77,
+   "attr": null
+  },
+  "WOL-193014": {
+   "sid": 1402232,
+   "lid": "premier-league",
+   "ovr": 68,
+   "attr": null
+  },
+  "WOL-4863": {
+   "sid": 361352,
+   "lid": "premier-league",
+   "ovr": 76,
+   "attr": null
+  },
+  "WOL-189575": {
+   "sid": 1166679,
+   "lid": "premier-league",
+   "ovr": 62,
+   "attr": null
+  },
+  "WOL-788": {
+   "sid": 845273,
+   "lid": "premier-league",
+   "ovr": 80,
+   "attr": null
+  },
+  "PFC-34754": {
+   "sid": 894733,
+   "lid": "ligue-1",
+   "ovr": 79,
+   "attr": null
+  },
+  "CEL-272431": {
+   "sid": 1526628,
+   "lid": "la-liga",
+   "ovr": 79,
+   "attr": null
+  },
+  "WOL-151521": {
+   "sid": 1006073,
+   "lid": "premier-league",
+   "ovr": 78,
+   "attr": null
+  },
+  "WOL-157709": {
+   "sid": 1013928,
+   "lid": "premier-league",
+   "ovr": 78,
+   "attr": null
+  },
+  "LEI-175979": {
+   "sid": 1136409,
+   "lid": "championship",
+   "ovr": 75,
+   "attr": null
+  },
+  "FCM-133553": {
+   "sid": 982613,
+   "lid": "ligue-1",
+   "ovr": 72,
+   "attr": null
+  },
+  "BIR-172581": {
+   "sid": 932628,
+   "lid": "championship",
+   "ovr": 75,
+   "attr": null
+  },
+  "NEW-3312": {
+   "sid": 69256,
+   "lid": "premier-league",
+   "ovr": 75,
+   "attr": null
+  },
+  "GIL-37432": {
+   "sid": 831781,
+   "lid": "primeira-liga",
+   "ovr": 72,
+   "attr": null
+  },
+  "WOL-153570": {
+   "sid": 1014835,
+   "lid": "premier-league",
+   "ovr": 78,
+   "attr": null
+  },
+  "WOL-102223": {
+   "sid": 973418,
+   "lid": "premier-league",
+   "ovr": 80,
+   "attr": null
+  },
+  "SPO-82207": {
+   "sid": 930666,
+   "lid": "primeira-liga",
+   "ovr": 72,
+   "attr": null
+  },
+  "NEW-4078": {
+   "sid": 1131,
+   "lid": "premier-league",
+   "ovr": 67,
+   "attr": null
+  },
+  "PIS-182274": {
+   "sid": 996919,
+   "lid": "serie-a",
+   "ovr": 73,
+   "attr": null
+  },
+  "OXF-11375": {
+   "sid": 309218,
+   "lid": "championship",
+   "ovr": 69,
+   "attr": null
+  },
+  "WRE-140977": {
+   "sid": 994562,
+   "lid": "championship",
+   "ovr": 67,
+   "attr": null
+  },
+  "CRE-3330": {
+   "sid": 173827,
+   "lid": "serie-a",
+   "ovr": 74,
+   "attr": null
+  },
+  "BUR-143054": {
+   "sid": 996985,
+   "lid": "premier-league",
+   "ovr": 71,
+   "attr": null
+  },
+  "BUR-122313": {
+   "sid": 990550,
+   "lid": "premier-league",
+   "ovr": 77,
+   "attr": null
+  },
+  "BUR-3999": {
+   "sid": 795066,
+   "lid": "premier-league",
+   "ovr": 76,
+   "attr": null
+  },
+  "VAL-136349": {
+   "sid": 909966,
+   "lid": "la-liga",
+   "ovr": 77,
+   "attr": null
+  },
+  "BUR-9405": {
+   "sid": 809276,
+   "lid": "premier-league",
+   "ovr": 74,
+   "attr": null
+  },
+  "BUR-169325": {
+   "sid": 1009386,
+   "lid": "premier-league",
+   "ovr": 78,
+   "attr": null
+  },
+  "BUR-207566": {
+   "sid": 826183,
+   "lid": "premier-league",
+   "ovr": 71,
+   "attr": null
+  },
+  "BUR-8217": {
+   "sid": 792122,
+   "lid": "premier-league",
+   "ovr": 73,
+   "attr": null
+  },
+  "LEI-172555": {
+   "sid": 1000142,
+   "lid": "championship",
+   "ovr": 75,
+   "attr": null
+  },
+  "BUR-213243": {
+   "sid": 552036,
+   "lid": "premier-league",
+   "ovr": 72,
+   "attr": null
+  },
+  "FEY-25615": {
+   "sid": 825899,
+   "lid": "eredivisie",
+   "ovr": 76,
+   "attr": null
+  },
+  "BHA-10777": {
+   "sid": 842513,
+   "lid": "premier-league",
+   "ovr": 76,
+   "attr": null
+  },
+  "BUR-190547": {
+   "sid": 996910,
+   "lid": "premier-league",
+   "ovr": 77,
+   "attr": null
+  },
+  "BUR-177627": {
+   "sid": 1136896,
+   "lid": "premier-league",
+   "ovr": 74,
+   "attr": null
+  },
+  "BUR-31560": {
+   "sid": 875360,
+   "lid": "premier-league",
+   "ovr": 75,
+   "attr": null
+  },
+  "BUR-7980": {
+   "sid": 804613,
+   "lid": "premier-league",
+   "ovr": 69,
+   "attr": null
+  },
+  "SPA-137697": {
+   "sid": 916926,
+   "lid": "eredivisie",
+   "ovr": 68,
+   "attr": null
+  },
+  "BUR-175800": {
+   "sid": 1128801,
+   "lid": "premier-league",
+   "ovr": 74,
+   "attr": null
+  },
+  "BRE-731": {
+   "sid": 891508,
+   "lid": "ligue-1",
+   "ovr": 75,
+   "attr": null
+  },
+  "WBA-38373": {
+   "sid": 932642,
+   "lid": "championship",
+   "ovr": 77,
+   "attr": null
+  },
+  "HUL-248734": {
+   "sid": 1084356,
+   "lid": "championship",
+   "ovr": 72,
+   "attr": null
+  },
+  "WBA-166548": {
+   "sid": 1066059,
+   "lid": "championship",
+   "ovr": 77,
+   "attr": null
+  },
+  "WBA-74701": {
+   "sid": 873627,
+   "lid": "championship",
+   "ovr": 71,
+   "attr": null
+  },
+  "WBA-180842": {
+   "sid": 847125,
+   "lid": "championship",
+   "ovr": 74,
+   "attr": null
+  },
+  "LEV-290072": {
+   "sid": 1649919,
+   "lid": "la-liga",
+   "ovr": 69,
+   "attr": null
+  },
+  "WBA-8276": {
+   "sid": 856718,
+   "lid": "championship",
+   "ovr": 75,
+   "attr": null
+  },
+  "WBA-228006": {
+   "sid": 1394801,
+   "lid": "championship",
+   "ovr": 67,
+   "attr": null
+  },
+  "WBA-5230": {
+   "sid": 839940,
+   "lid": "championship",
+   "ovr": 74,
+   "attr": null
+  },
+  "WBA-4427": {
+   "sid": 865740,
+   "lid": "championship",
+   "ovr": 72,
+   "attr": null
+  },
+  "WBA-140424": {
+   "sid": 988278,
+   "lid": "championship",
+   "ovr": 72,
+   "attr": null
+  },
+  "NEC-176767": {
+   "sid": 1012639,
+   "lid": "eredivisie",
+   "ovr": 69,
+   "attr": null
+  },
+  "IPS-5430": {
+   "sid": 197982,
+   "lid": "championship",
+   "ovr": 67,
+   "attr": null
+  },
+  "WBA-167566": {
+   "sid": 360388,
+   "lid": "championship",
+   "ovr": 76,
+   "attr": null
+  },
+  "OXF-4009": {
+   "sid": 136108,
+   "lid": "championship",
+   "ovr": 68,
+   "attr": null
+  },
+  "GET-156967": {
+   "sid": 974713,
+   "lid": "la-liga",
+   "ovr": 72,
+   "attr": null
+  },
+  "BIR-176016": {
+   "sid": 1157614,
+   "lid": "championship",
+   "ovr": 74,
+   "attr": null
+  },
+  "BIR-226": {
+   "sid": 258325,
+   "lid": "championship",
+   "ovr": 71,
+   "attr": null
+  },
+  "BIR-178361": {
+   "sid": 1106573,
+   "lid": "championship",
+   "ovr": 73,
+   "attr": null
+  },
+  "BIR-8072": {
+   "sid": 355152,
+   "lid": "championship",
+   "ovr": 73,
+   "attr": null
+  },
+  "BIR-213404": {
+   "sid": 1084399,
+   "lid": "championship",
+   "ovr": 77,
+   "attr": null
+  },
+  "BIR-189752": {
+   "sid": 881307,
+   "lid": "championship",
+   "ovr": 71,
+   "attr": null
+  },
+  "BIR-137475": {
+   "sid": 1013987,
+   "lid": "championship",
+   "ovr": 79,
+   "attr": null
+  },
+  "HUL-110807": {
+   "sid": 902083,
+   "lid": "championship",
+   "ovr": 75,
+   "attr": null
+  },
+  "BIR-58201": {
+   "sid": 794520,
+   "lid": "championship",
+   "ovr": 71,
+   "attr": null
+  },
+  "BIR-16076": {
+   "sid": 361326,
+   "lid": "championship",
+   "ovr": 74,
+   "attr": null
+  },
+  "BRI-4191": {
+   "sid": 906287,
+   "lid": "championship",
+   "ovr": 72,
+   "attr": null
+  },
+  "BLA-168660": {
+   "sid": 1015368,
+   "lid": "championship",
+   "ovr": 69,
+   "attr": null
+  },
+  "BIR-4031": {
+   "sid": 791616,
+   "lid": "championship",
+   "ovr": 74,
+   "attr": null
+  },
+  "BIR-136347": {
+   "sid": 927363,
+   "lid": "championship",
+   "ovr": 72,
+   "attr": null
+  },
+  "KOE-180567": {
+   "sid": 963043,
+   "lid": "bundesliga",
+   "ovr": 73,
+   "attr": null
+  },
+  "BIR-137712": {
+   "sid": 865554,
+   "lid": "championship",
+   "ovr": 77,
+   "attr": null
+  },
+  "BIR-6847": {
+   "sid": 843108,
+   "lid": "championship",
+   "ovr": 74,
+   "attr": null
+  },
+  "MID-4209": {
+   "sid": 548194,
+   "lid": "championship",
+   "ovr": 73,
+   "attr": null
+  },
+  "BIR-102317": {
+   "sid": 973785,
+   "lid": "championship",
+   "ovr": 69,
+   "attr": null
+  },
+  "BIR-128238": {
+   "sid": 970353,
+   "lid": "championship",
+   "ovr": 72,
+   "attr": null
+  },
+  "BIR-191362": {
+   "sid": 1148507,
+   "lid": "championship",
+   "ovr": 75,
+   "attr": null
+  },
+  "BIR-5832": {
+   "sid": 52023,
+   "lid": "championship",
+   "ovr": 73,
+   "attr": null
+  },
+  "BIR-245422": {
+   "sid": 1157797,
+   "lid": "championship",
+   "ovr": 54,
+   "attr": null
+  },
+  "LEI-7984": {
+   "sid": 103045,
+   "lid": "championship",
+   "ovr": 71,
+   "attr": null
+  },
+  "SHE-4223": {
+   "sid": 204336,
+   "lid": "championship",
+   "ovr": 70,
+   "attr": null
+  },
+  "SHE-189611": {
+   "sid": 1005766,
+   "lid": "championship",
+   "ovr": 75,
+   "attr": null
+  },
+  "SHE-7965": {
+   "sid": 826145,
+   "lid": "championship",
+   "ovr": 76,
+   "attr": null
+  },
+  "LEI-8075": {
+   "sid": 833057,
+   "lid": "championship",
+   "ovr": 74,
+   "attr": null
+  },
+  "SHE-4147": {
+   "sid": 786028,
+   "lid": "championship",
+   "ovr": 70,
+   "attr": null
+  },
+  "SHE-98483": {
+   "sid": 825845,
+   "lid": "championship",
+   "ovr": 73,
+   "attr": null
+  },
+  "SHE-8147": {
+   "sid": 285989,
+   "lid": "championship",
+   "ovr": 71,
+   "attr": null
+  },
+  "BRE-191077": {
+   "sid": 1586020,
+   "lid": "premier-league",
+   "ovr": 71,
+   "attr": null
+  },
+  "SHE-210648": {
+   "sid": 1391824,
+   "lid": "championship",
+   "ovr": 76,
+   "attr": null
+  },
+  "SHE-5508": {
+   "sid": 190853,
+   "lid": "championship",
+   "ovr": 68,
+   "attr": null
+  },
+  "WOL-4081": {
+   "sid": 143047,
+   "lid": "premier-league",
+   "ovr": 72,
+   "attr": null
+  },
+  "SHE-131037": {
+   "sid": 836693,
+   "lid": "championship",
+   "ovr": 75,
+   "attr": null
+  },
+  "COV-47098": {
+   "sid": 921006,
+   "lid": "championship",
+   "ovr": 80,
+   "attr": null
+  },
+  "SHE-80308": {
+   "sid": 943652,
+   "lid": "championship",
+   "ovr": 68,
+   "attr": null
+  },
+  "SHE-103117": {
+   "sid": 966458,
+   "lid": "championship",
+   "ovr": 74,
+   "attr": null
+  },
+  "SHE-83370": {
+   "sid": 952461,
+   "lid": "championship",
+   "ovr": 72,
+   "attr": null
+  },
+  "QPR-4305": {
+   "sid": 911708,
+   "lid": "championship",
+   "ovr": 72,
+   "attr": null
+  },
+  "SHE-6411": {
+   "sid": 896209,
+   "lid": "championship",
+   "ovr": 81,
+   "attr": null
+  },
+  "SHE-4327": {
+   "sid": 288997,
+   "lid": "championship",
+   "ovr": 68,
+   "attr": null
+  },
+  "ATL-123265": {
+   "sid": 1116315,
+   "lid": "la-liga",
+   "ovr": 71,
+   "attr": null
+  },
+  "BRI-9808": {
+   "sid": 914276,
+   "lid": "championship",
+   "ovr": 73,
+   "attr": null
+  },
+  "PNE-6145": {
+   "sid": 843756,
+   "lid": "championship",
+   "ovr": 72,
+   "attr": null
+  },
+  "PNE-157439": {
+   "sid": 1049459,
+   "lid": "championship",
+   "ovr": 73,
+   "attr": null
+  },
+  "PNE-175856": {
+   "sid": 1005706,
+   "lid": "championship",
+   "ovr": 66,
+   "attr": null
+  },
+  "CHA-180838": {
+   "sid": 993439,
+   "lid": "championship",
+   "ovr": 74,
+   "attr": null
+  },
+  "PNE-35064": {
+   "sid": 891870,
+   "lid": "championship",
+   "ovr": 72,
+   "attr": null
+  },
+  "NOR-135344": {
+   "sid": 1005723,
+   "lid": "championship",
+   "ovr": 68,
+   "attr": null
+  },
+  "PNE-37800": {
+   "sid": 800976,
+   "lid": "championship",
+   "ovr": 66,
+   "attr": null
+  },
+  "PNE-4348": {
+   "sid": 252999,
+   "lid": "championship",
+   "ovr": 68,
+   "attr": null
+  },
+  "PNE-79787": {
+   "sid": 280737,
+   "lid": "championship",
+   "ovr": 65,
+   "attr": null
+  },
+  "PNE-175855": {
+   "sid": 1069627,
+   "lid": "championship",
+   "ovr": 70,
+   "attr": null
+  },
+  "PNE-137963": {
+   "sid": 867443,
+   "lid": "championship",
+   "ovr": 72,
+   "attr": null
+  },
+  "PNE-4333": {
+   "sid": 331219,
+   "lid": "championship",
+   "ovr": 68,
+   "attr": null
+  },
+  "PNE-5390": {
+   "sid": 78368,
+   "lid": "championship",
+   "ovr": 67,
+   "attr": null
+  },
+  "PNE-6044": {
+   "sid": 845941,
+   "lid": "championship",
+   "ovr": 74,
+   "attr": null
+  },
+  "PNE-74783": {
+   "sid": 796986,
+   "lid": "championship",
+   "ovr": 75,
+   "attr": null
+  },
+  "WAT-261581": {
+   "sid": 1542789,
+   "lid": "championship",
+   "ovr": 70,
+   "attr": null
+  },
+  "PSV-7703": {
+   "sid": 856744,
+   "lid": "eredivisie",
+   "ovr": 74,
+   "attr": null
+  },
+  "WAT-183422": {
+   "sid": 1127789,
+   "lid": "championship",
+   "ovr": 75,
+   "attr": null
+  },
+  "WAT-190804": {
+   "sid": 1149235,
+   "lid": "championship",
+   "ovr": 68,
+   "attr": null
+  },
+  "WAT-131893": {
+   "sid": 998357,
+   "lid": "championship",
+   "ovr": 71,
+   "attr": null
+  },
+  "ASM-8887": {
+   "sid": 873534,
+   "lid": "ligue-1",
+   "ovr": 76,
+   "attr": null
+  },
+  "WAT-8854": {
+   "sid": 917305,
+   "lid": "championship",
+   "ovr": 74,
+   "attr": null
+  },
+  "WAT-156762": {
+   "sid": 986352,
+   "lid": "championship",
+   "ovr": 73,
+   "attr": null
+  },
+  "CRE-45711": {
+   "sid": 895592,
+   "lid": "serie-a",
+   "ovr": 75,
+   "attr": null
+  },
+  "UDI-99311": {
+   "sid": 964119,
+   "lid": "serie-a",
+   "ovr": 75,
+   "attr": null
+  },
+  "WAT-129591": {
+   "sid": 987346,
+   "lid": "championship",
+   "ovr": 70,
+   "attr": null
+  },
+  "UDI-284663": {
+   "sid": 1831525,
+   "lid": "serie-a",
+   "ovr": 71,
+   "attr": null
+  },
+  "WAT-137657": {
+   "sid": 991595,
+   "lid": "championship",
+   "ovr": 72,
+   "attr": null
+  },
+  "BRE-170075": {
+   "sid": 1001858,
+   "lid": "ligue-1",
+   "ovr": 73,
+   "attr": null
+  },
+  "WAT-160414": {
+   "sid": 1102504,
+   "lid": "championship",
+   "ovr": 71,
+   "attr": null
+  },
+  "WAT-5126": {
+   "sid": 862083,
+   "lid": "championship",
+   "ovr": 70,
+   "attr": null
+  },
+  "WAT-97285": {
+   "sid": 959208,
+   "lid": "championship",
+   "ovr": 70,
+   "attr": null
+  },
+  "BOL-1862": {
+   "sid": 850952,
+   "lid": "serie-a",
+   "ovr": 78,
+   "attr": null
+  },
+  "CHA-35126": {
+   "sid": 846204,
+   "lid": "championship",
+   "ovr": 67,
+   "attr": null
+  },
+  "MIL-154152": {
+   "sid": 1089021,
+   "lid": "championship",
+   "ovr": 74,
+   "attr": null
+  },
+  "MIL-80781": {
+   "sid": 945792,
+   "lid": "championship",
+   "ovr": 75,
+   "attr": null
+  },
+  "MIL-3416": {
+   "sid": 204300,
+   "lid": "championship",
+   "ovr": 67,
+   "attr": null
+  },
+  "MIL-131115": {
+   "sid": 988966,
+   "lid": "championship",
+   "ovr": 71,
+   "attr": null
+  },
+  "MIL-9039": {
+   "sid": 823654,
+   "lid": "championship",
+   "ovr": 71,
+   "attr": null
+  },
+  "BRI-38660": {
+   "sid": 560196,
+   "lid": "championship",
+   "ovr": 71,
+   "attr": null
+  },
+  "IPS-151919": {
+   "sid": 1066814,
+   "lid": "championship",
+   "ovr": 68,
+   "attr": null
+  },
+  "MIL-217744": {
+   "sid": 1092974,
+   "lid": "championship",
+   "ovr": 71,
+   "attr": null
+  },
+  "MIL-137371": {
+   "sid": 1018087,
+   "lid": "championship",
+   "ovr": 77,
+   "attr": null
+  },
+  "MIL-168651": {
+   "sid": 1066311,
+   "lid": "championship",
+   "ovr": 73,
+   "attr": null
+  },
+  "MIL-4373": {
+   "sid": 358220,
+   "lid": "championship",
+   "ovr": 72,
+   "attr": null
+  },
+  "MIL-4318": {
+   "sid": 111398,
+   "lid": "championship",
+   "ovr": 66,
+   "attr": null
+  },
+  "MIL-48418": {
+   "sid": 197904,
+   "lid": "championship",
+   "ovr": 75,
+   "attr": null
+  },
+  "MIL-24135": {
+   "sid": 1033351,
+   "lid": "championship",
+   "ovr": 70,
+   "attr": null
+  },
+  "MIL-8169": {
+   "sid": 344873,
+   "lid": "championship",
+   "ovr": 58,
+   "attr": null
+  },
+  "DER-192268": {
+   "sid": 1470298,
+   "lid": "championship",
+   "ovr": 78,
+   "attr": null
+  },
+  "DER-7877": {
+   "sid": 878705,
+   "lid": "championship",
+   "ovr": 72,
+   "attr": null
+  },
+  "DER-5483": {
+   "sid": 358222,
+   "lid": "championship",
+   "ovr": 74,
+   "attr": null
+  },
+  "DER-38000": {
+   "sid": 591876,
+   "lid": "championship",
+   "ovr": 65,
+   "attr": null
+  },
+  "DER-170782": {
+   "sid": 1008245,
+   "lid": "championship",
+   "ovr": 69,
+   "attr": null
+  },
+  "DER-5578": {
+   "sid": 354782,
+   "lid": "championship",
+   "ovr": 73,
+   "attr": null
+  },
+  "DER-204522": {
+   "sid": 1212155,
+   "lid": "championship",
+   "ovr": 70,
+   "attr": null
+  },
+  "WBA-5514": {
+   "sid": 351498,
+   "lid": "championship",
+   "ovr": 70,
+   "attr": null
+  },
+  "DER-4838": {
+   "sid": 864918,
+   "lid": "championship",
+   "ovr": 70,
+   "attr": null
+  },
+  "DER-5410": {
+   "sid": 872321,
+   "lid": "championship",
+   "ovr": 66,
+   "attr": null
+  },
+  "BLA-4355": {
+   "sid": 600620,
+   "lid": "championship",
+   "ovr": 68,
+   "attr": null
+  },
+  "DER-145159": {
+   "sid": 1026541,
+   "lid": "championship",
+   "ovr": 76,
+   "attr": null
+  },
+  "DER-213750": {
+   "sid": 1048192,
+   "lid": "championship",
+   "ovr": 70,
+   "attr": null
+  },
+  "WBA-8043": {
+   "sid": 166381,
+   "lid": "championship",
+   "ovr": 71,
+   "attr": null
+  },
+  "DER-81067": {
+   "sid": 946561,
+   "lid": "championship",
+   "ovr": 69,
+   "attr": null
+  },
+  "DER-122990": {
+   "sid": 970407,
+   "lid": "championship",
+   "ovr": 73,
+   "attr": null
+  },
+  "BIR-4013": {
+   "sid": 98454,
+   "lid": "championship",
+   "ovr": 65,
+   "attr": null
+  },
+  "DER-4917": {
+   "sid": 376394,
+   "lid": "championship",
+   "ovr": 71,
+   "attr": null
+  },
+  "DER-4177": {
+   "sid": 59932,
+   "lid": "championship",
+   "ovr": 61,
+   "attr": null
+  },
+  "DER-180671": {
+   "sid": 978728,
+   "lid": "championship",
+   "ovr": 75,
+   "attr": null
+  },
+  "DER-5830": {
+   "sid": 370476,
+   "lid": "championship",
+   "ovr": 63,
+   "attr": null
+  },
+  "DER-6339": {
+   "sid": 23562,
+   "lid": "championship",
+   "ovr": 64,
+   "attr": null
+  },
+  "STK-140290": {
+   "sid": 912033,
+   "lid": "championship",
+   "ovr": 72,
+   "attr": null
+  },
+  "IPS-25606": {
+   "sid": 839712,
+   "lid": "championship",
+   "ovr": 77,
+   "attr": null
+  },
+  "STK-170630": {
+   "sid": 1119480,
+   "lid": "championship",
+   "ovr": 71,
+   "attr": null
+  },
+  "STK-4129": {
+   "sid": 362704,
+   "lid": "championship",
+   "ovr": 68,
+   "attr": null
+  },
+  "STK-217655": {
+   "sid": 1185869,
+   "lid": "championship",
+   "ovr": 71,
+   "attr": null
+  },
+  "CRY-152149": {
+   "sid": 1084311,
+   "lid": "premier-league",
+   "ovr": 75,
+   "attr": null
+  },
+  "STK-154087": {
+   "sid": 1088725,
+   "lid": "championship",
+   "ovr": 72,
+   "attr": null
+  },
+  "SWA-136351": {
+   "sid": 158661,
+   "lid": "championship",
+   "ovr": 79,
+   "attr": null
+  },
+  "SHE-2131": {
+   "sid": 801483,
+   "lid": "championship",
+   "ovr": 68,
+   "attr": null
+  },
+  "STK-11363": {
+   "sid": 190857,
+   "lid": "championship",
+   "ovr": 69,
+   "attr": null
+  },
+  "STK-156804": {
+   "sid": 1093070,
+   "lid": "championship",
+   "ovr": 69,
+   "attr": null
+  },
+  "STK-8201": {
+   "sid": 43443,
+   "lid": "championship",
+   "ovr": 69,
+   "attr": null
+  },
+  "IPS-8224": {
+   "sid": 914412,
+   "lid": "championship",
+   "ovr": 76,
+   "attr": null
+  },
+  "STK-170618": {
+   "sid": 1005710,
+   "lid": "championship",
+   "ovr": 71,
+   "attr": null
+  },
+  "STK-6185": {
+   "sid": 862796,
+   "lid": "championship",
+   "ovr": 76,
+   "attr": null
+  },
+  "STK-137512": {
+   "sid": 1017684,
+   "lid": "championship",
+   "ovr": 71,
+   "attr": null
+  },
+  "STK-4207": {
+   "sid": 115432,
+   "lid": "championship",
+   "ovr": 69,
+   "attr": null
+  },
+  "STK-149732": {
+   "sid": 561430,
+   "lid": "championship",
+   "ovr": 82,
+   "attr": null
+  },
+  "WBA-147455": {
+   "sid": 1011208,
+   "lid": "championship",
+   "ovr": 69,
+   "attr": null
+  },
+  "STK-213249": {
+   "sid": 26910,
+   "lid": "championship",
+   "ovr": 64,
+   "attr": null
+  },
+  "MID-85239": {
+   "sid": 918482,
+   "lid": "championship",
+   "ovr": 77,
+   "attr": null
+  },
+  "HUL-149911": {
+   "sid": 1015712,
+   "lid": "championship",
+   "ovr": 74,
+   "attr": null
+  },
+  "MID-172909": {
+   "sid": 983816,
+   "lid": "championship",
+   "ovr": 73,
+   "attr": null
+  },
+  "MID-228509": {
+   "sid": 1142185,
+   "lid": "championship",
+   "ovr": 67,
+   "attr": null
+  },
+  "MID-221259": {
+   "sid": 1082714,
+   "lid": "championship",
+   "ovr": 68,
+   "attr": null
+  },
+  "MID-140417": {
+   "sid": 1014841,
+   "lid": "championship",
+   "ovr": 77,
+   "attr": null
+  },
+  "MID-4525": {
+   "sid": 835998,
+   "lid": "championship",
+   "ovr": 74,
+   "attr": null
+  },
+  "OXF-171099": {
+   "sid": 980649,
+   "lid": "championship",
+   "ovr": 68,
+   "attr": null
+  },
+  "MID-221271": {
+   "sid": 1469341,
+   "lid": "championship",
+   "ovr": 54,
+   "attr": null
+  },
+  "MID-81286": {
+   "sid": 845426,
+   "lid": "championship",
+   "ovr": 76,
+   "attr": null
+  },
+  "MID-157100": {
+   "sid": 1095645,
+   "lid": "championship",
+   "ovr": 76,
+   "attr": null
+  },
+  "BRI-30972": {
+   "sid": 920008,
+   "lid": "championship",
+   "ovr": 72,
+   "attr": null
+  },
+  "MID-101351": {
+   "sid": 967178,
+   "lid": "championship",
+   "ovr": 66,
+   "attr": null
+  },
+  "MID-5357": {
+   "sid": 803678,
+   "lid": "championship",
+   "ovr": 66,
+   "attr": null
+  },
+  "MID-6400": {
+   "sid": 828620,
+   "lid": "championship",
+   "ovr": 76,
+   "attr": null
+  },
+  "BRI-188435": {
+   "sid": 1101989,
+   "lid": "championship",
+   "ovr": 77,
+   "attr": null
+  },
+  "MID-137498": {
+   "sid": 1007050,
+   "lid": "championship",
+   "ovr": 81,
+   "attr": null
+  },
+  "WHU-28416": {
+   "sid": 877013,
+   "lid": "premier-league",
+   "ovr": 83,
+   "attr": null
+  },
+  "FIO-40541": {
+   "sid": 862223,
+   "lid": "serie-a",
+   "ovr": 78,
+   "attr": null
+  },
+  "LEE-67978": {
+   "sid": 850823,
+   "lid": "premier-league",
+   "ovr": 78,
+   "attr": null
+  },
+  "GEN-8471": {
+   "sid": 280439,
+   "lid": "serie-a",
+   "ovr": 68,
+   "attr": null
+  },
+  "WHU-11414": {
+   "sid": 552884,
+   "lid": "premier-league",
+   "ovr": 83,
+   "attr": null
+  },
+  "WHU-15742": {
+   "sid": 799041,
+   "lid": "premier-league",
+   "ovr": 78,
+   "attr": null
+  },
+  "WHU-262986": {
+   "sid": 1190165,
+   "lid": "premier-league",
+   "ovr": 66,
+   "attr": null
+  },
+  "WHU-179625": {
+   "sid": 1170560,
+   "lid": "premier-league",
+   "ovr": 77,
+   "attr": null
+  },
+  "WHU-219676": {
+   "sid": 1523623,
+   "lid": "premier-league",
+   "ovr": 72,
+   "attr": null
+  },
+  "WHU-209130": {
+   "sid": 1414991,
+   "lid": "premier-league",
+   "ovr": 67,
+   "attr": null
+  },
+  "WHU-7789": {
+   "sid": 829022,
+   "lid": "premier-league",
+   "ovr": 81,
+   "attr": null
+  },
+  "NOT-119596": {
+   "sid": 985086,
+   "lid": "premier-league",
+   "ovr": 79,
+   "attr": null
+  },
+  "ATH-246633": {
+   "sid": 1398511,
+   "lid": "la-liga",
+   "ovr": 70,
+   "attr": null
+  },
+  "WHU-7995": {
+   "sid": 823085,
+   "lid": "premier-league",
+   "ovr": 78,
+   "attr": null
+  },
+  "WHU-25376": {
+   "sid": 894474,
+   "lid": "premier-league",
+   "ovr": 79,
+   "attr": null
+  },
+  "WHU-188900": {
+   "sid": 1150952,
+   "lid": "premier-league",
+   "ovr": 74,
+   "attr": null
+  },
+  "WHU-273157": {
+   "sid": 1652590,
+   "lid": "premier-league",
+   "ovr": 67,
+   "attr": null
+  },
+  "WHU-3357": {
+   "sid": 96531,
+   "lid": "premier-league",
+   "ovr": 79,
+   "attr": null
+  },
+  "WHU-97144": {
+   "sid": 856640,
+   "lid": "premier-league",
+   "ovr": 83,
+   "attr": null
+  },
+  "SOU-15958": {
+   "sid": 790179,
+   "lid": "championship",
+   "ovr": 76,
+   "attr": null
+  },
+  "PNE-172958": {
+   "sid": 998832,
+   "lid": "championship",
+   "ovr": 77,
+   "attr": null
+  },
+  "BUR-8088": {
+   "sid": 161717,
+   "lid": "premier-league",
+   "ovr": 74,
+   "attr": null
+  },
+  "SOU-146647": {
+   "sid": 1007067,
+   "lid": "championship",
+   "ovr": 81,
+   "attr": null
+  },
+  "SOU-151650": {
+   "sid": 1386651,
+   "lid": "championship",
+   "ovr": 79,
+   "attr": null
+  },
+  "SOU-175796": {
+   "sid": 1065214,
+   "lid": "championship",
+   "ovr": 72,
+   "attr": null
+  },
+  "SOU-176995": {
+   "sid": 1171234,
+   "lid": "championship",
+   "ovr": 79,
+   "attr": null
+  },
+  "SOU-4024": {
+   "sid": 328701,
+   "lid": "championship",
+   "ovr": 73,
+   "attr": null
+  },
+  "SOU-172554": {
+   "sid": 1083026,
+   "lid": "championship",
+   "ovr": 75,
+   "attr": null
+  },
+  "SOU-5626": {
+   "sid": 879810,
+   "lid": "championship",
+   "ovr": 78,
+   "attr": null
+  },
+  "SOU-244814": {
+   "sid": 1142342,
+   "lid": "championship",
+   "ovr": 67,
+   "attr": null
+  },
+  "SOU-136783": {
+   "sid": 1009920,
+   "lid": "championship",
+   "ovr": 73,
+   "attr": null
+  },
+  "NOT-204483": {
+   "sid": 1390490,
+   "lid": "premier-league",
+   "ovr": 70,
+   "attr": null
+  },
+  "FCA-56858": {
+   "sid": 891651,
+   "lid": "bundesliga",
+   "ovr": 76,
+   "attr": null
+  },
+  "SOU-15535": {
+   "sid": 826057,
+   "lid": "championship",
+   "ovr": 74,
+   "attr": null
+  },
+  "SOU-8085": {
+   "sid": 134361,
+   "lid": "championship",
+   "ovr": 70,
+   "attr": null
+  },
+  "SOU-3899": {
+   "sid": 555406,
+   "lid": "championship",
+   "ovr": 72,
+   "attr": null
+  },
+  "NEW-5530": {
+   "sid": 839410,
+   "lid": "premier-league",
+   "ovr": 80,
+   "attr": null
+  },
+  "SOU-113105": {
+   "sid": 1048265,
+   "lid": "championship",
+   "ovr": 80,
+   "attr": null
+  },
+  "SOU-4972": {
+   "sid": 144297,
+   "lid": "championship",
+   "ovr": 65,
+   "attr": null
+  },
+  "BLA-99708": {
+   "sid": 965226,
+   "lid": "championship",
+   "ovr": 70,
+   "attr": null
+  },
+  "BLA-102314": {
+   "sid": 917327,
+   "lid": "championship",
+   "ovr": 68,
+   "attr": null
+  },
+  "BLA-8226": {
+   "sid": 871621,
+   "lid": "championship",
+   "ovr": 69,
+   "attr": null
+  },
+  "BLA-24319": {
+   "sid": 930961,
+   "lid": "championship",
+   "ovr": 73,
+   "attr": null
+  },
+  "CHA-190556": {
+   "sid": 1014467,
+   "lid": "championship",
+   "ovr": 65,
+   "attr": null
+  },
+  "BRI-3765": {
+   "sid": 108515,
+   "lid": "championship",
+   "ovr": 67,
+   "attr": null
+  },
+  "BLA-141910": {
+   "sid": 1020075,
+   "lid": "championship",
+   "ovr": 71,
+   "attr": null
+  },
+  "BLA-177177": {
+   "sid": 1014441,
+   "lid": "championship",
+   "ovr": 71,
+   "attr": null
+  },
+  "BLA-170820": {
+   "sid": 923974,
+   "lid": "championship",
+   "ovr": 67,
+   "attr": null
+  },
+  "BLA-171510": {
+   "sid": 1014507,
+   "lid": "championship",
+   "ovr": 62,
+   "attr": null
+  },
+  "BLA-45447": {
+   "sid": 357730,
+   "lid": "championship",
+   "ovr": 67,
+   "attr": null
+  },
+  "BLA-76249": {
+   "sid": 943634,
+   "lid": "championship",
+   "ovr": 68,
+   "attr": null
+  },
+  "BLA-36914": {
+   "sid": 891514,
+   "lid": "championship",
+   "ovr": 67,
+   "attr": null
+  },
+  "BLA-5739": {
+   "sid": 845571,
+   "lid": "championship",
+   "ovr": 71,
+   "attr": null
+  },
+  "BLA-5842": {
+   "sid": 845723,
+   "lid": "championship",
+   "ovr": 69,
+   "attr": null
+  },
+  "BLA-63304": {
+   "sid": 851309,
+   "lid": "championship",
+   "ovr": 71,
+   "attr": null
+  },
+  "BLA-4204": {
+   "sid": 903166,
+   "lid": "championship",
+   "ovr": 71,
+   "attr": null
+  },
+  "CHA-177457": {
+   "sid": 1186345,
+   "lid": "championship",
+   "ovr": 67,
+   "attr": null
+  },
+  "CHA-99345": {
+   "sid": 964422,
+   "lid": "championship",
+   "ovr": 70,
+   "attr": null
+  },
+  "CHA-185894": {
+   "sid": 1391785,
+   "lid": "championship",
+   "ovr": 64,
+   "attr": null
+  },
+  "LEI-96974": {
+   "sid": 859901,
+   "lid": "championship",
+   "ovr": 74,
+   "attr": null
+  },
+  "CHA-92863": {
+   "sid": 931257,
+   "lid": "championship",
+   "ovr": 71,
+   "attr": null
+  },
+  "WBA-213241": {
+   "sid": 609596,
+   "lid": "championship",
+   "ovr": 70,
+   "attr": null
+  },
+  "POR-210697": {
+   "sid": 1386414,
+   "lid": "championship",
+   "ovr": 69,
+   "attr": null
+  },
+  "CHA-126002": {
+   "sid": 886651,
+   "lid": "championship",
+   "ovr": 70,
+   "attr": null
+  },
+  "SHE-8126": {
+   "sid": 98450,
+   "lid": "championship",
+   "ovr": 67,
+   "attr": null
+  },
+  "CHA-151508": {
+   "sid": 1020336,
+   "lid": "championship",
+   "ovr": 74,
+   "attr": null
+  },
+  "CHA-4852": {
+   "sid": 905789,
+   "lid": "championship",
+   "ovr": 68,
+   "attr": null
+  },
+  "CHA-270440": {
+   "sid": 2193216,
+   "lid": "championship",
+   "ovr": 59,
+   "attr": null
+  },
+  "SHE-214425": {
+   "sid": 1514870,
+   "lid": "championship",
+   "ovr": 70,
+   "attr": null
+  },
+  "CHA-4842": {
+   "sid": 369674,
+   "lid": "championship",
+   "ovr": 69,
+   "attr": null
+  },
+  "HER-117473": {
+   "sid": 918484,
+   "lid": "eredivisie",
+   "ovr": 65,
+   "attr": null
+  },
+  "CHA-5610": {
+   "sid": 1096460,
+   "lid": "championship",
+   "ovr": 68,
+   "attr": null
+  },
+  "MIL-102566": {
+   "sid": 995670,
+   "lid": "championship",
+   "ovr": 69,
+   "attr": null
+  },
+  "CHA-3928": {
+   "sid": 372342,
+   "lid": "championship",
+   "ovr": 68,
+   "attr": null
+  },
+  "CHA-260766": {
+   "sid": 926762,
+   "lid": "championship",
+   "ovr": 66,
+   "attr": null
+  },
+  "WRE-165267": {
+   "sid": 1109561,
+   "lid": "championship",
+   "ovr": 77,
+   "attr": null
+  },
+  "CHA-151925": {
+   "sid": 1131881,
+   "lid": "championship",
+   "ovr": 58,
+   "attr": null
+  },
+  "CHA-171502": {
+   "sid": 848457,
+   "lid": "championship",
+   "ovr": 67,
+   "attr": null
+  },
+  "HUL-246949": {
+   "sid": 1166844,
+   "lid": "championship",
+   "ovr": 68,
+   "attr": null
+  },
+  "BRI-5812": {
+   "sid": 839416,
+   "lid": "championship",
+   "ovr": 79,
+   "attr": null
+  },
+  "CRY-278973": {
+   "sid": 1469007,
+   "lid": "premier-league",
+   "ovr": 68,
+   "attr": null
+  },
+  "BRI-156796": {
+   "sid": 1093053,
+   "lid": "championship",
+   "ovr": 66,
+   "attr": null
+  },
+  "BRI-120407": {
+   "sid": 906698,
+   "lid": "championship",
+   "ovr": 74,
+   "attr": null
+  },
+  "BRI-118587": {
+   "sid": 958918,
+   "lid": "championship",
+   "ovr": 78,
+   "attr": null
+  },
+  "VOL-217987": {
+   "sid": 1095753,
+   "lid": "eredivisie",
+   "ovr": 66,
+   "attr": null
+  },
+  "OXF-115443": {
+   "sid": 981222,
+   "lid": "championship",
+   "ovr": 72,
+   "attr": null
+  },
+  "BRI-99324": {
+   "sid": 964115,
+   "lid": "championship",
+   "ovr": 72,
+   "attr": null
+  },
+  "WBA-4380": {
+   "sid": 231646,
+   "lid": "championship",
+   "ovr": 71,
+   "attr": null
+  },
+  "BRI-4347": {
+   "sid": 784501,
+   "lid": "championship",
+   "ovr": 67,
+   "attr": null
+  },
+  "BRI-143107": {
+   "sid": 962050,
+   "lid": "championship",
+   "ovr": 73,
+   "attr": null
+  },
+  "BRI-137118": {
+   "sid": 981949,
+   "lid": "championship",
+   "ovr": 71,
+   "attr": null
+  },
+  "BRI-5502": {
+   "sid": 802697,
+   "lid": "championship",
+   "ovr": 70,
+   "attr": null
+  },
+  "BRI-101714": {
+   "sid": 920518,
+   "lid": "championship",
+   "ovr": 72,
+   "attr": null
+  },
+  "BRI-25651": {
+   "sid": 909763,
+   "lid": "championship",
+   "ovr": 71,
+   "attr": null
+  },
+  "BRI-125973": {
+   "sid": 927367,
+   "lid": "championship",
+   "ovr": 72,
+   "attr": null
+  },
+  "BRI-26842": {
+   "sid": 920617,
+   "lid": "championship",
+   "ovr": 63,
+   "attr": null
+  },
+  "WBA-5073": {
+   "sid": 573812,
+   "lid": "championship",
+   "ovr": 73,
+   "attr": null
+  },
+  "WRE-4350": {
+   "sid": 298366,
+   "lid": "championship",
+   "ovr": 73,
+   "attr": null
+  },
+  "WRE-189631": {
+   "sid": 1423747,
+   "lid": "championship",
+   "ovr": 67,
+   "attr": null
+  },
+  "WRE-34908": {
+   "sid": 340621,
+   "lid": "championship",
+   "ovr": 70,
+   "attr": null
+  },
+  "WRE-7853": {
+   "sid": 911710,
+   "lid": "championship",
+   "ovr": 76,
+   "attr": null
+  },
+  "WRE-4288": {
+   "sid": 892481,
+   "lid": "championship",
+   "ovr": 69,
+   "attr": null
+  },
+  "WRE-5031": {
+   "sid": 842141,
+   "lid": "championship",
+   "ovr": 67,
+   "attr": null
+  },
+  "WRE-123574": {
+   "sid": 1006189,
+   "lid": "championship",
+   "ovr": 74,
+   "attr": null
+  },
+  "WRE-4690": {
+   "sid": 905264,
+   "lid": "championship",
+   "ovr": 72,
+   "attr": null
+  },
+  "SHE-3914": {
+   "sid": 875085,
+   "lid": "championship",
+   "ovr": 77,
+   "attr": null
+  },
+  "WRE-8188": {
+   "sid": 920936,
+   "lid": "championship",
+   "ovr": 76,
+   "attr": null
+  },
+  "WRE-6199": {
+   "sid": 789229,
+   "lid": "championship",
+   "ovr": 76,
+   "attr": null
+  },
+  "WRE-5060": {
+   "sid": 788240,
+   "lid": "championship",
+   "ovr": 70,
+   "attr": null
+  },
+  "PNE-5302": {
+   "sid": 775063,
+   "lid": "championship",
+   "ovr": 73,
+   "attr": null
+  },
+  "WRE-131122": {
+   "sid": 991569,
+   "lid": "championship",
+   "ovr": 72,
+   "attr": null
+  },
+  "WRE-137668": {
+   "sid": 1014623,
+   "lid": "championship",
+   "ovr": 70,
+   "attr": null
+  },
+  "WRE-8070": {
+   "sid": 54331,
+   "lid": "championship",
+   "ovr": 67,
+   "attr": null
+  },
+  "ANG-176904": {
+   "sid": 1170532,
+   "lid": "ligue-1",
+   "ovr": 74,
+   "attr": null
+  },
+  "WRE-6424": {
+   "sid": 829186,
+   "lid": "championship",
+   "ovr": 73,
+   "attr": null
+  },
+  "BUR-11298": {
+   "sid": 838399,
+   "lid": "premier-league",
+   "ovr": 71,
+   "attr": null
+  },
+  "WRE-5769": {
+   "sid": 802719,
+   "lid": "championship",
+   "ovr": 71,
+   "attr": null
+  },
+  "WBA-262500": {
+   "sid": 1101358,
+   "lid": "championship",
+   "ovr": 74,
+   "attr": null
+  },
+  "MIL-97249": {
+   "sid": 958718,
+   "lid": "championship",
+   "ovr": 80,
+   "attr": null
+  },
+  "WRE-13234": {
+   "sid": 284415,
+   "lid": "championship",
+   "ovr": 61,
+   "attr": null
+  },
+  "SWA-183151": {
+   "sid": 1000160,
+   "lid": "championship",
+   "ovr": 80,
+   "attr": null
+  },
+  "SWA-125561": {
+   "sid": 879850,
+   "lid": "championship",
+   "ovr": 75,
+   "attr": null
+  },
+  "SOU-35101": {
+   "sid": 886117,
+   "lid": "championship",
+   "ovr": 72,
+   "attr": null
+  },
+  "SWA-156513": {
+   "sid": 1002620,
+   "lid": "championship",
+   "ovr": 71,
+   "attr": null
+  },
+  "SWA-181526": {
+   "sid": 1123234,
+   "lid": "championship",
+   "ovr": 73,
+   "attr": null
+  },
+  "SWA-118836": {
+   "sid": 984866,
+   "lid": "championship",
+   "ovr": 74,
+   "attr": null
+  },
+  "SWA-188216": {
+   "sid": 1102764,
+   "lid": "championship",
+   "ovr": 70,
+   "attr": null
+  },
+  "SWA-4896": {
+   "sid": 164291,
+   "lid": "championship",
+   "ovr": 66,
+   "attr": null
+  },
+  "WOB-154109": {
+   "sid": 1088897,
+   "lid": "bundesliga",
+   "ovr": 74,
+   "attr": null
+  },
+  "SWA-5432": {
+   "sid": 358084,
+   "lid": "championship",
+   "ovr": 70,
+   "attr": null
+  },
+  "SWA-59089": {
+   "sid": 939563,
+   "lid": "championship",
+   "ovr": 78,
+   "attr": null
+  },
+  "SWA-6383": {
+   "sid": 830238,
+   "lid": "championship",
+   "ovr": 78,
+   "attr": null
+  },
+  "SWA-6041": {
+   "sid": 930251,
+   "lid": "championship",
+   "ovr": 69,
+   "attr": null
+  },
+  "SWA-37144": {
+   "sid": 373240,
+   "lid": "championship",
+   "ovr": 71,
+   "attr": null
+  },
+  "SWA-4833": {
+   "sid": 878130,
+   "lid": "championship",
+   "ovr": 69,
+   "attr": null
+  },
+  "SWA-5828": {
+   "sid": 93150,
+   "lid": "championship",
+   "ovr": 64,
+   "attr": null
+  },
+  "SHE-4440": {
+   "sid": 849309,
+   "lid": "championship",
+   "ovr": 74,
+   "attr": null
+  },
+  "DER-4887": {
+   "sid": 786274,
+   "lid": "championship",
+   "ovr": 66,
+   "attr": null
+  },
+  "NOR-141451": {
+   "sid": 1019061,
+   "lid": "championship",
+   "ovr": 77,
+   "attr": null
+  },
+  "NOR-145327": {
+   "sid": 1018523,
+   "lid": "championship",
+   "ovr": 74,
+   "attr": null
+  },
+  "NOR-141826": {
+   "sid": 1006147,
+   "lid": "championship",
+   "ovr": 74,
+   "attr": null
+  },
+  "NOR-181976": {
+   "sid": 1464637,
+   "lid": "championship",
+   "ovr": 75,
+   "attr": null
+  },
+  "NOR-206125": {
+   "sid": 1463508,
+   "lid": "championship",
+   "ovr": 71,
+   "attr": null
+  },
+  "WOL-260577": {
+   "sid": 1396445,
+   "lid": "premier-league",
+   "ovr": 77,
+   "attr": null
+  },
+  "NOR-115362": {
+   "sid": 988202,
+   "lid": "championship",
+   "ovr": 74,
+   "attr": null
+  },
+  "NOR-8022": {
+   "sid": 839819,
+   "lid": "championship",
+   "ovr": 72,
+   "attr": null
+  },
+  "FCL-131179": {
+   "sid": 998241,
+   "lid": "ligue-1",
+   "ovr": 75,
+   "attr": null
+  },
+  "NOR-103208": {
+   "sid": 1105688,
+   "lid": "championship",
+   "ovr": 75,
+   "attr": null
+  },
+  "NOR-272833": {
+   "sid": 1142324,
+   "lid": "championship",
+   "ovr": 69,
+   "attr": null
+  },
+  "NOR-125987": {
+   "sid": 992045,
+   "lid": "championship",
+   "ovr": 69,
+   "attr": null
+  },
+  "NOR-6276": {
+   "sid": 866169,
+   "lid": "championship",
+   "ovr": 74,
+   "attr": null
+  },
+  "NOR-5620": {
+   "sid": 583450,
+   "lid": "championship",
+   "ovr": 70,
+   "attr": null
+  },
+  "NOR-172267": {
+   "sid": 857997,
+   "lid": "championship",
+   "ovr": 75,
+   "attr": null
+  },
+  "NOR-102441": {
+   "sid": 851096,
+   "lid": "championship",
+   "ovr": 68,
+   "attr": null
+  },
+  "CRU-91310": {
+   "sid": 954888,
+   "lid": "brasileirao",
+   "ovr": 80,
+   "attr": null
+  },
+  "CRU-22040": {
+   "sid": 836070,
+   "lid": "brasileirao",
+   "ovr": 78,
+   "attr": null
+  },
+  "PAL-169004": {
+   "sid": 817650,
+   "lid": "brasileirao",
+   "ovr": 69,
+   "attr": null
+  },
+  "CRU-49264": {
+   "sid": 247483,
+   "lid": "brasileirao",
+   "ovr": 75,
+   "attr": null
+  },
+  "CRU-45490": {
+   "sid": 377238,
+   "lid": "brasileirao",
+   "ovr": 79,
+   "attr": null
+  },
+  "CRU-1246": {
+   "sid": 263477,
+   "lid": "brasileirao",
+   "ovr": 74,
+   "attr": null
+  },
+  "CRU-1153": {
+   "sid": 912786,
+   "lid": "brasileirao",
+   "ovr": 75,
+   "attr": null
+  },
+  "FLA-28426": {
+   "sid": 875295,
+   "lid": "brasileirao",
+   "ovr": 72,
+   "attr": null
+  },
+  "CRU-1266": {
+   "sid": 840220,
+   "lid": "brasileirao",
+   "ovr": 78,
+   "attr": null
+  },
+  "COR-1434": {
+   "sid": 25554,
+   "lid": "brasileirao",
+   "ovr": 67,
+   "attr": null
+  },
+  "CRU-9418": {
+   "sid": 604274,
+   "lid": "brasileirao",
+   "ovr": 74,
+   "attr": null
+  },
+  "CRU-207251": {
+   "sid": 1498670,
+   "lid": "brasileirao",
+   "ovr": 76,
+   "attr": null
+  },
+  "CRU-45865": {
+   "sid": 260077,
+   "lid": "brasileirao",
+   "ovr": 73,
+   "attr": null
+  },
+  "CRU-115095": {
+   "sid": 978638,
+   "lid": "brasileirao",
+   "ovr": 73,
+   "attr": null
+  },
+  "CRU-278484": {
+   "sid": 2057367,
+   "lid": "brasileirao",
+   "ovr": 69,
+   "attr": null
+  },
+  "CRU-203390": {
+   "sid": 1589358,
+   "lid": "brasileirao",
+   "ovr": 77,
+   "attr": null
+  },
+  "BAH-203872": {
+   "sid": 1104070,
+   "lid": "brasileirao",
+   "ovr": 79,
+   "attr": null
+  },
+  "BAH-8": {
+   "sid": 123223,
+   "lid": "brasileirao",
+   "ovr": 73,
+   "attr": null
+  },
+  "CD-151951": {
+   "sid": 1003010,
+   "lid": "primeira-liga",
+   "ovr": 79,
+   "attr": null
+  },
+  "BAH-1547": {
+   "sid": 927975,
+   "lid": "brasileirao",
+   "ovr": 80,
+   "attr": null
+  },
+  "BAH-110928": {
+   "sid": 905461,
+   "lid": "brasileirao",
+   "ovr": 78,
+   "attr": null
+  },
+  "BAH-136393": {
+   "sid": 1008832,
+   "lid": "brasileirao",
+   "ovr": 77,
+   "attr": null
+  },
+  "BAH-28422": {
+   "sid": 924857,
+   "lid": "brasileirao",
+   "ovr": 72,
+   "attr": null
+  },
+  "BAH-107803": {
+   "sid": 959620,
+   "lid": "brasileirao",
+   "ovr": 78,
+   "attr": null
+  },
+  "BAH-140873": {
+   "sid": 1017264,
+   "lid": "brasileirao",
+   "ovr": 80,
+   "attr": null
+  },
+  "BAH-13419": {
+   "sid": 810715,
+   "lid": "brasileirao",
+   "ovr": 71,
+   "attr": null
+  },
+  "COR-275105": {
+   "sid": 1634148,
+   "lid": "brasileirao",
+   "ovr": 62,
+   "attr": null
+  },
+  "BAH-1205": {
+   "sid": 871705,
+   "lid": "brasileirao",
+   "ovr": 72,
+   "attr": null
+  },
+  "COR-8472": {
+   "sid": 138833,
+   "lid": "brasileirao",
+   "ovr": 78,
+   "attr": null
+  },
+  "COR-1325": {
+   "sid": 905463,
+   "lid": "brasileirao",
+   "ovr": 82,
+   "attr": null
+  },
+  "COR-40134": {
+   "sid": 866911,
+   "lid": "brasileirao",
+   "ovr": 70,
+   "attr": null
+  },
+  "COR-15795": {
+   "sid": 242054,
+   "lid": "brasileirao",
+   "ovr": 68,
+   "attr": null
+  },
+  "COR-211607": {
+   "sid": 1411152,
+   "lid": "brasileirao",
+   "ovr": 66,
+   "attr": null
+  },
+  "COR-60058": {
+   "sid": 994454,
+   "lid": "brasileirao",
+   "ovr": 79,
+   "attr": null
+  },
+  "COR-179054": {
+   "sid": 1199261,
+   "lid": "brasileirao",
+   "ovr": 78,
+   "attr": null
+  },
+  "COR-103611": {
+   "sid": 866392,
+   "lid": "brasileirao",
+   "ovr": 74,
+   "attr": null
+  },
+  "FLA-56574": {
+   "sid": 828839,
+   "lid": "brasileirao",
+   "ovr": 71,
+   "attr": null
+  },
+  "JUV-276260": {
+   "sid": 1647612,
+   "lid": "brasileirao",
+   "ovr": 76,
+   "attr": null
+  },
+  "FEC-1614": {
+   "sid": 795268,
+   "lid": "brasileirao",
+   "ovr": 70,
+   "attr": null
+  },
+  "COR-1577": {
+   "sid": 845178,
+   "lid": "brasileirao",
+   "ovr": 67,
+   "attr": null
+  },
+  "COR-1609": {
+   "sid": 358166,
+   "lid": "brasileirao",
+   "ovr": 70,
+   "attr": null
+  },
+  "COR-13710": {
+   "sid": 931540,
+   "lid": "brasileirao",
+   "ovr": 78,
+   "attr": null
+  },
+  "COR-169688": {
+   "sid": 981703,
+   "lid": "brasileirao",
+   "ovr": 77,
+   "attr": null
+  },
+  "COR-1301": {
+   "sid": 243181,
+   "lid": "brasileirao",
+   "ovr": 69,
+   "attr": null
+  },
+  "COR-16342": {
+   "sid": 148155,
+   "lid": "brasileirao",
+   "ovr": 70,
+   "attr": null
+  },
+  "COR-120089": {
+   "sid": 1017827,
+   "lid": "brasileirao",
+   "ovr": 66,
+   "attr": null
+  },
+  "COR-182583": {
+   "sid": 1170769,
+   "lid": "brasileirao",
+   "ovr": 62,
+   "attr": null
+  },
+  "COR-82991": {
+   "sid": 950454,
+   "lid": "brasileirao",
+   "ovr": 82,
+   "attr": null
+  },
+  "PAU-249208": {
+   "sid": 1884803,
+   "lid": "brasileirao",
+   "ovr": 74,
+   "attr": null
+  },
+  "BOT-1723": {
+   "sid": 870762,
+   "lid": "brasileirao",
+   "ovr": 77,
+   "attr": null
+  },
+  "CAM-12653": {
+   "sid": 922559,
+   "lid": "brasileirao",
+   "ovr": 74,
+   "attr": null
+  },
+  "BOT-169234": {
+   "sid": 1106779,
+   "lid": "brasileirao",
+   "ovr": 74,
+   "attr": null
+  },
+  "NEC-67903": {
+   "sid": 940647,
+   "lid": "eredivisie",
+   "ovr": 69,
+   "attr": null
+  },
+  "PAU-28433": {
+   "sid": 881215,
+   "lid": "brasileirao",
+   "ovr": 74,
+   "attr": null
+  },
+  "BOT-160792": {
+   "sid": 1099163,
+   "lid": "brasileirao",
+   "ovr": 69,
+   "attr": null
+  },
+  "BOT-8457": {
+   "sid": 143593,
+   "lid": "brasileirao",
+   "ovr": 68,
+   "attr": null
+  },
+  "BOT-37418": {
+   "sid": 990193,
+   "lid": "brasileirao",
+   "ovr": 70,
+   "attr": null
+  },
+  "FCA-169668": {
+   "sid": 1122806,
+   "lid": "bundesliga",
+   "ovr": 75,
+   "attr": null
+  },
+  "BAH-151999": {
+   "sid": 1069328,
+   "lid": "brasileirao",
+   "ovr": 63,
+   "attr": null
+  },
+  "CD-1528": {
+   "sid": 822526,
+   "lid": "primeira-liga",
+   "ovr": 77,
+   "attr": null
+  },
+  "CAM-21689": {
+   "sid": 34705,
+   "lid": "brasileirao",
+   "ovr": 74,
+   "attr": null
+  },
+  "FLU-157533": {
+   "sid": 1087399,
+   "lid": "brasileirao",
+   "ovr": 77,
+   "attr": null
+  },
+  "FLU-23333": {
+   "sid": 789960,
+   "lid": "brasileirao",
+   "ovr": 72,
+   "attr": null
+  },
+  "BOT-77159": {
+   "sid": 874739,
+   "lid": "brasileirao",
+   "ovr": 77,
+   "attr": null
+  },
+  "FLU-28614": {
+   "sid": 846413,
+   "lid": "brasileirao",
+   "ovr": 78,
+   "attr": null
+  },
+  "PAU-42901": {
+   "sid": 282557,
+   "lid": "brasileirao",
+   "ovr": 72,
+   "attr": null
+  },
+  "FLU-181336": {
+   "sid": 981374,
+   "lid": "brasileirao",
+   "ovr": 75,
+   "attr": null
+  },
+  "FLU-76": {
+   "sid": 116853,
+   "lid": "brasileirao",
+   "ovr": 69,
+   "attr": null
+  },
+  "FLU-145985": {
+   "sid": 1104068,
+   "lid": "brasileirao",
+   "ovr": 80,
+   "attr": null
+  },
+  "PAU-1154": {
+   "sid": 291723,
+   "lid": "brasileirao",
+   "ovr": 71,
+   "attr": null
+  },
+  "SAN-61369": {
+   "sid": 922566,
+   "lid": "brasileirao",
+   "ovr": 71,
+   "attr": null
+  },
+  "FLU-8503": {
+   "sid": 552686,
+   "lid": "brasileirao",
+   "ovr": 70,
+   "attr": null
+  },
+  "FLU-178998": {
+   "sid": 1518961,
+   "lid": "brasileirao",
+   "ovr": 55,
+   "attr": null
+  },
+  "CAM-15929": {
+   "sid": 1127439,
+   "lid": "brasileirao",
+   "ovr": 76,
+   "attr": null
+  },
+  "FLU-97470": {
+   "sid": 958382,
+   "lid": "brasileirao",
+   "ovr": 74,
+   "attr": null
+  },
+  "FLU-98654": {
+   "sid": 962187,
+   "lid": "brasileirao",
+   "ovr": 75,
+   "attr": null
+  },
+  "FLU-12594": {
+   "sid": 928134,
+   "lid": "brasileirao",
+   "ovr": 71,
+   "attr": null
+  },
+  "FLU-250800": {
+   "sid": 1527129,
+   "lid": "brasileirao",
+   "ovr": 73,
+   "attr": null
+  },
+  "FLU-179146": {
+   "sid": 1185449,
+   "lid": "brasileirao",
+   "ovr": 62,
+   "attr": null
+  },
+  "FLU-1230": {
+   "sid": 17785,
+   "lid": "brasileirao",
+   "ovr": 66,
+   "attr": null
+  },
+  "FLU-136654": {
+   "sid": 1093974,
+   "lid": "brasileirao",
+   "ovr": 63,
+   "attr": null
+  },
+  "FLU-44235": {
+   "sid": 927666,
+   "lid": "brasileirao",
+   "ovr": 67,
+   "attr": null
+  },
+  "VIT-12837": {
+   "sid": 814723,
+   "lid": "brasileirao",
+   "ovr": 68,
+   "attr": null
+  },
+  "VIT-85504": {
+   "sid": 975351,
+   "lid": "brasileirao",
+   "ovr": 68,
+   "attr": null
+  },
+  "VIT-203646": {
+   "sid": 795266,
+   "lid": "brasileirao",
+   "ovr": 73,
+   "attr": null
+  },
+  "CRU-6532": {
+   "sid": 553686,
+   "lid": "brasileirao",
+   "ovr": 73,
+   "attr": null
+  },
+  "FEC-46461": {
+   "sid": 824626,
+   "lid": "brasileirao",
+   "ovr": 72,
+   "attr": null
+  },
+  "VIT-61447": {
+   "sid": 922575,
+   "lid": "brasileirao",
+   "ovr": 72,
+   "attr": null
+  },
+  "AMA-202975": {
+   "sid": 1124220,
+   "lid": "primeira-liga",
+   "ovr": 69,
+   "attr": null
+  },
+  "RBB-83053": {
+   "sid": 948004,
+   "lid": "brasileirao",
+   "ovr": 68,
+   "attr": null
+  },
+  "SCI-115184": {
+   "sid": 980761,
+   "lid": "brasileirao",
+   "ovr": 71,
+   "attr": null
+  },
+  "RBB-95136": {
+   "sid": 905459,
+   "lid": "brasileirao",
+   "ovr": 73,
+   "attr": null
+  },
+  "VIT-101837": {
+   "sid": 972373,
+   "lid": "brasileirao",
+   "ovr": 67,
+   "attr": null
+  },
+  "VIT-130045": {
+   "sid": 901700,
+   "lid": "brasileirao",
+   "ovr": 68,
+   "attr": null
+  },
+  "VIT-169696": {
+   "sid": 982558,
+   "lid": "brasileirao",
+   "ovr": 77,
+   "attr": null
+  },
+  "PAL-140647": {
+   "sid": 1015733,
+   "lid": "brasileirao",
+   "ovr": 78,
+   "attr": null
+  },
+  "PAL-33153": {
+   "sid": 285949,
+   "lid": "brasileirao",
+   "ovr": 79,
+   "attr": null
+  },
+  "PAL-119594": {
+   "sid": 986233,
+   "lid": "brasileirao",
+   "ovr": 81,
+   "attr": null
+  },
+  "PAL-2060": {
+   "sid": 152276,
+   "lid": "brasileirao",
+   "ovr": 72,
+   "attr": null
+  },
+  "BOT-1080": {
+   "sid": 840202,
+   "lid": "brasileirao",
+   "ovr": 78,
+   "attr": null
+  },
+  "PAL-130957": {
+   "sid": 973533,
+   "lid": "brasileirao",
+   "ovr": 75,
+   "attr": null
+  },
+  "PAL-45173": {
+   "sid": 331397,
+   "lid": "brasileirao",
+   "ovr": 76,
+   "attr": null
+  },
+  "PAL-183528": {
+   "sid": 1106603,
+   "lid": "brasileirao",
+   "ovr": 76,
+   "attr": null
+  },
+  "PAL-1741": {
+   "sid": 220833,
+   "lid": "brasileirao",
+   "ovr": 77,
+   "attr": null
+  },
+  "PAL-28740": {
+   "sid": 881110,
+   "lid": "brasileirao",
+   "ovr": 79,
+   "attr": null
+  },
+  "CAM-115222": {
+   "sid": 973737,
+   "lid": "brasileirao",
+   "ovr": 74,
+   "attr": null
+  },
+  "BOT-46454": {
+   "sid": 801044,
+   "lid": "brasileirao",
+   "ovr": 77,
+   "attr": null
+  },
+  "PAL-115559": {
+   "sid": 984896,
+   "lid": "brasileirao",
+   "ovr": 76,
+   "attr": null
+  },
+  "PAL-206776": {
+   "sid": 1116665,
+   "lid": "brasileirao",
+   "ovr": 71,
+   "attr": null
+  },
+  "PAL-118029": {
+   "sid": 973738,
+   "lid": "brasileirao",
+   "ovr": 81,
+   "attr": null
+  },
+  "CRE-14": {
+   "sid": 333261,
+   "lid": "serie-a",
+   "ovr": 70,
+   "attr": null
+  },
+  "SCI-8404": {
+   "sid": 358550,
+   "lid": "brasileirao",
+   "ovr": 71,
+   "attr": null
+  },
+  "SCI-1189": {
+   "sid": 345113,
+   "lid": "brasileirao",
+   "ovr": 69,
+   "attr": null
+  },
+  "ALA-146350": {
+   "sid": 1046796,
+   "lid": "la-liga",
+   "ovr": 69,
+   "attr": null
+  },
+  "COR-249188": {
+   "sid": 1835793,
+   "lid": "brasileirao",
+   "ovr": 61,
+   "attr": null
+  },
+  "SCI-133258": {
+   "sid": 989200,
+   "lid": "brasileirao",
+   "ovr": 77,
+   "attr": null
+  },
+  "TOR-280": {
+   "sid": 339909,
+   "lid": "serie-a",
+   "ovr": 73,
+   "attr": null
+  },
+  "SCI-129367": {
+   "sid": 995071,
+   "lid": "brasileirao",
+   "ovr": 77,
+   "attr": null
+  },
+  "REC-165600": {
+   "sid": 1106487,
+   "lid": "brasileirao",
+   "ovr": 71,
+   "attr": null
+  },
+  "BAH-140872": {
+   "sid": 1047204,
+   "lid": "brasileirao",
+   "ovr": 72,
+   "attr": null
+  },
+  "SCI-153573": {
+   "sid": 1084963,
+   "lid": "brasileirao",
+   "ovr": 72,
+   "attr": null
+  },
+  "SCI-205533": {
+   "sid": 799947,
+   "lid": "brasileirao",
+   "ovr": 69,
+   "attr": null
+  },
+  "CRU-178822": {
+   "sid": 1105835,
+   "lid": "brasileirao",
+   "ovr": 75,
+   "attr": null
+  },
+  "SCI-30386": {
+   "sid": 581060,
+   "lid": "brasileirao",
+   "ovr": 77,
+   "attr": null
+  },
+  "SCI-169581": {
+   "sid": 1106134,
+   "lid": "brasileirao",
+   "ovr": 74,
+   "attr": null
+  },
+  "PAU-283427": {
+   "sid": 2009425,
+   "lid": "brasileirao",
+   "ovr": 60,
+   "attr": null
+  },
+  "RBB-178898": {
+   "sid": 1092354,
+   "lid": "brasileirao",
+   "ovr": 73,
+   "attr": null
+  },
+  "BAH-1073": {
+   "sid": 261687,
+   "lid": "brasileirao",
+   "ovr": 76,
+   "attr": null
+  },
+  "CRU-1327": {
+   "sid": 358554,
+   "lid": "brasileirao",
+   "ovr": 74,
+   "attr": null
+  },
+  "CAM-1226": {
+   "sid": 835260,
+   "lid": "brasileirao",
+   "ovr": 75,
+   "attr": null
+  },
+  "FLA-1159": {
+   "sid": 386198,
+   "lid": "brasileirao",
+   "ovr": 75,
+   "attr": null
+  },
+  "FBP-1148": {
+   "sid": 794927,
+   "lid": "brasileirao",
+   "ovr": 74,
+   "attr": null
+  },
+  "SAN-122016": {
+   "sid": 922454,
+   "lid": "brasileirao",
+   "ovr": 78,
+   "attr": null
+  },
+  "SAN-83705": {
+   "sid": 949687,
+   "lid": "brasileirao",
+   "ovr": 77,
+   "attr": null
+  },
+  "CAM-139933": {
+   "sid": 974556,
+   "lid": "brasileirao",
+   "ovr": 77,
+   "attr": null
+  },
+  "SAN-1156": {
+   "sid": 872039,
+   "lid": "brasileirao",
+   "ovr": 70,
+   "attr": null
+  },
+  "SAN-1849": {
+   "sid": 244591,
+   "lid": "brasileirao",
+   "ovr": 70,
+   "attr": null
+  },
+  "SAN-12616": {
+   "sid": 840119,
+   "lid": "brasileirao",
+   "ovr": 71,
+   "attr": null
+  },
+  "SAN-45834": {
+   "sid": 840500,
+   "lid": "brasileirao",
+   "ovr": 67,
+   "attr": null
+  },
+  "SAN-169023": {
+   "sid": 883205,
+   "lid": "brasileirao",
+   "ovr": 70,
+   "attr": null
+  },
+  "SAN-99380": {
+   "sid": 905448,
+   "lid": "brasileirao",
+   "ovr": 82,
+   "attr": null
+  },
+  "BAH-1296": {
+   "sid": 795177,
+   "lid": "brasileirao",
+   "ovr": 76,
+   "attr": null
+  },
+  "SAN-170456": {
+   "sid": 1128754,
+   "lid": "brasileirao",
+   "ovr": 64,
+   "attr": null
+  },
+  "VAS-165615": {
+   "sid": 1105970,
+   "lid": "brasileirao",
+   "ovr": 72,
+   "attr": null
+  },
+  "VAS-1251": {
+   "sid": 840291,
+   "lid": "brasileirao",
+   "ovr": 70,
+   "attr": null
+  },
+  "VAS-171304": {
+   "sid": 851285,
+   "lid": "brasileirao",
+   "ovr": 76,
+   "attr": null
+  },
+  "VAS-8402": {
+   "sid": 329303,
+   "lid": "brasileirao",
+   "ovr": 72,
+   "attr": null
+  },
+  "VAS-1172": {
+   "sid": 840398,
+   "lid": "brasileirao",
+   "ovr": 71,
+   "attr": null
+  },
+  "VAS-117822": {
+   "sid": 982174,
+   "lid": "brasileirao",
+   "ovr": 76,
+   "attr": null
+  },
+  "VAS-119622": {
+   "sid": 1069729,
+   "lid": "brasileirao",
+   "ovr": 74,
+   "attr": null
+  },
+  "VAS-179586": {
+   "sid": 595598,
+   "lid": "brasileirao",
+   "ovr": 81,
+   "attr": null
+  },
+  "VAS-1169": {
+   "sid": 863276,
+   "lid": "brasileirao",
+   "ovr": 70,
+   "attr": null
+  },
+  "OVI-141633": {
+   "sid": 1018547,
+   "lid": "la-liga",
+   "ovr": 72,
+   "attr": null
+  },
+  "CRU-249191": {
+   "sid": 1170954,
+   "lid": "brasileirao",
+   "ovr": 74,
+   "attr": null
+  },
+  "CAM-24670": {
+   "sid": 822729,
+   "lid": "brasileirao",
+   "ovr": 75,
+   "attr": null
+  },
+  "CAM-46266": {
+   "sid": 871273,
+   "lid": "brasileirao",
+   "ovr": 77,
+   "attr": null
+  },
+  "CAM-82534": {
+   "sid": 913598,
+   "lid": "brasileirao",
+   "ovr": 72,
+   "attr": null
+  },
+  "CAM-1671": {
+   "sid": 851150,
+   "lid": "brasileirao",
+   "ovr": 79,
+   "attr": null
+  },
+  "CAM-2283": {
+   "sid": 797893,
+   "lid": "brasileirao",
+   "ovr": 75,
+   "attr": null
+  },
+  "CAM-131258": {
+   "sid": 914487,
+   "lid": "brasileirao",
+   "ovr": 74,
+   "attr": null
+  },
+  "CAM-141379": {
+   "sid": 1046805,
+   "lid": "brasileirao",
+   "ovr": 73,
+   "attr": null
+  },
+  "CAM-1695": {
+   "sid": 870748,
+   "lid": "brasileirao",
+   "ovr": 77,
+   "attr": null
+  },
+  "CAM-178929": {
+   "sid": 1117032,
+   "lid": "brasileirao",
+   "ovr": 74,
+   "attr": null
+  },
+  "PAU-8003": {
+   "sid": 149710,
+   "lid": "brasileirao",
+   "ovr": 75,
+   "attr": null
+  },
+  "PAU-3137": {
+   "sid": 340519,
+   "lid": "brasileirao",
+   "ovr": 72,
+   "attr": null
+  },
+  "PAU-168954": {
+   "sid": 1015261,
+   "lid": "brasileirao",
+   "ovr": 77,
+   "attr": null
+  },
+  "PAU-85523": {
+   "sid": 905453,
+   "lid": "brasileirao",
+   "ovr": 80,
+   "attr": null
+  },
+  "PAU-3244": {
+   "sid": 44760,
+   "lid": "brasileirao",
+   "ovr": 69,
+   "attr": null
+  },
+  "PAU-13860": {
+   "sid": 356514,
+   "lid": "brasileirao",
+   "ovr": 70,
+   "attr": null
+  },
+  "BOT-203397": {
+   "sid": 1463909,
+   "lid": "brasileirao",
+   "ovr": 73,
+   "attr": null
+  },
+  "WOL-249435": {
+   "sid": 1597270,
+   "lid": "premier-league",
+   "ovr": 70,
+   "attr": null
+  },
+  "PAU-1338": {
+   "sid": 338937,
+   "lid": "brasileirao",
+   "ovr": 67,
+   "attr": null
+  },
+  "PAU-6475": {
+   "sid": 335033,
+   "lid": "brasileirao",
+   "ovr": 73,
+   "attr": null
+  },
+  "GET-45472": {
+   "sid": 576276,
+   "lid": "la-liga",
+   "ovr": 69,
+   "attr": null
+  },
+  "MIR-13647": {
+   "sid": 797225,
+   "lid": "brasileirao",
+   "ovr": 69,
+   "attr": null
+  },
+  "BAH-1566": {
+   "sid": 869644,
+   "lid": "brasileirao",
+   "ovr": 73,
+   "attr": null
+  },
+  "PAU-179818": {
+   "sid": 1116957,
+   "lid": "brasileirao",
+   "ovr": 60,
    "attr": null
   }
  }
