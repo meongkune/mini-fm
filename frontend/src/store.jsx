@@ -5,6 +5,7 @@ import { available } from './engine/match.js'
 import { assignSlots, buildSlots, fitOf, shapeNeeds } from './engine/formation.js'
 import { applyCupMatch, applyRound, customTalk, engineStatus, news, playerTalk, resolveTalk } from './game/season.js'
 import { cleanName, effectiveTeams } from './game/roster.js'
+import { applyTalkResult } from './game/aiTalk.js'
 import { evaluateTrade, executeTrade, windowState } from './game/trade.js'
 import { boardMidCheck, newBoard, nextSeason, seasonLabel, seasonReview } from './game/career.js'
 import { COMPS, CUP_LEAGUES, buildCups, cupKey, cupStatus, dueMatchday, myCupFixture, playMatchday } from './game/cup.js'
@@ -485,6 +486,12 @@ export function GameProvider({ children }) {
         if (r.blocked) return { blocked: r.blocked }
         setSave(r.save)
         return r.result
+      },
+      /** 배틀식 면담 결과 반영 (itemId: 편지함 면담 요청) */
+      finishTalk(playerId, result, itemId = null) {
+        const player = myTeam?.players.find((p) => p.id === playerId)
+        if (!player) return
+        setSave((s) => applyTalkResult(s, player, result, itemId).save)
       },
       /** 개별 면담 → 반응 문구를 돌려준다 */
       talkTo(playerId, kind) {

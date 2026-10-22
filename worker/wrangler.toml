@@ -1,0 +1,5 @@
+# Mini FM AI 면담 중계 서버 — 배포: cd worker && npx wrangler deploy
+# Gemini 키는 여기에 쓰지 않는다: npx wrangler secret put GEMINI_API_KEY 로 Cloudflare에만 저장
+name = "mini-fm-talk"
+main = "src/index.js"
+compatibility_date = "2026-10-01"

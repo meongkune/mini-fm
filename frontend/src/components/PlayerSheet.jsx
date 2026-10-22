@@ -6,12 +6,14 @@ import { Flag, nationName } from './Badges.jsx'
 import Rating, { CondBar } from './Rating.jsx'
 import { PLAYER_TALKS, moraleLabel } from '../game/season.js'
 import { personality, personalityText } from '../game/speech.js'
-import SayBox from './SayBox.jsx'
+import TalkBattle from './TalkBattle.jsx'
+import { situationOf } from '../game/aiTalk.js'
 import { eur, yearsLeft } from '../game/finance.js'
 import { useGame } from '../store.jsx'
 
 export default function PlayerSheet({ player, onClose, inLineup, onToggle }) {
-  const { status, save, talkTo, myTeam, teams, sayTo, contractOf, renewalAsk, renew, releaseCost, release, forceSell } = useGame()
+  const { status, save, talkTo, myTeam, teams, finishTalk, manager, contractOf, renewalAsk, renew, releaseCost, release, forceSell } = useGame()
+  const [battle, setBattle] = useState(false)
   const [deal, setDeal] = useState(null)
   const [reply, setReply] = useState('')
   const [profile, setProfile] = useState(null)
@@ -79,8 +81,14 @@ export default function PlayerSheet({ player, onClose, inLineup, onToggle }) {
               ))}
             </div>
             {reply && <p className="notice">{reply}</p>}
-            <h4>직접 말하기 <span className="muted small">성격: {personalityText(personality(player)).join(' · ')}</span></h4>
-            <SayBox disabled={talked} onSay={(t) => sayTo(player.id, t)} />
+            <h4>대화 면담 <span className="muted small">성격: {personalityText(personality(player)).join(' · ')}</span></h4>
+            <button className="btn wide talk-start" disabled={talked} onClick={() => setBattle(true)}>🗣️ {talked ? '이번 라운드 면담 완료' : '면담하기 (AI 대화)'}</button>
+            {battle && (
+              <TalkBattle player={player} team={myTeam} status={st} manager={manager}
+                situation={situationOf(player, myTeam, st, { contractYears: yearsLeft(save, contractOf(player)), inLineup })}
+                onClose={() => setBattle(false)}
+                onFinish={(r) => { finishTalk(player.id, r); setBattle(false) }} />
+            )}
           </>
         )}
       </div>
