@@ -5,7 +5,7 @@ import NeedTeam from './NeedTeam.jsx'
 import TalkRoom from '../components/TalkRoom.jsx'
 import { situationOf } from '../game/aiTalk.js'
 
-const ICON = { talk: '💬', promise: '💔', request: '✈️', injury: '🚑', susp: '🟥', mom: '⭐', board: '🏛️', trade: '🔄', season: '🏁', youth: '🌱' }
+const ICON = { offer: '💰', contract: '📝', finance: '💼', press: '📰', talk: '💬', promise: '💔', request: '✈️', injury: '🚑', susp: '🟥', mom: '⭐', board: '🏛️', trade: '🔄', season: '🏁', youth: '🌱' }
 
 export default function Inbox() {
   const { myTeam, save, readInbox, answerTalk, answerOffer, finishTalk, status, totalRounds, contractOf } = useGame()

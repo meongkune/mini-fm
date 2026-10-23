@@ -171,7 +171,7 @@ export function nextSeason(save, { teams, baseTeams, standings, country, baseSea
   const fresh = {
     ...save,
     seasonNo: next, round: 0, results: [], pstats: {}, status, mods, rosters, youth, history,
-    tradeLog: [], tradeTalks: {}, inbox: [...inbox, ...(save.inbox || [])].slice(0, 80),
+    tradeLog: [], bidTalks: {}, inbox: [...inbox, ...(save.inbox || [])].slice(0, 80),
     lineup: save.lineup.map((id) => (id && rosters[save.teamId].includes(id) ? id : null)),
   }
   return { save: fresh, review, conf, next }

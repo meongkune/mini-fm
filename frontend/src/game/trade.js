@@ -1,11 +1,10 @@
-// 트레이드 이적 (이적료 없음): 선수 가치 평가, 상대 구단 AI의 수락·거절·역제안, 실행
+// 이적료 이적: 선수 가치 평가, 상대 구단 AI의 수락·역제안·거절, 이적 실행, 내 선수에게 들어오는 제안
 import { playerOvrOf } from '../engine/engine.js'
 import { news } from './season.js'
 
 const hash = (s) => { let h = 2166136261; for (const c of String(s)) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return h >>> 0 }
 export const MIN_SQUAD = { GK: 2, DF: 6, MF: 6, FW: 3 }
 export const MAX_SQUAD = 30
-export const MAX_PER_SIDE = 2
 export const PATIENCE = 3 // 같은 선수를 두고 협상할 수 있는 횟수 (이적 시장마다)
 
 /** 숨겨진 잠재력(PA): 선수 ID로 정해지는 고정 값. 어릴수록 폭이 크다 */
@@ -44,99 +43,63 @@ export function windowState(round, totalRounds) {
 }
 
 const countPos = (players) => players.reduce((c, p) => ({ ...c, [p.pos]: (c[p.pos] || 0) + 1 }), {})
-function squadProblem(players) {
+export function squadProblem(players) {
   const c = countPos(players)
   for (const [pos, n] of Object.entries(MIN_SQUAD)) if ((c[pos] || 0) < n) return `${pos} 인원이 ${n}명 아래로 줄어듭니다`
   if (players.length > MAX_SQUAD) return `선수단이 ${MAX_SQUAD}명을 넘습니다`
   return null
 }
 
-/**
- * 상대 구단 AI의 판단
- * @returns { verdict: 'accept'|'counter'|'reject', reason, ask?: [추가로 원하는 내 선수 ID] }
- */
-export function evaluateTrade({ mine, theirs, give, get, status = {} }) {
-  if (!give.length || !get.length) return { verdict: 'reject', reason: '주고받을 선수를 한 명 이상 골라야 합니다.' }
-  const byId = Object.fromEntries([...mine.players, ...theirs.players].map((p) => [p.id, p]))
-  const giveP = give.map((id) => byId[id])
-  const getP = get.map((id) => byId[id])
-  // 선수단 규정 (양쪽 모두)
-  const theirAfter = [...theirs.players.filter((p) => !get.includes(p.id)), ...giveP]
-  const myAfter = [...mine.players.filter((p) => !give.includes(p.id)), ...getP]
-  const pTheirs = squadProblem(theirAfter)
-  if (pTheirs) return { verdict: 'reject', reason: `"그렇게 하면 우리 팀 ${pTheirs}."` }
-  const pMine = squadProblem(myAfter)
-  if (pMine) return { verdict: 'reject', reason: `규정상 불가: 내 팀 ${pMine}.` }
+/** 이 구단에서 핵심 선수(OVR 상위 3명)인지 */
+const isCore = (team, id) => [...team.players].sort((a, b) => playerOvrOf(b) - playerOvrOf(a)).slice(0, 3).some((p) => p.id === id)
 
-  const val = (ps) => ps.reduce((s, p) => s + valueOf(p, status[p.id]), 0)
-  const offer = val(giveP)
-  const ask = val(getP)
-  // 팀 핵심 선수(OVR 상위 3명)는 더 비싸게 부른다
-  const core = new Set([...theirs.players].sort((a, b) => playerOvrOf(b) - playerOvrOf(a)).slice(0, 3).map((p) => p.id))
-  const premium = getP.some((p) => core.has(p.id)) ? 1.3 : 1.12
-  const need = ask * premium
-  if (offer >= need) return { verdict: 'accept', reason: `"좋습니다. 이 조건이면 받아들이겠습니다."`, offer, need }
-  const ratio = offer / need
-  const coreNote = getP.some((p) => core.has(p.id)) ? ' 팀 핵심 선수라 쉽게 내줄 수 없습니다.' : ''
-  if (ratio >= 0.55 && give.length < MAX_PER_SIDE) {
-    // 내 선수 한 명을 더 얹으면 맞춰지는지 찾는다 (가장 싼 선수부터)
-    const extra = mine.players
-      .filter((p) => !give.includes(p.id))
-      .map((p) => ({ p, v: valueOf(p, status[p.id]) }))
-      .filter(({ v }) => offer + v >= need)
-      .sort((a, b) => a.v - b.v)
-      .find(({ p }) => !squadProblem([...mine.players.filter((x) => !give.includes(x.id) && x.id !== p.id), ...getP]) && !squadProblem([...theirAfter, p]))
-    if (extra) return { verdict: 'counter', reason: `"조금 모자랍니다.${coreNote} ${extra.p.name}까지 같이 보내 주시면 진행하죠."`, ask: [extra.p.id], offer, need }
-  }
-  if (ratio >= 0.8) return { verdict: 'reject', reason: `"거의 다 왔는데 조금 부족합니다.${coreNote}"`, offer, need }
-  if (ratio >= 0.55) return { verdict: 'reject', reason: `"가치 차이가 꽤 납니다.${coreNote} 더 좋은 선수를 제안해 주세요."`, offer, need }
-  return { verdict: 'reject', reason: `"${getP.map((p) => p.name).join(', ')}의 가치에 한참 못 미칩니다."`, offer, need }
+/**
+ * 영입 제안(이적료)에 대한 상대 구단 AI의 판단
+ * @returns { verdict: 'accept'|'counter'|'reject', reason, ask?(역제안 금액), need }
+ */
+export function evaluateBid({ theirs, player, fee, status = {} }) {
+  const after = theirs.players.filter((p) => p.id !== player.id)
+  const prob = squadProblem(after)
+  if (prob) return { verdict: 'reject', reason: `"그 선수를 팔면 우리 팀 ${prob}. 팔 수 없습니다."` }
+  const core = isCore(theirs, player.id)
+  const need = Math.round(valueOf(player, status[player.id]) * (core ? 1.4 : 1.1) * 10) / 10
+  if (fee >= need) return { verdict: 'accept', reason: `"좋습니다. ${money(fee)}이면 보내드리죠."`, need }
+  if (fee >= need * 0.75) return { verdict: 'counter', ask: need, reason: `"${money(need)}은 받아야 합니다.${core ? ' 우리 팀 핵심 선수입니다.' : ''}"`, need }
+  return { verdict: 'reject', reason: `"${money(fee)}은 말도 안 되는 금액입니다.${core ? ' 핵심 선수는 쉽게 내주지 않습니다.' : ''}"`, need }
 }
 
-/** 트레이드 실행: 두 팀 선수단을 save.rosters에 기록 */
-export function executeTrade(save, teams, myTeamId, theirId, give, get) {
+/** 이적 실행: fromId 구단의 선수를 toId 구단으로 (save.rosters에 기록). contract는 내 팀으로 올 때만 */
+export function executeTransfer(save, teams, fromId, toId, playerId, { contract = null } = {}) {
   const rosters = { ...(save.rosters || Object.fromEntries(teams.map((t) => [t.id, t.players.map((p) => p.id)]))) }
   for (const t of teams) if (!rosters[t.id]) rosters[t.id] = t.players.map((p) => p.id)
-  rosters[myTeamId] = [...rosters[myTeamId].filter((id) => !give.includes(id)), ...get]
-  rosters[theirId] = [...rosters[theirId].filter((id) => !get.includes(id)), ...give]
+  rosters[fromId] = rosters[fromId].filter((id) => id !== playerId)
+  rosters[toId] = [...rosters[toId].filter((id) => id !== playerId), playerId]
   const status = { ...(save.status || {}) }
-  for (const id of [...give, ...get]) {
-    const s = { ...(status[id] || {}) }
-    s.morale = get.includes(id) ? 72 : 60 // 새 팀에 온 선수는 의욕이 높다
-    delete s.wantsOut; delete s.promise; delete s.complained
-    s.benched = 0
-    status[id] = s
-  }
-  const byId = Object.fromEntries(teams.flatMap((t) => t.players).map((p) => [p.id, p]))
-  const their = teams.find((t) => t.id === theirId)
-  const item = news(save.round, 'trade', `트레이드 성사 · ${their?.name ?? theirId}`, `${get.map((id) => byId[id]?.name).join(', ')} 영입 ⇄ ${give.map((id) => byId[id]?.name).join(', ')} 이적`, { read: true })
+  const s = { ...(status[playerId] || {}), morale: toId === save.teamId ? 74 : 60, benched: 0 }
+  delete s.wantsOut; delete s.promise; delete s.complained; delete s.promises
+  status[playerId] = s
   return {
     ...save,
     rosters,
     status,
-    lineup: save.lineup.map((id) => (give.includes(id) ? null : id)),
-    tradeLog: [...(save.tradeLog || []), { round: save.round, with: theirId, give, get }],
-    inbox: [item, ...(save.inbox || [])],
+    contracts: contract ? { ...(save.contracts || {}), [playerId]: contract } : save.contracts,
+    lineup: save.lineup.map((id) => (id === playerId && fromId === save.teamId ? null : id)),
+    forSale: (save.forSale || []).filter((id) => id !== playerId),
   }
 }
 
-/** 이적 요청한 내 선수에게 다른 구단이 먼저 제안 (라운드 결과 처리 때 호출) */
-export function aiOfferFor(save, teams, myTeamId, playerId, round) {
+/** 내 선수에게 다른 구단이 이적료를 제안 (판매 목록에 올렸거나 이적을 요청한 선수) */
+export function aiBidFor(save, teams, myTeamId, playerId, round) {
   const mine = teams.find((t) => t.id === myTeamId)
   const p = mine?.players.find((x) => x.id === playerId)
   if (!p) return null
   const v = valueOf(p, save.status?.[p.id])
   const others = teams.filter((t) => t.id !== myTeamId)
   const team = others[hash(`${p.id}-${round}`) % others.length]
-  // 비슷한 가치(80~110%)의 같은 포지션 선수
-  const cand = team.players
-    .filter((x) => x.pos === p.pos)
-    .map((x) => ({ x, r: valueOf(x, save.status?.[x.id]) / v }))
-    .filter(({ r }) => r >= 0.8 && r <= 1.1)
-    .sort((a, b) => b.r - a.r)[0]
-  if (!cand) return null
-  return news(round, 'trade', `${team.name}의 트레이드 제안`, `${team.name}이(가) 이적을 원하는 ${p.name} 선수를 원합니다. 대신 ${cand.x.name}(${cand.x.pos}, OVR ${playerOvrOf(cand.x)}, ${cand.x.age}세)을(를) 보내겠다고 합니다.`, {
-    offer: { teamId: team.id, give: [p.id], get: [cand.x.id] },
-    actions: [['accept', '✅ 수락', '바로 트레이드합니다'], ['decline', '❌ 거절', '제안을 거절합니다']],
+  const k = 0.8 + (hash(`bid-${p.id}-${round}`) % 40) / 100 // 가치의 80~120%
+  const fee = Math.round(v * k * 10) / 10
+  return news(round, 'offer', `💰 ${team.name}의 영입 제안: ${p.name}`, `${team.name}이(가) ${p.name}(${p.pos}, OVR ${playerOvrOf(p)}, ${p.age}세) 영입을 위해 ${money(fee)}을 제시했습니다. (선수 가치 ${money(v)})`, {
+    offer: { teamId: team.id, playerId: p.id, fee },
+    actions: [['accept', '✅ 수락', `${money(fee)}에 판매합니다`], ['decline', '❌ 거절', '제안을 거절합니다']],
   })
 }

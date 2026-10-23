@@ -2,7 +2,7 @@
 // 브라우저 저장(save)만 바꾸고 원본 시즌 데이터(JSON)는 건드리지 않는다.
 import { playerOvrOf } from '../engine/engine.js'
 import { quickMatch } from '../engine/match.js'
-import { aiOfferFor, windowState } from './trade.js'
+import { aiBidFor, windowState } from './trade.js'
 import { reactToSpeech } from './speech.js'
 import { checkPromises } from './relations.js'
 import { buildSlots, fitOf } from '../engine/formation.js'
@@ -149,12 +149,13 @@ export function applyRound(save, { teamsById, schedule, myTeamId, mine }) {
         inbox.push(news(round, 'talk', `${p.name} 이적 요청`, `${p.name} 선수가 팀을 떠나고 싶다며 공식적으로 이적을 요청했습니다. 면담으로 설득하거나, 보내줄 수 있습니다.`, { playerId: p.id, topic: 'transfer' }))
       }
     }
-    // 이적을 원하는 선수에게 다른 구단 제안 (이적 시장이 열려 있을 때, 2라운드마다)
+    // 판매 목록에 올린 선수·이적을 원하는 선수에게 다른 구단의 이적료 제안 (이적 시장이 열려 있을 때)
     if (windowState(round + 1, schedule.length).open) {
       for (const p of my.players) {
         const s = st[p.id]
-        if (s?.wantsOut && (round + hash(p.id)) % 2 === 0) {
-          const offer = aiOfferFor({ ...save, status: st }, teams, myTeamId, p.id, round)
+        const listed = (save.forSale || []).includes(p.id)
+        if ((listed || s?.wantsOut) && (round + hash(p.id)) % (listed ? 1 : 2) === 0) {
+          const offer = aiBidFor({ ...save, status: st }, teams, myTeamId, p.id, round)
           if (offer) inbox.push(offer)
         }
       }

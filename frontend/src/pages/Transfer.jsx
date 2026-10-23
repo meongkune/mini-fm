@@ -1,10 +1,12 @@
+// 이적 시장: 이적료로 영입(상대 구단 AI와 협상) · 판매 목록 등록(제안은 편지함으로) · FA
 import { useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import FreeAgents from './FreeAgents.jsx'
 import { Crest, Flag } from '../components/Badges.jsx'
 import NeedTeam from './NeedTeam.jsx'
 import { CondBar } from '../components/Rating.jsx'
-import { MAX_PER_SIDE, PATIENCE, money, potentialStars, valueOf } from '../game/trade.js'
+import { PATIENCE, money, potentialStars, valueOf } from '../game/trade.js'
+import { eur, wageBill, wageBudget } from '../game/finance.js'
 import { playerOvr, short, useGame } from '../store.jsx'
 
 const POS = ['전체', 'GK', 'DF', 'MF', 'FW']
@@ -12,18 +14,14 @@ const SORTS = [['ovr', 'OVR'], ['value', '가치'], ['pot', '잠재력'], ['age'
 const stars = (n) => '★'.repeat(n) + '☆'.repeat(5 - n)
 
 export default function Transfer() {
-  const { myTeam, teams, teamsById, status, save, update, proposeTrade, doTrade, transferWindow, totalRounds } = useGame()
+  const { myTeam, teams, teamsById, status, save, data, transferWindow, totalRounds, toggleSale } = useGame()
   const [params] = useSearchParams()
   const [tab, setTab] = useState(params.get('tab') || 'buy')
   const [pos, setPos] = useState('전체')
   const [teamFilter, setTeamFilter] = useState('all')
   const [sort, setSort] = useState('ovr')
   const [q, setQ] = useState('')
-  const [give, setGive] = useState([])
-  const [get, setGet] = useState([])
-  const [theirId, setTheirId] = useState(null)
-  const [reply, setReply] = useState(null)
-  const [toast, setToast] = useState('')
+  const [pick, setPick] = useState(null) // { p, t }
 
   const market = useMemo(() => {
     if (!myTeam) return []
@@ -38,101 +36,33 @@ export default function Transfer() {
     .slice(0, 60)
   const mineList = [...myTeam.players].map((p) => ({ p, v: valueOf(p, status[p.id]), pot: potentialStars(p) })).sort((a, b) => playerOvr(b.p) - playerOvr(a.p))
   const byId = Object.fromEntries(teams.flatMap((t) => t.players).map((p) => [p.id, p]))
-  const sum = (ids) => ids.reduce((s, id) => s + valueOf(byId[id], status[id]), 0)
-  const talkKey = `${save.seasonNo || 1}-${transferWindow.label}-${[...get].sort().join(',')}`
-  const tries = save.tradeTalks?.[talkKey] || 0
-
-  const flash = (m) => { setToast(m); setTimeout(() => setToast(''), 2200) }
-  const toggleGet = (p, t) => {
-    setReply(null)
-    if (get.includes(p.id)) { setGet(get.filter((x) => x !== p.id)); if (get.length === 1) setTheirId(null); return }
-    if (theirId && theirId !== t.id) { setGet([p.id]); setTheirId(t.id); flash(`${short(t)} 선수로 바꿨습니다 (한 번에 한 구단과만 협상)`); return }
-    if (get.length >= MAX_PER_SIDE) return flash(`받을 선수는 최대 ${MAX_PER_SIDE}명입니다`)
-    setGet([...get, p.id]); setTheirId(t.id)
-  }
-  const toggleGive = (p) => {
-    setReply(null)
-    if (give.includes(p.id)) return setGive(give.filter((x) => x !== p.id))
-    if (give.length >= MAX_PER_SIDE) return flash(`줄 선수는 최대 ${MAX_PER_SIDE}명입니다`)
-    setGive([...give, p.id])
-  }
-  const propose = () => {
-    if (tries >= PATIENCE) return
-    const r = proposeTrade(theirId, give, get)
-    const n = tries + 1
-    update({ tradeTalks: { ...(save.tradeTalks || {}), [talkKey]: n } })
-    setReply(n >= PATIENCE && r.verdict !== 'accept' ? { ...r, verdict: 'reject', reason: `${r.reason} 더 이상 협상하지 않겠다고 합니다. (협상 결렬)` } : r)
-  }
-  const confirmDeal = (extra = []) => {
-    const finalGive = [...give, ...extra]
-    doTrade(theirId, finalGive, get)
-    flash(`트레이드 완료: ${get.map((id) => byId[id].name).join(', ')} 영입!`)
-    setGive([]); setGet([]); setTheirId(null); setReply(null)
-  }
-  const reset = () => { setGive([]); setGet([]); setTheirId(null); setReply(null) }
-  const their = theirId ? teamsById[theirId] : null
-  const offerV = sum(give)
-  const askV = sum(get)
+  const f = save.finance || {}
+  const bill = wageBill(save, myTeam, data.leagueId)
+  const room = Math.max(0, wageBudget(f) - bill)
+  const banned = f.ban === (save.seasonNo || 1)
 
   return (
     <section>
       <div className="section-head">
         <div>
           <h1>이적 시장</h1>
-          <p className="muted">이적료 없이 선수끼리 맞바꾸는 트레이드 · 한 번에 최대 {MAX_PER_SIDE}대{MAX_PER_SIDE}</p>
+          <p className="muted">이적료로 사고팝니다 · 상대 구단은 핵심 선수를 비싸게 부릅니다</p>
         </div>
         <span className={`pill ${transferWindow.open ? 'ok' : 'bad'}`}>{transferWindow.open ? `🟢 ${transferWindow.label}` : '🔒 닫힘'}</span>
       </div>
+      <div className="budget-strip">
+        <div><span>현금(이적 자금)</span><b className={(f.cash ?? 0) < 0 ? 'bad-text' : ''}>{eur(f.cash ?? 0)}</b></div>
+        <div><span>임금 예산 여유</span><b className={room <= 0 ? 'bad-text' : ''}>{eur(room)}/년</b></div>
+        <div><span>판매 목록</span><b>{(save.forSale || []).length}명</b></div>
+      </div>
+      {banned && <p className="notice bad">⚖️ FFP 위반 징계로 이번 시즌 영입이 금지돼 있습니다. 판매는 가능합니다.</p>}
       {!transferWindow.open && (
-        <p className="notice">지금은 이적 시장이 닫혀 있습니다. {transferWindow.next !== null ? `${transferWindow.next + 1}라운드부터 겨울 이적 시장이 열립니다.` : '시즌이 끝나고 다음 시즌 초반에 다시 열립니다.'} 선수 탐색은 계속할 수 있습니다.</p>
+        <p className="notice">지금은 이적 시장이 닫혀 있습니다. {transferWindow.next !== null ? `${transferWindow.next + 1}라운드부터 겨울 이적 시장이 열립니다.` : '시즌이 끝나고 다음 시즌 초반에 다시 열립니다.'} 선수 탐색과 판매 목록 등록은 할 수 있습니다.</p>
       )}
 
-      {tab !== 'fa' && (<>
-      {/* 협상 테이블 */}
-      <div className="card deal">
-        <div className="deal-cols">
-          <div>
-            <span className="eyebrow">받을 선수 {their && <>· <Crest team={their} size={16} /> {short(their)}</>}</span>
-            {get.length ? get.map((id) => <DealChip key={id} p={byId[id]} v={valueOf(byId[id], status[id])} onRemove={() => toggleGet(byId[id], their)} />) : <p className="muted small">아래 목록에서 영입할 선수를 고르세요</p>}
-          </div>
-          <span className="deal-arrow">⇄</span>
-          <div>
-            <span className="eyebrow">줄 선수 · {short(myTeam)}</span>
-            {give.length ? give.map((id) => <DealChip key={id} p={byId[id]} v={valueOf(byId[id], status[id])} onRemove={() => toggleGive(byId[id])} />) : <p className="muted small">"내 선수 내보내기" 탭에서 고르세요</p>}
-          </div>
-        </div>
-        {(get.length > 0 || give.length > 0) && (
-          <div className="deal-value">
-            <div className="dv-bar"><span style={{ width: `${Math.min(100, askV ? (offerV / (askV * 1.12)) * 100 : 0)}%` }} className={offerV >= askV * 1.12 ? 'ok' : offerV >= askV * 0.8 ? 'mid' : 'lo'} /></div>
-            <div className="dv-labels"><span>내 제안 {money(offerV)}</span><span>상대 선수 가치 {money(askV)}</span></div>
-          </div>
-        )}
-        {reply && (
-          <div className={`deal-reply ${reply.verdict}`}>
-            <strong>{their?.name}</strong>
-            <p>{reply.reason}</p>
-            {reply.verdict === 'accept' && <button className="btn wide" onClick={() => confirmDeal()}>✍️ 계약 확정</button>}
-            {reply.verdict === 'counter' && (
-              <div className="row">
-                <button className="btn" onClick={() => confirmDeal(reply.ask)}>{byId[reply.ask[0]].name} 추가해서 확정</button>
-                <button className="btn ghost" onClick={() => setReply(null)}>거절</button>
-              </div>
-            )}
-          </div>
-        )}
-        <div className="row">
-          <button className="btn ghost small" onClick={reset} disabled={!get.length && !give.length}>초기화</button>
-          <button className="btn" disabled={!transferWindow.open || !get.length || !give.length || tries >= PATIENCE || reply?.verdict === 'accept'} onClick={propose}>
-            {tries >= PATIENCE ? '협상 결렬' : `제안하기${tries ? ` (${tries}/${PATIENCE})` : ''}`}
-          </button>
-        </div>
-      </div>
-      </>)}
-      {toast && <p className="toast">{toast}</p>}
-
       <div className="tabs-line">
-        <button className={tab === 'buy' ? 'on' : ''} onClick={() => setTab('buy')}>영입 대상 찾기</button>
-        <button className={tab === 'sell' ? 'on' : ''} onClick={() => setTab('sell')}>내 선수 내보내기</button>
+        <button className={tab === 'buy' ? 'on' : ''} onClick={() => setTab('buy')}>영입</button>
+        <button className={tab === 'sell' ? 'on' : ''} onClick={() => setTab('sell')}>판매</button>
         <button className={tab === 'fa' ? 'on' : ''} onClick={() => setTab('fa')}>FA 시장</button>
       </div>
 
@@ -156,9 +86,9 @@ export default function Transfer() {
             <ul className="mk">
               {list.map(({ p, t, v, pot }) => (
                 <li key={p.id}>
-                  <button className={`mk-row ${get.includes(p.id) ? 'on' : ''}`} onClick={() => toggleGet(p, t)}>
+                  <button className="mk-row" onClick={() => setPick({ p, t })}>
                     <Crest team={t} />
-                    <span className="mk-name"><strong><Flag nation={p.nation} size={14} /> {p.name}</strong><small>{short(t)} · {p.pos} · {p.age}세{status[p.id]?.inj > 0 ? ' · 🚑' : ''}</small></span>
+                    <span className="mk-name"><strong><Flag nation={p.nation} size={14} /> {p.name}</strong><small>{short(t)} · {p.role || p.pos} · {p.age}세{status[p.id]?.inj > 0 ? ' · 🚑' : ''}</small></span>
                     <span className="mk-pot" title="스카우트 잠재력 평가">{stars(pot)}</span>
                     <span className="mk-ovr">{playerOvr(p)}</span>
                     <span className="mk-val">{money(v)}</span>
@@ -171,46 +101,85 @@ export default function Transfer() {
       )}
 
       {tab === 'sell' && (
-        <div className="card flush">
-          <ul className="mk">
-            {mineList.map(({ p, v, pot }) => (
-              <li key={p.id}>
-                <button className={`mk-row ${give.includes(p.id) ? 'on' : ''}`} onClick={() => toggleGive(p)}>
-                  <span className="lu-pos">{p.pos}</span>
-                  <span className="mk-name"><strong><Flag nation={p.nation} size={14} /> {p.name}{status[p.id]?.wantsOut ? ' ✈️' : ''}</strong><small>{p.age}세 · 출전 {save.pstats?.[p.id]?.apps ?? 0}경기 <CondBar value={status[p.id]?.cond} /></small></span>
-                  <span className="mk-pot">{stars(pot)}</span>
-                  <span className="mk-ovr">{playerOvr(p)}</span>
-                  <span className="mk-val">{money(v)}</span>
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
+        <>
+          <p className="small muted">판매 목록에 올리면 이적 시장 기간에 다른 구단의 이적료 제안이 편지함으로 옵니다. 바로 팔려면 선수 상세의 "강제 매각"을 쓰세요.</p>
+          <div className="card flush">
+            <ul className="mk">
+              {mineList.map(({ p, v, pot }) => {
+                const listed = (save.forSale || []).includes(p.id)
+                return (
+                  <li key={p.id}>
+                    <div className={`mk-row ${listed ? 'on' : ''}`}>
+                      <span className="lu-pos">{p.role || p.pos}</span>
+                      <span className="mk-name"><strong><Flag nation={p.nation} size={14} /> {p.name}{status[p.id]?.wantsOut ? ' ✈️' : ''}</strong><small>{p.age}세 · 출전 {save.pstats?.[p.id]?.apps ?? 0}경기 <CondBar value={status[p.id]?.cond} /></small></span>
+                      <span className="mk-ovr">{playerOvr(p)}</span>
+                      <span className="mk-val">{money(v)}</span>
+                      <button className={`btn small ${listed ? '' : 'ghost'}`} onClick={() => toggleSale(p.id)}>{listed ? '판매 중' : '판매 등록'}</button>
+                    </div>
+                  </li>
+                )
+              })}
+            </ul>
+          </div>
+        </>
       )}
 
-      {(save.tradeLog || []).length > 0 && (
+      {(save.tradeLog || []).some((t) => t.fee !== undefined) && (
         <div className="card">
-          <h3>이번 시즌 트레이드</h3>
+          <h3>이번 시즌 이적</h3>
           <ul className="trade-log">
-            {save.tradeLog.slice().reverse().map((t, i) => (
-              <li key={i}><span className="muted small">{t.round + 1}R</span> <Crest team={teamsById[t.with]} size={16} /> {t.get.map((id) => byId[id]?.name ?? id).join(', ')} ⇄ {t.give.map((id) => byId[id]?.name ?? id).join(', ')}</li>
+            {save.tradeLog.filter((t) => t.fee !== undefined).slice().reverse().map((t, i) => (
+              <li key={i}><span className="muted small">{t.round + 1}R</span> {t.in ? <>📥 {byId[t.in]?.name ?? t.in} ← <Crest team={teamsById[t.from]} size={16} /></> : <>📤 {byId[t.out]?.name ?? t.out} → <Crest team={teamsById[t.to]} size={16} /></>} <b>{eur(t.fee)}</b></li>
             ))}
           </ul>
         </div>
       )}
-      <p className="muted small">잠재력 ★은 스카우트 평가입니다. 어린 선수일수록 실제 성장 폭이 큽니다 · 총 {totalRounds}라운드 중 초반 4라운드·중반 4라운드에 이적 시장이 열립니다.</p>
+      <p className="muted small">잠재력 ★은 스카우트 평가입니다 · 총 {totalRounds}라운드 중 초반 4라운드·중반 4라운드에 이적 시장이 열립니다.</p>
+      {pick && <BidSheet p={pick.p} t={pick.t} onClose={() => setPick(null)} />}
     </section>
   )
 }
 
-function DealChip({ p, v, onRemove }) {
+/** 영입 협상: 이적료 제시 → 상대 구단 답 → 수락되면 계약 기간 정하고 확정 */
+function BidSheet({ p, t, onClose }) {
+  const { status, bidFor, signTransfer, wageFor, transferWindow } = useGame()
+  const v = valueOf(p, status[p.id])
+  const [fee, setFee] = useState(Math.round(v * 10) / 10)
+  const [years, setYears] = useState(p.age >= 31 ? 2 : 4)
+  const [reply, setReply] = useState(null)
+  const [done, setDone] = useState(null)
+  const wage = Math.round(wageFor(p) * 1.15 * 10) / 10
+  const offer = () => { setDone(null); setReply(bidFor(t.id, p.id, fee)) }
+  const sign = () => setDone(signTransfer(t.id, p.id, reply.verdict === 'counter' ? reply.ask : fee, years))
   return (
-    <button className="deal-chip" onClick={onRemove} title="빼기">
-      <span className="lu-pos">{p.pos}</span>
-      <strong>{p.name}</strong>
-      <span className="mk-ovr">{playerOvr(p)}</span>
-      <em>{money(v)}</em>
-      <i>×</i>
-    </button>
+    <div className="sheet-wrap" onClick={onClose}>
+      <div className="sheet" onClick={(e) => e.stopPropagation()}>
+        <div className="sheet-head"><h3><Crest team={t} size={20} /> {p.name} 영입 협상</h3><button className="btn ghost small" onClick={onClose}>닫기</button></div>
+        <p className="small muted" style={{ marginTop: 0 }}>{t.name} · {p.role || p.pos} · {p.age}세 · OVR {playerOvr(p)} · 선수 가치 {money(v)} · 요구 연봉 약 {eur(wage)}/년</p>
+        {!done?.ok && (
+          <>
+            <label className="tp-slider">
+              <span className="tp-row"><b>제시 이적료</b><em>{money(fee)} ({Math.round((fee / v) * 100)}%)</em></span>
+              <input type="range" min={Math.round(v * 5) / 10} max={Math.round(v * 25) / 10} step={0.1} value={fee} onChange={(e) => { setFee(Number(e.target.value)); setReply(null) }} />
+              <span className="tp-ends"><small>가치의 50%</small><small>250%</small></span>
+            </label>
+            <div className="row">
+              <span className="small">계약 기간</span>
+              <select value={years} onChange={(e) => setYears(Number(e.target.value))}>{[1, 2, 3, 4, 5].map((y) => <option key={y} value={y}>{y}년</option>)}</select>
+              <button className="btn" disabled={!transferWindow.open || reply?.verdict === 'accept'} onClick={offer}>제안하기</button>
+            </div>
+          </>
+        )}
+        {reply && (
+          <div className={`deal-reply ${reply.verdict}`}>
+            <strong>{t.name}{reply.tries ? <span className="muted small"> · 협상 {reply.tries}/{PATIENCE}</span> : null}</strong>
+            <p>{reply.reason}</p>
+            {reply.verdict === 'accept' && !done?.ok && <button className="btn wide" onClick={sign}>✍️ {money(fee)}에 계약 확정</button>}
+            {reply.verdict === 'counter' && !done?.ok && <button className="btn wide" onClick={sign}>✍️ {money(reply.ask)}에 맞춰 계약 확정</button>}
+          </div>
+        )}
+        {done && <p className={`notice ${done.ok ? 'ok' : 'bad'}`}>{done.ok ? `✍️ 영입 완료! 연봉 ${eur(done.wage)}/년 · ${years}년 계약` : done.reason}</p>}
+      </div>
+    </div>
   )
 }

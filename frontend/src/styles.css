@@ -1197,3 +1197,7 @@ html.framed body { overflow: hidden; height: 100vh; }
 .ratio-bar i.hi { background: #22c55e; } .ratio-bar i.mid { background: #eab308; } .ratio-bar i.lo { background: #ef4444; }
 .ratio-bar em { position: absolute; top: -3px; width: 2px; height: 14px; background: var(--muted); }
 .ticket-range { width: 100%; accent-color: var(--accent); }
+.budget-strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 10px; }
+.budget-strip > div { display: grid; padding: 8px 10px; border-radius: 10px; background: var(--panel); border: 1px solid var(--line); font-size: .72rem; }
+.budget-strip span { color: var(--muted); } .budget-strip b { font-size: .95rem; }
+.mk-row .btn.small { flex: none; }
