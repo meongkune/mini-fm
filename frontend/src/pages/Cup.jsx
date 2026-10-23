@@ -61,7 +61,7 @@ export default function CupView() {
                 <tbody>
                   {groupTable(cup, gi).map((r, i) => (
                     <tr key={r.id} className={r.id === myKey ? 'me' : ''}>
-                      <td className="grp-team"><span className="st-rank" style={i < 2 ? { '--zone': '#3b82f6' } : undefined}>{i + 1}</span><Crest team={T(r.id)} size={18} /><span className="st-name">{short(T(r.id))}</span></td>
+                      <td className="grp-team"><span className="st-rank" style={i < 2 ? { '--zone': '#3b82f6' } : undefined}>{i + 1}</span><Crest team={T(r.id)} size={18} /><span className="st-name">{short(T(r.id))}</span><LeagueTag k={r.id} /></td>
                       <td className="pts">{r.pts}</td><td>{r.gf - r.ga > 0 ? '+' : ''}{r.gf - r.ga}</td>
                     </tr>
                   ))}
@@ -82,7 +82,7 @@ export default function CupView() {
                   <div key={i} className={`br-match ${f.home === myKey || f.away === myKey ? 'me' : ''}`}>
                     {[f.home, f.away].map((k, j) => (
                       <div key={k} className={`br-team ${f.winner === k ? 'win' : f.winner ? 'lose' : ''}`}>
-                        <Crest team={T(k)} size={18} /><span>{short(T(k))}</span><b>{f.score ? f.score[j] : ''}{f.pens ? ` (${f.pens[j]})` : ''}</b>
+                        <Crest team={T(k)} size={18} /><span>{short(T(k))}</span><LeagueTag k={k} /><b>{f.score ? f.score[j] : ''}{f.pens ? ` (${f.pens[j]})` : ''}</b>
                       </div>
                     ))}
                   </div>
@@ -130,4 +130,11 @@ export default function CupView() {
       )}
     </>
   )
+}
+
+// 대회 팀 키("리그ID/팀ID") → 소속 리그 짧은 표시
+const LEAGUE_TAG = { 'premier-league': ['EPL', '#3d195b'], 'la-liga': ['라리가', '#ee8707'], bundesliga: ['분데스', '#d20515'], 'serie-a': ['세리에', '#008fd7'], 'ligue-1': ['리그1', '#091c3e'], eredivisie: ['에레디비시', '#e3001b'], 'primeira-liga': ['포르투갈', '#00a650'], brasileirao: ['브라질', '#009c3b'], championship: ['챔피언십', '#1f3d7a'] }
+export function LeagueTag({ k }) {
+  const [label, color] = LEAGUE_TAG[String(k).split('/')[0]] || [String(k).split('/')[0], '#475569']
+  return <span className="lg-tag" style={{ '--lc': color }}>{label}</span>
 }

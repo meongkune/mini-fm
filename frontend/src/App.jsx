@@ -48,7 +48,7 @@ class PageErrorBoundary extends Component {
 // PC 왼쪽 메뉴: [경로, 라벨, 아이콘, 정확히 일치]
 const SIDE = [
   ['/', '홈', '🏠', true],
-  ['/inbox', '받은 편지함', '📬'],
+  ['/inbox', '메시지함', '📬'],
   ['/squad', '스쿼드', '👥'],
   ['/tactics', '전술', '📋'],
   ['/match', '경기', '⚽'],
@@ -170,7 +170,7 @@ function MobileApp() {
           </Link>
         )}
         {myTeam && (
-          <Link to="/inbox" className="bell" aria-label={`받은 편지함${unread ? ` (새 소식 ${unread}개)` : ''}`}>
+          <Link to="/inbox" className="bell" aria-label={`메시지함${unread ? ` (새 소식 ${unread}개)` : ''}`}>
             📬{unread > 0 && <b>{unread > 9 ? '9+' : unread}</b>}
           </Link>
         )}

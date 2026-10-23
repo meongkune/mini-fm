@@ -199,7 +199,7 @@ function TeamStatus({ team, status, lineup, inbox, unread }) {
       </div>
       {latest.length > 0 && (
         <Link to="/inbox" className="ts-inbox">
-          <span>📬 {unread > 0 ? `새 소식 ${unread}개` : '받은 편지함'}</span>
+          <span>📬 {unread > 0 ? `새 소식 ${unread}개` : '메시지함'}</span>
           <em>{latest[0].title}</em>
         </Link>
       )}
@@ -262,7 +262,7 @@ function OwnerCard({ finance, fans }) {
 function InboxPanel({ inbox, unread }) {
   return (
     <div className="card dash-panel desk-only">
-      <h3>📬 받은 편지함 <Link className="link small" to="/inbox">{unread ? `새 소식 ${unread}` : '전체'} →</Link></h3>
+      <h3>📬 메시지함 <Link className="link small" to="/inbox">{unread ? `새 소식 ${unread}` : '전체'} →</Link></h3>
       {inbox.length === 0 ? <p className="small muted">아직 소식이 없습니다.</p> : (
         <ul className="dash-inbox">
           {inbox.slice(0, 12).map((m) => (

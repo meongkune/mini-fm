@@ -152,10 +152,11 @@ export function applyTalkResult(save, player, { trustStart, trustEnd, outcome, l
   const [icon, label] = OUTCOME_LABEL[outcome] || OUTCOME_LABEL.none
   const quote = lines.filter((l) => l.role === 'player').at(-1)?.text?.slice(0, 40) || ''
   s.talks = [...(s.talks || []), { round: save.round, topic: (TOPICS[topic] || TOPICS.general).label, outcome: label, quote }].slice(-6)
-  const transcript = lines.map((l) => `${l.role === 'manager' ? '감독' : player.name}: ${l.text}`).join('\n')
   const summary = `${icon} ${label} · 신뢰 ${trustStart}→${trustEnd} · 사기 ${dMorale >= 0 ? '+' : ''}${dMorale}${pr ? ` · 약속: ${pr.text}` : ''}${ai ? '' : ' (규칙 기반 대화)'}`
+  // 대화 기록은 말풍선으로 다시 볼 수 있게 구조 그대로 남긴다
+  const talk = { player: player.name, topic: (TOPICS[topic] || TOPICS.general).label, outcome: label, icon, trustStart, trustEnd, dMorale, promise: pr?.text || null, ai, round: save.round, lines: lines.map(({ role, text, mood, delta }) => ({ role, text, mood: mood || null, delta: delta ?? null })) }
   let next = { ...save, status, inbox: [...inbox, ...(save.inbox || [])].slice(0, 80) }
-  if (itemId) next = { ...next, inbox: next.inbox.map((x) => (x.id === itemId ? { ...x, resolved: 'custom', said: lines.find((l) => l.role === 'manager')?.text || '', reply: summary, transcript, read: true } : x)) }
-  else next = { ...next, inbox: [news(save.round, 'talk-log', `🗣️ ${player.name} 면담: ${label}`, `${summary}\n\n${transcript}`, { playerId: player.id, read: true }), ...next.inbox].slice(0, 80) }
+  if (itemId) next = { ...next, inbox: next.inbox.map((x) => (x.id === itemId ? { ...x, resolved: 'custom', reply: summary, talk, read: true } : x)) }
+  else next = { ...next, inbox: [news(save.round, 'talk-log', `${player.name} 면담 · ${talk.topic}`, summary, { playerId: player.id, read: true, talk }), ...next.inbox].slice(0, 80) }
   return { save: next, dMorale }
 }

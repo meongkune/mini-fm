@@ -35,7 +35,7 @@ const EMPTY_SAVE = {
   seasonNo: 1, // 같은 시즌 데이터로 몇 번째 시즌인지
   status: {}, // 선수 상태: 컨디션·사기·폼·부상·징계
   pstats: {}, // 선수 시즌 기록: 출전·골·도움·평점·클린시트·카드·MOM
-  inbox: [], // 받은 편지함
+  inbox: [], // 메시지함
   rosters: null, // 트레이드로 바뀐 선수단 { teamId: [playerId] }
   mods: {}, // 성장·노화로 바뀐 능력치
   youth: [], // 유스 입단 선수

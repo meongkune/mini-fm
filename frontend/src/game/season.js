@@ -1,4 +1,4 @@
-// 시즌 진행 규칙 (순수 함수): 라운드 결과 반영, 선수 기록·컨디션·부상·징계·폼·사기, 받은 편지함
+// 시즌 진행 규칙 (순수 함수): 라운드 결과 반영, 선수 기록·컨디션·부상·징계·폼·사기, 메시지함
 // 브라우저 저장(save)만 바꾸고 원본 시즌 데이터(JSON)는 건드리지 않는다.
 import { playerOvrOf } from '../engine/engine.js'
 import { quickMatch } from '../engine/match.js'
