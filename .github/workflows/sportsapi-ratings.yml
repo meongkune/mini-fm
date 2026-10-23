@@ -34,6 +34,7 @@ jobs:
         env:
           SPORTSAPIPRO_KEY: ${{ secrets.SPORTSAPIPRO_KEY }}
           MAX_CALLS: ${{ inputs.max_calls || '95' }}
+          PRIORITY_LEAGUES: ${{ vars.PRIORITY_LEAGUES || 'bundesliga' }}   # 지금 플레이 중인 리그를 먼저 (저장소 Variables에서 바꿀 수 있음)
         run: node tools/sportsapi_ratings.mjs | tee -a "$GITHUB_STEP_SUMMARY"
 
       - name: 변경 사항 커밋

@@ -2,6 +2,7 @@ import { playerOvr } from '../store.jsx'
 import { Flag, Kit } from './Badges.jsx'
 import { fitTone, roleOf } from '../engine/formation.js'
 import { unavailable } from '../game/season.js'
+import { keyAttrs } from '../game/attributes.js'
 
 // OVR 기준 선수 등급 — 카드 색을 정한다
 export function tierOf(ovr) {
@@ -21,6 +22,7 @@ export default function PlayerCard({ player, selected = false, onClick, size = '
   const ovr = playerOvr(player)
   const tier = tierOf(ovr)
   const out = status ? unavailable(status) : null
+  const keys = { list: keyAttrs(player), est: !player.rad && !player.gk } // 포지션별 핵심 능력치 3개
   return (
     <button
       type="button"
@@ -36,10 +38,8 @@ export default function PlayerCard({ player, selected = false, onClick, size = '
       </span>
       {color ? <span className="pc-kit"><Kit color={color} number={player.number} size={size === 'lg' ? 52 : 40} /></span> : <span className="pc-badge" aria-hidden="true">{player.number}</span>}
       <span className="pc-name">{lastName(player.name)}</span>
-      <span className="pc-stats">
-        <span><b>{player.att}</b><em>공격</em></span>
-        <span><b>{player.def}</b><em>수비</em></span>
-        <span><b>{player.sta}</b><em>체력</em></span>
+      <span className="pc-stats" title={keys.est ? '추정 능력치' : 'SportsAPI 레이더 기반'}>
+        {keys.list.map(([k, v]) => <span key={k}><b>{v}</b><em>{k}</em></span>)}
       </span>
       {selected && <span className="pc-check" aria-hidden="true">✓</span>}
       {out && (

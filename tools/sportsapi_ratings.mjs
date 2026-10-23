@@ -146,16 +146,28 @@ try {
     }
   }
   // 2단계: OVR 높은 선수부터 능력치 레이더로 공격·수비 비중 보정
-  const todo = Object.entries(state.players).filter(([, s]) => !s.attr).sort((a, b) => b[1].ovr - a[1].ovr)
+  // 우선순위: PRIORITY_LEAGUES(지금 플레이 중인 리그 등) 먼저, 그 안에서는 OVR 높은 선수부터. 레이더 값을 아직 저장 못 한 선수도 다시 받는다
+  const prio = (process.env.PRIORITY_LEAGUES || 'bundesliga').split(',').map((x) => x.trim()).filter(Boolean)
+  const rank = (lid) => (prio.includes(lid) ? prio.indexOf(lid) : prio.length)
+  const todo = Object.entries(state.players).filter(([, s]) => !s.attr || !s.rad).sort((a, b) => rank(a[1].lid) - rank(b[1].lid) || b[1].ovr - a[1].ovr)
   for (const [pid, s] of todo) {
     const d = await tryGet(`/api/players/${s.sid}/attribute-overviews`)
     const cur = (d?.playerAttributeOverviews || []).sort((a, b) => a.yearShift - b.yearShift)[0]
     s.attr = today
+    // 게임 능력치로 바꾼 레이더: 같은 포지션 평균과의 차이를 그 선수 OVR에 얹는다 (원본 점수가 아니라 게임용 계산값)
+    const avg = (d?.averageAttributeOverviews || [])[0] || {}
+    const conv = (k) => Math.max(30, Math.min(99, Math.round(s.ovr + ((cur[k] ?? 50) - (avg[k] ?? 50)) * 0.3)))
     if (cur && cur.position !== 'G') {
       const r = ratingsFor(s.lid)
       const p = ours[s.lid].find((x) => x.id === pid)
       const gap = Math.max(-28, Math.min(28, ((cur.attacking + cur.creativity) / 2 - cur.defending) * 0.45))
-      r.players[pid] = { ...r.players[pid], ...split(s.ovr, p.pos, gap) }
+      r.players[pid] = { ...r.players[pid], ...split(s.ovr, p.pos, gap), rad: ['attacking', 'technical', 'tactical', 'defending', 'creativity'].map(conv) }
+      s.rad = true
+      attrDone++
+    } else if (cur) {
+      const r = ratingsFor(s.lid)
+      r.players[pid] = { ...r.players[pid], gk: ['saves', 'anticipation', 'ballDistribution', 'aerial'].map(conv) }
+      s.rad = true
       attrDone++
     }
     saveState()

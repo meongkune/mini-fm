@@ -1282,3 +1282,25 @@ html.desktop .tabs-line { position: static; margin: 0 0 12px; padding: 0; backgr
 .tl-sum { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: baseline; padding: 10px 14px; border-bottom: 1px solid var(--line); background: var(--panel-2); font-size: .82rem; }
 .tl-sum strong { font-size: .98rem; }
 .tl-foot { margin: 0; padding: 8px 14px calc(10px + var(--safe-bottom, 0px)); border-top: 1px solid var(--line); text-align: center; }
+/* 전술 드래그 */
+.slot { touch-action: none; user-select: none; }
+.slot.drop .kit, .slot.drop .slot-plus { outline: 3px solid #fde047; outline-offset: 3px; }
+.slot.lifted { opacity: .35; }
+.bench-chip.draggable { cursor: grab; touch-action: none; user-select: none; }
+.drag-ghost { position: fixed; z-index: 90; transform: translate(-50%, -60%); display: grid; justify-items: center; gap: 2px; pointer-events: none; color: #fff; font-size: .7rem; font-weight: 800; text-shadow: 0 1px 3px #000; filter: drop-shadow(0 6px 10px rgba(0,0,0,.5)); }
+.dnd-hint { margin: 0 0 6px; }
+/* 세부 능력치 레이더 */
+.attr-radar { display: grid; grid-template-columns: 170px 1fr; gap: 12px; align-items: center; margin-bottom: 10px; }
+.attr-radar svg { width: 100%; }
+.ar-ring { fill: none; stroke: var(--line); stroke-width: .6; }
+.ar-axis { stroke: var(--line); stroke-width: .5; }
+.ar-shape { fill: color-mix(in srgb, var(--c) 45%, transparent); stroke: color-mix(in srgb, var(--c) 80%, #fff); stroke-width: 1.2; }
+.ar-label { fill: var(--muted); font-size: 7px; font-weight: 700; }
+.ar-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 5px; }
+.ar-list li { display: grid; grid-template-columns: 44px 1fr 26px; align-items: center; gap: 6px; font-size: .78rem; }
+.ar-list span { color: var(--muted); }
+.ar-list i { display: block; height: 7px; border-radius: 4px; background: var(--panel-2); }
+.ar-list i.elite { background: #a78bfa; } .ar-list i.good { background: #22c55e; } .ar-list i.ok { background: #eab308; } .ar-list i.low { background: #ef4444; }
+.ar-list b { text-align: right; font-variant-numeric: tabular-nums; }
+.ar-est { grid-column: 1 / -1; margin: 0; }
+.screen .attr-radar { grid-template-columns: 130px 1fr; }

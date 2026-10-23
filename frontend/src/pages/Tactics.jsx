@@ -6,6 +6,7 @@ import { alignLineup, autoSlots, lineupOvr, myTactics, playerOvr, teamOvr, useGa
 import TacticsPanel from '../components/TacticsPanel.jsx'
 import { unavailable } from '../game/season.js'
 import NeedTeam from './NeedTeam.jsx'
+import usePitchDrag from '../components/usePitchDrag.js'
 
 export const MENTALITY = [
   ['parkbus', '🚌 버스 세우기', '골문 앞에 벽을 쌓습니다. 득점은 거의 포기'],
@@ -71,7 +72,7 @@ export function FormationPicker({ value, onChange }) {
 }
 
 /** 세로 경기장 위의 포메이션 자리. 자리를 누르면 onSlot(i) */
-export function SlotPitch({ team, formation, lineup, onSlot, active = null, status = {} }) {
+export function SlotPitch({ team, formation, lineup, onSlot, active = null, status = {}, dnd = null }) {
   const slots = buildSlots(formation)
   const byId = Object.fromEntries(team.players.map((p) => [p.id, p]))
   return (
@@ -82,8 +83,10 @@ export function SlotPitch({ team, formation, lineup, onSlot, active = null, stat
         const fit = p ? fitOf(p, s.role) : 0
         const out = p && unavailable(status[p.id])
         return (
-          <button key={i} className={`slot ${p ? `fit-${fitTone(fit)}` : 'empty'} ${active === i ? 'active' : ''} ${out ? 'out' : ''}`}
-            style={{ left: `${s.x}%`, top: `${100 - s.y}%` }} onClick={() => onSlot(i)} title={ROLE_LABEL[s.role]}>
+          <button key={i} data-slot={i} className={`slot ${p ? `fit-${fitTone(fit)}` : 'empty'} ${active === i ? 'active' : ''} ${out ? 'out' : ''} ${dnd?.drag?.over === i ? 'drop' : ''} ${dnd?.drag && dnd.drag.id === p?.id ? 'lifted' : ''}`}
+            style={{ left: `${s.x}%`, top: `${100 - s.y}%` }} title={ROLE_LABEL[s.role]}
+            onPointerDown={dnd ? (e) => dnd.startSlot(i, p?.id ?? null, e) : undefined}
+            onClick={dnd ? undefined : () => onSlot(i)}>
             {p ? <Kit color={team.color} number={p.number} size={30} /> : <span className="slot-plus">+</span>}
             <span className="slot-role">{s.role}</span>
             {p && <span className="slot-name">{p.name.split(' ').at(-1)}</span>}
@@ -153,6 +156,14 @@ export function placeInSlot(lineup, index, playerId) {
 export default function Tactics() {
   const { myTeam, save, update, status } = useGame()
   const [slot, setSlot] = useState(null)
+  const lineupNow = () => Array.from({ length: buildSlots(save.formation).length }, (_, i) => save.lineup[i] ?? null)
+  const dnd = usePitchDrag({
+    onTap: (i) => setSlot(i),
+    // 선발끼리: 두 자리 맞바꾸기 (빈 자리로 옮기기도 된다)
+    onMove: (from, to) => { const next = lineupNow(); [next[from], next[to]] = [next[to], next[from]]; update({ lineup: next }) },
+    // 벤치 → 자리: 그 자리 선수는 벤치로
+    onPlace: (id, to) => { if (unavailable(status[id])) return; update({ lineup: placeInSlot(lineupNow(), to, id) }) },
+  })
   if (!myTeam) return <NeedTeam />
 
   const formation = save.formation
@@ -189,7 +200,9 @@ export default function Tactics() {
       </div>
 
       <div className="card tac-pitch">
-        <SlotPitch team={myTeam} formation={formation} lineup={lineup} onSlot={setSlot} active={slot} status={status} />
+        <SlotPitch team={myTeam} formation={formation} lineup={lineup} onSlot={setSlot} active={slot} status={status} dnd={dnd} />
+        <p className="small muted dnd-hint">선수를 끌어 다른 자리에 놓으면 맞바꾸고, 벤치 선수를 끌어 자리에 놓으면 투입합니다. 짧게 누르면 선수 목록이 열립니다.</p>
+        {dnd.drag && (() => { const p = byId[dnd.drag.id]; return p ? <div className="drag-ghost" style={{ left: dnd.drag.x, top: dnd.drag.y }}><Kit color={myTeam.color} number={p.number} size={30} /><span>{p.name.split(' ').at(-1)}</span></div> : null })()}
         <div className="fit-legend">
           {Object.entries(FIT_LABEL).map(([k, l]) => <span key={k}><i className={`fit-dot ${k}`} />{l}</span>)}
         </div>
@@ -199,7 +212,8 @@ export default function Tactics() {
         <h3>벤치 <span className="muted small">{bench.length}명</span></h3>
         <div className="bench">
           {bench.map((p) => (
-            <span key={p.id} className={`bench-chip ${unavailable(status[p.id]) ? `out ${unavailable(status[p.id]).kind}` : ''}`} title={unavailable(status[p.id])?.text}>
+            <span key={p.id} className={`bench-chip ${unavailable(status[p.id]) ? `out ${unavailable(status[p.id]).kind}` : 'draggable'}`} title={unavailable(status[p.id])?.text ?? '끌어서 경기장 자리에 놓기'}
+              onPointerDown={unavailable(status[p.id]) ? undefined : (e) => dnd.startBench(p.id, e)}>
               <span className="role-chip">{roleOf(p)}</span>{p.name.split(' ').at(-1)} <b>{playerOvr(p)}</b>
               {unavailable(status[p.id]) && <i className="bench-out">{unavailable(status[p.id]).icon} {unavailable(status[p.id]).games}경기</i>}
             </span>

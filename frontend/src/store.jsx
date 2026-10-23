@@ -7,7 +7,7 @@ import { applyCupMatch, applyRound, customTalk, engineStatus, news, playerTalk, 
 import { cleanName, effectiveTeams } from './game/roster.js'
 import { applyTalkResult } from './game/aiTalk.js'
 import { checkPromises } from './game/relations.js'
-import { PATIENCE, evaluateBid, executeTransfer, windowState } from './game/trade.js'
+import { PATIENCE, evaluateBid, executeTransfer, valueCtx, windowState } from './game/trade.js'
 import { boardMidCheck, newBoard, nextSeason, seasonLabel, seasonReview } from './game/career.js'
 import { COMPS, CUP_LEAGUES, buildCups, cupKey, cupStatus, dueMatchday, myCupFixture, playMatchday } from './game/cup.js'
 import { ROSTER_MAX, book, checkBankruptcy, contractOf, eur, faDecision, ffpReview, newFinance, prizeMoney, releaseCost, renewalAsk, settleMatch, wageBill, wageBudget, wageFor, wageShock } from './game/finance.js'
@@ -370,7 +370,7 @@ export function GameProvider({ children }) {
         if (tries >= PATIENCE) return { verdict: 'reject', reason: '"더 이상 이야기하지 않겠습니다." (이번 이적 시장 협상 횟수 소진)' }
         const theirs = teamsById[theirId]
         const player = theirs.players.find((p) => p.id === playerId)
-        const r = evaluateBid({ theirs, player, fee, status })
+        const r = evaluateBid({ theirs, player, fee, status, value: valueOf(player, status[player.id], valueCtx(save, player, data.leagueId)) })
         setSave((s) => ({ ...s, bidTalks: { ...(s.bidTalks || {}), [key]: tries + 1 } }))
         return { ...r, tries: tries + 1 }
       },
@@ -418,6 +418,8 @@ export function GameProvider({ children }) {
       setWageRatio(ratio) { setSave((s) => ({ ...s, finance: { ...s.finance, wageRatio: ratio } })) },
       contractOf: (p) => contractOf(save, p, data?.leagueId),
       wageFor: (p) => wageFor(p, data?.leagueId),
+      /** 지금 몸값 (폼·공격 포인트·남은 계약 반영) */
+      valueFor: (p) => valueOf(p, status[p.id], valueCtx(save, p, data?.leagueId)),
       renewalAsk: (p) => renewalAsk(save, p, data?.leagueId, status[p.id]),
       /** 재계약 */
       renew(p, years, wage) {
@@ -458,7 +460,7 @@ export function GameProvider({ children }) {
         const others = teams.filter((t) => t.id !== save.teamId)
         const buyer = others.sort((a, b) => a.players.filter((x) => x.pos === p.pos).length - b.players.filter((x) => x.pos === p.pos).length)[0]
         const k = 0.6 + ((p.id.length * 7 + save.round * 13) % 60) / 100
-        const fee = Math.round(valueOf(p, status[p.id]) * k * 10) / 10
+        const fee = Math.round(valueOf(p, status[p.id], valueCtx(save, p, data.leagueId)) * k * 10) / 10
         const star = [...myTeam.players].sort((a, b) => playerOvr(b) - playerOvr(a)).slice(0, 3).some((x) => x.id === p.id)
         setSave((s) => {
           const rosters = s.rosters || Object.fromEntries(teams.map((t) => [t.id, t.players.map((x) => x.id)]))

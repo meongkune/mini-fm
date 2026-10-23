@@ -1,6 +1,7 @@
 // 이적료 이적: 선수 가치 평가, 상대 구단 AI의 수락·역제안·거절, 이적 실행, 내 선수에게 들어오는 제안
 import { playerOvrOf } from '../engine/engine.js'
 import { news } from './season.js'
+import { contractOf, yearsLeft } from './finance.js'
 
 const hash = (s) => { let h = 2166136261; for (const c of String(s)) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return h >>> 0 }
 export const MIN_SQUAD = { GK: 2, DF: 6, MF: 6, FW: 3 }
@@ -22,15 +23,33 @@ export function potentialStars(p) {
   return pa >= 88 ? 5 : pa >= 83 ? 4 : pa >= 78 ? 3 : pa >= 72 ? 2 : 1
 }
 
-/** 선수 가치 (게임 내 단위, 백만 유로처럼 표시) */
-export function valueOf(p, st = {}) {
+// 나이별 보정 (능력치 계산 tools/sportsapi_ratings.mjs와 같은 표): 어린 선수는 잠재력 몫이 몸값에 붙고, 베테랑은 낮게 매겨진다
+const AGE_ADJ = (age) => (age <= 20 ? -4 : age <= 21 ? -3 : age <= 23 ? -1.5 : age <= 29 ? 0 : age <= 31 ? 2 : age <= 33 ? 4 : 6)
+
+/**
+ * 선수 몸값 (€M). 능력치를 실제 시장가치에서 계산했으므로 그 식을 거꾸로 풀면 실제 시세에 가까운 값이 된다.
+ *   OVR 88 · 25세 ≈ €100M, 78 ≈ €10M, 68 ≈ €1M (골키퍼는 같은 OVR이면 더 싸다)
+ * 그 위에 시즌 중 변하는 요소: 최근 폼(평균 평점) · 공격 포인트 · 남은 계약 기간 · 이적 요청 · 부상
+ * ctx = { yearsLeft, apps, g, a } (없으면 해당 보정 없음)
+ */
+export function valueOf(p, st = {}, ctx = {}) {
   const ovr = playerOvrOf(p)
-  const pa = potentialOf(p)
-  const ageMult = p.age <= 21 ? 1 + (pa - ovr) * 0.045 : p.age <= 27 ? 1 + (pa - ovr) * 0.03 : p.age <= 29 ? 0.85 : p.age <= 31 ? 0.65 : 0.45
-  let v = 12 * Math.pow(1.13, ovr - 70) * ageMult
+  let v = 0.1 * Math.pow(10, (ovr - 58 - AGE_ADJ(p.age) - (p.pos === 'GK' ? 3 : 0)) / 10)
+  if (p.age <= 23) v *= 1 + Math.max(0, potentialOf(p) - ovr) * 0.02 // 스카우트가 보는 성장 여지
+  if ((st.fr?.length || 0) >= 3) v *= 1 + Math.max(-0.2, Math.min(0.3, ((st.form ?? 6.6) - 6.6) * 0.25)) // 최근 폼
+  if (ctx.apps >= 5 && p.pos !== 'GK' && p.pos !== 'DF') v *= 1 + Math.min(0.25, ((ctx.g || 0) + (ctx.a || 0) * 0.6) / ctx.apps * 0.35) // 공격 포인트
+  if (ctx.yearsLeft === 1) v *= 0.65 // 계약 1년 남으면 헐값 (곧 FA)
+  else if (ctx.yearsLeft === 2) v *= 0.85
   if (st.wantsOut) v *= 0.8
   if (st.inj > 0) v *= 0.85
-  return Math.max(0.5, Math.round(v * 10) / 10)
+  return Math.max(0.2, Math.round(v * 10) / 10)
+}
+
+/** 몸값 계산에 쓰는 시즌 정보 (남은 계약·출전·공격 포인트) */
+export function valueCtx(save, p, leagueId) {
+  const c = contractOf(save, p, leagueId)
+  const ps = save.pstats?.[p.id] || {}
+  return { yearsLeft: yearsLeft(save, c), apps: ps.apps || 0, g: ps.g || 0, a: ps.a || 0 }
 }
 export const money = (v) => (v >= 100 ? `€${Math.round(v)}M` : `€${v.toFixed(1)}M`)
 
@@ -57,12 +76,12 @@ const isCore = (team, id) => [...team.players].sort((a, b) => playerOvrOf(b) - p
  * 영입 제안(이적료)에 대한 상대 구단 AI의 판단
  * @returns { verdict: 'accept'|'counter'|'reject', reason, ask?(역제안 금액), need }
  */
-export function evaluateBid({ theirs, player, fee, status = {} }) {
+export function evaluateBid({ theirs, player, fee, status = {}, value = null }) {
   const after = theirs.players.filter((p) => p.id !== player.id)
   const prob = squadProblem(after)
   if (prob) return { verdict: 'reject', reason: `"그 선수를 팔면 우리 팀 ${prob}. 팔 수 없습니다."` }
   const core = isCore(theirs, player.id)
-  const need = Math.round(valueOf(player, status[player.id]) * (core ? 1.4 : 1.1) * 10) / 10
+  const need = Math.round((value ?? valueOf(player, status[player.id])) * (core ? 1.4 : 1.1) * 10) / 10
   if (fee >= need) return { verdict: 'accept', reason: `"좋습니다. ${money(fee)}이면 보내드리죠."`, need }
   if (fee >= need * 0.75) return { verdict: 'counter', ask: need, reason: `"${money(need)}은 받아야 합니다.${core ? ' 우리 팀 핵심 선수입니다.' : ''}"`, need }
   return { verdict: 'reject', reason: `"${money(fee)}은 말도 안 되는 금액입니다.${core ? ' 핵심 선수는 쉽게 내주지 않습니다.' : ''}"`, need }
@@ -89,11 +108,11 @@ export function executeTransfer(save, teams, fromId, toId, playerId, { contract 
 }
 
 /** 내 선수에게 다른 구단이 이적료를 제안 (판매 목록에 올렸거나 이적을 요청한 선수) */
-export function aiBidFor(save, teams, myTeamId, playerId, round) {
+export function aiBidFor(save, teams, myTeamId, playerId, round, leagueId = save.league) {
   const mine = teams.find((t) => t.id === myTeamId)
   const p = mine?.players.find((x) => x.id === playerId)
   if (!p) return null
-  const v = valueOf(p, save.status?.[p.id])
+  const v = valueOf(p, save.status?.[p.id], valueCtx(save, p, leagueId))
   const others = teams.filter((t) => t.id !== myTeamId)
   const team = others[hash(`${p.id}-${round}`) % others.length]
   const k = 0.8 + (hash(`bid-${p.id}-${round}`) % 40) / 100 // 가치의 80~120%

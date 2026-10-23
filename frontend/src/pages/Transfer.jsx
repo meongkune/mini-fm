@@ -14,7 +14,7 @@ const SORTS = [['ovr', 'OVR'], ['value', '가치'], ['pot', '잠재력'], ['age'
 const stars = (n) => '★'.repeat(n) + '☆'.repeat(5 - n)
 
 export default function Transfer() {
-  const { myTeam, teams, teamsById, status, save, data, transferWindow, totalRounds, toggleSale } = useGame()
+  const { myTeam, teams, teamsById, status, save, data, transferWindow, totalRounds, toggleSale, valueFor } = useGame()
   const [params] = useSearchParams()
   const [tab, setTab] = useState(params.get('tab') || 'buy')
   const [pos, setPos] = useState('전체')
@@ -25,8 +25,8 @@ export default function Transfer() {
 
   const market = useMemo(() => {
     if (!myTeam) return []
-    return teams.filter((t) => t.id !== myTeam.id).flatMap((t) => t.players.map((p) => ({ p, t, v: valueOf(p, status[p.id]), pot: potentialStars(p) })))
-  }, [teams, myTeam, status])
+    return teams.filter((t) => t.id !== myTeam.id).flatMap((t) => t.players.map((p) => ({ p, t, v: valueFor(p), pot: potentialStars(p) })))
+  }, [teams, myTeam, status, save.pstats])
   if (!myTeam) return <NeedTeam />
 
   const sorter = { ovr: (a, b) => playerOvr(b.p) - playerOvr(a.p), value: (a, b) => b.v - a.v, pot: (a, b) => b.pot - a.pot || a.p.age - b.p.age, age: (a, b) => a.p.age - b.p.age }[sort]
@@ -34,7 +34,7 @@ export default function Transfer() {
     .filter(({ p, t }) => (pos === '전체' || p.pos === pos) && (teamFilter === 'all' || t.id === teamFilter) && (!q || p.name.toLowerCase().includes(q.toLowerCase())))
     .sort(sorter)
     .slice(0, 60)
-  const mineList = [...myTeam.players].map((p) => ({ p, v: valueOf(p, status[p.id]), pot: potentialStars(p) })).sort((a, b) => playerOvr(b.p) - playerOvr(a.p))
+  const mineList = [...myTeam.players].map((p) => ({ p, v: valueFor(p), pot: potentialStars(p) })).sort((a, b) => playerOvr(b.p) - playerOvr(a.p))
   const byId = Object.fromEntries(teams.flatMap((t) => t.players).map((p) => [p.id, p]))
   const f = save.finance || {}
   const bill = wageBill(save, myTeam, data.leagueId)
@@ -142,8 +142,8 @@ export default function Transfer() {
 
 /** 영입 협상: 이적료 제시 → 상대 구단 답 → 수락되면 계약 기간 정하고 확정 */
 function BidSheet({ p, t, onClose }) {
-  const { status, bidFor, signTransfer, wageFor, transferWindow } = useGame()
-  const v = valueOf(p, status[p.id])
+  const { bidFor, signTransfer, wageFor, transferWindow, valueFor } = useGame()
+  const v = valueFor(p)
   const [fee, setFee] = useState(Math.round(v * 10) / 10)
   const [years, setYears] = useState(p.age >= 31 ? 2 : 4)
   const [reply, setReply] = useState(null)

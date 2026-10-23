@@ -284,7 +284,9 @@ export function applyCupMatch(save, { myTeam, mineIdx, summary, label, oppName }
     const s = { ...defaultStatus(), ...(st[p.id] || {}) }
     s.fr = [...(s.fr || []), r.r].slice(-5)
     s.form = Math.round((s.fr.reduce((a, b) => a + b, 0) / s.fr.length) * 100) / 100
-    s.cond = summary.energy[p.id] ?? s.cond
+    // 주중 대회 경기 뒤에는 회복 기간이 짧다: 리그 라운드 사이 회복의 절반만
+    const after = summary.energy[p.id] ?? s.cond
+    s.cond = Math.min(100, Math.round(after + RECOVERY * 0.5 + (100 - after) * 0.15 + (p.sta - 70) / 20))
     s.morale = Math.round(clamp(s.morale + (res > 0 ? 3 : res < 0 ? -3 : 0) + clamp((r.r - 6.6) * 3, -4, 4), 0, 100))
     s.benched = 0
     st[p.id] = s

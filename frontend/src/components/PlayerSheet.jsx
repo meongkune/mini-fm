@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import { fetchProfile } from '../game/wiki.js'
 import PlayerCard from './PlayerCard.jsx'
+import AttrRadar from './AttrRadar.jsx'
 import { Flag, nationName } from './Badges.jsx'
 import Rating, { CondBar } from './Rating.jsx'
 import { PLAYER_TALKS, moraleLabel } from '../game/season.js'
@@ -48,9 +49,12 @@ export default function PlayerSheet({ player, onClose, inLineup, onToggle }) {
             {st.inj > 0 && <div className="ps-row bad"><span>부상</span><b>🚑 {st.injKind || '부상'} · {st.inj}경기 결장</b></div>}
             {st.susp > 0 && <div className="ps-row bad"><span>징계</span><b>🟥 {st.suspWhy || '징계'} · {st.susp}경기 출전 정지</b></div>}
             {st.wantsOut && <div className="ps-row bad"><span>상태</span><b>✈️ 이적 요청</b></div>}
-            {st.promise !== undefined && <div className="ps-row"><span>약속</span><b>다음 경기 선발</b></div>}
+            {(st.promises || []).map((pr) => <div key={pr.kind} className="ps-row"><span>약속</span><b>{pr.text}</b></div>)}
           </div>
         </div>
+
+        <h4>세부 능력치 <span className="muted small">{player.role || player.pos} 기준</span></h4>
+        <AttrRadar player={player} color={teams.find((t) => t.players.some((p) => p.id === player.id))?.color} sta={player.sta} />
 
         <WikiProfile profile={profile} />
 
