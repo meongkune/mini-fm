@@ -38,9 +38,9 @@ export function valueOf(p, st = {}, ctx = {}) {
   if (p.age <= 23) v *= 1 + Math.max(0, potentialOf(p) - ovr) * 0.02 // 스카우트가 보는 성장 여지
   if ((st.fr?.length || 0) >= 3) v *= 1 + Math.max(-0.2, Math.min(0.3, ((st.form ?? 6.6) - 6.6) * 0.25)) // 최근 폼
   if (ctx.apps >= 5 && p.pos !== 'GK' && p.pos !== 'DF') v *= 1 + Math.min(0.25, ((ctx.g || 0) + (ctx.a || 0) * 0.6) / ctx.apps * 0.35) // 공격 포인트
-  if (ctx.yearsLeft === 1) v *= 0.65 // 계약 1년 남으면 헐값 (곧 FA)
-  else if (ctx.yearsLeft === 2) v *= 0.85
-  if (st.wantsOut) v *= 0.8
+  if (ctx.yearsLeft === 1) v *= 0.75 // 계약 1년 남으면 싸진다 (곧 FA)
+  else if (ctx.yearsLeft === 2) v *= 0.9
+  if (st.wantsOut) v *= 0.85
   if (st.inj > 0) v *= 0.85
   return Math.max(0.2, Math.round(v * 10) / 10)
 }
@@ -107,18 +107,35 @@ export function executeTransfer(save, teams, fromId, toId, playerId, { contract 
   }
 }
 
-/** 내 선수에게 다른 구단이 이적료를 제안 (판매 목록에 올렸거나 이적을 요청한 선수) */
+/** 상대 구단이 낼 수 있는 최대 금액 (몸값 기준, 좋은 선수일수록 경쟁이 붙어 더 낸다) */
+export function maxBid(p, v, seed) {
+  const star = playerOvrOf(p) >= 80 ? 1.35 : playerOvrOf(p) >= 75 ? 1.25 : 1.15
+  return Math.round(v * star * (0.95 + (hash(`max-${seed}`) % 15) / 100) * 10) / 10
+}
+
+/**
+ * 내 선수에게 다른 구단들이 이적료를 제안 (판매 목록에 올렸거나 이적을 요청한 선수)
+ * 희망 가격(ask)이 있으면 그 근처에서 시작한다. 좋은 선수면 두 구단이 경쟁한다.
+ * 반환: 편지함 메일 배열
+ */
 export function aiBidFor(save, teams, myTeamId, playerId, round, leagueId = save.league) {
   const mine = teams.find((t) => t.id === myTeamId)
   const p = mine?.players.find((x) => x.id === playerId)
-  if (!p) return null
+  if (!p) return []
   const v = valueOf(p, save.status?.[p.id], valueCtx(save, p, leagueId))
+  const ask = save.askPrice?.[p.id] ?? Math.round(v * 1.2 * 10) / 10
   const others = teams.filter((t) => t.id !== myTeamId)
-  const team = others[hash(`${p.id}-${round}`) % others.length]
-  const k = 0.8 + (hash(`bid-${p.id}-${round}`) % 40) / 100 // 가치의 80~120%
-  const fee = Math.round(v * k * 10) / 10
-  return news(round, 'offer', `💰 ${team.name}의 영입 제안: ${p.name}`, `${team.name}이(가) ${p.name}(${p.pos}, OVR ${playerOvrOf(p)}, ${p.age}세) 영입을 위해 ${money(fee)}을 제시했습니다. (선수 가치 ${money(v)})`, {
-    offer: { teamId: team.id, playerId: p.id, fee },
-    actions: [['accept', '✅ 수락', `${money(fee)}에 판매합니다`], ['decline', '❌ 거절', '제안을 거절합니다']],
-  })
+  const n = playerOvrOf(p) >= 78 ? 2 : 1
+  const out = []
+  for (let k = 0; k < n; k++) {
+    const team = others[hash(`${p.id}-${round}-${k}`) % others.length]
+    const cap = maxBid(p, v, `${p.id}-${team.id}-${round}`)
+    const open = Math.min(cap, ask) * (0.78 + (hash(`bid-${p.id}-${round}-${k}`) % 20) / 100) // 처음엔 희망가보다 조금 낮게
+    const fee = Math.round(open * 10) / 10
+    out.push(news(round, 'offer', `💰 ${team.name}의 영입 제안: ${p.name}`, `${team.name}이(가) ${p.name}(${p.pos}, OVR ${playerOvrOf(p)}, ${p.age}세)에게 ${money(fee)}을 제시했습니다. (희망 가격 ${money(ask)} · 선수 가치 ${money(v)})`, {
+      offer: { teamId: team.id, playerId: p.id, fee, cap, ask, tries: 0 },
+      actions: [['accept', '✅ 수락', `${money(fee)}에 판매합니다`], ['counter', '↗️ 더 달라고 하기', `희망 가격 ${money(ask)}에 맞춰 달라고 요구합니다`], ['decline', '❌ 거절', '제안을 거절합니다']],
+    }))
+  }
+  return out
 }

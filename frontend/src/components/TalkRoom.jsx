@@ -116,6 +116,7 @@ export default function TalkRoom({ player, team, status, reason, situation, topi
                 <strong>{res[0]} {res[1]}</strong>
                 <span>감독 신뢰 {outcome.trustStart} → {outcome.trustEnd}</span>
                 {outcome.outcome.startsWith('promise_') && <span className="small warn-text">⚠️ 약속은 자동으로 확인됩니다. 지키지 않으면 신뢰와 사기가 크게 떨어집니다.</span>}
+                {outcome.outcome === 'promise_contract' && <span className="small">👉 선수 상세 → 계약에서 5라운드 안에 재계약(연봉 인상)을 제안하세요.</span>}
                 <button className="btn wide" onClick={() => onFinish(outcome)}>확인</button>
               </div>
             )}

@@ -1304,3 +1304,4 @@ html.desktop .tabs-line { position: static; margin: 0 0 12px; padding: 0; backgr
 .ar-list b { text-align: right; font-variant-numeric: tabular-nums; }
 .ar-est { grid-column: 1 / -1; margin: 0; }
 .screen .attr-radar { grid-template-columns: 130px 1fr; }
+.ask-price select { max-width: 120px; padding: 4px; border-radius: 7px; border: 1px solid var(--line); background: var(--panel-2); color: var(--text); font: inherit; font-size: .72rem; }

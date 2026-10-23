@@ -390,6 +390,8 @@ export function GameProvider({ children }) {
         return { ok: true, wage }
       },
       /** 판매 목록 등록·해제 (이적 시장이 열려 있으면 다른 구단 제안이 들어온다) */
+      /** 판매 희망 가격 */
+      setAskPrice(playerId, fee) { setSave((s) => ({ ...s, askPrice: { ...(s.askPrice || {}), [playerId]: fee } })) },
       toggleSale(playerId) {
         setSave((s) => ({ ...s, forSale: (s.forSale || []).includes(playerId) ? s.forSale.filter((x) => x !== playerId) : [...(s.forSale || []), playerId] }))
       },
@@ -399,7 +401,20 @@ export function GameProvider({ children }) {
           const item = s.inbox.find((x) => x.id === id)
           if (!item?.offer || item.resolved) return s
           const mark = (sv, reply) => ({ ...sv, inbox: sv.inbox.map((x) => (x.id === id ? { ...x, resolved: action, reply, read: true } : x)) })
-          if (action !== 'accept') return mark(s, '제안을 거절했습니다.')
+          if (action === 'decline') return mark(s, '제안을 거절했습니다.')
+          if (action === 'counter') {
+            // 더 달라고 하기: 상대 최대 금액 안이면 희망 가격에 합의, 넘으면 한 번은 중간 금액으로 '최종 제안', 그 뒤엔 협상 결렬
+            const o = item.offer
+            const want = Math.max(o.ask ?? o.fee * 1.15, Math.round(o.fee * 1.1 * 10) / 10)
+            const club = teamsById[o.teamId]?.name || '상대 구단'
+            const pName = teamsById[s.teamId]?.players.find((x) => x.id === o.playerId)?.name || '선수'
+            const acts = (fee, last) => [['accept', '✅ 수락', `${eur(fee)}에 판매합니다`], ...(last ? [] : [['counter', '↗️ 한 번 더 요구', '더 올려 달라고 합니다']]), ['decline', '❌ 거절', '제안을 거절합니다']]
+            let follow
+            if (want <= o.cap) follow = news(s.round, 'offer', `🤝 ${club}: ${pName} ${eur(want)}에 합의`, `${club}이(가) 요구를 받아들였습니다. ${eur(want)}에 판매할 수 있습니다.`, { offer: { ...o, fee: want, tries: (o.tries || 0) + 1 }, actions: acts(want, true) })
+            else if ((o.tries || 0) < 1) { const mid = Math.round(((o.fee + o.cap) / 2) * 10) / 10; follow = news(s.round, 'offer', `📈 ${club}의 수정 제안: ${pName} ${eur(mid)}`, `"${eur(want)}은 무리입니다. ${eur(mid)}이 우리 최종 제안입니다."`, { offer: { ...o, fee: mid, tries: 1 }, actions: acts(mid, true) }) }
+            else follow = news(s.round, 'offer', `🚪 ${club}: 협상 결렬`, `${club}이(가) 더 이상 금액을 올릴 수 없다며 협상을 접었습니다.`)
+            return { ...mark(s, `${eur(want)}을 요구했습니다.`), inbox: [follow, ...mark(s, `${eur(want)}을 요구했습니다.`).inbox] }
+          }
           const { teamId, playerId, fee } = item.offer
           if (!playerId || !teamsById[s.teamId]?.players.some((p) => p.id === playerId)) return mark(s, '이미 선수 구성이 바뀌어 제안이 무효가 됐습니다.')
           if (!windowState(s.round, data.schedule.length).open) return mark(s, '이적 시장이 닫혀 진행할 수 없습니다.')
@@ -459,7 +474,7 @@ export function GameProvider({ children }) {
       forceSell(p) {
         const others = teams.filter((t) => t.id !== save.teamId)
         const buyer = others.sort((a, b) => a.players.filter((x) => x.pos === p.pos).length - b.players.filter((x) => x.pos === p.pos).length)[0]
-        const k = 0.6 + ((p.id.length * 7 + save.round * 13) % 60) / 100
+        const k = 0.75 + ((p.id.length * 7 + save.round * 13) % 26) / 100 // 급매: 몸값의 75~100%
         const fee = Math.round(valueOf(p, status[p.id], valueCtx(save, p, data.leagueId)) * k * 10) / 10
         const star = [...myTeam.players].sort((a, b) => playerOvr(b) - playerOvr(a)).slice(0, 3).some((x) => x.id === p.id)
         setSave((s) => {

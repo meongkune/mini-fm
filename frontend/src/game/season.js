@@ -5,6 +5,7 @@ import { quickMatch } from '../engine/match.js'
 import { aiBidFor, windowState } from './trade.js'
 import { reactToSpeech } from './speech.js'
 import { checkPromises } from './relations.js'
+import { contractOf, wageFor } from './finance.js'
 import { buildSlots, fitOf } from '../engine/formation.js'
 
 export const RECOVERY = 6 // 라운드 사이 기본 회복량 (+ 부족분의 30% + 지구력 보정)
@@ -116,9 +117,9 @@ export function applyRound(save, { teamsById, schedule, myTeamId, mine }) {
     for (const p of my.players) {
       const s = touch(p.id)
       const r = mine.summary.players[p.id]
-      let dm = res > 0 ? 4 : res < 0 ? -4 : 0
+      let dm = res > 0 ? 3 : res < 0 ? -3 : 0
       if (r) {
-        dm += clamp((r.r - 6.6) * 4, -5, 6)
+        dm += clamp((r.r - 6.6) * 2.5, -3, 5) // 뛰는 선수는 평점이 나빠도 사기가 크게 꺾이지 않는다
         s.benched = 0
         s.complained = false
       } else if (s.inj <= 0 && s.susp <= 0) {
@@ -144,9 +145,20 @@ export function applyRound(save, { teamsById, schedule, myTeamId, mine }) {
       if (s.promise !== undefined && s.promise !== null) { s.promises = [...(s.promises || []), { kind: 'start', need: 1, got: 0, made: s.promise, until: s.promise, text: '다음 경기 선발' }]; delete s.promise }
       inbox.push(...checkPromises(p, s, { round, sum: r, fitOk: fit >= 0.9, renewed: false, sold: false }))
       s.morale = Math.round(clamp(s.morale + dm + (60 - s.morale) * 0.05, 0, 100))
-      if (s.morale < 25 && !s.wantsOut) {
+      // 연봉 인상 요구: 활약이 좋거나 주전급인데 연봉이 적정 수준보다 한참 낮으면 (시즌에 한 번)
+      const cw = contractOf(save, p, save.league)
+      const fair = wageFor(p, save.league)
+      const hot = (s.fr?.length || 0) >= 4 && (s.form ?? 6.6) >= 7.1
+      const underpaid = cw.wage < fair * 0.75
+      if ((hot || deserves(p)) && underpaid && s.wageAsked !== (save.seasonNo || 1) && round >= 4) {
+        s.wageAsked = save.seasonNo || 1
+        talkReq(p, 'wage', `${p.name} 면담 요청 · 연봉 인상`, `${p.name} 선수가 지금 활약에 비해 연봉(${Math.round(cw.wage * 10) / 10}M/년)이 너무 낮다며 연봉 인상을 요구합니다. (적정 수준 약 ${Math.round(fair * 10) / 10}M)`)
+      }
+      // 이적 요청은 사기가 바닥이면서 '이유'가 분명할 때만: 오래 못 뛰었거나, 감독을 못 믿거나, 연봉이 터무니없이 낮을 때
+      const reason = deserves(p) && s.benched >= 5 ? '출전 시간' : (s.trust ?? 52) < 25 ? '감독에 대한 불신' : cw.wage < fair * 0.6 && (hot || deserves(p)) ? '연봉' : null
+      if (s.morale < 25 && reason && !s.wantsOut && !(s.promises || []).length) {
         s.wantsOut = true
-        inbox.push(news(round, 'talk', `${p.name} 이적 요청`, `${p.name} 선수가 팀을 떠나고 싶다며 공식적으로 이적을 요청했습니다. 면담으로 설득하거나, 보내줄 수 있습니다.`, { playerId: p.id, topic: 'transfer' }))
+        inbox.push(news(round, 'talk', `${p.name} 이적 요청`, `${p.name} 선수가 ${reason} 문제로 팀을 떠나고 싶다며 공식적으로 이적을 요청했습니다. 면담으로 설득하거나, 보내줄 수 있습니다.`, { playerId: p.id, topic: 'transfer' }))
       }
     }
     // 판매 목록에 올린 선수·이적을 원하는 선수에게 다른 구단의 이적료 제안 (이적 시장이 열려 있을 때)
@@ -155,8 +167,7 @@ export function applyRound(save, { teamsById, schedule, myTeamId, mine }) {
         const s = st[p.id]
         const listed = (save.forSale || []).includes(p.id)
         if ((listed || s?.wantsOut) && (round + hash(p.id)) % (listed ? 1 : 2) === 0) {
-          const offer = aiBidFor({ ...save, status: st }, teams, myTeamId, p.id, round)
-          if (offer) inbox.push(offer)
+          inbox.push(...aiBidFor({ ...save, status: st }, teams, myTeamId, p.id, round))
         }
       }
     }

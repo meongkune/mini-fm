@@ -1,4 +1,4 @@
-// 이적 시장: 이적료로 영입(상대 구단 AI와 협상) · 판매 목록 등록(제안은 편지함으로) · FA
+// 이적 시장: 이적료로 영입(상대 구단 AI와 협상) · 판매 목록 등록(제안은 메시지함으로) · FA
 import { useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import FreeAgents from './FreeAgents.jsx'
@@ -14,7 +14,7 @@ const SORTS = [['ovr', 'OVR'], ['value', '가치'], ['pot', '잠재력'], ['age'
 const stars = (n) => '★'.repeat(n) + '☆'.repeat(5 - n)
 
 export default function Transfer() {
-  const { myTeam, teams, teamsById, status, save, data, transferWindow, totalRounds, toggleSale, valueFor } = useGame()
+  const { myTeam, teams, teamsById, status, save, data, transferWindow, totalRounds, toggleSale, valueFor, setAskPrice } = useGame()
   const [params] = useSearchParams()
   const [tab, setTab] = useState(params.get('tab') || 'buy')
   const [pos, setPos] = useState('전체')
@@ -102,7 +102,7 @@ export default function Transfer() {
 
       {tab === 'sell' && (
         <>
-          <p className="small muted">판매 목록에 올리면 이적 시장 기간에 다른 구단의 이적료 제안이 편지함으로 옵니다. 바로 팔려면 선수 상세의 "강제 매각"을 쓰세요.</p>
+          <p className="small muted">판매 목록에 올리고 희망 가격을 정하면, 이적 시장 기간에 다른 구단 제안이 메시지함으로 옵니다. 제안이 낮으면 '더 달라고 하기'로 협상하세요. 너무 높게 부르면 결렬될 수 있습니다. 급하게 팔려면 선수 상세의 "강제 매각"(몸값의 75~100%)을 쓰세요.</p>
           <div className="card flush">
             <ul className="mk">
               {mineList.map(({ p, v, pot }) => {
@@ -114,7 +114,14 @@ export default function Transfer() {
                       <span className="mk-name"><strong><Flag nation={p.nation} size={14} /> {p.name}{status[p.id]?.wantsOut ? ' ✈️' : ''}</strong><small>{p.age}세 · 출전 {save.pstats?.[p.id]?.apps ?? 0}경기 <CondBar value={status[p.id]?.cond} /></small></span>
                       <span className="mk-ovr">{playerOvr(p)}</span>
                       <span className="mk-val">{money(v)}</span>
-                      <button className={`btn small ${listed ? '' : 'ghost'}`} onClick={() => toggleSale(p.id)}>{listed ? '판매 중' : '판매 등록'}</button>
+                      {listed && (
+                        <label className="ask-price" title="희망 가격 (몸값 대비)">
+                          <select value={Math.round(((save.askPrice?.[p.id] ?? v * 1.2) / v) * 10) / 10} onChange={(e) => setAskPrice(p.id, Math.round(v * Number(e.target.value) * 10) / 10)}>
+                            {[0.8, 0.9, 1, 1.1, 1.2, 1.3, 1.5, 1.8, 2].map((k) => <option key={k} value={k}>{money(Math.round(v * k * 10) / 10)} ({Math.round(k * 100)}%)</option>)}
+                          </select>
+                        </label>
+                      )}
+                      <button className={`btn small ${listed ? '' : 'ghost'}`} onClick={() => { if (!listed && !save.askPrice?.[p.id]) setAskPrice(p.id, Math.round(v * 1.2 * 10) / 10); toggleSale(p.id) }}>{listed ? '판매 중' : '판매 등록'}</button>
                     </div>
                   </li>
                 )
