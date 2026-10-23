@@ -184,6 +184,8 @@ export default function Match() {
       </div>
       <div className="progress"><span style={{ width: `${(match.minute / 90) * 100}%` }} /></div>
 
+      <div className="match-layout">
+      <div className="ml-pitch">
       <MatchPitch
         home={home}
         away={away}
@@ -195,6 +197,8 @@ export default function Match() {
         idleLabel={phase === 'ht' ? '하프타임' : phase === 'ft' ? '경기 종료' : paused ? '일시정지' : '킥오프 대기'}
         caption={caption && { text: caption.text, minute: caption.minute, type: caption.type, color: onDark(kits[caption.team]?.color || '#7c5cff') }}
       />
+      </div>
+      <div className="ml-side">
 
       {/* 조작 */}
       <div className="card side-panel">
@@ -323,6 +327,8 @@ export default function Match() {
           </div>
         </div>
       )}
+      </div>
+      </div>
     </section>
   )
 }

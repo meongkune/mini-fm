@@ -93,7 +93,11 @@ export default function Home() {
   const form = me.form.slice(-5)
 
   return (
-    <section>
+    <section className="home-dash">
+      <div className="dash-col">
+        <InboxPanel inbox={save.inbox || []} unread={unread} />
+      </div>
+      <div className="dash-col">
       <div className="team-hero" style={{ '--c': myTeam.color, '--ink': ink(myTeam.color) }}>
         <span className="th-crest"><Crest team={myTeam} size={54} /></span>
         <div className="th-text">
@@ -127,7 +131,6 @@ export default function Home() {
       </div>
 
       <TeamStatus team={myTeam} status={status} lineup={save.lineup} inbox={save.inbox || []} unread={unread} />
-      {save.finance && <OwnerCard finance={save.finance} fans={save.fans ?? 60} />}
 
       <div className="card next-match">
         {seasonOver ? (
@@ -167,6 +170,11 @@ export default function Home() {
         <button className="btn ghost small" onClick={() => { if (confirm('팀을 바꾸면 현재 시즌 기록이 삭제됩니다. 계속할까요?')) quitTeam() }}>
           팀 변경 (시즌 초기화)
         </button>
+      </div>
+      </div>
+      <div className="dash-col">
+        <MiniTable standings={standings} teamsById={teamsById} myId={myTeam.id} />
+        {save.finance && <OwnerCard finance={save.finance} fans={save.fans ?? 60} />}
       </div>
     </section>
   )
@@ -247,5 +255,45 @@ function OwnerCard({ finance, fans }) {
       <div><span>지난 경기</span><strong className={(finance.last?.net ?? 0) >= 0 ? 'good-text' : 'bad-text'}>{finance.last ? `${finance.last.net >= 0 ? '+' : ''}${eur(finance.last.net)}` : '-'}</strong></div>
       <em>🏛️ 구단 운영 →</em>
     </Link>
+  )
+}
+
+// PC 대시보드: 최근 소식 (편지함 미리보기)
+function InboxPanel({ inbox, unread }) {
+  return (
+    <div className="card dash-panel desk-only">
+      <h3>📬 받은 편지함 <Link className="link small" to="/inbox">{unread ? `새 소식 ${unread}` : '전체'} →</Link></h3>
+      {inbox.length === 0 ? <p className="small muted">아직 소식이 없습니다.</p> : (
+        <ul className="dash-inbox">
+          {inbox.slice(0, 12).map((m) => (
+            <li key={m.id}><Link to="/inbox" className={m.read ? '' : 'unread'}><strong>{m.title}</strong><small>{m.round + 1}R · {m.body?.slice(0, 40)}</small></Link></li>
+          ))}
+        </ul>
+      )}
+    </div>
+  )
+}
+
+// PC 대시보드: 리그 순위 (상위권 + 내 팀 주변)
+function MiniTable({ standings, teamsById, myId }) {
+  const me = standings.findIndex((s) => s.id === myId)
+  const idx = new Set([...standings.keys()].filter((i) => i < 5 || Math.abs(i - me) <= 2))
+  return (
+    <div className="card dash-panel desk-only">
+      <h3>🏆 리그 순위 <Link className="link small" to="/league">전체 →</Link></h3>
+      <table className="mini-table">
+        <tbody>
+          {standings.map((s, i) => idx.has(i) && (
+            <tr key={s.id} className={s.id === myId ? 'me' : ''}>
+              <td>{i + 1}</td>
+              <td><span className="tn"><Crest team={teamsById[s.id]} size={16} />{short(teamsById[s.id])}</span></td>
+              <td className="n">{s.p}</td>
+              <td className="n">{s.gf - s.ga > 0 ? '+' : ''}{s.gf - s.ga}</td>
+              <td className="n"><b>{s.pts}</b></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   )
 }

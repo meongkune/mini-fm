@@ -182,19 +182,20 @@ export default function Tactics() {
         <button className="btn small" onClick={() => update({ lineup: autoSlots(myTeam, formation, status) })}>⚡ 자동 배치</button>
       </div>
 
-      <div className="card">
+      <div className="tac-layout">
+      <div className="card tac-form">
         <h3>포메이션 <span className="muted small">{formation}</span></h3>
         <FormationPicker value={formation} onChange={changeFormation} />
       </div>
 
-      <div className="card">
+      <div className="card tac-pitch">
         <SlotPitch team={myTeam} formation={formation} lineup={lineup} onSlot={setSlot} active={slot} status={status} />
         <div className="fit-legend">
           {Object.entries(FIT_LABEL).map(([k, l]) => <span key={k}><i className={`fit-dot ${k}`} />{l}</span>)}
         </div>
       </div>
 
-      <div className="card">
+      <div className="card tac-bench">
         <h3>벤치 <span className="muted small">{bench.length}명</span></h3>
         <div className="bench">
           {bench.map((p) => (
@@ -206,9 +207,10 @@ export default function Tactics() {
         </div>
       </div>
 
-      <div className="card">
+      <div className="card tac-orders">
         <h3>팀 지시</h3>
         <TacticsPanel value={myTactics(save)} onChange={update} />
+      </div>
       </div>
 
       {slot !== null && (
