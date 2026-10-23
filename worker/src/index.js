@@ -4,7 +4,7 @@
 // Gemini 키는 Cloudflare 비밀값(GEMINI_API_KEY)에만 있고, 게임 코드·GitHub에는 없다.
 
 const ALLOWED = ['https://meongkune.github.io', 'http://localhost:5173', 'http://localhost:4173', 'http://127.0.0.1:5173']
-const MODELS = ['gemini-flash-latest', 'gemini-flash-lite-latest'] // 앞 모델 한도가 차면 다음 모델로
+const MODELS = ['gemini-flash-lite-latest', 'gemini-flash-latest'] // 빠른 경량 모델 먼저, 한도·지연·오류면 다음 모델로
 const OUTCOMES = ['none', 'calm', 'promise_minutes', 'transfer_request', 'sulk', 'press_leak', 'loyal']
 
 const cors = (origin) => ({
@@ -64,12 +64,16 @@ async function askGemini(env, body) {
   }
   let last = null
   for (const model of MODELS) {
-    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': env.GEMINI_API_KEY },
-      body: JSON.stringify(payload),
-    })
-    if (res.status === 429 || res.status === 503) { last = res.status; continue } // 한도 초과·혼잡 → 다음 모델
+    let res
+    try {
+      res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': env.GEMINI_API_KEY },
+        body: JSON.stringify(payload),
+        signal: AbortSignal.timeout(12000), // 12초 넘게 걸리면 다음 모델로
+      })
+    } catch { last = 504; continue }
+    if (res.status === 429 || res.status === 503 || res.status === 400) { last = res.status; continue } // 한도 초과·혼잡·모델 미지원 → 다음 모델
     if (!res.ok) throw Object.assign(new Error(`gemini ${res.status}`), { status: res.status })
     const data = await res.json()
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text

@@ -34,6 +34,7 @@ export async function sayToPlayer({ player, team, status, message, history, trus
   try {
     const res = await fetch(TALK_API, {
       method: 'POST',
+      signal: AbortSignal.timeout(20000), // 20초 안에 답이 없으면 규칙 기반으로
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         message,
