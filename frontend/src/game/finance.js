@@ -72,26 +72,31 @@ export function wageBill(save, team, leagueId) {
  * extra: { cup: true } 이면 대회 경기 (상금 포함)
  */
 export function settleMatch(save, { team, leagueId, home, result, totalRounds, cupStage = null, cupPay = 1 }) {
-  const m = moneyOf(leagueId)
   const f = { ...(save.finance || newFinance(team, leagueId)) }
   const fans = save.fans ?? 60
-  const t = TICKETS.find((x) => x[0] === f.ticket) || TICKETS[1]
-  const fanK = 0.6 + fans / 125 // 민심이 낮으면 관중이 줄어든다
+  const tk = gateModel(f, fans, save) // 티켓 가격(%)·민심·최근 성적 → 관중
   const items = []
   const base = f.base || 40
   if (!cupStage) {
     items.push(['중계권', r1((base * 0.45) / totalRounds)])
     items.push(['스폰서', r1(((base * 0.25) / totalRounds) * (1 + (save.owner?.sponsorBoost || 0)))])
   }
-  if (home) items.push(['관중 수입', r1(((base * 0.3) / (totalRounds / 2)) * t[2] * fanK * (cupStage ? 0.8 + 0.6 * cupPay : 1))])
+  if (home) {
+    items.push(['관중 수입', r1(((base * 0.3) / (totalRounds / 2)) * tk.revenueK * (cupStage ? 0.8 + 0.6 * cupPay : 1))])
+    items.push(['상품 판매', r1(((base * 0.06) / (totalRounds / 2)) * (0.5 + fans / 100))])
+  }
   if (cupStage) items.push(['대회 수당', r1(base * 0.012 * cupPay * (result > 0 ? 1.6 : 1))])
   const wages = cupStage ? 0 : r1(wageBill(save, team, leagueId) / totalRounds)
   if (wages) items.push(['주급', -wages])
   const net = r1(items.reduce((s, [, v]) => s + v, 0))
   f.cash = r1(f.cash + net)
-  f.last = { items, net }
+  f.last = { items, net, ...(home ? { att: tk.att, pct: tk.pct } : {}) }
   f.ledger = [...(f.ledger || []), { r: save.round, net }].slice(-40)
-  let dFans = (result > 0 ? 2 : result < 0 ? -2 : 0) + (home ? t[3] : 0)
+  // 시즌 손익 누적 (FFP 판단용)
+  const ss = { rev: 0, exp: 0, wages: 0, ...(f.season || {}) }
+  for (const [k, v] of items) { if (v >= 0) ss.rev = r1(ss.rev + v); else { ss.exp = r1(ss.exp - v); if (k === '주급') ss.wages = r1(ss.wages - v) } }
+  f.season = ss
+  const dFans = (result > 0 ? 2 : result < 0 ? -2 : 0) + (home ? tk.dFans : 0)
   return { finance: f, fans: clamp(Math.round(fans + dFans), 0, 100) }
 }
 
@@ -156,3 +161,59 @@ export function wageShock(save, team, leagueId, p, offerWage) {
   const bill = wageBill(save, team, leagueId)
   return { topWage: top?.wage ?? 0, topName: top?.x.name ?? '', jealous, overpay: offerWage / ask, bill, newBill: r1(bill + offerWage), income: save.finance?.base || 40 }
 }
+
+// ── 티켓 가격(%) · 관중 · FFP ──
+const OLD_TICKET = { cheap: -30, normal: 0, high: 35, gouge: 80 }
+export const ticketPct = (f = {}) => (typeof f.ticketPct === 'number' ? f.ticketPct : OLD_TICKET[f.ticket] ?? 0)
+
+/**
+ * 홈경기 관중 모델: 수요(민심·최근 성적) × 가격 탄력성
+ * 반환: att(관중 비율 0~1) · revenueK(기준 대비 관중 수입 배수) · dFans(경기당 민심 변화)
+ */
+export function gateModel(f, fans = 60, save = null, pct = ticketPct(f)) {
+  const recent = (save?.results || []).filter((r) => r.home === save.teamId || r.away === save.teamId).slice(-5)
+  const form = recent.reduce((s, r) => { const d = r.home === save.teamId ? r.score[0] - r.score[1] : r.score[1] - r.score[0]; return s + Math.sign(d) }, 0)
+  const demand = clamp(0.6 + fans / 220 + form * 0.02, 0.35, 1.08)
+  const elastic = pct >= 0 ? 1 - 0.55 * (pct / 100) ** 1.2 : 1 - 0.2 * (pct / 100) // 비싸질수록 관중이 줄고, 싸지면 조금 는다
+  const att = clamp(demand * elastic, 0.15, 1)
+  const revenueK = ((1 + pct / 100) * att) / 0.86 // 보통 가격·보통 수요(관중 86%)일 때 1
+  const dFans = r1(-pct / 40 + (att < 0.65 ? -0.6 : 0))
+  return { att, revenueK, dFans, pct }
+}
+
+/** FFP 기준: 최근 3시즌 손실 합계 한도 · 매출 대비 연봉 비율(85% 넘으면 주의, 100% 넘으면 위반) */
+export function ffpStatus(f = {}, bill = 0) {
+  const base = f.base || 40
+  const allowance = r1(base * 0.25)
+  const cur = f.season ? r1(f.season.rev - f.season.exp) : 0
+  const past = (f.history || []).slice(-2).map((x) => x.net)
+  const total = r1([...past, cur].reduce((a, b) => a + b, 0))
+  const revenue = Math.max(1, base * 1.1) // 한 시즌 예상 매출 (중계·스폰서·관중·상품)
+  const ratio = bill / revenue
+  const level = total < -allowance || ratio > 1 ? 'breach' : total < -allowance * 0.6 || ratio > 0.85 ? 'warn' : 'ok'
+  return { allowance, cur, total, ratio, revenue: r1(revenue), level, label: { ok: '준수', warn: '주의', breach: '위반' }[level] }
+}
+
+/** 시즌 마감 FFP 심사: 위반이면 벌금 + 다음 시즌 영입 금지, 두 번째 위반부터 승점 6점 감점 */
+export function ffpReview(f = {}, bill = 0, seasonNo = 1) {
+  const st = ffpStatus(f, bill)
+  const history = [...(f.history || []), { seasonNo, net: st.cur, rev: f.season?.rev || 0, exp: f.season?.exp || 0 }].slice(-5)
+  const nf = { ...f, history, season: { rev: 0, exp: 0, wages: 0 } }
+  if (st.level !== 'breach') return { finance: nf, penalty: null, st }
+  const breaches = (f.breaches || 0) + 1
+  const fine = r1(Math.max(0, -(st.total + st.allowance)) * 0.3 + (f.base || 40) * 0.03)
+  nf.cash = r1((f.cash || 0) - fine)
+  nf.breaches = breaches
+  return { finance: nf, penalty: { fine, ban: true, points: breaches >= 2 ? 6 : 0 }, st }
+}
+
+/** 장부 기록 (영입·방출·매각 등 경기 밖의 돈) */
+export function book(f, amount) {
+  const ss = { rev: 0, exp: 0, wages: 0, ...(f.season || {}) }
+  if (amount >= 0) ss.rev = r1(ss.rev + amount)
+  else ss.exp = r1(ss.exp - amount)
+  return { ...f, cash: r1((f.cash || 0) + amount), season: ss }
+}
+
+/** 임금 예산 (구단주가 정함, 기본: 예상 매출의 85%) */
+export const wageBudget = (f = {}) => r1((f.base || 40) * 1.1 * (f.wageRatio ?? 0.85))

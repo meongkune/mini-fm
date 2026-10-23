@@ -1184,3 +1184,16 @@ html.framed body { overflow: hidden; height: 100vh; }
 .matchup-notes li { padding: 4px 8px; border-radius: 7px; }
 .matchup-notes .good { background: rgba(34, 197, 94, .12); color: #86efac; }
 .matchup-notes .bad { background: rgba(239, 68, 68, .12); color: #fca5a5; }
+/* 재정 · FFP */
+.ffp-badge { padding: 2px 9px; border-radius: 999px; font-size: .72rem; font-weight: 900; }
+.ffp-badge.ok { background: rgba(34,197,94,.15); color: #86efac; } .ffp-badge.warn { background: rgba(234,179,8,.15); color: #fde68a; } .ffp-badge.breach { background: rgba(239,68,68,.18); color: #fca5a5; }
+.card.ffp.breach { border-color: rgba(239,68,68,.5); }
+.ffp-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 6px; margin: 8px 0; }
+.ffp-grid > div { display: grid; padding: 8px; border-radius: 9px; background: var(--panel-2); font-size: .74rem; }
+.ffp-grid span { color: var(--muted); } .ffp-grid b { font-size: 1rem; } .ffp-grid small { color: var(--muted); font-size: .64rem; }
+.ffp-ratio { margin: 6px 0; }
+.ratio-bar { position: relative; height: 8px; border-radius: 4px; background: var(--panel-2); margin: 4px 0; }
+.ratio-bar i { display: block; height: 100%; border-radius: 4px; transition: width .4s; }
+.ratio-bar i.hi { background: #22c55e; } .ratio-bar i.mid { background: #eab308; } .ratio-bar i.lo { background: #ef4444; }
+.ratio-bar em { position: absolute; top: -3px; width: 2px; height: 14px; background: var(--muted); }
+.ticket-range { width: 100%; accent-color: var(--accent); }

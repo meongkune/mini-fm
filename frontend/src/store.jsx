@@ -10,7 +10,7 @@ import { checkPromises } from './game/relations.js'
 import { evaluateTrade, executeTrade, windowState } from './game/trade.js'
 import { boardMidCheck, newBoard, nextSeason, seasonLabel, seasonReview } from './game/career.js'
 import { COMPS, CUP_LEAGUES, buildCups, cupKey, cupStatus, dueMatchday, myCupFixture, playMatchday } from './game/cup.js'
-import { ROSTER_MAX, checkBankruptcy, contractOf, eur, faDecision, newFinance, prizeMoney, releaseCost, renewalAsk, settleMatch, wageFor, wageShock } from './game/finance.js'
+import { ROSTER_MAX, book, checkBankruptcy, contractOf, eur, faDecision, ffpReview, newFinance, prizeMoney, releaseCost, renewalAsk, settleMatch, wageBill, wageBudget, wageFor, wageShock } from './game/finance.js'
 import { afterMatchOwner, decide } from './game/owner.js'
 import { valueOf } from './game/trade.js'
 
@@ -97,6 +97,9 @@ export const myTactics = (save) => ({
   width: save.width ?? 50, passing: save.passing ?? 50, approach: save.approach || 'balanced', focus: save.focus || 'mixed', trap: !!save.trap, tackling: save.tackling || 'normal',
 })
 
+/** 이번 시즌 FFP 승점 감점 */
+const penaltyOf = (save) => (save.pointsPenalty?.seasonNo === (save.seasonNo || 1) ? save.pointsPenalty : null)
+
 const hashStr = (t) => { let h = 2166136261; for (const c of String(t)) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return h >>> 0 }
 
 export const formationNeeds = shapeNeeds
@@ -138,7 +141,7 @@ export function bestEmptySlot(formation, lineup, player) {
   return best
 }
 
-export function computeStandings(teams, results) {
+export function computeStandings(teams, results, penalty = null) {
   const table = Object.fromEntries(
     teams.map((t) => [t.id, { id: t.id, name: t.name, color: t.color, p: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0, pts: 0, form: [] }]),
   )
@@ -153,6 +156,7 @@ export function computeStandings(teams, results) {
     else if (hg < ag) { a.w++; h.l++; a.pts += 3; h.form.push('L'); a.form.push('W') }
     else { h.d++; a.d++; h.pts++; a.pts++; h.form.push('D'); a.form.push('D') }
   }
+  if (penalty?.points && table[penalty.teamId]) table[penalty.teamId].pts -= penalty.points // FFP 승점 감점
   return Object.values(table).sort(
     (x, y) => y.pts - x.pts || (y.gf - y.ga) - (x.gf - x.ga) || y.gf - x.gf || x.name.localeCompare(y.name),
   )
@@ -303,7 +307,7 @@ export function GameProvider({ children }) {
       saveManager(m) { setManager(m); try { localStorage.setItem(MANAGER_KEY, JSON.stringify(m)) } catch { /* 저장 실패 무시 */ } },
       data, error, save, teams, teamsById, myTeam, totalRounds, seasonOver, nextFixture, update, status,
       cups, cup, cupIdx, cupMd, allTeams, myKey, cupState: cup ? cupStatus(cup, myKey) : null,
-      standings: data ? computeStandings(teams, save.results) : [],
+      standings: data ? computeStandings(teams, save.results, penaltyOf(save)) : [],
       unread: (save.inbox || []).filter((x) => !x.read).length,
       /** 컨디션·부상·징계를 고려한 베스트 11 */
       autoPick(formation = save.formation, teamId = save.teamId) {
@@ -315,11 +319,11 @@ export function GameProvider({ children }) {
         setSave((s) => ({ ...EMPTY_SAVE, league: s.league, season: s.season, teamId, lineup, slotLineup: true, board: newBoard(base, teamId) }))
       },
       seasonText: data ? `${data.leagueInfo.name} ${seasonLabel(data.season, save.seasonNo)}` : '',
-      review: data && save.teamId && save.round >= data.schedule.length ? seasonReview(save, computeStandings(teams, save.results)) : null,
+      review: data && save.teamId && save.round >= data.schedule.length ? seasonReview(save, computeStandings(teams, save.results, penaltyOf(save))) : null,
       /** 시즌 마감 → 다음 시즌 (경질되면 팀 선택으로) */
       startNextSeason() {
         setSave((s) => {
-          const standingsNow = computeStandings(teams, s.results)
+          const standingsNow = computeStandings(teams, s.results, penaltyOf(s))
           const r = nextSeason(s, { teams, baseTeams: data.teams, standings: standingsNow, country: data.leagueInfo.country, baseSeason: data.season })
           if (r.review.sacked) {
             return { ...EMPTY_SAVE, league: s.league, season: s.season, sacked: { team: s.teamId, history: r.save.history } }
@@ -328,14 +332,17 @@ export function GameProvider({ children }) {
           const pos = standingsNow.findIndex((x) => x.id === s.teamId) + 1
           const prize = prizeMoney(pos, standingsNow.length, s.finance?.base || 40)
           const repay = Math.min(s.owner?.debt || 0, Math.round(((s.owner?.debt || 0) / 2) * 10) / 10)
-          const finance = { ...(r.save.finance || {}), cash: Math.round(((r.save.finance?.cash || 0) + prize - repay) * 10) / 10 }
+          const settled = book(book(r.save.finance || {}, prize), -repay)
+          const ffp = ffpReview(settled, wageBill(s, myTeam, data.leagueId), s.seasonNo || 1)
+          const finance = { ...ffp.finance, ...(ffp.penalty ? { ban: (s.seasonNo || 1) + 1 } : {}) }
           const owner = { ...(r.save.owner || {}), debt: Math.round(((s.owner?.debt || 0) - repay) * 10) / 10, used: {}, youthBoost: false, sponsorBoost: 0 }
           const leaving = Object.entries(s.contracts || {}).filter(([id, c]) => c.until < (s.seasonNo || 1) + 1 && r.save.rosters?.[s.teamId]?.includes(id)).map(([id]) => id)
           const byIdNow = Object.fromEntries(teams.flatMap((t) => t.players).map((p) => [p.id, p]))
           const rosters = { ...r.save.rosters, [s.teamId]: r.save.rosters[s.teamId].filter((id) => !leaving.includes(id)) }
           const released = [...(s.released || []), ...leaving.map((id) => byIdNow[id]).filter(Boolean).map((p) => ({ ...p, from: s.teamId }))]
           const closing = [
-            news(0, 'finance', `💼 시즌 결산: 상금 ${eur(prize)}`, `${pos}위 상금 ${eur(prize)}${repay ? ` · 사채 상환 ${eur(repay)}` : ''}. 현재 현금 ${eur(finance.cash)}.`),
+            news(0, 'finance', `💼 시즌 결산: 상금 ${eur(prize)}`, `${pos}위 상금 ${eur(prize)}${repay ? ` · 사채 상환 ${eur(repay)}` : ''}. 시즌 손익 ${eur(ffp.st.cur)} · FFP ${ffp.st.label}. 현재 현금 ${eur(finance.cash)}.`),
+            ...(ffp.penalty ? [news(0, 'finance', '⚖️ FFP 위반 징계', `최근 3시즌 손익 ${eur(ffp.st.total)} (허용 -${eur(ffp.st.allowance)}) · 매출 대비 연봉 ${Math.round(ffp.st.ratio * 100)}%. 벌금 ${eur(ffp.penalty.fine)}, 이번 시즌 선수 영입 금지${ffp.penalty.points ? `, 승점 ${ffp.penalty.points}점 감점` : ''}.`)] : []),
             ...(leaving.length ? [news(0, 'contract', `📄 계약 만료 ${leaving.length}명 이탈`, `${leaving.map((id) => byIdNow[id]?.name).join(', ')} 선수가 계약이 끝나 팀을 떠났습니다. FA 시장에서 다시 영입할 수 있습니다.`)] : []),
           ]
           r.save = { ...r.save, finance, owner, rosters, released, lineup: r.save.lineup.map((id) => (leaving.includes(id) ? null : id)), inbox: [...closing, ...(r.save.inbox || [])].slice(0, 80) }
@@ -343,7 +350,8 @@ export function GameProvider({ children }) {
           const mine = nextTeams.find((t) => t.id === s.teamId)
           const keep = Object.fromEntries(r.save.lineup.map((id, i) => [i, id]).filter(([, id]) => id && mine.players.some((p) => p.id === id)))
           const lineup = autoSlots(mine, s.formation, {}, keep)
-          return { ...r.save, lineup, lastOrder: standingsNow.map((x) => x.id), board: newBoard(nextTeams, s.teamId, { confidence: r.conf, fails: r.review.fails }) }
+          const pointsPenalty = ffp.penalty?.points ? { seasonNo: (s.seasonNo || 1) + 1, teamId: s.teamId, points: ffp.penalty.points } : null
+          return { ...r.save, pointsPenalty, lineup, lastOrder: standingsNow.map((x) => x.id), board: newBoard(nextTeams, s.teamId, { confidence: r.conf, fails: r.review.fails }) }
         })
       },
       readInbox(id) {
@@ -381,12 +389,16 @@ export function GameProvider({ children }) {
         setSave(r.save)
         return r
       },
-      setTicket(ticket) { setSave((s) => ({ ...s, finance: { ...s.finance, ticket } })) },
+      setTicket(pct) { setSave((s) => ({ ...s, finance: { ...s.finance, ticketPct: pct } })) },
+      setWageRatio(ratio) { setSave((s) => ({ ...s, finance: { ...s.finance, wageRatio: ratio } })) },
       contractOf: (p) => contractOf(save, p, data?.leagueId),
       wageFor: (p) => wageFor(p, data?.leagueId),
       renewalAsk: (p) => renewalAsk(save, p, data?.leagueId, status[p.id]),
       /** 재계약 */
       renew(p, years, wage) {
+        const billNow = wageBill(save, myTeam, data.leagueId)
+        const old = contractOf(save, p, data.leagueId).wage
+        if (wage > old && billNow - old + wage > wageBudget(save.finance)) return { ok: false, reason: `임금 예산 초과: 재계약하면 연봉 총액 ${eur(billNow - old + wage)} > 예산 ${eur(wageBudget(save.finance))}` }
         setSave((s) => {
           const st = { ...(s.status?.[p.id] || {}), morale: Math.min(100, (s.status?.[p.id]?.morale ?? 60) + 6), contractAsked: false }
           const kept = checkPromises(p, st, { round: s.round, sum: null, fitOk: false, renewed: true, sold: false }) // 재계약 약속을 지켰는지
@@ -397,6 +409,7 @@ export function GameProvider({ children }) {
             inbox: [...kept, news(s.round, 'contract', `✍️ ${p.name} 재계약`, `${years}년 연장, 연봉 ${eur(wage)}.`), ...(s.inbox || [])],
           }
         })
+        return { ok: true }
       },
       releaseCost: (p) => releaseCost(save, p, data?.leagueId),
       /** 방출: 위약금을 내고 FA로 내보낸다 */
@@ -408,7 +421,7 @@ export function GameProvider({ children }) {
             ...s,
             rosters: { ...rosters, [s.teamId]: rosters[s.teamId].filter((id) => id !== p.id) },
             lineup: s.lineup.map((id) => (id === p.id ? null : id)),
-            finance: { ...s.finance, cash: Math.round((s.finance.cash - cost) * 10) / 10 },
+            finance: book(s.finance, -cost),
             released: [...(s.released || []), { ...p, from: s.teamId }],
             fans: Math.max(0, (s.fans ?? 60) - (playerOvr(p) >= 80 ? 4 : 0)),
             inbox: [news(s.round, 'contract', `🚪 ${p.name} 방출`, `위약금 ${eur(cost)}을 내고 계약을 해지했습니다.`), ...(s.inbox || [])],
@@ -428,7 +441,7 @@ export function GameProvider({ children }) {
             ...s,
             rosters: { ...rosters, [s.teamId]: rosters[s.teamId].filter((id) => id !== p.id), [buyer.id]: [...rosters[buyer.id], p.id] },
             lineup: s.lineup.map((id) => (id === p.id ? null : id)),
-            finance: { ...s.finance, cash: Math.round((s.finance.cash + fee) * 10) / 10 },
+            finance: book(s.finance, fee),
             fans: Math.max(0, (s.fans ?? 60) - (star ? 10 : 2)),
             inbox: [news(s.round, 'trade', `💸 ${p.name} 강제 매각`, `${buyer.name}에 ${eur(fee)}을 받고 팔았습니다.${star ? ' 핵심 선수를 판 구단주에게 팬들이 분노합니다. (민심 -10)' : ''}`), ...(s.inbox || [])],
           }
@@ -446,6 +459,9 @@ export function GameProvider({ children }) {
         const d = faDecision(p, { offerWage, years, leagueId: data.leagueId, clubOvr: top.reduce((a, b) => a + b, 0) / top.length })
         if (!d.ok) return d
         const fee = Math.round(offerWage * 0.5 * 10) / 10 // 계약금
+        if (save.finance?.ban === (save.seasonNo || 1)) return { ok: false, reason: 'FFP 위반 징계로 이번 시즌에는 선수를 영입할 수 없습니다.' }
+        const billNow = wageBill(save, myTeam, data.leagueId)
+        if (billNow + offerWage > wageBudget(save.finance)) return { ok: false, reason: `임금 예산 초과: 연봉 총액 ${eur(billNow + offerWage)} > 예산 ${eur(wageBudget(save.finance))}. 구단 운영에서 임금 예산을 늘리거나 선수를 정리하세요.` }
         if ((save.finance?.cash ?? 0) < fee) return { ok: false, reason: `계약금 ${eur(fee)}을 낼 현금이 없습니다 (보유 ${eur(save.finance?.cash ?? 0)}).` }
         const shock = wageShock(save, myTeam, data.leagueId, p, offerWage)
         const roll = (k) => (hashStr(`${p.id}-${k}-${save.round}`) % 100) / 100
@@ -461,7 +477,7 @@ export function GameProvider({ children }) {
             released: (s.released || []).filter((x) => x.id !== p.id),
             rosters: { ...rosters, [s.teamId]: [...rosters[s.teamId].filter((id) => id !== p.id), p.id] },
             contracts: { ...s.contracts, [p.id]: { until: (s.seasonNo || 1) + years - 1, wage: offerWage } },
-            finance: { ...s.finance, cash: Math.round((s.finance.cash - fee) * 10) / 10 },
+            finance: book(s.finance, -fee),
             status: { ...s.status, [p.id]: { morale: 72, cond: 100 } },
             fans: Math.min(100, (s.fans ?? 60) + (playerOvr(p) >= 75 ? 3 : 1)),
             inbox: [news(s.round, 'trade', `✍️ FA 영입: ${p.name}`, `${years}년 계약, 연봉 ${eur(offerWage)}, 계약금 ${eur(fee)}.`), ...(s.inbox || [])],

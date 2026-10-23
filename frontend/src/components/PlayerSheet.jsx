@@ -130,6 +130,7 @@ function ContractBox({ player, save, contractOf, renewalAsk, renew, onRelease, o
   const ask = renewalAsk(player)
   const [years, setYears] = useState(Math.min(2, ask.maxYears || 1))
   const [done, setDone] = useState(false)
+  const [err, setErr] = useState('')
   return (
     <div className="contract-box">
       <h4>계약</h4>
@@ -144,9 +145,10 @@ function ContractBox({ player, save, contractOf, renewalAsk, renew, onRelease, o
           <select value={years} onChange={(e) => setYears(Number(e.target.value))}>
             {Array.from({ length: ask.maxYears }, (_, i) => i + 1).map((y) => <option key={y} value={y}>{y}년 연장</option>)}
           </select>
-          <button className="btn small" onClick={() => { renew(player, years, ask.wage); setDone(true) }}>재계약</button>
+          <button className="btn small" onClick={() => { const r = renew(player, years, ask.wage); if (r?.ok === false) setErr(r.reason); else setDone(true) }}>재계약</button>
         </div>
       ) : <p className="small good-text">✍️ 재계약 완료</p>}
+      {err && <p className="small bad-text">{err}</p>}
       <div className="row">
         <button className="btn ghost small" onClick={onRelease}>🚪 방출</button>
         <button className="btn ghost small" onClick={onSell}>💸 강제 매각</button>

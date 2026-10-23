@@ -1,14 +1,14 @@
 // 구단주 사무실: 재정, 팬 민심, 티켓 가격, 구단주 결정, 계약 현황
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ROSTER_MAX, TICKETS, eur, wageBill, yearsLeft } from '../game/finance.js'
+import { ROSTER_MAX, eur, ffpStatus, gateModel, ticketPct, wageBill, wageBudget, yearsLeft } from '../game/finance.js'
 import { DECISIONS, decisionReady, fanLabel } from '../game/owner.js'
 import { playerOvr, useGame } from '../store.jsx'
 import PlayerSheet from '../components/PlayerSheet.jsx'
 import NeedTeam from './NeedTeam.jsx'
 
 export default function Club() {
-  const { myTeam, save, data, ownerDecide, setTicket, contractOf } = useGame()
+  const { myTeam, save, data, ownerDecide, setTicket, setWageRatio, contractOf, totalRounds } = useGame()
   const [last, setLast] = useState(null)
   const [detail, setDetail] = useState(null)
   if (!myTeam) return <NeedTeam />
@@ -55,17 +55,7 @@ export default function Club() {
         </div>
       )}
 
-      <div className="card">
-        <h3>티켓 가격</h3>
-        <div className="options">
-          {TICKETS.map(([k, label, mult, dFans, desc]) => (
-            <button key={k} className={`option ${f.ticket === k ? 'on' : ''}`} onClick={() => setTicket(k)}>
-              <strong>{label} <span className="muted small">×{mult}</span></strong>
-              <span className="small muted">{desc}{dFans ? ` (홈경기마다 민심 ${dFans > 0 ? '+' : ''}${dFans})` : ''}</span>
-            </button>
-          ))}
-        </div>
-      </div>
+      <FinancePanel f={f} bill={bill} save={save} setTicket={setTicket} setWageRatio={setWageRatio} fans={fans} totalRounds={totalRounds} />
 
       <div className="card">
         <h3>구단주 결정</h3>
@@ -113,5 +103,59 @@ export default function Club() {
       <p className="small muted center"><Link className="link" to="/deploy">📡 서버·배포 상태 보기</Link></p>
       {detail && <PlayerSheet player={detail} onClose={() => setDetail(null)} />}
     </section>
+  )
+}
+
+/** 재정 패널: 시즌 손익 · FFP · 임금 예산 · 티켓 가격(%) */
+function FinancePanel({ f, bill, save, setTicket, setWageRatio, fans, totalRounds }) {
+  const pct = ticketPct(f)
+  const g = gateModel(f, fans, save, pct)
+  const perGame = ((f.base || 40) * 0.3) / (totalRounds / 2) * g.revenueK
+  const ffp = ffpStatus(f, bill)
+  const budget = wageBudget(f)
+  const ss = f.season || { rev: 0, exp: 0 }
+  const banned = f.ban === (save.seasonNo || 1)
+  return (
+    <>
+      <div className={`card ffp ${ffp.level}`}>
+        <div className="row between"><h3>재정 · FFP</h3><span className={`ffp-badge ${ffp.level}`}>FFP {ffp.label}</span></div>
+        <div className="ffp-grid">
+          <div><span>이번 시즌 수입</span><b className="good-text">{eur(ss.rev)}</b></div>
+          <div><span>이번 시즌 지출</span><b className="bad-text">{eur(ss.exp)}</b></div>
+          <div><span>시즌 손익</span><b className={ffp.cur >= 0 ? 'good-text' : 'bad-text'}>{ffp.cur >= 0 ? '+' : ''}{eur(ffp.cur)}</b></div>
+          <div><span>최근 3시즌 손익</span><b className={ffp.total >= -ffp.allowance ? '' : 'bad-text'}>{eur(ffp.total)}</b><small>허용 -{eur(ffp.allowance)}</small></div>
+        </div>
+        <div className="ffp-ratio">
+          <span className="small">매출 대비 연봉 <b className={ffp.ratio > 1 ? 'bad-text' : ffp.ratio > 0.85 ? 'warn-text' : 'good-text'}>{Math.round(ffp.ratio * 100)}%</b> <span className="muted">(85% 넘으면 주의, 100% 넘으면 위반)</span></span>
+          <div className="ratio-bar"><i style={{ width: `${Math.min(100, ffp.ratio * 100)}%` }} className={ffp.ratio > 1 ? 'lo' : ffp.ratio > 0.85 ? 'mid' : 'hi'} /><em style={{ left: '85%' }} /><em style={{ left: '99%' }} /></div>
+        </div>
+        {banned && <p className="small bad-text">⚖️ FFP 징계: 이번 시즌 선수 영입 금지</p>}
+        {(f.history || []).length > 0 && <p className="small muted">지난 시즌: {(f.history || []).slice(-3).map((h) => `${h.seasonNo}시즌 ${h.net >= 0 ? '+' : ''}${eur(h.net)}`).join(' · ')}</p>}
+        <p className="small muted" style={{ margin: 0 }}>시즌이 끝나면 심사합니다. 위반하면 벌금과 다음 시즌 영입 금지, 두 번째 위반부터 승점 6점 감점.</p>
+      </div>
+
+      <div className="card">
+        <h3>임금 예산 <span className="muted small">연봉 총액 {eur(bill)} / 예산 {eur(budget)}</span></h3>
+        <label className="tp-slider">
+          <span className="tp-row"><b>예상 매출 대비</b><em>{Math.round((f.wageRatio ?? 0.85) * 100)}%</em></span>
+          <input type="range" min={40} max={110} step={5} value={Math.round((f.wageRatio ?? 0.85) * 100)} onChange={(e) => setWageRatio(Number(e.target.value) / 100)} />
+          <span className="tp-ends"><small>짠물 운영 40%</small><small>110% (FFP 위험)</small></span>
+        </label>
+        <div className="ratio-bar"><i style={{ width: `${Math.min(100, (bill / Math.max(1, budget)) * 100)}%` }} className={bill > budget ? 'lo' : bill > budget * 0.9 ? 'mid' : 'hi'} /></div>
+        <p className="small muted" style={{ marginBottom: 0 }}>예산을 넘는 영입·재계약은 막힙니다. 예산을 늘리면 FFP 위험이 커집니다.</p>
+      </div>
+
+      <div className="card">
+        <h3>티켓 가격 <span className="muted small">기준 대비 {pct > 0 ? '+' : ''}{pct}%</span></h3>
+        <input className="ticket-range" type="range" min={-50} max={100} step={5} value={pct} onChange={(e) => setTicket(Number(e.target.value))} />
+        <div className="tp-ends"><small>-50% 반값</small><small>기준</small><small>+100% 두 배</small></div>
+        <div className="ffp-grid">
+          <div><span>예상 관중</span><b>{Math.round(g.att * 100)}%</b></div>
+          <div><span>홈경기당 관중 수입</span><b>{eur(perGame)}</b></div>
+          <div><span>홈경기마다 민심</span><b className={g.dFans < 0 ? 'bad-text' : g.dFans > 0 ? 'good-text' : ''}>{g.dFans > 0 ? '+' : ''}{g.dFans}</b></div>
+        </div>
+        {f.last?.att !== undefined && <p className="small muted" style={{ marginBottom: 0 }}>지난 홈경기: 관중 {Math.round(f.last.att * 100)}% (가격 {f.last.pct > 0 ? '+' : ''}{f.last.pct}%)</p>}
+      </div>
+    </>
   )
 }
