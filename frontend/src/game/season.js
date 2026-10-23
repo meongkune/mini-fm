@@ -4,6 +4,8 @@ import { playerOvrOf } from '../engine/engine.js'
 import { quickMatch } from '../engine/match.js'
 import { aiOfferFor, windowState } from './trade.js'
 import { reactToSpeech } from './speech.js'
+import { checkPromises } from './relations.js'
+import { buildSlots, fitOf } from '../engine/formation.js'
 
 export const RECOVERY = 6 // 라운드 사이 기본 회복량 (+ 부족분의 30% + 지구력 보정)
 export const YELLOW_LIMIT = 5 // 경고 누적 출전 정지 기준
@@ -103,6 +105,14 @@ export function applyRound(save, { teamsById, schedule, myTeamId, mine }) {
     for (const p of my.players) if (mine.summary.players[p.id]?.start) starterMin[p.pos] = Math.min(starterMin[p.pos] ?? 99, playerOvrOf(p))
     const deserves = (p) => p.pos !== 'GK' && playerOvrOf(p) >= (starterMin[p.pos] ?? 99) - 1
     let complaints = 0
+    // 지금 라인업에서 각 선수가 선 자리 (본 포지션이 아닌 자리에 계속 세우면 '역할' 면담 요청)
+    const slotRoles = buildSlots(save.formation || '4-4-2').map((x) => x.role)
+    const slotOf = Object.fromEntries((save.lineup || []).map((id, i) => [id, slotRoles[i]]).filter(([id]) => id))
+    const talkReq = (p, topic, title, body) => {
+      if (complaints >= 2) return
+      complaints++
+      inbox.push(news(round, 'talk', title, body, { playerId: p.id, topic }))
+    }
     for (const p of my.players) {
       const s = touch(p.id)
       const r = mine.summary.players[p.id]
@@ -114,21 +124,29 @@ export function applyRound(save, { teamsById, schedule, myTeamId, mine }) {
       } else if (s.inj <= 0 && s.susp <= 0) {
         s.benched = (s.benched || 0) + 1
         if (deserves(p) && s.benched >= 3) dm -= 4
-        if (deserves(p) && s.benched >= 3 && !s.complained && complaints < 1) {
-          complaints++
+        if (deserves(p) && s.benched >= 3 && !s.complained && !(s.promises || []).some((x) => x.kind === 'start')) {
           s.complained = true
-          inbox.push(news(round, 'talk', `${p.name} 면담 요청`, `${p.name} 선수가 최근 ${s.benched}경기 연속 출전하지 못해 불만을 드러내며 면담을 요청했습니다.`, { playerId: p.id, actions: TALK_ACTIONS }))
+          talkReq(p, 'minutes', `${p.name} 면담 요청 · 출전 시간`, `${p.name} 선수가 최근 ${s.benched}경기 연속 출전하지 못해 불만을 드러내며 면담을 요청했습니다.`)
         }
       }
-      // 약속 확인: 선발을 약속했는데 지키지 않았으면
-      if (s.promise === round) {
-        if (r?.start) { dm += 4; delete s.promise }
-        else { dm -= 18; delete s.promise; inbox.push(news(round, 'promise', `${p.name}: 약속을 어겼습니다`, `선발로 기용하겠다던 약속이 지켜지지 않자 ${p.name} 선수가 크게 실망했습니다. (사기 크게 하락)`, { playerId: p.id })) }
+      // 본 포지션이 아닌 자리에서 2경기 연속 선발 → 역할 불만
+      const fit = r?.start && slotOf[p.id] ? fitOf(p, slotOf[p.id]) : 1
+      s.offpos = fit < 0.82 ? (s.offpos || 0) + 1 : 0
+      if (s.offpos >= 2 && !s.roleAsked) { s.roleAsked = true; talkReq(p, 'role', `${p.name} 면담 요청 · 포지션`, `${p.name} 선수가 본 포지션이 아닌 ${slotOf[p.id]} 자리에 계속 기용되는 것에 대해 이야기하고 싶어 합니다.`) }
+      if (fit >= 0.9) s.roleAsked = false
+      // 계약 마지막 해 + 주전급 → 재계약 요청 (시즌 중반 이후, 한 번)
+      const c = save.contracts?.[p.id]
+      if (c && c.until <= (save.seasonNo || 1) && round >= Math.floor(schedule.length / 3) && deserves(p) && !s.contractAsked) {
+        s.contractAsked = true
+        talkReq(p, 'contract', `${p.name} 면담 요청 · 재계약`, `계약이 이번 시즌으로 끝나는 ${p.name} 선수가 앞으로의 거취와 재계약에 대해 이야기하고 싶어 합니다.`)
       }
+      // 예전 방식 약속(다음 경기 선발)은 새 약속 기록으로 옮긴다
+      if (s.promise !== undefined && s.promise !== null) { s.promises = [...(s.promises || []), { kind: 'start', need: 1, got: 0, made: s.promise, until: s.promise, text: '다음 경기 선발' }]; delete s.promise }
+      inbox.push(...checkPromises(p, s, { round, sum: r, fitOk: fit >= 0.9, renewed: false, sold: false }))
       s.morale = Math.round(clamp(s.morale + dm + (60 - s.morale) * 0.05, 0, 100))
       if (s.morale < 25 && !s.wantsOut) {
         s.wantsOut = true
-        inbox.push(news(round, 'request', `${p.name} 이적 요청`, `${p.name} 선수가 팀을 떠나고 싶다며 공식적으로 이적을 요청했습니다. 이적 시장에서 트레이드 카드로 쓸 수 있습니다.`, { playerId: p.id }))
+        inbox.push(news(round, 'talk', `${p.name} 이적 요청`, `${p.name} 선수가 팀을 떠나고 싶다며 공식적으로 이적을 요청했습니다. 면담으로 설득하거나, 보내줄 수 있습니다.`, { playerId: p.id, topic: 'transfer' }))
       }
     }
     // 이적을 원하는 선수에게 다른 구단 제안 (이적 시장이 열려 있을 때, 2라운드마다)

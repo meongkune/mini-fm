@@ -6,13 +6,13 @@ import { Flag, nationName } from './Badges.jsx'
 import Rating, { CondBar } from './Rating.jsx'
 import { PLAYER_TALKS, moraleLabel } from '../game/season.js'
 import { personality, personalityText } from '../game/speech.js'
-import TalkBattle from './TalkBattle.jsx'
+import TalkRoom from './TalkRoom.jsx'
 import { situationOf } from '../game/aiTalk.js'
 import { eur, yearsLeft } from '../game/finance.js'
 import { useGame } from '../store.jsx'
 
 export default function PlayerSheet({ player, onClose, inLineup, onToggle }) {
-  const { status, save, talkTo, myTeam, teams, finishTalk, manager, contractOf, renewalAsk, renew, releaseCost, release, forceSell } = useGame()
+  const { status, save, talkTo, myTeam, teams, finishTalk, totalRounds, contractOf, renewalAsk, renew, releaseCost, release, forceSell } = useGame()
   const [battle, setBattle] = useState(false)
   const [deal, setDeal] = useState(null)
   const [reply, setReply] = useState('')
@@ -82,9 +82,10 @@ export default function PlayerSheet({ player, onClose, inLineup, onToggle }) {
             </div>
             {reply && <p className="notice">{reply}</p>}
             <h4>대화 면담 <span className="muted small">성격: {personalityText(personality(player)).join(' · ')}</span></h4>
-            <button className="btn wide talk-start" disabled={talked} onClick={() => setBattle(true)}>🗣️ {talked ? '이번 라운드 면담 완료' : '면담하기 (AI 대화)'}</button>
+            <button className="btn wide talk-start" disabled={talked} onClick={() => setBattle(true)}>🗣️ {talked ? '이번 라운드 면담 완료' : st.wantsOut ? '이적 문제로 면담하기' : '면담하기'}</button>
             {battle && (
-              <TalkBattle player={player} team={myTeam} status={st} manager={manager}
+              <TalkRoom player={player} team={myTeam} status={st} topic={st.wantsOut ? 'transfer' : 'general'}
+                wage={contractOf(player).wage} totalRounds={totalRounds}
                 situation={situationOf(player, myTeam, st, { contractYears: yearsLeft(save, contractOf(player)), inLineup })}
                 onClose={() => setBattle(false)}
                 onFinish={(r) => { finishTalk(player.id, r); setBattle(false) }} />

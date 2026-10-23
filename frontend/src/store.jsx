@@ -6,6 +6,7 @@ import { assignSlots, buildSlots, fitOf, shapeNeeds } from './engine/formation.j
 import { applyCupMatch, applyRound, customTalk, engineStatus, news, playerTalk, resolveTalk } from './game/season.js'
 import { cleanName, effectiveTeams } from './game/roster.js'
 import { applyTalkResult } from './game/aiTalk.js'
+import { checkPromises } from './game/relations.js'
 import { evaluateTrade, executeTrade, windowState } from './game/trade.js'
 import { boardMidCheck, newBoard, nextSeason, seasonLabel, seasonReview } from './game/career.js'
 import { COMPS, CUP_LEAGUES, buildCups, cupKey, cupStatus, dueMatchday, myCupFixture, playMatchday } from './game/cup.js'
@@ -380,12 +381,16 @@ export function GameProvider({ children }) {
       renewalAsk: (p) => renewalAsk(save, p, data?.leagueId, status[p.id]),
       /** 재계약 */
       renew(p, years, wage) {
-        setSave((s) => ({
-          ...s,
-          contracts: { ...s.contracts, [p.id]: { until: (s.seasonNo || 1) + years, wage } },
-          status: { ...s.status, [p.id]: { ...(s.status?.[p.id] || {}), morale: Math.min(100, (s.status?.[p.id]?.morale ?? 60) + 6) } },
-          inbox: [news(s.round, 'contract', `✍️ ${p.name} 재계약`, `${years}년 연장, 연봉 ${eur(wage)}.`), ...(s.inbox || [])],
-        }))
+        setSave((s) => {
+          const st = { ...(s.status?.[p.id] || {}), morale: Math.min(100, (s.status?.[p.id]?.morale ?? 60) + 6), contractAsked: false }
+          const kept = checkPromises(p, st, { round: s.round, sum: null, fitOk: false, renewed: true, sold: false }) // 재계약 약속을 지켰는지
+          return {
+            ...s,
+            contracts: { ...s.contracts, [p.id]: { until: (s.seasonNo || 1) + years, wage } },
+            status: { ...s.status, [p.id]: st },
+            inbox: [...kept, news(s.round, 'contract', `✍️ ${p.name} 재계약`, `${years}년 연장, 연봉 ${eur(wage)}.`), ...(s.inbox || [])],
+          }
+        })
       },
       releaseCost: (p) => releaseCost(save, p, data?.leagueId),
       /** 방출: 위약금을 내고 FA로 내보낸다 */
