@@ -4,6 +4,7 @@
 //   status[playerId] = { cond: 0~100(컨디션), morale: 0~100(사기), form: 평균 평점 } — 없으면 기본값
 import { MENTALITY, PRESSING, playerOvrOf } from './engine.js'
 import { ROLE_POS, assignSlots, buildSlots, fitOf, shapeMods } from './formation.js'
+import { aiTactics, edges, tacOf } from './tactics.js'
 
 const DEFAULT_TACTICS = { formation: '4-4-2', mentality: 'balanced', pressing: 'normal', line: 'normal', tempo: 'normal' }
 // 팀 지시: 수비 라인 높이, 템포
@@ -14,7 +15,11 @@ const AI_SHAPES = ['4-4-2', '4-3-3', '4-2-3-1', '4-1-4-1', '3-5-2', '4-4-1-1', '
 export const aiFormation = (teamId) => AI_SHAPES[[...String(teamId)].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7) % AI_SHAPES.length]
 export const MAX_SUBS = 5
 // 전력 차가 결과에 미치는 정도 (클수록 이변이 잦다)
-const HOME_ADV = 1.5
+const HOME_ADV = 4
+// 전술 효과 계수 (선수 능력 계수보다 작을수록 = 더 크게 반영)
+const K_TMID = 70
+const K_TCHANCE = 200
+const K_TQUAL = 350
 const K_POSS = 110
 const K_CHANCE = 520
 const K_QUAL = 800
@@ -55,7 +60,9 @@ export function pickLineup(team, formation = '4-4-2', status = {}, { useConditio
 
 export function createMatch({ home, away, homeCfg = {}, awayCfg = {}, seed, status = {}, myIdx = null }) {
   const sideState = (team, cfg) => {
-    const tactics = { ...DEFAULT_TACTICS, ...(cfg.tactics || {}) }
+    // 상대(AI)는 구단 고유 전형 + 전력에 맞는 스타일 (강팀: 점유·압박, 약팀: 역습·수비)
+    const strength = [...team.players].map(playerOvrOf).sort((a, b) => b - a).slice(0, 11).reduce((s, v) => s + v, 0) / 11
+    const tactics = cfg.tactics ? { ...DEFAULT_TACTICS, ...cfg.tactics } : { ...DEFAULT_TACTICS, ...aiTactics(team, strength), formation: aiFormation(team.id) }
     if (!cfg.tactics?.formation && !cfg.lineup) tactics.formation = aiFormation(team.id)
     const byId = Object.fromEntries(team.players.map((p) => [p.id, p]))
     // 정해 둔 자리는 그대로, 비었거나 출전할 수 없는 자리만 가장 알맞은 선수로 채운다
@@ -107,7 +114,8 @@ function effective(match, ctx, idx, p) {
   return { ...p, att: p.att * f, def: p.def * f }
 }
 
-function sideRatings(match, ctx, idx) {
+/** 그 분의 출전 선수(실효 능력치·자리 포지션)와 포지션별 묶음 */
+function xiOf(match, ctx, idx) {
   const sd = match.sides[idx]
   const team = ctx.teams[idx]
   const byId = Object.fromEntries(team.players.map((p) => [p.id, p]))
@@ -121,11 +129,24 @@ function sideRatings(match, ctx, idx) {
     xi.push({ ...e, att: e.att * fit, def: e.def * fit, pos: ROLE_POS[sd.slots[i]], realPos: p.pos })
   })
   const g = Object.fromEntries(['GK', 'DF', 'MF', 'FW'].map((pos) => [pos, xi.filter((p) => p.pos === pos)]))
+  return { xi, g, fwAtt: avg(g.FW.map((p) => p.att), 60), mfAtt: avg(g.MF.map((p) => p.att), 60), dfDef: avg(g.DF.map((p) => p.def), 60) }
+}
+
+/** 전술 상성 (양 팀 출전 선수 기준) — 화면 표시용으로도 쓴다 */
+export function tacticalEdges(match, ctx, idx) {
+  const me = xiOf(match, ctx, idx)
+  const op = xiOf(match, ctx, 1 - idx)
+  const sd = match.sides[idx]
+  const od = match.sides[1 - idx]
+  return edges({ tac: sd.tactics, formation: sd.tactics.formation, ...me }, { tac: od.tactics, formation: od.tactics.formation, ...op })
+}
+
+function sideRatings(match, ctx, idx) {
+  const sd = match.sides[idx]
+  const { xi, g } = xiOf(match, ctx, idx)
   const f = shapeMods(sd.tactics.formation)
-  const m = MENTALITY[sd.tactics.mentality] || MENTALITY.balanced
-  const pr = PRESSING[sd.tactics.pressing] || PRESSING.normal
-  const ln = LINE[sd.tactics.line] || LINE.normal
-  const tp = TEMPO[sd.tactics.tempo] || TEMPO.normal
+  const e = tacticalEdges(match, ctx, idx)
+  const t = tacOf(sd.tactics)
   const missing = 11 - xi.length // 퇴장·부상으로 빈 자리
   const penalty = (g.GK.length !== 1 ? 15 : 0) + missing * 6
   // 경기 상황: 후반 55분 이후 지는 팀은 라인을 올려 몰아붙이고, 이기는 팀은 지키는 쪽으로 기운다
@@ -137,14 +158,23 @@ function sideRatings(match, ctx, idx) {
   const gsDef = -chase * 2.5 + hold * 2
   return {
     xi,
-    attack: avg([...g.FW.map((p) => p.att), ...g.FW.map((p) => p.att), ...g.MF.map((p) => p.att)]) + f.att + m.att + tp.att + gsAtt - penalty,
-    midfield: avg(g.MF.map((p) => (p.att + p.def) / 2)) + f.mid + pr.mid + ln.mid + tp.mid - penalty,
-    defense: avg([...g.DF.map((p) => p.def), ...g.DF.map((p) => p.def), ...g.MF.map((p) => p.def)]) + f.def + m.def + ln.def + gsDef - penalty,
+    // 선수 능력(+전형) — 전력 차는 완만하게 반영
+    attack: avg([...g.FW.map((p) => p.att), ...g.FW.map((p) => p.att), ...g.MF.map((p) => p.att)]) + f.att - penalty,
+    midfield: avg(g.MF.map((p) => (p.att + p.def) / 2)) + f.mid - penalty,
+    defense: avg([...g.DF.map((p) => p.def), ...g.DF.map((p) => p.def), ...g.MF.map((p) => p.def)]) + f.def - penalty,
+    // 전술·경기 상황 — 선수 능력보다 크게 반영 (약팀도 전술로 뒤집을 수 있게)
+    tAtt: e.att + gsAtt,
+    tMid: e.mid,
+    tDef: e.def + gsDef,
+    notes: e.notes,
     keeper: avg(g.GK.map((p) => p.def), 40),
     gk: g.GK[0] || null,
-    drain: pr.drain * tp.drain,
-    acc: tp.acc,
-    offside: ln.offside,
+    drain: (0.6 + t.press * 0.008) * (0.9 + t.tempo * 0.002), // 압박·템포가 높을수록 빨리 지친다
+    acc: ((50 - t.tempo) / 50) * 0.03 - ((t.passing - 50) / 50) * 0.04,
+    offside: e.offside,
+    chance: e.chance,
+    quality: e.quality,
+    foul: e.foul,
   }
 }
 
@@ -228,7 +258,7 @@ export function step(match, ctx, { withEvents = true } = {}) {
   if (withEvents && minute === 46) match.events.push({ minute: 45, type: 'info', text: '후반전 시작!' })
   const r = [sideRatings(match, ctx, 0), sideRatings(match, ctx, 1)]
   const mid = [r[0].midfield + HOME_ADV, r[1].midfield] // 홈 어드밴티지
-  const atk = rng.random() < clamp(0.5 + (mid[0] - mid[1]) / K_POSS, 0.25, 0.75) ? 0 : 1
+  const atk = rng.random() < clamp(0.5 + (mid[0] - mid[1]) / K_POSS + (r[0].tMid - r[1].tMid) / K_TMID, 0.22, 0.78) ? 0 : 1
   const dfn = 1 - atk
   const S = match.stats
   S[atk].poss++
@@ -243,6 +273,7 @@ export function step(match, ctx, { withEvents = true } = {}) {
 
   const a = r[atk].attack
   const d = r[dfn].defense
+  const tEdge = r[atk].tAtt - r[dfn].tDef // 전술 상성 (공격 쪽 전술 - 수비 쪽 전술)
 
   // 슈팅: long=true면 먼 거리·수비 맞고 굴절되는 낮은 확률의 슈팅
   const shoot = (long) => {
@@ -254,7 +285,7 @@ export function step(match, ctx, { withEvents = true } = {}) {
     const assister = helpers.length && rng.random() < (long ? 0.35 : 0.78) ? rng.weighted(helpers, helpers.map((p) => ({ MF: 2.2, FW: 1.6, DF: 0.7 })[p.pos] * p.att)) : null
     S[atk].shots++
     match.ps[shooter.id].sh++
-    const quality = long ? 0.09 : 0.3 + (shooter.att - r[dfn].keeper) / K_FINISH + (a - d) / K_QUAL
+    const quality = long ? 0.09 : 0.3 + (shooter.att - r[dfn].keeper) / K_FINISH + (a - d) / K_QUAL + tEdge / K_TQUAL + r[atk].quality
     const pOn = long ? 0.28 : clamp(0.45 + (shooter.att - 60) / 200, 0.25, 0.75)
     const pGoal = clamp(quality, long ? 0.04 : 0.08, 0.55)
     const xg = pOn * pGoal
@@ -287,11 +318,11 @@ export function step(match, ctx, { withEvents = true } = {}) {
     }
   }
 
-  if (rng.random() > CHANCE + (a - d) / K_CHANCE) {
+  if (rng.random() > CHANCE + r[atk].chance + (a - d) / K_CHANCE + tEdge / K_TCHANCE) {
     // 결정적 찬스 없이 끝난 공격: 파울·카드, 오프사이드, 중거리 슈팅, 태클
     const x = rng.random()
     const defenders = r[dfn].xi.filter((p) => p.pos !== 'GK')
-    if (x < 0.27 && defenders.length) {
+    if (x < 0.27 * r[dfn].foul && defenders.length) {
       S[dfn].fouls++
       const fouler = rng.weighted(defenders, defenders.map((p) => ({ DF: 2, MF: 1.6, FW: 0.6 })[p.pos]))
       const c = rng.random()
@@ -313,7 +344,7 @@ export function step(match, ctx, { withEvents = true } = {}) {
         Object.assign(tick, { k: 'card', p: fouler.id })
         if (withEvents) match.events.push({ minute, type: 'card', team: dfn, player: fouler.name, text: `🟨 ${fouler.name}(${names[dfn]}) 경고. 거친 태클이었습니다.` })
       }
-    } else if (x < 0.27 + 0.05 * r[dfn].offside) {
+    } else if (x < 0.27 * r[dfn].foul + 0.05 * r[dfn].offside) {
       S[atk].offsides++ // 수비 라인이 높을수록 상대가 오프사이드에 자주 걸린다
     } else if (x < 0.43) {
       shoot(true)

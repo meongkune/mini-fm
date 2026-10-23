@@ -2,7 +2,8 @@ import { useState } from 'react'
 import { Kit, Flag } from '../components/Badges.jsx'
 import { CondBar } from '../components/Rating.jsx'
 import { PRESETS, ROLE_LABEL, buildSlots, fitOf, fitTone, parseShape, roleOf } from '../engine/formation.js'
-import { alignLineup, autoSlots, lineupOvr, playerOvr, teamOvr, useGame } from '../store.jsx'
+import { alignLineup, autoSlots, lineupOvr, myTactics, playerOvr, teamOvr, useGame } from '../store.jsx'
+import TacticsPanel from '../components/TacticsPanel.jsx'
 import { unavailable } from '../game/season.js'
 import NeedTeam from './NeedTeam.jsx'
 
@@ -207,14 +208,7 @@ export default function Tactics() {
 
       <div className="card">
         <h3>팀 지시</h3>
-        <h4>경기 운영</h4>
-        <OptionGroup options={MENTALITY} value={save.mentality} onChange={(mentality) => update({ mentality })} />
-        <h4>압박 강도</h4>
-        <OptionGroup options={PRESSING} value={save.pressing} onChange={(pressing) => update({ pressing })} />
-        <h4>수비 라인</h4>
-        <OptionGroup options={LINE_OPTS} value={save.line || 'normal'} onChange={(line) => update({ line })} />
-        <h4>템포</h4>
-        <OptionGroup options={TEMPO_OPTS} value={save.tempo || 'normal'} onChange={(tempo) => update({ tempo })} />
+        <TacticsPanel value={myTactics(save)} onChange={update} />
       </div>
 
       {slot !== null && (

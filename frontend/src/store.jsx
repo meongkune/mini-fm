@@ -91,6 +91,12 @@ export function teamOvr(team) {
   return Math.round(top.reduce((s, v) => s + v, 0) / top.length)
 }
 
+/** 저장된 내 팀 전술 (경기 엔진에 넘기는 형태) */
+export const myTactics = (save) => ({
+  formation: save.formation, mentality: save.mentality, pressing: save.pressing, line: save.line ?? 'normal', tempo: save.tempo ?? 'normal',
+  width: save.width ?? 50, passing: save.passing ?? 50, approach: save.approach || 'balanced', focus: save.focus || 'mixed', trap: !!save.trap, tackling: save.tackling || 'normal',
+})
+
 const hashStr = (t) => { let h = 2166136261; for (const c of String(t)) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return h >>> 0 }
 
 export const formationNeeds = shapeNeeds

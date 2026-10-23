@@ -1,11 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { buildSlots, fitOf, fitTone } from '../engine/formation.js'
-import { MAX_SUBS, advance, benchOf, createMatch, dropInjured, fillVacant, moveToVacant, predict, ratings, reshape, step, substitute, summarize, swapPositions } from '../engine/match.js'
+import { MAX_SUBS, advance, benchOf, createMatch, dropInjured, fillVacant, moveToVacant, predict, ratings, reshape, step, substitute, summarize, swapPositions, tacticalEdges } from '../engine/match.js'
+import { styleName } from '../engine/tactics.js'
 import { TEAM_TALKS, teamTalkEffect, unavailable as outReason } from '../game/season.js'
 import Rating, { CondBar } from '../components/Rating.jsx'
 import { Crest, Flag, Kit } from '../components/Badges.jsx'
-import { ink, kitColors, lineupOvr, onDark, playerOvr, short, teamOvr, useGame } from '../store.jsx'
+import { ink, kitColors, lineupOvr, myTactics, onDark, playerOvr, short, teamOvr, useGame } from '../store.jsx'
+import TacticsPanel from '../components/TacticsPanel.jsx'
 import MatchPitch from './MatchPitch.jsx'
 import NeedTeam from './NeedTeam.jsx'
 import { FormationPicker, LINE_OPTS, MENTALITY, OptionGroup, PRESSING, TEMPO_OPTS } from './Tactics.jsx'
@@ -41,7 +43,7 @@ export default function Match() {
     if (!ctx || !myTeam) return
     // 경기가 시작된 뒤에는(전술 변경으로 save가 바뀌어도) 다시 만들지 않는다
     if (matchRef.current?.key === fixtureKey && matchRef.current.minute > 0) return
-    const myCfg = { lineup: save.lineup, tactics: { formation: save.formation, mentality: save.mentality, pressing: save.pressing, line: save.line || 'normal', tempo: save.tempo || 'normal' } }
+    const myCfg = { lineup: save.lineup, tactics: myTactics(save) }
     const oppCfg = {} // 상대는 구단 고유 전형 + 자동 배치
     matchRef.current = createMatch({ home: ctx.teams[0], away: ctx.teams[1], homeCfg: isHome ? myCfg : oppCfg, awayCfg: isHome ? oppCfg : myCfg, status, myIdx })
     matchRef.current.key = fixtureKey
@@ -207,8 +209,11 @@ export default function Match() {
             </div>
             <Odds ctx={ctx} isHome={isHome} save={save} status={status} xi={mySide.onPitch} preFit={preFit} />
             <p className="small muted">상대 핵심: {[...opp.players].sort((a, b) => playerOvr(b) - playerOvr(a)).slice(0, 3).map((p) => `${p.name.split(' ').at(-1)}(${playerOvr(p)})`).join(' · ')}</p>
-            <p className="small">내 전술 <strong>{save.formation}</strong> · 자리 적합도 {preFit}% · {MENTALITY.find((m) => m[0] === save.mentality)[1]} · 압박 {PRESSING.find((p) => p[0] === save.pressing)[1]}</p>
-            <p className="small muted">상대 전형 <strong>{match.sides[1 - myIdx].tactics.formation}</strong></p>
+            <div className="matchup">
+              <div><span className="muted small">내 전술</span><strong>{save.formation} · {styleName(mySide.tactics)}</strong></div>
+              <div><span className="muted small">상대 전술</span><strong>{match.sides[1 - myIdx].tactics.formation} · {styleName(match.sides[1 - myIdx].tactics)}</strong></div>
+            </div>
+            <MatchupNotes match={match} ctx={ctx} myIdx={myIdx} />
             {promised.length > 0 && (
               <p className="small notice">🤝 선발 약속: {promised.map((p) => p.name).join(', ')} {promised.every((p) => save.lineup.includes(p.id)) ? '— 선발에 포함됨 ✓' : '— 선발에 없습니다! 약속을 어기면 사기가 크게 떨어집니다'}</p>
             )}
@@ -314,14 +319,7 @@ export default function Match() {
             <div className="sheet-head"><h3>전술 변경</h3><button className="btn ghost small" onClick={() => setSheet(null)}>완료</button></div>
             <h4>포메이션 <span className="muted small">(뛰고 있는 선수들이 새 자리로 재배치됩니다)</span></h4>
             <FormationPicker value={mySide.tactics.formation} onChange={(formation) => setTactics({ formation })} />
-            <h4>경기 운영</h4>
-            <OptionGroup options={MENTALITY} value={mySide.tactics.mentality} onChange={(mentality) => setTactics({ mentality })} />
-            <h4>압박 강도</h4>
-            <OptionGroup options={PRESSING} value={mySide.tactics.pressing} onChange={(pressing) => setTactics({ pressing })} />
-            <h4>수비 라인</h4>
-            <OptionGroup options={LINE_OPTS} value={mySide.tactics.line || 'normal'} onChange={(line) => setTactics({ line })} />
-            <h4>템포</h4>
-            <OptionGroup options={TEMPO_OPTS} value={mySide.tactics.tempo || 'normal'} onChange={(tempo) => setTactics({ tempo })} />
+            <TacticsPanel value={mySide.tactics} onChange={setTactics} compact />
           </div>
         </div>
       )}
@@ -527,11 +525,11 @@ function SubsSheet({ match, ctx, myIdx, rt, status, interrupt, kit, onSub, onFil
  */
 function Odds({ ctx, isHome, save, status, xi, preFit }) {
   const [res, setRes] = useState(null)
-  const key = [ctx.teams[0].id, ctx.teams[1].id, save.lineup.join(), save.formation, save.mentality, save.pressing, save.line, save.tempo].join('|')
+  const key = [ctx.teams[0].id, ctx.teams[1].id, save.lineup.join(), JSON.stringify(myTactics(save))].join('|')
   useEffect(() => {
     setRes(null)
     const t = setTimeout(() => {
-      const myCfg = { lineup: save.lineup, tactics: { formation: save.formation, mentality: save.mentality, pressing: save.pressing, line: save.line || 'normal', tempo: save.tempo || 'normal' } }
+      const myCfg = { lineup: save.lineup, tactics: myTactics(save) }
       const n = window.innerWidth < 700 ? 70 : 120
       setRes(predict(ctx.teams[0], ctx.teams[1], { homeCfg: isHome ? myCfg : {}, awayCfg: isHome ? {} : myCfg, status, n }))
     }, 60)
@@ -544,7 +542,6 @@ function Odds({ ctx, isHome, save, status, xi, preFit }) {
   const moraleFx = Math.round((0.92 + 0.16 * morale / 100 - 1) * 100)
   const condFx = Math.round((0.8 + 0.2 * cond / 100 - 1) * 100)
   const fitFx = preFit - 100
-  const ment = MENTALITY.find((m) => m[0] === save.mentality)
   const [w, d, l] = res ? (isHome ? [res.win, res.draw, res.loss] : [res.loss, res.draw, res.win]).map((x) => Math.round(x * 100)) : [0, 0, 0]
   return (
     <div className="odds">
@@ -559,8 +556,21 @@ function Odds({ ctx, isHome, save, status, xi, preFit }) {
         <span className={condFx < -3 ? 'bad' : ''}>🔋 컨디션 {cond}% <b>{pct(condFx)}</b></span>
         <span className={fitFx < -3 ? 'bad' : ''}>🧩 자리 적합도 <b>{pct(fitFx)}</b></span>
         <span>{isHome ? '🏟️ 홈 이점' : '✈️ 원정'}</span>
-        <span>{ment ? ment[1] : ''}</span>
+        <span>📋 {styleName(myTactics(save))}</span>
       </div>
     </div>
+  )
+}
+
+/** 전술 상성 분석: 우리에게 유리한 점(초록)과 상대가 우리를 공략하는 점(빨강) */
+function MatchupNotes({ match, ctx, myIdx }) {
+  const mine = tacticalEdges(match, ctx, myIdx).notes
+  const theirs = tacticalEdges(match, ctx, 1 - myIdx).notes
+  const list = [...mine.map(([t, s]) => [t, s]), ...theirs.filter(([t, s]) => s > 0 && !t.startsWith('중원')).map(([t]) => [`상대 ${t}`, -1])]
+  if (!list.length) return <p className="small muted">특별한 전술 상성은 없습니다. 선수 능력 싸움입니다.</p>
+  return (
+    <ul className="matchup-notes">
+      {list.map(([t, sgn], i) => <li key={i} className={sgn > 0 ? 'good' : 'bad'}>{sgn > 0 ? '▲' : '▼'} {t}</li>)}
+    </ul>
   )
 }
