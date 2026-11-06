@@ -169,6 +169,8 @@ try {
       r.players[pid] = { ...r.players[pid], gk: ['saves', 'anticipation', 'ballDistribution', 'aerial'].map(conv) }
       s.rad = true
       attrDone++
+    } else {
+      s.rad = 'none' // 레이더 자체가 없는 선수(404 등): 다시 요청하지 않는다 (매일 같은 선수를 다시 받느라 한도를 낭비하던 문제)
     }
     saveState()
   }
