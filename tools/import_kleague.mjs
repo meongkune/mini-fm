@@ -13,7 +13,9 @@ const KEY = process.env.API_FOOTBALL_KEY
 if (!KEY) throw new Error('API_FOOTBALL_KEY 환경 변수가 없습니다')
 
 let calls = 0
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 async function get(p) {
+  if (calls) await sleep(7000) // 무료 플랜은 분당 약 10회 제한
   calls++
   const res = await fetch(`https://v3.football.api-sports.io${p}`, { headers: { 'x-apisports-key': KEY } })
   const j = await res.json()
