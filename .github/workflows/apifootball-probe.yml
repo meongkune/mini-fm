@@ -1,0 +1,21 @@
+# API-Football 무료 플랜 시험 호출 (수동 실행 전용, 요청 3~4회)
+name: Probe API-Football
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: K리그 시험 호출
+        env:
+          API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+        run: node tools/apifootball_probe.mjs | tee -a "$GITHUB_STEP_SUMMARY"
