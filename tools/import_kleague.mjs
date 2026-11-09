@@ -42,9 +42,14 @@ const norm = (s = '') => s.toLowerCase().replace(/[^a-z]/g, '')
 const POS = { Goalkeeper: 'GK', Defender: 'DF', Midfielder: 'MF', Attacker: 'FW' }
 
 // 기존 위키데이터 목록의 로마자 이름 → 한글 이름
-const wiki = JSON.parse(fs.readFileSync(path.join(DATA, 'fa', 'korea.json'), 'utf8')).players
+// 한글 이름 사전: 지난번에 만든 K리그 파일(nameEn → name)과, 남아 있으면 예전 위키데이터 목록
 const koName = new Map()
-for (const p of wiki) { const k = norm(p.nameEn); if (k && !koName.has(k)) koName.set(k, p.name) }
+for (const f of [path.join(DATA, 'k-league', '2026.json'), path.join(DATA, 'fa', 'korea.json')]) {
+  if (!fs.existsSync(f)) continue
+  const j = JSON.parse(fs.readFileSync(f, 'utf8'))
+  const list = j.players || (j.teams || []).flatMap((t) => t.players)
+  for (const p of list) { const k = norm(p.nameEn); if (k && p.name && !koName.has(k)) koName.set(k, p.name) }
+}
 
 const leagueTeams = new Map()
 for (const [lid, tier] of [[292, 1], [293, 2]]) {
