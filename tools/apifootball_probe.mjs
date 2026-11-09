@@ -18,7 +18,8 @@ for (const l of leagues) {
 }
 const k1 = leagues.find((l) => /K League 1/i.test(l.league.name))
 if (!k1) process.exit(0)
-const season = k1.seasons.find((s) => s.current)?.year ?? k1.seasons.at(-1).year
+// 무료 플랜은 2022~2024 시즌만 → 구단 ID는 2024 시즌에서 가져오고, 명단은 시즌 없는 '현재 명단' 엔드포인트로
+const season = 2024
 
 // 2) 현재 시즌 팀 목록 (무료 플랜이 이 시즌을 허용하는지)
 const teams = await get(`/teams?league=${k1.league.id}&season=${season}`)
