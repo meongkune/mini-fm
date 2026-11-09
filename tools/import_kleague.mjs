@@ -19,6 +19,8 @@ async function get(p) {
   calls++
   const res = await fetch(`https://v3.football.api-sports.io${p}`, { headers: { 'x-apisports-key': KEY } })
   const j = await res.json()
+  if (j.errors?.rateLimit && (get.retry = (get.retry || 0) + 1) <= 3) { await sleep(65000); return get(p) } // 분당 한도: 1분 쉬고 다시
+  get.retry = 0
   if (j.errors && Object.keys(j.errors).length) throw new Error(`${p}: ${JSON.stringify(j.errors)}`)
   return j.response || []
 }
