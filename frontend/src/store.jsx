@@ -97,6 +97,15 @@ export const myTactics = (save) => ({
   width: save.width ?? 50, passing: save.passing ?? 50, approach: save.approach || 'balanced', focus: save.focus || 'mixed', trap: !!save.trap, tackling: save.tackling || 'normal',
 })
 
+/** 다른 리그 구단 명단에 이적 결과 반영: 내가 데려온 선수(gone)는 빼고, 내가 판 선수(abroad)는 넣는다 */
+export function applyWorld(team, lid, save) {
+  const gone = save.gone || {}
+  const extra = Object.values(save.abroad || {}).filter((a) => a.lid === lid && a.teamId === team.id).map((a) => a.player)
+  if (!extra.length && !team.players.some((p) => gone[p.id])) return team
+  return { ...team, players: [...team.players.filter((p) => !gone[p.id]), ...extra] }
+}
+const adjustMap = (map, save) => Object.fromEntries(Object.entries(map).map(([k, t]) => [k, applyWorld(t, k.split('/')[0], save)]))
+
 /** 이번 시즌 FFP 승점 감점 */
 const penaltyOf = (save) => (save.pointsPenalty?.seasonNo === (save.seasonNo || 1) ? save.pointsPenalty : null)
 
@@ -170,6 +179,7 @@ export function GameProvider({ children }) {
   const [save, setSave] = useState(loadSave)
   const [manager, setManager] = useState(() => { try { return JSON.parse(localStorage.getItem(MANAGER_KEY) || 'null') } catch { return null } })
   const [cupTeams, setCupTeams] = useState({}) // 대항전에 나오는 다른 리그 팀 (키: 리그/팀ID)
+  const [world, setWorld] = useState({}) // 이적 시장용 다른 리그 (K리그 포함): { 리그ID: { name, teams } }
 
   // 리그·시즌이 바뀔 때마다 해당 시즌 데이터를 불러온다
   useEffect(() => {
@@ -227,6 +237,22 @@ export function GameProvider({ children }) {
     })
   }, [data, save.teamId, save.rosters, save.signed?.length, save.youth?.length, save.finance?.base ? 1 : 0])
 
+  // 이적 시장: 내 리그 말고 모든 리그(K리그 같은 '이적 시장 전용' 리그 포함) 명단을 불러 둔다
+  useEffect(() => {
+    if (!data) return
+    let alive = true
+    ;(async () => {
+      const out = {}
+      for (const l of data.index.leagues) {
+        if (l.id === data.leagueId) continue
+        const s = l.seasons.find((x) => x.id === data.seasonId) || l.seasons[0]
+        try { out[l.id] = { name: l.name, teams: (await loadSeasonFile(s.file)).teams } } catch { /* 그 리그만 건너뜀 */ }
+      }
+      if (alive) setWorld(out)
+    })()
+    return () => { alive = false }
+  }, [data?.leagueId, data?.seasonId])
+
   // 대항전(챔스·유로파·컨퍼런스): 시즌마다 참가팀을 뽑고(다른 리그 파일을 읽어서) 대진을 만든다
   const seasonNo = save.seasonNo || 1
   useEffect(() => {
@@ -261,7 +287,7 @@ export function GameProvider({ children }) {
     const due = cups.map((c) => { const md = dueMatchday(c, save.round); return md && !myCupFixture(c, md, myKey) ? md : null })
     if (!due.some(Boolean)) return
     const leagueKeyed = Object.fromEntries(effectiveTeams(data.teams, save).map((t) => [cupKey(data.leagueId, t.id), t]))
-    const all = { ...cupTeams, ...leagueKeyed }
+    const all = { ...adjustMap(cupTeams, save), ...leagueKeyed }
     setSave((s) => {
       const st = engineStatus(s, Object.values(all))
       return { ...s, cups: s.cups.map((c, i) => (due[i] ? playMatchday(c, due[i], all, st, null, s.seasonNo || 1).cup : c)) }
@@ -282,7 +308,10 @@ export function GameProvider({ children }) {
     // 대항전: 내 팀 키, 다른 리그 팀을 포함한 팀 찾기, 내가 나가는 대회와 이번에 치를 매치데이
     const myKey = data && save.teamId ? cupKey(data.leagueId, save.teamId) : null
     const leagueKeyed = data ? Object.fromEntries(teams.map((t) => [cupKey(data.leagueId, t.id), t])) : {}
-    const allTeams = { ...cupTeams, ...leagueKeyed }
+    const allTeams = { ...adjustMap(cupTeams, save), ...leagueKeyed }
+    // 이적 시장용 다른 리그 구단 (내가 데려온 선수는 빠지고, 내가 판 선수는 들어간다)
+    const worldTeams = Object.entries(world).flatMap(([lid, L]) => L.teams.map((t) => ({ lid, league: L.name, team: applyWorld(t, lid, save) })))
+    const findTeam = (ref) => (typeof ref === 'string' ? teamsById[ref] : ref.lid === data?.leagueId ? teamsById[ref.id] : worldTeams.find((w) => w.lid === ref.lid && w.team.id === ref.id)?.team)
     const cups = save.cups || []
     const cupIdx = cups.findIndex((c) => c.teams.some((t) => t.key === myKey))
     const cup = cupIdx >= 0 ? cups[cupIdx] : null
@@ -306,7 +335,7 @@ export function GameProvider({ children }) {
       manager,
       saveManager(m) { setManager(m); try { localStorage.setItem(MANAGER_KEY, JSON.stringify(m)) } catch { /* 저장 실패 무시 */ } },
       data, error, save, teams, teamsById, myTeam, totalRounds, seasonOver, nextFixture, update, status,
-      cups, cup, cupIdx, cupMd, allTeams, myKey, cupState: cup ? cupStatus(cup, myKey) : null,
+      cups, cup, cupIdx, cupMd, allTeams, myKey, worldTeams, cupState: cup ? cupStatus(cup, myKey) : null,
       standings: data ? computeStandings(teams, save.results, penaltyOf(save)) : [],
       unread: (save.inbox || []).filter((x) => !x.read).length,
       /** 컨디션·부상·징계를 고려한 베스트 11 */
@@ -362,30 +391,44 @@ export function GameProvider({ children }) {
       },
       transferWindow: data ? windowState(save.round, data.schedule.length) : { open: false },
       /** 영입 제안: 상대 구단에 이적료 제시 → { verdict, reason, ask? } (이적 시장마다 같은 선수에 3번까지) */
-      bidFor(theirId, playerId, fee) {
+      bidFor(ref, playerId, fee) {
         if (!windowState(save.round, data.schedule.length).open) return { verdict: 'reject', reason: '이적 시장이 닫혀 있습니다.' }
         if (save.finance?.ban === (save.seasonNo || 1)) return { verdict: 'reject', reason: 'FFP 위반 징계로 이번 시즌에는 선수를 영입할 수 없습니다.' }
         const key = `${save.seasonNo || 1}-${windowState(save.round, data.schedule.length).label}-${playerId}`
         const tries = save.bidTalks?.[key] || 0
         if (tries >= PATIENCE) return { verdict: 'reject', reason: '"더 이상 이야기하지 않겠습니다." (이번 이적 시장 협상 횟수 소진)' }
-        const theirs = teamsById[theirId]
+        const theirs = findTeam(ref)
         const player = theirs.players.find((p) => p.id === playerId)
         const r = evaluateBid({ theirs, player, fee, status, value: valueOf(player, status[player.id], valueCtx(save, player, data.leagueId)) })
         setSave((s) => ({ ...s, bidTalks: { ...(s.bidTalks || {}), [key]: tries + 1 } }))
         return { ...r, tries: tries + 1 }
       },
       /** 이적 확정: 이적료 + 개인 조건(연봉은 선수 요구액) → { ok, reason } */
-      signTransfer(theirId, playerId, fee, years) {
-        const player = teamsById[theirId].players.find((p) => p.id === playerId)
+      signTransfer(ref, playerId, fee, years) {
+        const theirs = findTeam(ref)
+        const foreign = typeof ref !== 'string' && ref.lid !== data.leagueId
+        const theirId = typeof ref === 'string' ? ref : ref.id
+        const player = theirs.players.find((p) => p.id === playerId)
         const wage = Math.round(wageFor(player, data.leagueId) * 1.15 * 10) / 10
         if (myTeam.players.length >= ROSTER_MAX) return { ok: false, reason: `로스터가 가득 찼습니다 (${ROSTER_MAX}명).` }
         if ((save.finance?.cash ?? 0) < fee) return { ok: false, reason: `현금이 부족합니다 (보유 ${eur(save.finance?.cash ?? 0)} < 이적료 ${eur(fee)}).` }
         const billNow = wageBill(save, myTeam, data.leagueId)
         if (billNow + wage > wageBudget(save.finance)) return { ok: false, reason: `임금 예산 초과: 연봉 ${eur(wage)}을 더하면 ${eur(billNow + wage)} > 예산 ${eur(wageBudget(save.finance))}.` }
         setSave((s) => {
-          const moved = executeTransfer(s, teams, theirId, s.teamId, playerId, { contract: { until: (s.seasonNo || 1) + years - 1, wage } })
-          const item = news(s.round, 'trade', `✍️ 영입: ${player.name}`, `${teamsById[theirId].name}에서 이적료 ${eur(fee)}, 연봉 ${eur(wage)}/년 · ${years}년 계약.`, { read: true })
-          return { ...moved, finance: book(moved.finance, -fee), tradeLog: [...(s.tradeLog || []), { round: s.round, in: playerId, from: theirId, fee }], inbox: [item, ...(moved.inbox || [])] }
+          const contract = { until: (s.seasonNo || 1) + years - 1, wage }
+          // 다른 리그에서 데려오면: 선수 정보를 내 세이브에 복사하고, 원래 구단 명단에서는 빼 둔다
+          const moved = foreign
+            ? (() => {
+                const rosters = s.rosters || Object.fromEntries(teams.map((t) => [t.id, t.players.map((x) => x.id)]))
+                const used = new Set(myTeam.players.map((x) => x.number))
+                const number = !player.number || used.has(player.number) ? Array.from({ length: 98 }, (_, i) => i + 2).find((n) => !used.has(n)) : player.number
+                const abroad = { ...(s.abroad || {}) }
+                delete abroad[playerId]
+                return { ...s, signed: [...(s.signed || []).filter((x) => x.id !== playerId), { ...player, number, from: undefined }], rosters: { ...rosters, [s.teamId]: [...rosters[s.teamId].filter((id) => id !== playerId), playerId] }, gone: { ...(s.gone || {}), [playerId]: true }, abroad, contracts: { ...s.contracts, [playerId]: contract }, status: { ...s.status, [playerId]: { morale: 74, cond: 100 } } }
+              })()
+            : executeTransfer(s, teams, theirId, s.teamId, playerId, { contract })
+          const item = news(s.round, 'trade', `✍️ 영입: ${player.name}`, `${theirs.name}${foreign ? ` (${world[ref.lid]?.name})` : ''}에서 이적료 ${eur(fee)}, 연봉 ${eur(wage)}/년 · ${years}년 계약.`, { read: true })
+          return { ...moved, finance: book(moved.finance, -fee), tradeLog: [...(s.tradeLog || []), { round: s.round, in: playerId, from: theirId, lid: foreign ? ref.lid : undefined, fee }], inbox: [item, ...(moved.inbox || [])] }
         })
         return { ok: true, wage }
       },
@@ -419,7 +462,16 @@ export function GameProvider({ children }) {
           if (!playerId || !teamsById[s.teamId]?.players.some((p) => p.id === playerId)) return mark(s, '이미 선수 구성이 바뀌어 제안이 무효가 됐습니다.')
           if (!windowState(s.round, data.schedule.length).open) return mark(s, '이적 시장이 닫혀 진행할 수 없습니다.')
           const p = teamsById[s.teamId].players.find((x) => x.id === playerId)
-          const moved = executeTransfer(s, teams, s.teamId, teamId, playerId)
+          const lid = item.offer.lid
+          // 다른 리그 구단에 팔면: 내 명단에서 빼고, 그 구단 명단에 들어간 것으로 기록 (대항전 등에서 보인다)
+          const moved = lid && lid !== data.leagueId
+            ? (() => {
+                const rosters = s.rosters || Object.fromEntries(teams.map((t) => [t.id, t.players.map((x) => x.id)]))
+                const gone = { ...(s.gone || {}) }
+                delete gone[playerId]
+                return { ...s, rosters: { ...rosters, [s.teamId]: rosters[s.teamId].filter((id) => id !== playerId) }, lineup: s.lineup.map((id) => (id === playerId ? null : id)), forSale: (s.forSale || []).filter((id) => id !== playerId), gone, abroad: { ...(s.abroad || {}), [playerId]: { lid, teamId, player: { ...p } } } }
+              })()
+            : executeTransfer(s, teams, s.teamId, teamId, playerId)
           return mark({ ...moved, finance: book(moved.finance, fee), tradeLog: [...(s.tradeLog || []), { round: s.round, out: playerId, to: teamId, fee }] }, `${p.name}을(를) ${eur(fee)}에 팔았습니다.`)
         })
       },
@@ -595,7 +647,7 @@ export function GameProvider({ children }) {
           return
         }
         setSave((s) => {
-          const next = applyRound(s, { teamsById, schedule: data.schedule, myTeamId: s.teamId, mine })
+          const next = applyRound(s, { teamsById, schedule: data.schedule, myTeamId: s.teamId, mine, buyers: worldTeams })
           const mineIdx = mine.home === s.teamId ? 0 : 1
           const [gf, ga] = mineIdx === 0 ? mine.summary.score : [...mine.summary.score].reverse()
           const money = settleMatch(next, { team: myTeam, leagueId: data.leagueId, home: mineIdx === 0, result: Math.sign(gf - ga), totalRounds: data.schedule.length })
@@ -606,7 +658,7 @@ export function GameProvider({ children }) {
         })
       },
     }
-  }, [data, error, save, manager, cupTeams])
+  }, [data, error, save, manager, cupTeams, world])
 
   return <GameContext.Provider value={value}>{children}</GameContext.Provider>
 }

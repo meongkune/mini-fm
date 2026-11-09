@@ -33,7 +33,7 @@ export const news = (round, type, title, body, extra = {}) => ({ id: `${Date.now
  * 한 라운드 마무리: 내 경기 요약 + 나머지 경기 시뮬레이션 → 결과·기록·상태 갱신
  * @param mine { home, away, summary }
  */
-export function applyRound(save, { teamsById, schedule, myTeamId, mine }) {
+export function applyRound(save, { teamsById, schedule, myTeamId, mine, buyers = [] }) {
   const round = save.round
   const fixtures = schedule[round] || []
   const teams = Object.values(teamsById)
@@ -167,7 +167,7 @@ export function applyRound(save, { teamsById, schedule, myTeamId, mine }) {
         const s = st[p.id]
         const listed = (save.forSale || []).includes(p.id)
         if ((listed || s?.wantsOut) && (round + hash(p.id)) % (listed ? 1 : 2) === 0) {
-          inbox.push(...aiBidFor({ ...save, status: st }, teams, myTeamId, p.id, round))
+          inbox.push(...aiBidFor({ ...save, status: st }, teams, myTeamId, p.id, round, save.league, buyers))
         }
       }
     }

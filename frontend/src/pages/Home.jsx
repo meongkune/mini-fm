@@ -50,7 +50,7 @@ export default function Home() {
         </div>
 
         <div className="season-picker">
-          {data.index.leagues.map((l) => (
+          {data.index.leagues.filter((l) => !l.marketOnly).map((l) => (
             <div key={l.id} className="sp-league">
               <span className="sp-name">{l.name}<small>{l.country}</small></span>
               <div className="sp-chips">

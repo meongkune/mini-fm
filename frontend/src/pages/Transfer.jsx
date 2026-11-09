@@ -14,28 +14,33 @@ const SORTS = [['ovr', 'OVR'], ['value', '가치'], ['pot', '잠재력'], ['age'
 const stars = (n) => '★'.repeat(n) + '☆'.repeat(5 - n)
 
 export default function Transfer() {
-  const { myTeam, teams, teamsById, status, save, data, transferWindow, totalRounds, toggleSale, valueFor, setAskPrice } = useGame()
+  const { myTeam, teams, teamsById, status, save, data, transferWindow, totalRounds, toggleSale, valueFor, setAskPrice, worldTeams } = useGame()
   const [params] = useSearchParams()
   const [tab, setTab] = useState(params.get('tab') || 'buy')
   const [pos, setPos] = useState('전체')
   const [teamFilter, setTeamFilter] = useState('all')
+  const [leagueFilter, setLeagueFilter] = useState('all') // all | mine | 리그ID
   const [sort, setSort] = useState('ovr')
   const [q, setQ] = useState('')
   const [pick, setPick] = useState(null) // { p, t }
 
   const market = useMemo(() => {
     if (!myTeam) return []
-    return teams.filter((t) => t.id !== myTeam.id).flatMap((t) => t.players.map((p) => ({ p, t, v: valueFor(p), pot: potentialStars(p) })))
-  }, [teams, myTeam, status, save.pstats])
+    // 전 세계 이적 시장: 내 리그 다른 구단 + 다른 리그 구단(K리그 포함) 선수 전부
+    const mineLeague = data.index.leagues.find((l) => l.id === data.leagueId)?.name
+    const local = teams.filter((t) => t.id !== myTeam.id).map((t) => ({ lid: data.leagueId, league: mineLeague, team: t }))
+    return [...local, ...worldTeams].flatMap(({ lid, league, team: t }) => t.players.map((p) => ({ p, t, lid, league, v: valueFor(p), pot: potentialStars(p) })))
+  }, [teams, myTeam, status, save.pstats, worldTeams.length, save.gone, save.abroad])
   if (!myTeam) return <NeedTeam />
 
   const sorter = { ovr: (a, b) => playerOvr(b.p) - playerOvr(a.p), value: (a, b) => b.v - a.v, pot: (a, b) => b.pot - a.pot || a.p.age - b.p.age, age: (a, b) => a.p.age - b.p.age }[sort]
   const list = market
-    .filter(({ p, t }) => (pos === '전체' || p.pos === pos) && (teamFilter === 'all' || t.id === teamFilter) && (!q || p.name.toLowerCase().includes(q.toLowerCase())))
+    .filter(({ p, t, lid }) => (leagueFilter === 'all' || (leagueFilter === 'mine' ? lid === data.leagueId : lid === leagueFilter)) && (pos === '전체' || p.pos === pos) && (teamFilter === 'all' || `${lid}/${t.id}` === teamFilter) && (!q || `${p.name} ${p.nameEn || ''}`.toLowerCase().includes(q.toLowerCase())))
     .sort(sorter)
     .slice(0, 60)
   const mineList = [...myTeam.players].map((p) => ({ p, v: valueFor(p), pot: potentialStars(p) })).sort((a, b) => playerOvr(b.p) - playerOvr(a.p))
-  const byId = Object.fromEntries(teams.flatMap((t) => t.players).map((p) => [p.id, p]))
+  const byId = Object.fromEntries([...teams, ...worldTeams.map((w) => w.team)].flatMap((t) => t.players).concat(save.signed || []).concat(Object.values(save.abroad || {}).map((a) => a.player)).map((p) => [p.id, p]))
+  const clubName = (id, lid) => (lid && lid !== data.leagueId ? worldTeams.find((w) => w.lid === lid && w.team.id === id)?.team : teamsById[id])
   const f = save.finance || {}
   const bill = wageBill(save, myTeam, data.leagueId)
   const room = Math.max(0, wageBudget(f) - bill)
@@ -46,7 +51,7 @@ export default function Transfer() {
       <div className="section-head">
         <div>
           <h1>이적 시장</h1>
-          <p className="muted">이적료로 사고팝니다 · 상대 구단은 핵심 선수를 비싸게 부릅니다</p>
+          <p className="muted">전 세계 9개 리그 + K리그 선수를 이적료로 사고팝니다 · 상대 구단은 핵심 선수를 비싸게 부릅니다</p>
         </div>
         <span className={`pill ${transferWindow.open ? 'ok' : 'bad'}`}>{transferWindow.open ? `🟢 ${transferWindow.label}` : '🔒 닫힘'}</span>
       </div>
@@ -72,9 +77,14 @@ export default function Transfer() {
         <>
           <div className="filters">
             <input className="search" placeholder="선수 이름 검색" value={q} onChange={(e) => setQ(e.target.value)} />
+            <select value={leagueFilter} onChange={(e) => { setLeagueFilter(e.target.value); setTeamFilter('all') }}>
+              <option value="all">🌍 전체 리그</option>
+              <option value="mine">내 리그</option>
+              {data.index.leagues.filter((l) => l.id !== data.leagueId).map((l) => <option key={l.id} value={l.id}>{l.name}</option>)}
+            </select>
             <select value={teamFilter} onChange={(e) => setTeamFilter(e.target.value)}>
               <option value="all">전체 구단</option>
-              {teams.filter((t) => t.id !== myTeam.id).map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
+              {[...new Map(market.filter(({ lid }) => leagueFilter === 'all' || (leagueFilter === 'mine' ? lid === data.leagueId : lid === leagueFilter)).map(({ t, lid }) => [`${lid}/${t.id}`, t.name])).entries()].map(([k, n]) => <option key={k} value={k}>{n}</option>)}
             </select>
           </div>
           <div className="chips-scroll">
@@ -84,11 +94,11 @@ export default function Transfer() {
           </div>
           <div className="card flush">
             <ul className="mk">
-              {list.map(({ p, t, v, pot }) => (
+              {list.map(({ p, t, lid, league, v, pot }) => (
                 <li key={p.id}>
-                  <button className="mk-row" onClick={() => setPick({ p, t })}>
+                  <button className="mk-row" onClick={() => setPick({ p, t, lid })}>
                     <Crest team={t} />
-                    <span className="mk-name"><strong><Flag nation={p.nation} size={14} /> {p.name}</strong><small>{short(t)} · {p.role || p.pos} · {p.age}세{status[p.id]?.inj > 0 ? ' · 🚑' : ''}</small></span>
+                    <span className="mk-name"><strong><Flag nation={p.nation} size={14} /> {p.name}</strong><small>{short(t)}{lid !== data.leagueId ? ` · ${league}` : ''} · {p.role || p.pos} · {p.age}세{status[p.id]?.inj > 0 ? ' · 🚑' : ''}</small></span>
                     <span className="mk-pot" title="스카우트 잠재력 평가">{stars(pot)}</span>
                     <span className="mk-ovr">{playerOvr(p)}</span>
                     <span className="mk-val">{money(v)}</span>
@@ -136,19 +146,19 @@ export default function Transfer() {
           <h3>이번 시즌 이적</h3>
           <ul className="trade-log">
             {save.tradeLog.filter((t) => t.fee !== undefined).slice().reverse().map((t, i) => (
-              <li key={i}><span className="muted small">{t.round + 1}R</span> {t.in ? <>📥 {byId[t.in]?.name ?? t.in} ← <Crest team={teamsById[t.from]} size={16} /></> : <>📤 {byId[t.out]?.name ?? t.out} → <Crest team={teamsById[t.to]} size={16} /></>} <b>{eur(t.fee)}</b></li>
+              <li key={i}><span className="muted small">{t.round + 1}R</span> {t.in ? <>📥 {byId[t.in]?.name ?? t.in} ← <Crest team={clubName(t.from, t.lid)} size={16} /></> : <>📤 {byId[t.out]?.name ?? t.out} → <Crest team={clubName(t.to, t.lid)} size={16} /></>} <b>{eur(t.fee)}</b></li>
             ))}
           </ul>
         </div>
       )}
       <p className="muted small">잠재력 ★은 스카우트 평가입니다 · 총 {totalRounds}라운드 중 초반 4라운드·중반 4라운드에 이적 시장이 열립니다.</p>
-      {pick && <BidSheet p={pick.p} t={pick.t} onClose={() => setPick(null)} />}
+      {pick && <BidSheet p={pick.p} t={pick.t} lid={pick.lid} onClose={() => setPick(null)} />}
     </section>
   )
 }
 
 /** 영입 협상: 이적료 제시 → 상대 구단 답 → 수락되면 계약 기간 정하고 확정 */
-function BidSheet({ p, t, onClose }) {
+function BidSheet({ p, t, lid, onClose }) {
   const { bidFor, signTransfer, wageFor, transferWindow, valueFor } = useGame()
   const v = valueFor(p)
   const [fee, setFee] = useState(Math.round(v * 10) / 10)
@@ -156,8 +166,9 @@ function BidSheet({ p, t, onClose }) {
   const [reply, setReply] = useState(null)
   const [done, setDone] = useState(null)
   const wage = Math.round(wageFor(p) * 1.15 * 10) / 10
-  const offer = () => { setDone(null); setReply(bidFor(t.id, p.id, fee)) }
-  const sign = () => setDone(signTransfer(t.id, p.id, reply.verdict === 'counter' ? reply.ask : fee, years))
+  const ref = { lid, id: t.id }
+  const offer = () => { setDone(null); setReply(bidFor(ref, p.id, fee)) }
+  const sign = () => setDone(signTransfer(ref, p.id, reply.verdict === 'counter' ? reply.ask : fee, years))
   return (
     <div className="sheet-wrap" onClick={onClose}>
       <div className="sheet" onClick={(e) => e.stopPropagation()}>

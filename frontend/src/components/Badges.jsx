@@ -9,7 +9,7 @@ const crestUrls = (ext) => [`https://crests.football-data.org/${ext}.svg`, `http
 export function Crest({ team, size = 22, className = '' }) {
   const [step, setStep] = useState(0)
   if (!team) return null
-  const urls = team.ext ? crestUrls(team.ext) : []
+  const urls = team.logo ? [team.logo] : team.ext ? crestUrls(team.ext) : []
   if (step < urls.length) {
     return (
       <img

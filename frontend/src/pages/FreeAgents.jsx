@@ -1,4 +1,4 @@
-// FA 시장: K리그 한국 선수 + 방출·계약 만료 선수. 연봉·기간을 제시하면 선수가 판단한다
+// FA 시장: 방출·계약 만료 선수 (소속 구단 없음). 연봉·기간을 제시하면 선수가 판단한다
 import { useEffect, useMemo, useState } from 'react'
 import { loadSeasonFile } from '../api.js'
 import { Flag } from '../components/Badges.jsx'
@@ -11,28 +11,24 @@ const stars = (n) => '★'.repeat(n) + '☆'.repeat(5 - n)
 
 export default function FreeAgents() {
   const { myTeam, save, teams, wageFor, offerFA, faPreview } = useGame()
-  const [korea, setKorea] = useState(null)
   const [pos, setPos] = useState('전체')
-  const [src, setSrc] = useState('korea')
   const [q, setQ] = useState('')
   const [pick, setPick] = useState(null)
-  useEffect(() => { loadSeasonFile('fa/korea.json').then((d) => setKorea(d.players)).catch(() => setKorea([])) }, [])
 
   // 이미 어느 구단에 있는 선수는 제외
   const taken = useMemo(() => new Set(teams.flatMap((t) => t.players.map((p) => p.id))), [teams])
   const pool = useMemo(() => {
-    const base = src === 'korea' ? (korea || []) : (save.released || [])
+    const base = save.released || []
     return base.filter((p) => !taken.has(p.id) && (pos === '전체' || p.pos === pos) && (!q || `${p.name} ${p.nameEn || ''} ${p.lastClub || ''}`.toLowerCase().includes(q.toLowerCase())))
       .sort((a, b) => playerOvr(b) - playerOvr(a)).slice(0, 80)
-  }, [korea, save.released, taken, pos, q, src])
+  }, [save.released, taken, pos, q])
 
   if (!myTeam) return null
   return (
     <>
       <div className="row between" style={{ marginBottom: 8 }}>
         <div className="seg small inline">
-          <button className={src === 'korea' ? 'on' : ''} onClick={() => setSrc('korea')}>🇰🇷 한국 선수 {korea ? korea.length : ''}</button>
-          <button className={src === 'released' ? 'on' : ''} onClick={() => setSrc('released')}>방출·만료 {(save.released || []).filter((p) => !taken.has(p.id)).length}</button>
+          <button className="on">방출·계약 만료 {(save.released || []).filter((p) => !taken.has(p.id)).length}</button>
         </div>
         <span className="muted small">로스터 {myTeam.players.length}/{ROSTER_MAX}</span>
       </div>
@@ -43,8 +39,8 @@ export default function FreeAgents() {
       <div className="chips-scroll">
         {POS.map((x) => <button key={x} className={`chip ${pos === x ? 'on' : ''}`} onClick={() => setPos(x)}>{x}</button>)}
       </div>
-      {src === 'korea' && <p className="small muted" style={{ margin: '0 0 8px' }}>위키데이터에 등록된 K리그1·2 한국 선수입니다. 이적료 없이 연봉·계약금만으로 데려올 수 있습니다 (능력치는 게임용 생성값).</p>}
-      {!korea && src === 'korea' ? <div className="card muted">명단을 불러오는 중…</div> : (
+      <p className="small muted" style={{ margin: '0 0 8px' }}>소속 구단이 없는 선수(방출·계약 만료)는 이적료 없이 연봉·계약금만으로 데려올 수 있습니다. K리그 등 다른 리그 선수는 '영입' 탭에서 이적료로 데려오세요.</p>
+      {(
         <div className="card flush">
           <ul className="mk">
             {pool.map((p) => (

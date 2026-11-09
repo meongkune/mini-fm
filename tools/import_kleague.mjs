@@ -60,10 +60,11 @@ for (const [tid, { team, tier }] of leagueTeams) {
     const pos = POS[p.position]
     const ko = koName.get(norm(p.name))
     if (ko) matched++
-    // 수준: K리그1 평균 OVR ~66, K리그2 ~61 · 나이 곡선 · 고정 난수 · 등번호가 작을수록 주전일 가능성
+    // 수준: K리그1 평균 OVR ~62, K리그2 ~57 · 나이 곡선 · 고정 난수 · 등번호가 작을수록 주전일 가능성
     const age = p.age
     const starter = p.number && p.number <= 30 ? 2 : -2
-    const base = (tier === 1 ? 66 : 61) + (age < 21 ? -6 : age < 24 ? -2 : age <= 30 ? 1.5 : age <= 33 ? 0 : -3) + starter + (rnd(`k-${p.id}`) - 0.5) * 9
+    // 실제 K리그 시세(주전급 €1~3M)에 맞춰: 게임 몸값 식에서 OVR 70 ≈ €1.6M, 74 ≈ €4M
+    const base = (tier === 1 ? 62 : 57) + (age < 21 ? -6 : age < 24 ? -2 : age <= 30 ? 1.5 : age <= 33 ? 0 : -3) + starter + (rnd(`k-${p.id}`) - 0.5) * 7
     const bias = { GK: [-30, 1], DF: [-12, 4], MF: [0, 0], FW: [8, -18] }[pos]
     return {
       id: `KL-${p.id}`,
