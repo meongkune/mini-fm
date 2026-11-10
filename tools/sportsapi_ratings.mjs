@@ -140,8 +140,16 @@ try {
         const useRole = role && ROLE_POS[role] === p.pos ? role : p.role
         const age = ageOf(sp.dateOfBirthTimestamp) ?? p.age
         const ovr = ovrFrom(mv, age, useRole)
-        ratingsFor(p.lid).players[p.id] = { ...split(ovr, p.pos, GAP[useRole] ?? 0), ...(useRole ? { role: useRole } : {}) }
-        state.players[p.id] = { sid: sp.id, lid: p.lid, ovr, attr: state.players[p.id]?.attr || null }
+        // 이미 받아 둔 레이더(rad·gk)는 지우지 않는다 — 시장가치가 바뀐 만큼만 같이 옮긴다
+        //   (예전에는 새 객체로 덮어써서, 명단을 다시 받을 때 쌓아 둔 레이더가 사라졌다)
+        const prev = ratingsFor(p.lid).players[p.id]
+        const old = state.players[p.id]
+        const d = old?.ovr != null ? ovr - old.ovr : 0
+        const shift = (v) => Math.max(30, Math.min(99, Math.round(v + d)))
+        ratingsFor(p.lid).players[p.id] = prev && (prev.rad || prev.gk)
+          ? { ...prev, att: shift(prev.att), def: shift(prev.def), ...(prev.rad ? { rad: prev.rad.map(shift) } : {}), ...(prev.gk ? { gk: prev.gk.map(shift) } : {}), ...(useRole ? { role: useRole } : {}) }
+          : { ...split(ovr, p.pos, GAP[useRole] ?? 0), ...(useRole ? { role: useRole } : {}) }
+        state.players[p.id] = { ...(old || {}), sid: sp.id, lid: p.lid, ovr }
         matched++
       }
       t.done = today
