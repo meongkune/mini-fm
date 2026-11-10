@@ -32,8 +32,9 @@ jobs:
         run: |
           pip install --quiet "rembg[cpu]" pillow numpy
           pip uninstall -y -q opencv-python opencv-python-headless opencv-contrib-python || true
-          pip install --quiet opencv-python-headless
-          python -c "import cv2; cv2.CascadeClassifier; print('opencv', cv2.__version__)"
+          pip install --quiet --force-reinstall --no-deps opencv-python-headless==4.10.0.84
+          pip list 2>/dev/null | grep -i -E "opencv|numpy|rembg"
+          python -c "import cv2; print('opencv', cv2.__version__, cv2.__file__); cv2.CascadeClassifier"
       - name: 사진 통일
         shell: bash
         run: set -o pipefail; python tools/player_faces.py --teams "${{ inputs.teams }}" --leagues "${{ inputs.leagues }}" --limit ${{ inputs.limit }} | tee -a "$GITHUB_STEP_SUMMARY"
