@@ -1,0 +1,32 @@
+# 명단 점검 (수동 실행): 한 구단의 원본 명단을 football-data.org와 API-Football에서 받아 비교
+name: Squad check
+
+on:
+  workflow_dispatch:
+    inputs:
+      competition:
+        description: 'football-data 대회 코드 (PL, PD, BL1 …)'
+        default: PL
+      team:
+        description: '구단 이름 일부 (영문)'
+        default: Brentford
+      af_team:
+        description: 'API-Football 구단 ID (브렌트퍼드 55)'
+        default: '55'
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: 명단 비교
+        env:
+          FOOTBALL_DATA_TOKEN: ${{ secrets.FOOTBALL_DATA_TOKEN }}
+          API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+        run: node tools/squad_check.mjs "${{ inputs.competition }}" "${{ inputs.team }}" "${{ inputs.af_team }}" | tee -a "$GITHUB_STEP_SUMMARY"
