@@ -66,8 +66,24 @@ export function clubKOf(team) {
 // 내 구단 규모 (화면이 그리기 전에 store가 정한다 — 통화 표시처럼)
 let CLUB_K = 1
 export const setClubK = (k) => { CLUB_K = k || 1 }
-/** 연봉(€M/년): 능력가치 · 리그 · 구단 규모(기본: 내 구단) · 나이 */
-export function wageFor(p, leagueId, clubK = CLUB_K) {
+/**
+ * 연봉 + 출처: 실제 보도 연봉(TheSportsDB)이 있고 추정치의 0.4~2.5배 안이면 실제 값, 아니면 추정
+ *   크라우드소싱 값이라 주급이 섞이거나(×52로 맞춰 봄) 이적 전 낡은 값이 있다 → 추정치와 너무 다르면 버린다
+ * @returns { wage, real }
+ */
+export function wageInfo(p, leagueId, clubK = CLUB_K) {
+  const est = estWage(p, leagueId, clubK)
+  if (p.realWage) {
+    const fits = [p.realWage, r1(p.realWage * 52)].map((w) => ({ w, d: Math.abs(Math.log(w / est)) })).filter(({ w }) => w / est >= 0.4 && w / est <= 2.5).sort((a, b) => a.d - b.d)
+    if (fits.length) return { wage: Math.max(0.1, fits[0].w), real: true }
+  }
+  return { wage: est, real: false }
+}
+/** 연봉(€M/년): 실제 보도 값이 그럴듯하면 그것, 아니면 추정 */
+export const wageFor = (p, leagueId, clubK = CLUB_K) => wageInfo(p, leagueId, clubK).wage
+
+/** 추정 연봉(€M/년): 능력가치 · 리그 · 구단 규모(기본: 내 구단) · 나이 */
+function estWage(p, leagueId, clubK = CLUB_K) {
   const worth = 0.1 * Math.pow(10, (playerOvrOf(p) - 58 - (p.pos === 'GK' ? 3 : 0)) / 10) // 나이 할인 없는 능력가치(€M)
   const ageK = p.age <= 20 ? 0.5 : p.age <= 22 ? 0.7 : p.age <= 24 ? 0.85 : p.age <= 30 ? 1 : 0.92
   const star = 1 + clamp((worth - 60) / 300, 0, 0.35) // 슈퍼스타 프리미엄
@@ -80,7 +96,8 @@ export function contractOf(save, p, leagueId) {
   const c = save.contracts?.[p.id]
   if (c) return c
   const years = 1 + (hash(`ct-${p.id}`) % 5)
-  return { until: (save.seasonNo || 1) + years - 1, wage: wageFor(p, leagueId) }
+  const w = wageInfo(p, leagueId)
+  return { until: (save.seasonNo || 1) + years - 1, wage: w.wage, ...(w.real ? { real: true } : {}) }
 }
 export const yearsLeft = (save, c) => c.until - (save.seasonNo || 1) + 1
 
@@ -99,7 +116,7 @@ export function newFinance(team, leagueId) {
   const k = clubKOf(team)
   const wages = team.players.reduce((s, p) => s + wageFor(p, leagueId, k), 0)
   const base = r1(Math.max(8, wages * 1.15))
-  return { cash: r1(base * 0.15), base, ticket: 'normal', last: null, ledger: [], warn: 0, wageModel: 2, clubK: k } // 시작 자금은 빠듯하게 (시즌 수입의 15%)
+  return { cash: r1(base * 0.15), base, ticket: 'normal', last: null, ledger: [], warn: 0, wageModel: 3, clubK: k } // 시작 자금은 빠듯하게 (시즌 수입의 15%)
 }
 
 /** 주급 총액 (€M/년) */

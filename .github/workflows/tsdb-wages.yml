@@ -1,0 +1,50 @@
+# 실제 보도 연봉·키·등번호 (TheSportsDB 무료 API, 분당 30회) → 커밋 → GitHub Pages 재배포
+# 매일 50분씩 약 700명. 전체가 끝나면 90일마다 다시 받는다.
+name: Real wages (TheSportsDB)
+
+on:
+  schedule:
+    - cron: '40 1 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: tsdb-wages
+  cancel-in-progress: false
+
+jobs:
+  wages:
+    runs-on: ubuntu-latest
+    timeout-minutes: 70
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: 연봉·키·등번호 받기
+        env:
+          TSDB_MINUTES: '50'
+          PRIORITY_LEAGUES: 'bundesliga,premier-league'
+        run: node tools/tsdb_wages.mjs | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: 변경 사항 커밋
+        id: commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add frontend/public/data/wages tools/tsdb-state.json
+          if git diff --cached --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            git commit -m "data: 실제 보도 연봉·키·등번호 (TheSportsDB)"
+            git pull --rebase origin main
+            git push
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: GitHub Pages 재배포
+        if: steps.commit.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run pages.yml --ref main

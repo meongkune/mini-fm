@@ -10,7 +10,7 @@ import { checkPromises } from './game/relations.js'
 import { PATIENCE, evaluateBid, executeTransfer, valueCtx, windowState } from './game/trade.js'
 import { boardMidCheck, newBoard, nextSeason, seasonLabel, seasonReview } from './game/career.js'
 import { COMPS, CUP_LEAGUES, buildCups, cupKey, cupStatus, dueMatchday, myCupFixture, playMatchday } from './game/cup.js'
-import { FX_DEFAULT, clubKOf, setClubK, setFx, ROSTER_MAX, book, checkBankruptcy, contractOf, eur, faDecision, ffpReview, newFinance, prizeMoney, releaseCost, renewalAsk, settleMatch, wageBill, wageBudget, wageFor, wageShock } from './game/finance.js'
+import { FX_DEFAULT, clubKOf, setClubK, setFx, wageInfo, ROSTER_MAX, book, checkBankruptcy, contractOf, eur, faDecision, ffpReview, newFinance, prizeMoney, releaseCost, renewalAsk, settleMatch, wageBill, wageBudget, wageFor, wageShock } from './game/finance.js'
 import { afterMatchOwner, decide } from './game/owner.js'
 import { valueOf } from './game/trade.js'
 
@@ -262,8 +262,9 @@ export function GameProvider({ children }) {
     const team = effectiveTeams(data.teams, save).find((t) => t.id === save.teamId)
     if (!team) return
     const missing = team.players.filter((p) => !save.contracts?.[p.id])
-    const oldWages = save.finance && save.finance.wageModel !== 2 // 예전 연봉 공식(구단 규모 무시)으로 만든 세이브
-    if (save.finance?.base && !missing.length && !oldWages) return
+    const oldWages = save.finance && !(save.finance.wageModel >= 2) // 예전 연봉 공식(구단 규모 무시)으로 만든 세이브
+    const noReal = save.finance && save.finance.wageModel === 2 && team.players.some((p) => wageInfo(p, data.leagueId, save.finance.clubK).real) // 실제 연봉 반영 전
+    if (save.finance?.base && !missing.length && !oldWages && !noReal) return
     setSave((s) => {
       const k = s.finance?.clubK ?? clubKOf(team)
       setClubK(k)
@@ -285,13 +286,34 @@ export function GameProvider({ children }) {
           contracts[p.id] = { ...c, wage }
         }
         const ratio = before > 0 ? after / before : 1
-        finance = { ...s.finance, base: Math.round(s.finance.base * ratio * 10) / 10, clubK: k, wageModel: 2 }
+        finance = { ...s.finance, base: Math.round(s.finance.base * ratio * 10) / 10, clubK: k, wageModel: 3 }
         inbox.push(news(s.round, 'finance', '💶 연봉 체계 개편', `선수 연봉을 실제 시세에 맞게 다시 매겼습니다 (구단 규모·리그·선수 가치 기준). 연봉 총액 ${eur(before)} → ${eur(after)}/년, 구단 수입 규모도 같은 비율로 맞췄습니다. 협상으로 더 받던 선수는 그 비율을 유지합니다.`, { read: false }))
+      }
+      if (noReal || oldWages) {
+        // 실제 보도 연봉이 있는 선수는 계약 연봉을 그 값으로 (재계약으로 바뀐 계약은 그대로)
+        const fixed = []
+        let before = 0
+        let after = 0
+        for (const p of team.players) {
+          const c = contracts[p.id]
+          const w = wageInfo(p, data.leagueId, k)
+          if (!c || c.renewed || !w.real) continue
+          before += c.wage
+          after += w.wage
+          contracts[p.id] = { ...c, wage: w.wage, real: true }
+          fixed.push(p.name.split(' ').at(-1))
+        }
+        if (fixed.length) {
+          const bill = team.players.reduce((a, p) => a + (contracts[p.id]?.wage || 0), 0)
+          const prev = bill - after + before
+          finance = { ...(finance || s.finance), base: Math.round((finance || s.finance).base * (prev > 0 ? bill / prev : 1) * 10) / 10, clubK: k, wageModel: 3 }
+          inbox.push(news(s.round, 'finance', '📰 실제 보도 연봉 반영', `${fixed.length}명의 연봉을 실제 보도 값(TheSportsDB)으로 바꿨습니다: ${fixed.slice(0, 8).join(', ')}${fixed.length > 8 ? ' 외' : ''}. 나머지 선수는 추정 연봉입니다. 이 선수들 연봉 합계 ${eur(before)} → ${eur(after)}/년.`, { read: false }))
+        }
       }
       for (const p of missing) contracts[p.id] = contractOf({ ...s, contracts }, p, data.leagueId)
       const fresh = newFinance(team, data.leagueId)
       // 예전 재정(수입 기준 없음)은 수입 기준만 채운다
-      finance = finance ? { ...finance, base: finance.base || fresh.base, cash: finance.base ? finance.cash : fresh.cash, clubK: k, wageModel: 2 } : { ...fresh, clubK: k }
+      finance = finance ? { ...finance, base: finance.base || fresh.base, cash: finance.base ? finance.cash : fresh.cash, clubK: k, wageModel: 3 } : { ...fresh, clubK: k }
       return { ...s, contracts, finance, fans: s.fans ?? 60, inbox: [...inbox, ...(s.inbox || [])].slice(0, 80) }
     })
   }, [data, save.teamId, save.rosters, save.signed?.length, save.youth?.length, save.finance?.base ? 1 : 0])
@@ -558,7 +580,7 @@ export function GameProvider({ children }) {
           const kept = checkPromises(p, st, { round: s.round, sum: null, fitOk: false, renewed: true, sold: false }) // 재계약 약속을 지켰는지
           return {
             ...s,
-            contracts: { ...s.contracts, [p.id]: { until: (s.seasonNo || 1) + years, wage } },
+            contracts: { ...s.contracts, [p.id]: { until: (s.seasonNo || 1) + years, wage, renewed: true } }, // 재계약한 연봉은 협상 값 (실제 보도 연봉으로 덮지 않는다)
             status: { ...s.status, [p.id]: st },
             inbox: [...kept, news(s.round, 'contract', `✍️ ${p.name} 재계약`, `${years}년 연장, 연봉 ${eur(wage)}.`), ...(s.inbox || [])],
           }

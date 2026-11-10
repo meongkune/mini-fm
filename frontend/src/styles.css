@@ -1445,3 +1445,8 @@ html.desktop .mk-cards { grid-template-columns: repeat(2, 1fr); }
 .mkc-pos em { font-style: normal; font-size: .62rem; font-weight: 900; padding: 1px 4px; border-radius: 5px; background: var(--panel-2); }
 .photo-credit { margin: 4px 0 0; font-size: .64rem; }
 .photo-credit a { color: inherit; }
+
+/* 연봉 출처 */
+.wage-src { font-style: normal; font-size: .58rem; font-weight: 800; padding: 1px 5px; border-radius: 5px; margin-left: 4px; background: rgba(148,163,184,.18); color: #cbd5e1; vertical-align: 1px; white-space: nowrap; }
+.wage-src.real { background: rgba(34,197,94,.18); color: #86efac; }
+.ct-wage { display: inline-flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; }

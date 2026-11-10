@@ -22,16 +22,36 @@ async function getSeason(file) {
   const league = file.split('/')[0]
   if (!data.teams || file.startsWith('fa/')) return data
   // 능력치(SportsAPI)와 실제 사진(위키미디어 공용, data/photos/{리그}.json)을 함께 읽어 선수에 붙인다
-  const [ratings, photos] = await Promise.all([
+  const [ratings, photos, wages] = await Promise.all([
     getJson(dataUrl(`ratings/${league}.json`)).catch(() => null),
     getJson(dataUrl(`photos/${league}.json`)).catch(() => null),
+    getJson(dataUrl(`wages/${league}.json`)).catch(() => null), // 실제 보도 연봉·키·등번호 (TheSportsDB)
   ])
   const rp = ratings?.players || {}
   const ph = photos?.players || {}
+  const wg = wages?.players || {}
   return {
     ...data,
     ratingsAt: ratings?.updatedAt,
-    teams: data.teams.map((t) => ({ ...t, players: t.players.map((p) => ({ ...p, ...(rp[p.id] ? { ...rp[p.id], rated: true } : {}), ...(ph[p.id] ? { img: ph[p.id].img, imgPage: ph[p.id].page } : {}) })) })),
+    teams: data.teams.map((t) => {
+      // 실제 등번호: 같은 구단 안에서 겹치지 않을 때만 (football-data는 등번호가 없어 관례 번호를 붙여 두었다)
+      const real = t.players.map((p) => wg[p.id]?.n).filter(Boolean)
+      const dup = new Set(real.filter((n, i) => real.indexOf(n) !== i))
+      const taken = new Set(real)
+      return {
+        ...t,
+        players: t.players.map((p) => {
+          const w = wg[p.id]
+          const number = w?.n && !dup.has(w.n) ? w.n : taken.has(p.number) ? null : p.number
+          return {
+            ...p,
+            ...(rp[p.id] ? { ...rp[p.id], rated: true } : {}),
+            ...(ph[p.id] ? { img: ph[p.id].img, imgPage: ph[p.id].page } : {}),
+            ...(w ? { number, ...(w.w ? { realWage: w.w } : {}), ...(w.h ? { height: w.h } : {}) } : {}),
+          }
+        }),
+      }
+    }),
   }
 }
 

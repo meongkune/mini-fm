@@ -44,7 +44,7 @@ export default function PlayerSheet({ player, onClose, inLineup, onToggle }) {
           <PlayerCard player={player.img || !profile?.photo ? player : { ...player, img: profile.photo }} size="lg" color={teams.find((t) => t.players.some((p) => p.id === player.id))?.color} />
           <div className="ps-status">
             <div className="ps-row ps-stars"><AbilityStars player={player} /></div>
-            {profile?.height && <div className="ps-row"><span>키</span><b>{profile.height}cm</b></div>}
+            {(player.height || profile?.height) && <div className="ps-row"><span>키</span><b>{player.height || profile.height}cm</b></div>}
             <div className="ps-row"><span>나이 · 국적</span><b>{player.age}세 <Flag nation={player.nation} size={16} /> {nationName(player.nation)}</b></div>
             <div className="ps-row"><span>컨디션</span><b><CondBar value={st.cond} /> {Math.round(st.cond ?? 100)}%</b></div>
             <div className="ps-row"><span>사기</span><b className={`mood ${mTone}`}>{face} {mLabel}</b></div>
@@ -118,7 +118,7 @@ function ContractBox({ player, save, contractOf, renewalAsk, renew, onRelease, o
     <div className="contract-box">
       <h4>계약</h4>
       <div className="ct-grid">
-        <div><span>연봉</span><b>{eur(c.wage)}</b></div>
+        <div><span>연봉 <em className={`wage-src ${c.real ? 'real' : ''}`} title={c.real ? 'TheSportsDB에 올라온 실제 보도 연봉' : '실제 연봉 자료가 없거나 낡아서 능력·구단 규모로 추정'}>{c.real ? '실제 보도' : c.renewed ? '재계약' : '추정'}</em></span><b>{eur(c.wage)}</b></div>
         <div><span>남은 기간</span><b className={left <= 1 ? 'bad-text' : ''}>{left <= 1 ? '이번 시즌까지' : `${left}년`}</b></div>
         <div><span>방출 위약금</span><b>{eur(releaseCost(player))}</b></div>
       </div>

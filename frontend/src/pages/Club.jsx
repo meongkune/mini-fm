@@ -83,6 +83,7 @@ export default function Club() {
           <h3>선수단 · 계약</h3>
           <span className="muted small">{myTeam.players.length}/{ROSTER_MAX}명 · <Link className="link" to="/transfer?tab=fa">FA 시장 →</Link></span>
         </div>
+        <p className="small muted" style={{ marginTop: 0 }}>연봉 <em className="wage-src real">실제</em> = TheSportsDB 실제 보도 연봉 · <em className="wage-src">추정</em> = 자료가 없거나 낡아서 능력·구단 규모로 추정</p>
         {expiring.length > 0 && <p className="small bad-text">이번 시즌 끝나면 계약 만료: {expiring.length}명 — 선수를 눌러 재계약하세요.</p>}
         <ul className="contract-list">
           {[...myTeam.players].sort((a, b) => playerOvr(b) - playerOvr(a)).map((p) => {
@@ -94,7 +95,7 @@ export default function Club() {
                   <span className="lu-pos">{p.pos}</span>
                   <span className="lu-name">{p.name}</span>
                   <Stars value={abilityStars(p)} compact />
-                  <span className="ct-wage">{eur(c.wage)}/년</span>
+                  <span className="ct-wage">{eur(c.wage)}/년<em className={`wage-src ${c.real ? 'real' : ''}`}>{c.real ? '실제' : c.renewed ? '재계약' : '추정'}</em></span>
                   <span className={`ct-left ${left <= 1 ? 'warn' : ''}`}>{left <= 1 ? '만료 임박' : `${left}년`}</span>
                 </button>
               </li>
