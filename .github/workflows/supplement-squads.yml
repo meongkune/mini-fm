@@ -1,0 +1,51 @@
+# 명단 보충 (수동 실행): football-data 명단에 빠진 선수를 API-Football 현재 명단으로 채움 → 커밋 → Pages 재배포
+# API-Football 무료 플랜은 하루 100회라 리그 3~4개씩 나눠 실행한다 (리그당 약 20~26회)
+name: Supplement squads
+
+on:
+  workflow_dispatch:
+    inputs:
+      leagues:
+        description: '대회 코드 (공백으로 구분: PL BL1 PD SA FL1 DED PPL ELC BSA)'
+        default: 'PL BL1'
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: import-season
+  cancel-in-progress: false
+
+jobs:
+  supplement:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: 명단 보충
+        env:
+          FOOTBALL_DATA_TOKEN: ${{ secrets.FOOTBALL_DATA_TOKEN }}
+          API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+        run: node tools/supplement_squads.mjs ${{ inputs.leagues }} | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: 변경 사항 커밋
+        id: commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add frontend/public/data
+          if git diff --cached --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            git commit -m "data: 명단 보충 (API-Football 현재 명단)"
+            git pull --rebase origin main
+            git push
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: GitHub Pages 재배포
+        if: steps.commit.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run pages.yml --ref main
