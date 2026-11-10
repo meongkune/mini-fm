@@ -41,9 +41,10 @@ export default function PlayerSheet({ player, onClose, inLineup, onToggle }) {
           <button className="btn ghost small" onClick={onClose}>닫기</button>
         </div>
         <div className="ps-top">
-          <PlayerCard player={player} size="lg" color={teams.find((t) => t.players.some((p) => p.id === player.id))?.color} />
+          <PlayerCard player={player.img || !profile?.photo ? player : { ...player, img: profile.photo }} size="lg" color={teams.find((t) => t.players.some((p) => p.id === player.id))?.color} />
           <div className="ps-status">
             <div className="ps-row ps-stars"><AbilityStars player={player} /></div>
+            {profile?.height && <div className="ps-row"><span>키</span><b>{profile.height}cm</b></div>}
             <div className="ps-row"><span>나이 · 국적</span><b>{player.age}세 <Flag nation={player.nation} size={16} /> {nationName(player.nation)}</b></div>
             <div className="ps-row"><span>컨디션</span><b><CondBar value={st.cond} /> {Math.round(st.cond ?? 100)}%</b></div>
             <div className="ps-row"><span>사기</span><b className={`mood ${mTone}`}>{face} {mLabel}</b></div>
@@ -59,7 +60,6 @@ export default function PlayerSheet({ player, onClose, inLineup, onToggle }) {
         <h4>세부 능력치 <span className="muted small">1~20점 · {player.role || player.pos} 기준</span></h4>
         <AttrRadar player={player} color={teams.find((t) => t.players.some((p) => p.id === player.id))?.color} sta={player.sta} />
 
-        <WikiProfile profile={profile} />
 
         <h4>이번 시즌</h4>
         <div className="ps-season">
@@ -105,30 +105,6 @@ export default function PlayerSheet({ player, onClose, inLineup, onToggle }) {
 }
 
 // 위키백과 프로필: 사진·한글 이름·소개·키·생년월일·출생지·실제 포지션
-function WikiProfile({ profile }) {
-  if (!profile) return <div className="wiki loading"><span className="spin" /> 위키백과에서 프로필을 찾는 중…</div>
-  if (profile.none || profile.error) return <p className="wiki none small muted">{profile.error ? '프로필을 불러오지 못했습니다 (네트워크).' : '위키백과에 이 선수 문서가 없습니다.'}</p>
-  const text = profile.koExtract || profile.extract
-  return (
-    <div className="wiki">
-      <div className="wiki-head">
-        {profile.photo && <img className="wiki-photo" src={profile.photo} alt="" loading="lazy" />}
-        <div className="grow">
-          {profile.koName && <strong className="wiki-name">{profile.koName}</strong>}
-          <span className="muted small">{profile.en}{profile.desc ? ` · ${profile.desc}` : ''}</span>
-          <div className="wiki-facts">
-            {profile.height && <span>📏 {profile.height}cm</span>}
-            {profile.born && <span>🎂 {profile.born}</span>}
-            {profile.birthplace && <span>📍 {profile.birthplace}</span>}
-            {profile.positions?.length > 0 && <span>⚽ {profile.positions.slice(0, 2).join(' · ')}</span>}
-          </div>
-        </div>
-      </div>
-      {text && <p className="wiki-text">{text.length > 320 ? `${text.slice(0, 320)}…` : text}</p>}
-      <a className="wiki-src" href={profile.koUrl || profile.url} target="_blank" rel="noreferrer">출처: 위키백과 (CC BY-SA) · 사진: 위키미디어 공용 ↗</a>
-    </div>
-  )
-}
 
 // 계약: 남은 기간·연봉, 재계약 제안, 방출, 강제 매각
 function ContractBox({ player, save, contractOf, renewalAsk, renew, onRelease, onSell, releaseCost }) {
