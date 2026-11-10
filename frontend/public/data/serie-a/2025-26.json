@@ -5,7 +5,7 @@
   "country": "이탈리아"
  },
  "season": "2025-26",
- "updatedAt": "2026-10-20",
+ "updatedAt": "2026-11-10",
  "source": "football-data.org (SA 2025)",
  "zones": [
   {
@@ -50,11 +50,24 @@
      "ext": 8390
     },
     {
+     "id": "MIL-2476",
+     "name": "Pietro Terracciano",
+     "pos": "GK",
+     "role": "GK",
+     "number": 13,
+     "age": 35,
+     "att": 46,
+     "def": 71,
+     "sta": 64,
+     "nation": "Italy",
+     "ext": 2476
+    },
+    {
      "id": "MIL-251128",
      "name": "Lorenzo Torriani",
      "pos": "GK",
      "role": "GK",
-     "number": 13,
+     "number": 31,
      "age": 20,
      "att": 40,
      "def": 72,
@@ -63,17 +76,17 @@
      "ext": 251128
     },
     {
-     "id": "MIL-2476",
-     "name": "Pietro Terracciano",
+     "id": "MIL-265490",
+     "name": "Matteo Pittarella",
      "pos": "GK",
      "role": "GK",
-     "number": 31,
-     "age": 35,
-     "att": 46,
-     "def": 71,
-     "sta": 64,
+     "number": 41,
+     "age": 17,
+     "att": 40,
+     "def": 65,
+     "sta": 68,
      "nation": "Italy",
-     "ext": 2476
+     "ext": 265490
     },
     {
      "id": "MIL-32642",
@@ -172,6 +185,18 @@
      "ext": 278015
     },
     {
+     "id": "MIL-215616",
+     "name": "Davide Bartesaghi",
+     "pos": "DF",
+     "number": 26,
+     "age": 19,
+     "att": 56,
+     "def": 69,
+     "sta": 73,
+     "nation": "Italy",
+     "ext": 215616
+    },
+    {
      "id": "MIL-81299",
      "name": "Youssouf Fofana",
      "pos": "MF",
@@ -220,22 +245,10 @@
      "ext": 43
     },
     {
-     "id": "MIL-262882",
-     "name": "Jacopo Sardo",
-     "pos": "MF",
-     "number": 14,
-     "age": 20,
-     "att": 75,
-     "def": 76,
-     "sta": 73,
-     "nation": "Italy",
-     "ext": 262882
-    },
-    {
      "id": "MIL-144909",
      "name": "Ardon Jasari",
      "pos": "MF",
-     "number": 18,
+     "number": 14,
      "age": 23,
      "att": 76,
      "def": 71,
@@ -247,7 +260,7 @@
      "id": "MIL-3368",
      "name": "Adrien Rabiot",
      "pos": "MF",
-     "number": 20,
+     "number": 18,
      "age": 30,
      "att": 77,
      "def": 69,
@@ -259,13 +272,25 @@
      "id": "MIL-115245",
      "name": "Samuele Ricci",
      "pos": "MF",
-     "number": 17,
+     "number": 20,
      "age": 23,
      "att": 71,
      "def": 69,
      "sta": 72,
      "nation": "Italy",
      "ext": 115245
+    },
+    {
+     "id": "MIL-262882",
+     "name": "Jacopo Sardo",
+     "pos": "MF",
+     "number": 17,
+     "age": 20,
+     "att": 75,
+     "def": 76,
+     "sta": 73,
+     "nation": "Italy",
+     "ext": 262882
     },
     {
      "id": "MIL-273959",
@@ -338,6 +363,42 @@
      "sta": 70,
      "nation": "Portugal",
      "ext": 15892
+    },
+    {
+     "id": "MIL-289016",
+     "name": "Alex Castiello",
+     "pos": "FW",
+     "number": 23,
+     "age": 18,
+     "att": 72,
+     "def": 40,
+     "sta": 67,
+     "nation": "Italy",
+     "ext": 289016
+    },
+    {
+     "id": "MIL-290027",
+     "name": "Emanuele Borsani",
+     "pos": "FW",
+     "number": 25,
+     "age": 17,
+     "att": 71,
+     "def": 41,
+     "sta": 68,
+     "nation": "Italy",
+     "ext": 290027
+    },
+    {
+     "id": "MIL-282945",
+     "name": "Cheveyo Balentien",
+     "pos": "FW",
+     "number": 27,
+     "age": 18,
+     "att": 71,
+     "def": 40,
+     "sta": 70,
+     "nation": "Suriname",
+     "ext": 282945
     }
    ]
   },
@@ -387,6 +448,19 @@
      "sta": 85,
      "nation": "Denmark",
      "ext": 24293
+    },
+    {
+     "id": "FIO-292635",
+     "name": "Mattia Magalotti",
+     "pos": "GK",
+     "role": "GK",
+     "number": 41,
+     "age": 17,
+     "att": 40,
+     "def": 70,
+     "sta": 61,
+     "nation": "Italy",
+     "ext": 292635
     },
     {
      "id": "FIO-1847",
@@ -461,10 +535,22 @@
      "ext": 129801
     },
     {
+     "id": "FIO-2027",
+     "name": "Daniele Rugani",
+     "pos": "DF",
+     "number": 12,
+     "age": 31,
+     "att": 55,
+     "def": 76,
+     "sta": 71,
+     "nation": "Italy",
+     "ext": 2027
+    },
+    {
      "id": "FIO-267944",
      "name": "Eddy Kouadio",
      "pos": "DF",
-     "number": 12,
+     "number": 24,
      "age": 19,
      "att": 65,
      "def": 74,
@@ -473,16 +559,28 @@
      "ext": 267944
     },
     {
-     "id": "FIO-2027",
-     "name": "Daniele Rugani",
+     "id": "FIO-291719",
+     "name": "Edoardo Sadotti",
      "pos": "DF",
-     "number": 24,
-     "age": 31,
-     "att": 55,
-     "def": 76,
-     "sta": 71,
+     "number": 26,
+     "age": 19,
+     "att": 58,
+     "def": 72,
+     "sta": 61,
      "nation": "Italy",
-     "ext": 2027
+     "ext": 291719
+    },
+    {
+     "id": "FIO-217391",
+     "name": "Pietro Comuzzo",
+     "pos": "DF",
+     "number": 33,
+     "age": 20,
+     "att": 56,
+     "def": 71,
+     "sta": 67,
+     "nation": "Italy",
+     "ext": 217391
     },
     {
      "id": "FIO-177054",
@@ -581,6 +679,18 @@
      "ext": 291720
     },
     {
+     "id": "FIO-294577",
+     "name": "Salvatore Cianciulli",
+     "pos": "MF",
+     "number": 22,
+     "age": 16,
+     "att": 69,
+     "def": 68,
+     "sta": 71,
+     "nation": "Italy",
+     "ext": 294577
+    },
+    {
      "id": "FIO-102591",
      "name": "Roberto Piccoli",
      "pos": "FW",
@@ -651,6 +761,18 @@
      "sta": 67,
      "nation": "Italy",
      "ext": 292636
+    },
+    {
+     "id": "FIO-294382",
+     "name": "Giorgio Puzzoli",
+     "pos": "FW",
+     "number": 25,
+     "age": 19,
+     "att": 77,
+     "def": 46,
+     "sta": 66,
+     "nation": "Italy",
+     "ext": 294382
     }
    ]
   },
@@ -796,6 +918,30 @@
      "sta": 74,
      "nation": "Spain",
      "ext": 7646
+    },
+    {
+     "id": "ROM-149173",
+     "name": "Devyne Rensch",
+     "pos": "DF",
+     "number": 26,
+     "age": 22,
+     "att": 63,
+     "def": 74,
+     "sta": 82,
+     "nation": "Netherlands",
+     "ext": 149173
+    },
+    {
+     "id": "ROM-216023",
+     "name": "Jan Ziółkowski",
+     "pos": "DF",
+     "number": 33,
+     "age": 20,
+     "att": 56,
+     "def": 74,
+     "sta": 68,
+     "nation": "Poland",
+     "ext": 216023
     },
     {
      "id": "ROM-102395",
@@ -965,6 +1111,42 @@
      "sta": 83,
      "nation": "Argentina",
      "ext": 2046
+    },
+    {
+     "id": "ROM-274222",
+     "name": "Lorenzo Venturino",
+     "pos": "FW",
+     "number": 22,
+     "age": 19,
+     "att": 79,
+     "def": 57,
+     "sta": 70,
+     "nation": "Italy",
+     "ext": 274222
+    },
+    {
+     "id": "ROM-213033",
+     "name": "Robinio Vaz",
+     "pos": "FW",
+     "number": 25,
+     "age": 18,
+     "att": 79,
+     "def": 49,
+     "sta": 64,
+     "nation": "France",
+     "ext": 213033
+    },
+    {
+     "id": "ROM-130809",
+     "name": "Evan Ferguson",
+     "pos": "FW",
+     "number": 27,
+     "age": 20,
+     "att": 78,
+     "def": 48,
+     "sta": 71,
+     "nation": "Ireland",
+     "ext": 130809
     }
    ]
   },
@@ -1209,16 +1391,64 @@
      "ext": 152528
     },
     {
+     "id": "ATA-150669",
+     "name": "Yunus Musah",
+     "pos": "MF",
+     "number": 22,
+     "age": 22,
+     "att": 70,
+     "def": 71,
+     "sta": 80,
+     "nation": "USA",
+     "ext": 150669
+    },
+    {
+     "id": "ATA-7807",
+     "name": "Davide Zappacosta",
+     "pos": "MF",
+     "number": 19,
+     "age": 33,
+     "att": 66,
+     "def": 70,
+     "sta": 72,
+     "nation": "Italy",
+     "ext": 7807
+    },
+    {
+     "id": "ATA-1848",
+     "name": "Marten de Roon",
+     "pos": "MF",
+     "number": 21,
+     "age": 34,
+     "att": 66,
+     "def": 67,
+     "sta": 73,
+     "nation": "Netherlands",
+     "ext": 1848
+    },
+    {
      "id": "ATA-251012",
      "name": "Federico Cassa",
      "pos": "MF",
-     "number": 22,
+     "number": 23,
      "age": 19,
      "att": 75,
      "def": 67,
      "sta": 76,
      "nation": "Italy",
      "ext": 251012
+    },
+    {
+     "id": "ATA-285074",
+     "name": "Sergej Levak",
+     "pos": "MF",
+     "number": 25,
+     "age": 19,
+     "att": 72,
+     "def": 69,
+     "sta": 80,
+     "nation": "Croatia",
+     "ext": 285074
     },
     {
      "id": "ATA-2681",
@@ -1248,7 +1478,7 @@
      "id": "ATA-120679",
      "name": "Nikola Krstović",
      "pos": "FW",
-     "number": 19,
+     "number": 29,
      "age": 25,
      "att": 89,
      "def": 53,
@@ -1260,7 +1490,7 @@
      "id": "ATA-142140",
      "name": "Kamal Deen Sulemana",
      "pos": "FW",
-     "number": 21,
+     "number": 26,
      "age": 23,
      "att": 84,
      "def": 53,
@@ -1272,13 +1502,25 @@
      "id": "ATA-261018",
      "name": "Henry Camara",
      "pos": "FW",
-     "number": 29,
+     "number": 27,
      "age": 19,
      "att": 77,
      "def": 52,
      "sta": 69,
      "nation": "France",
      "ext": 261018
+    },
+    {
+     "id": "ATA-217758",
+     "name": "Dominic Vavassori",
+     "pos": "FW",
+     "number": 28,
+     "age": 19,
+     "att": 77,
+     "def": 43,
+     "sta": 76,
+     "nation": "Italy",
+     "ext": 217758
     }
    ]
   },
@@ -1451,6 +1693,30 @@
      "ext": 2292
     },
     {
+     "id": "BOL-289975",
+     "name": "Petar Markovic",
+     "pos": "DF",
+     "number": 14,
+     "age": 19,
+     "att": 57,
+     "def": 76,
+     "sta": 77,
+     "nation": "Austria",
+     "ext": 289975
+    },
+    {
+     "id": "BOL-256234",
+     "name": "Bodin Tomašević",
+     "pos": "DF",
+     "number": 16,
+     "age": 19,
+     "att": 50,
+     "def": 76,
+     "sta": 68,
+     "nation": "Montenegro",
+     "ext": 256234
+    },
+    {
      "id": "BOL-99013",
      "name": "Tommaso Pobega",
      "pos": "MF",
@@ -1490,7 +1756,7 @@
      "id": "BOL-34638",
      "name": "Lewis Ferguson",
      "pos": "MF",
-     "number": 16,
+     "number": 18,
      "age": 25,
      "att": 75,
      "def": 75,
@@ -1502,7 +1768,7 @@
      "id": "BOL-1841",
      "name": "Remo Freuler",
      "pos": "MF",
-     "number": 14,
+     "number": 20,
      "age": 33,
      "att": 71,
      "def": 75,
@@ -1514,7 +1780,7 @@
      "id": "BOL-23135",
      "name": "Nikola Moro",
      "pos": "MF",
-     "number": 18,
+     "number": 17,
      "age": 27,
      "att": 71,
      "def": 71,
@@ -1526,7 +1792,7 @@
      "id": "BOL-291032",
      "name": "Luca Lai",
      "pos": "MF",
-     "number": 20,
+     "number": 22,
      "age": 19,
      "att": 62,
      "def": 69,
@@ -1593,6 +1859,42 @@
      "sta": 73,
      "nation": "Italy",
      "ext": 2040
+    },
+    {
+     "id": "BOL-191379",
+     "name": "Benjamín Domínguez",
+     "pos": "FW",
+     "number": 23,
+     "age": 21,
+     "att": 72,
+     "def": 49,
+     "sta": 79,
+     "nation": "Argentina",
+     "ext": 191379
+    },
+    {
+     "id": "BOL-291035",
+     "name": "Francesco Castaldo",
+     "pos": "FW",
+     "number": 25,
+     "age": 18,
+     "att": 79,
+     "def": 41,
+     "sta": 62,
+     "nation": "Italy",
+     "ext": 291035
+    },
+    {
+     "id": "BOL-170891",
+     "name": "Santiago Castro",
+     "pos": "FW",
+     "number": 27,
+     "age": 20,
+     "att": 74,
+     "def": 45,
+     "sta": 76,
+     "nation": "Argentina",
+     "ext": 170891
     }
    ]
   },
@@ -1704,28 +2006,28 @@
      "ext": 59072
     },
     {
-     "id": "CAG-206136",
-     "name": "Marco Palestra",
-     "pos": "DF",
-     "number": 15,
-     "age": 20,
-     "att": 53,
-     "def": 72,
-     "sta": 60,
-     "nation": "Italy",
-     "ext": 206136
-    },
-    {
      "id": "CAG-170374",
      "name": "Adam Obert",
      "pos": "DF",
-     "number": 12,
+     "number": 15,
      "age": 22,
      "att": 55,
      "def": 70,
      "sta": 78,
      "nation": "Slovakia",
      "ext": 170374
+    },
+    {
+     "id": "CAG-206136",
+     "name": "Marco Palestra",
+     "pos": "DF",
+     "number": 12,
+     "age": 20,
+     "att": 53,
+     "def": 72,
+     "sta": 60,
+     "nation": "Italy",
+     "ext": 206136
     },
     {
      "id": "CAG-260246",
@@ -1738,6 +2040,30 @@
      "sta": 65,
      "nation": "Uruguay",
      "ext": 260246
+    },
+    {
+     "id": "CAG-192169",
+     "name": "Othniel Raterink",
+     "pos": "DF",
+     "number": 26,
+     "age": 19,
+     "att": 56,
+     "def": 66,
+     "sta": 59,
+     "nation": "Netherlands",
+     "ext": 192169
+    },
+    {
+     "id": "CAG-261228",
+     "name": "Riyad Idrissi",
+     "pos": "DF",
+     "number": 33,
+     "age": 20,
+     "att": 53,
+     "def": 66,
+     "sta": 63,
+     "nation": "Italy",
+     "ext": 261228
     },
     {
      "id": "CAG-185019",
@@ -1788,22 +2114,10 @@
      "ext": 188791
     },
     {
-     "id": "CAG-286712",
-     "name": "Nicola Grandu",
-     "pos": "MF",
-     "number": 14,
-     "age": 19,
-     "att": 68,
-     "def": 69,
-     "sta": 66,
-     "nation": "Italy",
-     "ext": 286712
-    },
-    {
      "id": "CAG-42760",
      "name": "Michael Folorunsho",
      "pos": "MF",
-     "number": 18,
+     "number": 14,
      "age": 27,
      "att": 66,
      "def": 69,
@@ -1812,10 +2126,34 @@
      "ext": 42760
     },
     {
+     "id": "CAG-2196",
+     "name": "Luca Mazzitelli",
+     "pos": "MF",
+     "number": 18,
+     "age": 29,
+     "att": 65,
+     "def": 66,
+     "sta": 64,
+     "nation": "Italy",
+     "ext": 2196
+    },
+    {
+     "id": "CAG-286712",
+     "name": "Nicola Grandu",
+     "pos": "MF",
+     "number": 20,
+     "age": 19,
+     "att": 68,
+     "def": 69,
+     "sta": 66,
+     "nation": "Italy",
+     "ext": 286712
+    },
+    {
      "id": "CAG-289720",
      "name": "Ivan Sulev",
      "pos": "MF",
-     "number": 20,
+     "number": 17,
      "age": 18,
      "att": 65,
      "def": 69,
@@ -1827,7 +2165,7 @@
      "id": "CAG-295721",
      "name": "Alessandro Russo",
      "pos": "MF",
-     "number": 17,
+     "number": 22,
      "age": 19,
      "att": 64,
      "def": 68,
@@ -1863,7 +2201,6 @@
      "id": "CAG-2298",
      "name": "Andrea Belotti",
      "pos": "FW",
-     "role": "ST",
      "number": 19,
      "age": 31,
      "att": 79,
@@ -1885,10 +2222,23 @@
      "ext": 114054
     },
     {
+     "id": "CAG-1925",
+     "name": "Leonardo Pavoletti",
+     "pos": "FW",
+     "role": "ST",
+     "number": 29,
+     "age": 36,
+     "att": 70,
+     "def": 41,
+     "sta": 58,
+     "nation": "Italy",
+     "ext": 1925
+    },
+    {
      "id": "CAG-259979",
      "name": "Agustín Albarracín",
      "pos": "FW",
-     "number": 29,
+     "number": 23,
      "age": 19,
      "att": 75,
      "def": 41,
@@ -1900,13 +2250,25 @@
      "id": "CAG-191289",
      "name": "Semih Kilicsoy",
      "pos": "FW",
-     "number": 23,
+     "number": 25,
      "age": 20,
      "att": 72,
      "def": 45,
      "sta": 71,
      "nation": "Turkey",
      "ext": 191289
+    },
+    {
+     "id": "CAG-289719",
+     "name": "Yael Trepy",
+     "pos": "FW",
+     "number": 27,
+     "age": 19,
+     "att": 69,
+     "def": 44,
+     "sta": 58,
+     "nation": "France",
+     "ext": 289719
     }
    ]
   },
@@ -1956,6 +2318,32 @@
      "sta": 73,
      "nation": "Italy",
      "ext": 2580
+    },
+    {
+     "id": "GEN-72523",
+     "name": "Benjamin Siegrist",
+     "pos": "GK",
+     "role": "GK",
+     "number": 41,
+     "age": 33,
+     "att": 40,
+     "def": 65,
+     "sta": 62,
+     "nation": "Switzerland",
+     "ext": 72523
+    },
+    {
+     "id": "GEN-286512",
+     "name": "Ernestas Lysionok",
+     "pos": "GK",
+     "role": "GK",
+     "number": 14,
+     "age": 18,
+     "att": 40,
+     "def": 69,
+     "sta": 58,
+     "nation": "Lithuania",
+     "ext": 286512
     },
     {
      "id": "GEN-44032",
@@ -2018,10 +2406,34 @@
      "ext": 188357
     },
     {
+     "id": "GEN-2443",
+     "name": "Stefano Sabelli",
+     "pos": "DF",
+     "number": 15,
+     "age": 32,
+     "att": 58,
+     "def": 70,
+     "sta": 61,
+     "nation": "Italy",
+     "ext": 2443
+    },
+    {
+     "id": "GEN-39330",
+     "name": "Johan Vásquez",
+     "pos": "DF",
+     "number": 12,
+     "age": 26,
+     "att": 55,
+     "def": 70,
+     "sta": 80,
+     "nation": "Mexico",
+     "ext": 39330
+    },
+    {
      "id": "GEN-292956",
      "name": "Mamedi Doucouré",
      "pos": "DF",
-     "number": 15,
+     "number": 24,
      "age": 18,
      "att": 55,
      "def": 72,
@@ -2033,25 +2445,13 @@
      "id": "GEN-252927",
      "name": "Alin Kumer",
      "pos": "DF",
-     "number": 12,
+     "number": 26,
      "age": 18,
      "att": 50,
      "def": 73,
      "sta": 70,
      "nation": "Slovenia",
      "ext": 252927
-    },
-    {
-     "id": "GEN-2443",
-     "name": "Stefano Sabelli",
-     "pos": "DF",
-     "number": 24,
-     "age": 32,
-     "att": 58,
-     "def": 70,
-     "sta": 61,
-     "nation": "Italy",
-     "ext": 2443
     },
     {
      "id": "GEN-24119",
@@ -2102,10 +2502,34 @@
      "ext": 153097
     },
     {
+     "id": "GEN-179561",
+     "name": "Ruslan Malinovskiy",
+     "pos": "MF",
+     "number": 18,
+     "age": 32,
+     "att": 70,
+     "def": 65,
+     "sta": 61,
+     "nation": "Ukraine",
+     "ext": 179561
+    },
+    {
+     "id": "GEN-172413",
+     "name": "Mikael Egill Ellertsson",
+     "pos": "MF",
+     "number": 20,
+     "age": 23,
+     "att": 67,
+     "def": 63,
+     "sta": 71,
+     "nation": "Iceland",
+     "ext": 172413
+    },
+    {
      "id": "GEN-203350",
      "name": "Alexsandro Amorim",
      "pos": "MF",
-     "number": 14,
+     "number": 17,
      "age": 20,
      "att": 74,
      "def": 71,
@@ -2118,37 +2542,13 @@
      "name": "Gaël Lafont",
      "pos": "MF",
      "role": "CM",
-     "number": 18,
+     "number": 22,
      "age": 19,
      "att": 69,
      "def": 69,
      "sta": 57,
      "nation": "France",
      "ext": 250853
-    },
-    {
-     "id": "GEN-179561",
-     "name": "Ruslan Malinovskiy",
-     "pos": "MF",
-     "number": 20,
-     "age": 32,
-     "att": 70,
-     "def": 65,
-     "sta": 61,
-     "nation": "Ukraine",
-     "ext": 179561
-    },
-    {
-     "id": "GEN-172413",
-     "name": "Mikael Egill Ellertsson",
-     "pos": "MF",
-     "number": 17,
-     "age": 23,
-     "att": 67,
-     "def": 63,
-     "sta": 71,
-     "nation": "Iceland",
-     "ext": 172413
     },
     {
      "id": "GEN-8471",
@@ -2212,16 +2612,40 @@
      "ext": 212573
     },
     {
+     "id": "GEN-97869",
+     "name": "Junior Messias",
+     "pos": "FW",
+     "number": 23,
+     "age": 34,
+     "att": 76,
+     "def": 42,
+     "sta": 70,
+     "nation": "Brazil",
+     "ext": 97869
+    },
+    {
      "id": "GEN-295711",
      "name": "Marco Romano",
      "pos": "FW",
-     "number": 23,
+     "number": 25,
      "age": 19,
      "att": 77,
      "def": 40,
      "sta": 65,
      "nation": "Italy",
      "ext": 295711
+    },
+    {
+     "id": "GEN-276932",
+     "name": "Xheto Nuredini",
+     "pos": "FW",
+     "number": 27,
+     "age": 18,
+     "att": 73,
+     "def": 44,
+     "sta": 69,
+     "nation": "Albania",
+     "ext": 276932
     }
    ]
   },
@@ -2260,11 +2684,24 @@
      "ext": 2819
     },
     {
+     "id": "INT-3470",
+     "name": "Yann Sommer",
+     "pos": "GK",
+     "role": "GK",
+     "number": 31,
+     "age": 36,
+     "att": 47,
+     "def": 74,
+     "sta": 79,
+     "nation": "Switzerland",
+     "ext": 3470
+    },
+    {
      "id": "INT-217713",
      "name": "Alessandro Calligaris",
      "pos": "GK",
      "role": "GK",
-     "number": 31,
+     "number": 41,
      "age": 20,
      "att": 44,
      "def": 76,
@@ -2383,6 +2820,31 @@
      "ext": 2180
     },
     {
+     "id": "INT-177319",
+     "name": "Iwo Kaczmarski",
+     "pos": "DF",
+     "role": "DM",
+     "number": 33,
+     "age": 21,
+     "att": 70,
+     "def": 76,
+     "sta": 68,
+     "nation": "Poland",
+     "ext": 177319
+    },
+    {
+     "id": "INT-273853",
+     "name": "Christos Alexiou",
+     "pos": "DF",
+     "number": 14,
+     "age": 20,
+     "att": 60,
+     "def": 78,
+     "sta": 63,
+     "nation": "Greece",
+     "ext": 273853
+    },
+    {
      "id": "INT-2200",
      "name": "Davide Frattesi",
      "pos": "MF",
@@ -2434,7 +2896,7 @@
      "id": "INT-264821",
      "name": "Simone Cinquegrano",
      "pos": "MF",
-     "number": 14,
+     "number": 18,
      "age": 21,
      "att": 78,
      "def": 77,
@@ -2446,7 +2908,7 @@
      "id": "INT-2097",
      "name": "Piotr Zieliński",
      "pos": "MF",
-     "number": 18,
+     "number": 20,
      "age": 31,
      "att": 78,
      "def": 75,
@@ -2458,7 +2920,7 @@
      "id": "INT-115074",
      "name": "Luis Henrique",
      "pos": "MF",
-     "number": 20,
+     "number": 17,
      "age": 23,
      "att": 72,
      "def": 80,
@@ -2467,10 +2929,34 @@
      "ext": 115074
     },
     {
+     "id": "INT-1754",
+     "name": "Hakan Çalhanoğlu",
+     "pos": "MF",
+     "number": 22,
+     "age": 31,
+     "att": 73,
+     "def": 76,
+     "sta": 75,
+     "nation": "Turkey",
+     "ext": 1754
+    },
+    {
+     "id": "INT-7795",
+     "name": "Henrikh Mkhitaryan",
+     "pos": "MF",
+     "number": 19,
+     "age": 36,
+     "att": 73,
+     "def": 68,
+     "sta": 79,
+     "nation": "Armenia",
+     "ext": 7795
+    },
+    {
      "id": "INT-271989",
      "name": "Thomas Berenbruch",
      "pos": "MF",
-     "number": 17,
+     "number": 21,
      "age": 20,
      "att": 73,
      "def": 77,
@@ -2507,7 +2993,7 @@
      "name": "Issiaka Kamate",
      "pos": "FW",
      "role": "RW",
-     "number": 19,
+     "number": 29,
      "age": 21,
      "att": 87,
      "def": 52,
@@ -2519,7 +3005,7 @@
      "id": "INT-3220",
      "name": "Lautaro Martínez",
      "pos": "FW",
-     "number": 21,
+     "number": 23,
      "age": 27,
      "att": 81,
      "def": 58,
@@ -2531,7 +3017,7 @@
      "id": "INT-215433",
      "name": "Francesco Esposito",
      "pos": "FW",
-     "number": 29,
+     "number": 25,
      "age": 20,
      "att": 80,
      "def": 46,
@@ -2587,6 +3073,32 @@
      "sta": 65,
      "nation": "Italy",
      "ext": 264814
+    },
+    {
+     "id": "JUV-2023",
+     "name": "Carlo Pinsoglio",
+     "pos": "GK",
+     "role": "GK",
+     "number": 41,
+     "age": 35,
+     "att": 40,
+     "def": 71,
+     "sta": 74,
+     "nation": "Italy",
+     "ext": 2023
+    },
+    {
+     "id": "JUV-189897",
+     "name": "Simone Scaglia",
+     "pos": "GK",
+     "role": "GK",
+     "number": 14,
+     "age": 21,
+     "att": 47,
+     "def": 71,
+     "sta": 75,
+     "nation": "Italy",
+     "ext": 189897
     },
     {
      "id": "JUV-124865",
@@ -2697,6 +3209,18 @@
      "ext": 153130
     },
     {
+     "id": "JUV-261736",
+     "name": "Stefano Turco",
+     "pos": "DF",
+     "number": 33,
+     "age": 20,
+     "att": 64,
+     "def": 78,
+     "sta": 71,
+     "nation": "Italy",
+     "ext": 261736
+    },
+    {
      "id": "JUV-6507",
      "name": "Weston McKennie",
      "pos": "MF",
@@ -2748,7 +3272,7 @@
      "id": "JUV-161142",
      "name": "Fabio Miretti",
      "pos": "MF",
-     "number": 14,
+     "number": 18,
      "age": 22,
      "att": 73,
      "def": 72,
@@ -2760,7 +3284,7 @@
      "id": "JUV-183018",
      "name": "Vasilije Adzic",
      "pos": "MF",
-     "number": 18,
+     "number": 20,
      "age": 19,
      "att": 73,
      "def": 65,
@@ -2841,16 +3365,40 @@
      "ext": 8924
     },
     {
+     "id": "JUV-150791",
+     "name": "Francisco Conceição",
+     "pos": "FW",
+     "number": 17,
+     "age": 22,
+     "att": 75,
+     "def": 52,
+     "sta": 70,
+     "nation": "Portugal",
+     "ext": 150791
+    },
+    {
      "id": "JUV-221357",
      "name": "Lorenzo Anghelè",
      "pos": "FW",
-     "number": 17,
+     "number": 22,
      "age": 20,
      "att": 83,
      "def": 47,
      "sta": 66,
      "nation": "Italy",
      "ext": 221357
+    },
+    {
+     "id": "JUV-191712",
+     "name": "Kenan Yıldız",
+     "pos": "FW",
+     "number": 25,
+     "age": 20,
+     "att": 78,
+     "def": 49,
+     "sta": 71,
+     "nation": "Turkey",
+     "ext": 191712
     }
    ]
   },
@@ -2900,6 +3448,19 @@
      "sta": 68,
      "nation": "Italy",
      "ext": 219746
+    },
+    {
+     "id": "LAZ-293598",
+     "name": "Giacomo Giacomone",
+     "pos": "GK",
+     "role": "GK",
+     "number": 41,
+     "age": 17,
+     "att": 40,
+     "def": 67,
+     "sta": 71,
+     "nation": "Italy",
+     "ext": 293598
     },
     {
      "id": "LAZ-2069",
@@ -2996,6 +3557,30 @@
      "sta": 75,
      "nation": "Portugal",
      "ext": 80459
+    },
+    {
+     "id": "LAZ-212456",
+     "name": "Oliver Nielsen",
+     "pos": "DF",
+     "number": 26,
+     "age": 22,
+     "att": 55,
+     "def": 78,
+     "sta": 69,
+     "nation": "Denmark",
+     "ext": 212456
+    },
+    {
+     "id": "LAZ-2088",
+     "name": "Elseid Hysaj",
+     "pos": "DF",
+     "number": 33,
+     "age": 31,
+     "att": 59,
+     "def": 75,
+     "sta": 76,
+     "nation": "Albania",
+     "ext": 2088
     },
     {
      "id": "LAZ-2329",
@@ -3165,6 +3750,30 @@
      "sta": 71,
      "nation": "Italy",
      "ext": 152787
+    },
+    {
+     "id": "LAZ-98299",
+     "name": "Boulaye Dia",
+     "pos": "FW",
+     "number": 22,
+     "age": 28,
+     "att": 81,
+     "def": 52,
+     "sta": 77,
+     "nation": "Senegal",
+     "ext": 98299
+    },
+    {
+     "id": "LAZ-217916",
+     "name": "Saná Fernandes",
+     "pos": "FW",
+     "number": 25,
+     "age": 19,
+     "att": 76,
+     "def": 52,
+     "sta": 71,
+     "nation": "Portugal",
+     "ext": 217916
     }
    ]
   },
@@ -3203,11 +3812,24 @@
      "ext": 136714
     },
     {
+     "id": "PAR-118920",
+     "name": "Zion Suzuki",
+     "pos": "GK",
+     "role": "GK",
+     "number": 31,
+     "age": 22,
+     "att": 45,
+     "def": 65,
+     "sta": 74,
+     "nation": "Japan",
+     "ext": 118920
+    },
+    {
      "id": "PAR-290120",
      "name": "Gianluca Astaldi",
      "pos": "GK",
      "role": "GK",
-     "number": 31,
+     "number": 41,
      "age": 19,
      "att": 42,
      "def": 68,
@@ -3240,22 +3862,10 @@
      "ext": 1839
     },
     {
-     "id": "PAR-286781",
-     "name": "Roberto D'Intino",
-     "pos": "DF",
-     "number": 4,
-     "age": 19,
-     "att": 54,
-     "def": 76,
-     "sta": 60,
-     "nation": "Italy",
-     "ext": 286781
-    },
-    {
      "id": "PAR-204310",
      "name": "Abdoulaye N'Diaye",
      "pos": "DF",
-     "number": 3,
+     "number": 4,
      "age": 23,
      "att": 62,
      "def": 71,
@@ -3267,7 +3877,7 @@
      "id": "PAR-97151",
      "name": "Lautaro Valenti",
      "pos": "DF",
-     "number": 6,
+     "number": 3,
      "age": 26,
      "att": 54,
      "def": 72,
@@ -3279,7 +3889,7 @@
      "id": "PAR-176730",
      "name": "Alessandro Circati",
      "pos": "DF",
-     "number": 15,
+     "number": 6,
      "age": 21,
      "att": 57,
      "def": 71,
@@ -3291,7 +3901,7 @@
      "id": "PAR-212729",
      "name": "Mariano Troilo",
      "pos": "DF",
-     "number": 12,
+     "number": 15,
      "age": 22,
      "att": 59,
      "def": 70,
@@ -3303,13 +3913,37 @@
      "id": "PAR-152734",
      "name": "Franco Carboni",
      "pos": "DF",
-     "number": 24,
+     "number": 12,
      "age": 22,
      "att": 53,
      "def": 71,
      "sta": 73,
      "nation": "Argentina",
      "ext": 152734
+    },
+    {
+     "id": "PAR-286781",
+     "name": "Roberto D'Intino",
+     "pos": "DF",
+     "number": 24,
+     "age": 19,
+     "att": 54,
+     "def": 76,
+     "sta": 60,
+     "nation": "Italy",
+     "ext": 286781
+    },
+    {
+     "id": "PAR-272754",
+     "name": "Sascha Britschgi",
+     "pos": "DF",
+     "number": 26,
+     "age": 18,
+     "att": 52,
+     "def": 69,
+     "sta": 55,
+     "nation": "Switzerland",
+     "ext": 272754
     },
     {
      "id": "PAR-60002",
@@ -3408,6 +4042,18 @@
      "ext": 289179
     },
     {
+     "id": "PAR-262826",
+     "name": "Alessandro Ciardi",
+     "pos": "MF",
+     "number": 22,
+     "age": 18,
+     "att": 67,
+     "def": 64,
+     "sta": 64,
+     "nation": "Italy",
+     "ext": 262826
+    },
+    {
      "id": "PAR-31881",
      "name": "Pontus Almqvist",
      "pos": "FW",
@@ -3468,16 +4114,40 @@
      "ext": 157538
     },
     {
+     "id": "PAR-184455",
+     "name": "Matija Frigan",
+     "pos": "FW",
+     "number": 23,
+     "age": 22,
+     "att": 73,
+     "def": 47,
+     "sta": 73,
+     "nation": "Croatia",
+     "ext": 184455
+    },
+    {
      "id": "PAR-263878",
      "name": "Daniel Mikołajewski",
      "pos": "FW",
-     "number": 23,
+     "number": 25,
      "age": 19,
      "att": 79,
      "def": 48,
      "sta": 66,
      "nation": "Poland",
      "ext": 263878
+    },
+    {
+     "id": "PAR-286780",
+     "name": "Alessandro Cardinali",
+     "pos": "FW",
+     "number": 27,
+     "age": 19,
+     "att": 77,
+     "def": 42,
+     "sta": 72,
+     "nation": "Italy",
+     "ext": 286780
     }
    ]
   },
@@ -3527,6 +4197,19 @@
      "sta": 72,
      "nation": "Italy",
      "ext": 2344
+    },
+    {
+     "id": "NAP-288535",
+     "name": "David Spinelli",
+     "pos": "GK",
+     "role": "GK",
+     "number": 41,
+     "age": 17,
+     "att": 40,
+     "def": 72,
+     "sta": 78,
+     "nation": "Italy",
+     "ext": 288535
     },
     {
      "id": "NAP-32754",
@@ -3625,6 +4308,30 @@
      "ext": 161310
     },
     {
+     "id": "NAP-1842",
+     "name": "Leonardo Spinazzola",
+     "pos": "DF",
+     "number": 26,
+     "age": 32,
+     "att": 63,
+     "def": 76,
+     "sta": 73,
+     "nation": "Italy",
+     "ext": 1842
+    },
+    {
+     "id": "NAP-291752",
+     "name": "Christian Garofalo",
+     "pos": "DF",
+     "number": 33,
+     "age": 18,
+     "att": 59,
+     "def": 71,
+     "sta": 71,
+     "nation": "Italy",
+     "ext": 291752
+    },
+    {
      "id": "NAP-126289",
      "name": "Billy Gilmour",
      "pos": "MF",
@@ -3721,6 +4428,30 @@
      "ext": 290025
     },
     {
+     "id": "NAP-290412",
+     "name": "Vincenzo Prisco",
+     "pos": "MF",
+     "number": 22,
+     "age": 17,
+     "att": 66,
+     "def": 76,
+     "sta": 78,
+     "nation": "Italy",
+     "ext": 290412
+    },
+    {
+     "id": "NAP-290021",
+     "name": "Francisco Baridó",
+     "pos": "MF",
+     "number": 19,
+     "age": 17,
+     "att": 69,
+     "def": 71,
+     "sta": 65,
+     "nation": "Argentina",
+     "ext": 290021
+    },
+    {
      "id": "NAP-7571",
      "name": "David Neres",
      "pos": "FW",
@@ -3748,7 +4479,7 @@
      "id": "NAP-152770",
      "name": "Rasmus Højlund",
      "pos": "FW",
-     "number": 19,
+     "number": 21,
      "age": 22,
      "att": 91,
      "def": 63,
@@ -3760,7 +4491,7 @@
      "id": "NAP-220542",
      "name": "Alisson Santos",
      "pos": "FW",
-     "number": 21,
+     "number": 29,
      "age": 22,
      "att": 90,
      "def": 57,
@@ -3772,7 +4503,7 @@
      "id": "NAP-3662",
      "name": "Romelu Lukaku",
      "pos": "FW",
-     "number": 29,
+     "number": 23,
      "age": 32,
      "att": 88,
      "def": 60,
@@ -3784,7 +4515,7 @@
      "id": "NAP-181795",
      "name": "Giovane Nascimento",
      "pos": "FW",
-     "number": 23,
+     "number": 25,
      "age": 21,
      "att": 82,
      "def": 54,
@@ -3840,6 +4571,19 @@
      "sta": 80,
      "nation": "Nigeria",
      "ext": 65480
+    },
+    {
+     "id": "UDI-1993",
+     "name": "Daniele Padelli",
+     "pos": "GK",
+     "role": "GK",
+     "number": 41,
+     "age": 39,
+     "att": 40,
+     "def": 63,
+     "sta": 71,
+     "nation": "Italy",
+     "ext": 1993
     },
     {
      "id": "UDI-8462",
@@ -4105,6 +4849,18 @@
      "sta": 58,
      "nation": "Senegal",
      "ext": 274050
+    },
+    {
+     "id": "UDI-285327",
+     "name": "Giulio Vinciati",
+     "pos": "FW",
+     "number": 23,
+     "age": 17,
+     "att": 70,
+     "def": 43,
+     "sta": 66,
+     "nation": "Italy",
+     "ext": 285327
     }
    ]
   },
@@ -4241,10 +4997,46 @@
      "ext": 2185
     },
     {
+     "id": "HVE-160756",
+     "name": "Rafik Belghali",
+     "pos": "DF",
+     "number": 24,
+     "age": 23,
+     "att": 60,
+     "def": 72,
+     "sta": 68,
+     "nation": "Algeria",
+     "ext": 160756
+    },
+    {
+     "id": "HVE-284061",
+     "name": "Fallou Cham",
+     "pos": "DF",
+     "number": 26,
+     "age": 22,
+     "att": 49,
+     "def": 73,
+     "sta": 69,
+     "nation": "Gambia",
+     "ext": 284061
+    },
+    {
+     "id": "HVE-175894",
+     "name": "Daniel Oyegoke",
+     "pos": "DF",
+     "number": 33,
+     "age": 22,
+     "att": 58,
+     "def": 70,
+     "sta": 62,
+     "nation": "England",
+     "ext": 175894
+    },
+    {
      "id": "HVE-292281",
      "name": "Andrej Popović",
      "pos": "DF",
-     "number": 24,
+     "number": 14,
      "age": 19,
      "att": 49,
      "def": 75,
@@ -4253,16 +5045,16 @@
      "ext": 292281
     },
     {
-     "id": "HVE-160756",
-     "name": "Rafik Belghali",
+     "id": "HVE-272448",
+     "name": "William Feola",
      "pos": "DF",
-     "number": 26,
-     "age": 23,
-     "att": 60,
-     "def": 72,
-     "sta": 68,
-     "nation": "Algeria",
-     "ext": 160756
+     "number": 16,
+     "age": 19,
+     "att": 52,
+     "def": 71,
+     "sta": 71,
+     "nation": "Italy",
+     "ext": 272448
     },
     {
      "id": "HVE-6629",
@@ -4304,7 +5096,7 @@
      "id": "HVE-10887",
      "name": "Sandi Lovric",
      "pos": "MF",
-     "number": 16,
+     "number": 18,
      "age": 27,
      "att": 79,
      "def": 72,
@@ -4316,7 +5108,7 @@
      "id": "HVE-213187",
      "name": "Jean-Daniel Akpa-Akpro",
      "pos": "MF",
-     "number": 14,
+     "number": 20,
      "age": 32,
      "att": 74,
      "def": 76,
@@ -4328,7 +5120,7 @@
      "id": "HVE-2006",
      "name": "Roberto Gagliardini",
      "pos": "MF",
-     "number": 18,
+     "number": 17,
      "age": 31,
      "att": 70,
      "def": 76,
@@ -4340,7 +5132,7 @@
      "id": "HVE-178723",
      "name": "Ali Al Musrati",
      "pos": "MF",
-     "number": 20,
+     "number": 22,
      "age": 29,
      "att": 69,
      "def": 76,
@@ -4352,13 +5144,25 @@
      "id": "HVE-102047",
      "name": "Cheikh Niasse",
      "pos": "MF",
-     "number": 17,
+     "number": 19,
      "age": 25,
      "att": 69,
      "def": 70,
      "sta": 63,
      "nation": "Senegal",
      "ext": 102047
+    },
+    {
+     "id": "HVE-137978",
+     "name": "Tomáš Suslov",
+     "pos": "MF",
+     "number": 21,
+     "age": 23,
+     "att": 66,
+     "def": 66,
+     "sta": 72,
+     "nation": "Slovakia",
+     "ext": 137978
     },
     {
      "id": "HVE-193027",
@@ -4388,7 +5192,7 @@
      "id": "HVE-124473",
      "name": "Amin Sarr",
      "pos": "FW",
-     "number": 19,
+     "number": 29,
      "age": 24,
      "att": 83,
      "def": 53,
@@ -4400,7 +5204,7 @@
      "id": "HVE-178445",
      "name": "Daniel Mosquera",
      "pos": "FW",
-     "number": 21,
+     "number": 23,
      "age": 25,
      "att": 84,
      "def": 49,
@@ -4412,13 +5216,26 @@
      "id": "HVE-105081",
      "name": "Kieron Bowie",
      "pos": "FW",
-     "number": 29,
+     "number": 25,
      "age": 22,
      "att": 76,
      "def": 45,
      "sta": 64,
      "nation": "Scotland",
      "ext": 105081
+    },
+    {
+     "id": "HVE-228738",
+     "name": "Luca Monticelli",
+     "pos": "FW",
+     "role": "ST",
+     "number": 27,
+     "age": 20,
+     "att": 74,
+     "def": 49,
+     "sta": 75,
+     "nation": "Belgium",
+     "ext": 228738
     }
    ]
   },
@@ -4468,6 +5285,19 @@
      "sta": 52,
      "nation": "Italy",
      "ext": 2143
+    },
+    {
+     "id": "CRE-276439",
+     "name": "Marco Cassin",
+     "pos": "GK",
+     "role": "GK",
+     "number": 41,
+     "age": 17,
+     "att": 40,
+     "def": 62,
+     "sta": 56,
+     "nation": "Italy",
+     "ext": 276439
     },
     {
      "id": "CRE-175839",
@@ -4566,6 +5396,30 @@
      "ext": 249351
     },
     {
+     "id": "CRE-2145",
+     "name": "Matteo Bianchetti",
+     "pos": "DF",
+     "number": 26,
+     "age": 32,
+     "att": 50,
+     "def": 64,
+     "sta": 70,
+     "nation": "Italy",
+     "ext": 2145
+    },
+    {
+     "id": "CRE-124704",
+     "name": "Tommaso Barbieri",
+     "pos": "DF",
+     "number": 33,
+     "age": 22,
+     "att": 48,
+     "def": 61,
+     "sta": 59,
+     "nation": "Italy",
+     "ext": 124704
+    },
+    {
      "id": "CRE-2362",
      "name": "Alberto Grassi",
      "pos": "MF",
@@ -4662,6 +5516,18 @@
      "ext": 156527
     },
     {
+     "id": "CRE-294496",
+     "name": "Simone Lottici Tessadri",
+     "pos": "MF",
+     "number": 22,
+     "age": 19,
+     "att": 65,
+     "def": 58,
+     "sta": 69,
+     "nation": "Italy",
+     "ext": 294496
+    },
+    {
      "id": "CRE-42179",
      "name": "David Okereke",
      "pos": "FW",
@@ -4710,29 +5576,40 @@
      "ext": 144651
     },
     {
-     "id": "CRE-220307",
-     "name": "Adrian Lickūnas",
-     "pos": "FW",
-     "number": 29,
-     "age": 19,
-     "att": 70,
-     "def": 40,
-     "sta": 52,
-     "nation": "Lithuania",
-     "ext": 220307
-    },
-    {
      "id": "CRE-3330",
      "name": "Jamie Vardy",
      "pos": "FW",
-     "role": "ST",
-     "number": 23,
+     "number": 29,
      "age": 38,
      "att": 70,
      "def": 40,
      "sta": 57,
      "nation": "England",
      "ext": 3330
+    },
+    {
+     "id": "CRE-4409",
+     "name": "Milan Đurić",
+     "pos": "FW",
+     "number": 23,
+     "age": 35,
+     "att": 67,
+     "def": 40,
+     "sta": 58,
+     "nation": "Bosnia-Herzegovina",
+     "ext": 4409
+    },
+    {
+     "id": "CRE-294283",
+     "name": "Nouroudine Faye",
+     "pos": "FW",
+     "number": 25,
+     "age": 18,
+     "att": 67,
+     "def": 40,
+     "sta": 56,
+     "nation": "Italy",
+     "ext": 294283
     }
    ]
   },
@@ -4782,6 +5659,19 @@
      "sta": 75,
      "nation": "Kosovo",
      "ext": 81179
+    },
+    {
+     "id": "SAS-41384",
+     "name": "Stefano Turati",
+     "pos": "GK",
+     "role": "GK",
+     "number": 41,
+     "age": 23,
+     "att": 40,
+     "def": 61,
+     "sta": 65,
+     "nation": "Italy",
+     "ext": 41384
     },
     {
      "id": "SAS-105441",
@@ -4892,6 +5782,30 @@
      "ext": 189153
     },
     {
+     "id": "SAS-246656",
+     "name": "Pedro Felipe",
+     "pos": "DF",
+     "number": 33,
+     "age": 21,
+     "att": 55,
+     "def": 66,
+     "sta": 64,
+     "nation": "Brazil",
+     "ext": 246656
+    },
+    {
+     "id": "SAS-289601",
+     "name": "Tommaso Macchioni",
+     "pos": "DF",
+     "number": 14,
+     "age": 19,
+     "att": 53,
+     "def": 71,
+     "sta": 66,
+     "nation": "Italy",
+     "ext": 289601
+    },
+    {
      "id": "SAS-147020",
      "name": "Daniel Boloca",
      "pos": "MF",
@@ -4943,25 +5857,13 @@
      "id": "SAS-150821",
      "name": "Edoardo Iannoni",
      "pos": "MF",
-     "number": 14,
+     "number": 18,
      "age": 24,
      "att": 67,
      "def": 67,
      "sta": 78,
      "nation": "Italy",
      "ext": 150821
-    },
-    {
-     "id": "SAS-189844",
-     "name": "Luca Lipani",
-     "pos": "MF",
-     "number": 18,
-     "age": 20,
-     "att": 61,
-     "def": 69,
-     "sta": 61,
-     "nation": "Italy",
-     "ext": 189844
     },
     {
      "id": "SAS-122340",
@@ -4976,10 +5878,22 @@
      "ext": 122340
     },
     {
+     "id": "SAS-189844",
+     "name": "Luca Lipani",
+     "pos": "MF",
+     "number": 17,
+     "age": 20,
+     "att": 61,
+     "def": 69,
+     "sta": 61,
+     "nation": "Italy",
+     "ext": 189844
+    },
+    {
      "id": "SAS-289603",
      "name": "Christian Frangella",
      "pos": "MF",
-     "number": 17,
+     "number": 22,
      "age": 18,
      "att": 61,
      "def": 57,
@@ -5046,6 +5960,30 @@
      "sta": 77,
      "nation": "Australia",
      "ext": 175891
+    },
+    {
+     "id": "SAS-2202",
+     "name": "Domenico Berardi",
+     "pos": "FW",
+     "number": 23,
+     "age": 31,
+     "att": 72,
+     "def": 40,
+     "sta": 66,
+     "nation": "Italy",
+     "ext": 2202
+    },
+    {
+     "id": "SAS-111561",
+     "name": "Luca Moro",
+     "pos": "FW",
+     "number": 25,
+     "age": 24,
+     "att": 70,
+     "def": 46,
+     "sta": 62,
+     "nation": "Italy",
+     "ext": 111561
     }
    ]
   },
@@ -5084,17 +6022,17 @@
      "ext": 23318
     },
     {
-     "id": "PIS-291140",
-     "name": "Tommaso Guizzo",
+     "id": "PIS-2142",
+     "name": "Nicolas",
      "pos": "GK",
      "role": "GK",
      "number": 31,
-     "age": 16,
+     "age": 37,
      "att": 40,
-     "def": 62,
-     "sta": 65,
-     "nation": "Italy",
-     "ext": 291140
+     "def": 61,
+     "sta": 56,
+     "nation": "Brazil",
+     "ext": 2142
     },
     {
      "id": "PIS-2490",
@@ -5121,22 +6059,10 @@
      "ext": 3064
     },
     {
-     "id": "PIS-260722",
-     "name": "Rosen Bozhinov",
-     "pos": "DF",
-     "number": 4,
-     "age": 20,
-     "att": 55,
-     "def": 63,
-     "sta": 57,
-     "nation": "Bulgaria",
-     "ext": 260722
-    },
-    {
      "id": "PIS-213265",
      "name": "Raúl Albiol",
      "pos": "DF",
-     "number": 3,
+     "number": 4,
      "age": 39,
      "att": 49,
      "def": 64,
@@ -5148,7 +6074,7 @@
      "id": "PIS-267901",
      "name": "Daniel Denoon",
      "pos": "DF",
-     "number": 6,
+     "number": 3,
      "age": 21,
      "att": 54,
      "def": 62,
@@ -5157,28 +6083,40 @@
      "ext": 267901
     },
     {
-     "id": "PIS-206658",
-     "name": "Francesco Coppola",
-     "pos": "DF",
-     "number": 15,
-     "age": 20,
-     "att": 51,
-     "def": 61,
-     "sta": 54,
-     "nation": "Italy",
-     "ext": 206658
-    },
-    {
      "id": "PIS-2148",
      "name": "Antonio Caracciolo",
      "pos": "DF",
-     "number": 12,
+     "number": 6,
      "age": 35,
      "att": 48,
      "def": 61,
      "sta": 67,
      "nation": "Italy",
      "ext": 2148
+    },
+    {
+     "id": "PIS-260722",
+     "name": "Rosen Bozhinov",
+     "pos": "DF",
+     "number": 15,
+     "age": 20,
+     "att": 55,
+     "def": 63,
+     "sta": 57,
+     "nation": "Bulgaria",
+     "ext": 260722
+    },
+    {
+     "id": "PIS-206658",
+     "name": "Francesco Coppola",
+     "pos": "DF",
+     "number": 12,
+     "age": 20,
+     "att": 51,
+     "def": 61,
+     "sta": 54,
+     "nation": "Italy",
+     "ext": 206658
     },
     {
      "id": "PIS-191977",
@@ -5253,22 +6191,10 @@
      "ext": 16265
     },
     {
-     "id": "PIS-206715",
-     "name": "Ebenezer Akinsanmiro",
-     "pos": "MF",
-     "number": 20,
-     "age": 20,
-     "att": 69,
-     "def": 64,
-     "sta": 69,
-     "nation": "Nigeria",
-     "ext": 206715
-    },
-    {
      "id": "PIS-420",
      "name": "Mattéo Tramoni",
      "pos": "MF",
-     "number": 17,
+     "number": 20,
      "age": 25,
      "att": 66,
      "def": 66,
@@ -5280,13 +6206,50 @@
      "id": "PIS-130695",
      "name": "Malthe Hojholt",
      "pos": "MF",
-     "number": 22,
+     "number": 17,
      "age": 24,
      "att": 66,
      "def": 62,
      "sta": 59,
      "nation": "Denmark",
      "ext": 130695
+    },
+    {
+     "id": "PIS-165887",
+     "name": "Samuele Angori",
+     "pos": "MF",
+     "number": 22,
+     "age": 21,
+     "att": 66,
+     "def": 60,
+     "sta": 60,
+     "nation": "Italy",
+     "ext": 165887
+    },
+    {
+     "id": "PIS-2037",
+     "name": "Juan Cuadrado",
+     "pos": "MF",
+     "role": "RM",
+     "number": 19,
+     "age": 37,
+     "att": 68,
+     "def": 58,
+     "sta": 61,
+     "nation": "Colombia",
+     "ext": 2037
+    },
+    {
+     "id": "PIS-206715",
+     "name": "Ebenezer Akinsanmiro",
+     "pos": "MF",
+     "number": 21,
+     "age": 20,
+     "att": 69,
+     "def": 64,
+     "sta": 69,
+     "nation": "Nigeria",
+     "ext": 206715
     },
     {
      "id": "PIS-7690",
@@ -5316,7 +6279,7 @@
      "id": "PIS-2436",
      "name": "Stefano Moreo",
      "pos": "FW",
-     "number": 19,
+     "number": 29,
      "age": 32,
      "att": 76,
      "def": 48,
@@ -5328,7 +6291,7 @@
      "id": "PIS-182274",
      "name": "Samuel Iling-Junior",
      "pos": "FW",
-     "number": 21,
+     "number": 23,
      "age": 21,
      "att": 77,
      "def": 41,
@@ -5340,7 +6303,7 @@
      "id": "PIS-114025",
      "name": "Filip Stojilković",
      "pos": "FW",
-     "number": 29,
+     "number": 24,
      "age": 25,
      "att": 72,
      "def": 45,
@@ -5352,13 +6315,49 @@
      "id": "PIS-216210",
      "name": "Rafiu Durosinmi",
      "pos": "FW",
-     "number": 23,
+     "number": 25,
      "age": 22,
      "att": 70,
      "def": 40,
      "sta": 63,
      "nation": "Nigeria",
      "ext": 216210
+    },
+    {
+     "id": "PIS-213819",
+     "name": "Henrik Meister",
+     "pos": "FW",
+     "number": 26,
+     "age": 21,
+     "att": 69,
+     "def": 40,
+     "sta": 64,
+     "nation": "Denmark",
+     "ext": 213819
+    },
+    {
+     "id": "PIS-283745",
+     "name": "Roberts Bočs",
+     "pos": "FW",
+     "number": 27,
+     "age": 19,
+     "att": 70,
+     "def": 40,
+     "sta": 69,
+     "nation": "Latvia",
+     "ext": 283745
+    },
+    {
+     "id": "PIS-265504",
+     "name": "Lorenzo Tosi",
+     "pos": "FW",
+     "number": 28,
+     "age": 17,
+     "att": 69,
+     "def": 40,
+     "sta": 63,
+     "nation": "Italy",
+     "ext": 265504
     }
    ]
   },
@@ -5473,7 +6472,6 @@
      "id": "TOR-280",
      "name": "Guillermo Maripán",
      "pos": "DF",
-     "role": "CB",
      "number": 15,
      "age": 31,
      "att": 68,
@@ -5520,6 +6518,30 @@
      "ext": 8438
     },
     {
+     "id": "TOR-265154",
+     "name": "Rafa Obrador",
+     "pos": "DF",
+     "number": 33,
+     "age": 21,
+     "att": 61,
+     "def": 74,
+     "sta": 66,
+     "nation": "Spain",
+     "ext": 265154
+    },
+    {
+     "id": "TOR-214546",
+     "name": "Luca Marianucci",
+     "pos": "DF",
+     "number": 14,
+     "age": 21,
+     "att": 53,
+     "def": 68,
+     "sta": 75,
+     "nation": "Italy",
+     "ext": 214546
+    },
+    {
      "id": "TOR-6563",
      "name": "Valentino Lazaro",
      "pos": "MF",
@@ -5545,22 +6567,10 @@
      "ext": 7843
     },
     {
-     "id": "TOR-273396",
-     "name": "Sergiu Perciun",
-     "pos": "MF",
-     "number": 7,
-     "age": 19,
-     "att": 75,
-     "def": 74,
-     "sta": 61,
-     "nation": "Moldova",
-     "ext": 273396
-    },
-    {
      "id": "TOR-166329",
      "name": "Matteo Prati",
      "pos": "MF",
-     "number": 16,
+     "number": 7,
      "age": 21,
      "att": 75,
      "def": 72,
@@ -5572,7 +6582,7 @@
      "id": "TOR-179558",
      "name": "Cesare Casadei",
      "pos": "MF",
-     "number": 14,
+     "number": 16,
      "age": 22,
      "att": 73,
      "def": 74,
@@ -5617,6 +6627,30 @@
      "ext": 131119
     },
     {
+     "id": "TOR-190831",
+     "name": "Gvidas Gineitis",
+     "pos": "MF",
+     "number": 22,
+     "age": 21,
+     "att": 69,
+     "def": 67,
+     "sta": 71,
+     "nation": "Lithuania",
+     "ext": 190831
+    },
+    {
+     "id": "TOR-273396",
+     "name": "Sergiu Perciun",
+     "pos": "MF",
+     "number": 19,
+     "age": 19,
+     "att": 75,
+     "def": 74,
+     "sta": 61,
+     "nation": "Moldova",
+     "ext": 273396
+    },
+    {
      "id": "TOR-59075",
      "name": "Sandro Kulenović",
      "pos": "FW",
@@ -5644,7 +6678,7 @@
      "id": "TOR-4119",
      "name": "Che Adams",
      "pos": "FW",
-     "number": 19,
+     "number": 21,
      "age": 29,
      "att": 85,
      "def": 53,
@@ -5656,7 +6690,7 @@
      "id": "TOR-1789",
      "name": "Giovanni Simeone",
      "pos": "FW",
-     "number": 21,
+     "number": 29,
      "age": 30,
      "att": 79,
      "def": 54,
@@ -5665,17 +6699,41 @@
      "ext": 1789
     },
     {
+     "id": "TOR-2271",
+     "name": "Duván Zapata",
+     "pos": "FW",
+     "number": 23,
+     "age": 34,
+     "att": 75,
+     "def": 55,
+     "sta": 64,
+     "nation": "Colombia",
+     "ext": 2271
+    },
+    {
      "id": "TOR-226987",
      "name": "Zannetos Savva",
      "pos": "FW",
      "role": "RW",
-     "number": 29,
+     "number": 25,
      "age": 19,
      "att": 78,
      "def": 49,
      "sta": 70,
      "nation": "Cyprus",
      "ext": 226987
+    },
+    {
+     "id": "TOR-290877",
+     "name": "Zalán Kugyela",
+     "pos": "FW",
+     "number": 27,
+     "age": 18,
+     "att": 78,
+     "def": 46,
+     "sta": 58,
+     "nation": "Hungary",
+     "ext": 290877
     }
    ]
   },
@@ -5727,6 +6785,19 @@
      "ext": 56649
     },
     {
+     "id": "USL-283194",
+     "name": "Plamen Penev",
+     "pos": "GK",
+     "role": "GK",
+     "number": 41,
+     "age": 17,
+     "att": 40,
+     "def": 61,
+     "sta": 61,
+     "nation": "Bulgaria",
+     "ext": 283194
+    },
+    {
      "id": "USL-77469",
      "name": "Antonino Gallo",
      "pos": "DF",
@@ -5775,22 +6846,10 @@
      "ext": 113590
     },
     {
-     "id": "USL-285135",
-     "name": "Matías Pérez",
-     "pos": "DF",
-     "number": 6,
-     "age": 20,
-     "att": 57,
-     "def": 74,
-     "sta": 72,
-     "nation": "Chile",
-     "ext": 285135
-    },
-    {
      "id": "USL-150530",
      "name": "Jamil Siebert",
      "pos": "DF",
-     "number": 15,
+     "number": 6,
      "age": 23,
      "att": 53,
      "def": 72,
@@ -5799,28 +6858,40 @@
      "ext": 150530
     },
     {
-     "id": "USL-246341",
-     "name": "Tiago Gabriel",
-     "pos": "DF",
-     "number": 12,
-     "age": 20,
-     "att": 57,
-     "def": 70,
-     "sta": 71,
-     "nation": "Portugal",
-     "ext": 246341
-    },
-    {
      "id": "USL-185129",
      "name": "Danilo Veiga",
      "pos": "DF",
-     "number": 24,
+     "number": 15,
      "age": 22,
      "att": 55,
      "def": 70,
      "sta": 70,
      "nation": "Portugal",
      "ext": 185129
+    },
+    {
+     "id": "USL-285135",
+     "name": "Matías Pérez",
+     "pos": "DF",
+     "number": 12,
+     "age": 20,
+     "att": 57,
+     "def": 74,
+     "sta": 72,
+     "nation": "Chile",
+     "ext": 285135
+    },
+    {
+     "id": "USL-246341",
+     "name": "Tiago Gabriel",
+     "pos": "DF",
+     "number": 24,
+     "age": 20,
+     "att": 57,
+     "def": 70,
+     "sta": 71,
+     "nation": "Portugal",
+     "ext": 246341
     },
     {
      "id": "USL-70286",
@@ -5907,10 +6978,34 @@
      "ext": 188103
     },
     {
+     "id": "USL-177262",
+     "name": "Oumar Ngom",
+     "pos": "MF",
+     "number": 17,
+     "age": 21,
+     "att": 70,
+     "def": 67,
+     "sta": 70,
+     "nation": "Mauritania",
+     "ext": 177262
+    },
+    {
+     "id": "USL-176076",
+     "name": "Sadik Fofana",
+     "pos": "MF",
+     "number": 22,
+     "age": 22,
+     "att": 68,
+     "def": 63,
+     "sta": 68,
+     "nation": "Togo",
+     "ext": 176076
+    },
+    {
      "id": "USL-286314",
      "name": "Niko Kovač",
      "pos": "MF",
-     "number": 17,
+     "number": 19,
      "age": 20,
      "att": 70,
      "def": 68,
@@ -5919,16 +7014,16 @@
      "ext": 286314
     },
     {
-     "id": "USL-177262",
-     "name": "Oumar Ngom",
+     "id": "USL-226967",
+     "name": "Olaf Gorter",
      "pos": "MF",
-     "number": 22,
-     "age": 21,
-     "att": 70,
-     "def": 67,
-     "sta": 70,
-     "nation": "Mauritania",
-     "ext": 177262
+     "number": 21,
+     "age": 20,
+     "att": 60,
+     "def": 62,
+     "sta": 62,
+     "nation": "Netherlands",
+     "ext": 226967
     },
     {
      "id": "USL-116223",
@@ -5958,7 +7053,7 @@
      "id": "USL-167394",
      "name": "Konan N'Dri",
      "pos": "FW",
-     "number": 19,
+     "number": 29,
      "age": 24,
      "att": 83,
      "def": 48,
@@ -5970,7 +7065,7 @@
      "id": "USL-129808",
      "name": "Walid Cheddira",
      "pos": "FW",
-     "number": 21,
+     "number": 23,
      "age": 27,
      "att": 80,
      "def": 48,
@@ -5982,13 +7077,37 @@
      "id": "USL-121808",
      "name": "Lameck Banda",
      "pos": "FW",
-     "number": 29,
+     "number": 25,
      "age": 24,
      "att": 78,
      "def": 52,
      "sta": 65,
      "nation": "Zambia",
      "ext": 121808
+    },
+    {
+     "id": "USL-221315",
+     "name": "Nikola Štulić",
+     "pos": "FW",
+     "number": 26,
+     "age": 23,
+     "att": 72,
+     "def": 51,
+     "sta": 72,
+     "nation": "Serbia",
+     "ext": 221315
+    },
+    {
+     "id": "USL-242550",
+     "name": "Francesco Camarda",
+     "pos": "FW",
+     "number": 27,
+     "age": 17,
+     "att": 74,
+     "def": 40,
+     "sta": 61,
+     "nation": "Italy",
+     "ext": 242550
     }
    ]
   },
@@ -6040,6 +7159,32 @@
      "ext": 146639
     },
     {
+     "id": "COM-2715",
+     "name": "Mauro Vigorito",
+     "pos": "GK",
+     "role": "GK",
+     "number": 41,
+     "age": 35,
+     "att": 42,
+     "def": 65,
+     "sta": 64,
+     "nation": "Italy",
+     "ext": 2715
+    },
+    {
+     "id": "COM-276252",
+     "name": "Henrique Menke",
+     "pos": "GK",
+     "role": "GK",
+     "number": 14,
+     "age": 18,
+     "att": 40,
+     "def": 64,
+     "sta": 71,
+     "nation": "Brazil",
+     "ext": 276252
+    },
+    {
      "id": "COM-114212",
      "name": "Ivan Smolčić",
      "pos": "DF",
@@ -6064,22 +7209,10 @@
      "ext": 8698
     },
     {
-     "id": "COM-247056",
-     "name": "Jacobo Ramón",
-     "pos": "DF",
-     "number": 4,
-     "age": 20,
-     "att": 63,
-     "def": 79,
-     "sta": 63,
-     "nation": "Spain",
-     "ext": 247056
-    },
-    {
      "id": "COM-9471",
      "name": "Marc-Oliver Kempf",
      "pos": "DF",
-     "number": 3,
+     "number": 4,
      "age": 30,
      "att": 58,
      "def": 78,
@@ -6091,7 +7224,7 @@
      "id": "COM-9204",
      "name": "Mërgim Vojvoda",
      "pos": "DF",
-     "number": 6,
+     "number": 3,
      "age": 30,
      "att": 65,
      "def": 75,
@@ -6103,7 +7236,7 @@
      "id": "COM-189493",
      "name": "Alex Valle",
      "pos": "DF",
-     "number": 15,
+     "number": 6,
      "age": 21,
      "att": 63,
      "def": 75,
@@ -6115,7 +7248,7 @@
      "id": "COM-2187",
      "name": "Edoardo Goldaniga",
      "pos": "DF",
-     "number": 12,
+     "number": 15,
      "age": 31,
      "att": 60,
      "def": 73,
@@ -6127,13 +7260,49 @@
      "id": "COM-126768",
      "name": "Ignace Van Der Brempt",
      "pos": "DF",
-     "number": 24,
+     "number": 12,
      "age": 23,
      "att": 54,
      "def": 72,
      "sta": 77,
      "nation": "Belgium",
      "ext": 126768
+    },
+    {
+     "id": "COM-7860",
+     "name": "Alberto Moreno",
+     "pos": "DF",
+     "number": 24,
+     "age": 33,
+     "att": 52,
+     "def": 67,
+     "sta": 60,
+     "nation": "Spain",
+     "ext": 7860
+    },
+    {
+     "id": "COM-247056",
+     "name": "Jacobo Ramón",
+     "pos": "DF",
+     "number": 26,
+     "age": 20,
+     "att": 63,
+     "def": 79,
+     "sta": 63,
+     "nation": "Spain",
+     "ext": 247056
+    },
+    {
+     "id": "COM-284110",
+     "name": "Cristiano De Paoli",
+     "pos": "DF",
+     "number": 33,
+     "age": 17,
+     "att": 50,
+     "def": 71,
+     "sta": 62,
+     "nation": "Italy",
+     "ext": 284110
     },
     {
      "id": "COM-101350",
@@ -6172,23 +7341,11 @@
      "ext": 179159
     },
     {
-     "id": "COM-203511",
-     "name": "Nico Paz",
-     "pos": "MF",
-     "number": 16,
-     "age": 20,
-     "att": 68,
-     "def": 76,
-     "sta": 72,
-     "nation": "Argentina",
-     "ext": 203511
-    },
-    {
      "id": "COM-15865",
      "name": "Sergi Roberto",
      "pos": "MF",
      "role": "CM",
-     "number": 14,
+     "number": 16,
      "age": 33,
      "att": 75,
      "def": 67,
@@ -6209,10 +7366,22 @@
      "ext": 156912
     },
     {
+     "id": "COM-203511",
+     "name": "Nico Paz",
+     "pos": "MF",
+     "number": 20,
+     "age": 20,
+     "att": 68,
+     "def": 76,
+     "sta": 72,
+     "nation": "Argentina",
+     "ext": 203511
+    },
+    {
      "id": "COM-286784",
      "name": "Matteo Papaccioli",
      "pos": "MF",
-     "number": 20,
+     "number": 17,
      "age": 17,
      "att": 70,
      "def": 63,
@@ -6224,13 +7393,25 @@
      "id": "COM-291722",
      "name": "Samuele Pisati",
      "pos": "MF",
-     "number": 17,
+     "number": 22,
      "age": 16,
      "att": 67,
      "def": 66,
      "sta": 71,
      "nation": "Italy",
      "ext": 291722
+    },
+    {
+     "id": "COM-286783",
+     "name": "Lorenzo Bonsignori",
+     "pos": "MF",
+     "number": 19,
+     "age": 18,
+     "att": 61,
+     "def": 70,
+     "sta": 63,
+     "nation": "Italy",
+     "ext": 286783
     },
     {
      "id": "COM-67902",
@@ -6257,18 +7438,6 @@
      "ext": 43285
     },
     {
-     "id": "COM-178165",
-     "name": "Jayden Addai",
-     "pos": "FW",
-     "number": 19,
-     "age": 19,
-     "att": 81,
-     "def": 51,
-     "sta": 69,
-     "nation": "Netherlands",
-     "ext": 178165
-    },
-    {
      "id": "COM-7819",
      "name": "Álvaro Morata",
      "pos": "FW",
@@ -6281,10 +7450,22 @@
      "ext": 7819
     },
     {
+     "id": "COM-178165",
+     "name": "Jayden Addai",
+     "pos": "FW",
+     "number": 29,
+     "age": 19,
+     "att": 81,
+     "def": 51,
+     "sta": 69,
+     "nation": "Netherlands",
+     "ext": 178165
+    },
+    {
      "id": "COM-270254",
      "name": "Jesús Rodríguez",
      "pos": "FW",
-     "number": 29,
+     "number": 23,
      "age": 19,
      "att": 78,
      "def": 45,
@@ -6296,7 +7477,7 @@
      "id": "COM-218474",
      "name": "Assane Diao",
      "pos": "FW",
-     "number": 23,
+     "number": 25,
      "age": 19,
      "att": 74,
      "def": 44,
