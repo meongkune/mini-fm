@@ -1450,3 +1450,55 @@ html.desktop .mk-cards { grid-template-columns: repeat(2, 1fr); }
 .wage-src { font-style: normal; font-size: .58rem; font-weight: 800; padding: 1px 5px; border-radius: 5px; margin-left: 4px; background: rgba(148,163,184,.18); color: #cbd5e1; vertical-align: 1px; white-space: nowrap; }
 .wage-src.real { background: rgba(34,197,94,.18); color: #86efac; }
 .ct-wage { display: inline-flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; }
+
+/* ── 메시지함 (분류 색 · 한 줄 미리보기 · 답 필요 고정) ── */
+:root { --cat-squad: #22c55e; --cat-transfer: #f59e0b; --cat-club: #60a5fa; --cat-season: #c084fc; }
+.todo-box { border-color: rgba(251,146,60,.55); background: linear-gradient(135deg, rgba(251,146,60,.10), transparent 60%), var(--panel); }
+.todo-box h3 { margin: 0 0 8px; }
+.todo-box h3 b { color: #fdba74; }
+.inbox-filter { margin: 4px 0 8px; }
+.cat-chip.cat-squad { border-left: 3px solid var(--cat-squad); } .cat-chip.cat-transfer { border-left: 3px solid var(--cat-transfer); }
+.cat-chip.cat-club { border-left: 3px solid var(--cat-club); } .cat-chip.cat-season { border-left: 3px solid var(--cat-season); }
+.inbox-group { margin-bottom: 10px; }
+.ig-head { margin: 10px 2px 5px; font-size: .74rem; color: var(--muted); font-weight: 800; letter-spacing: .02em; }
+.inbox2 { list-style: none; margin: 0; padding: 0; display: grid; gap: 5px; }
+.mail2 { border-radius: 10px; background: var(--panel); border: 1px solid rgba(255,255,255,.06); border-left: 4px solid var(--cat-club); overflow: hidden; }
+.mail2.cat-squad { border-left-color: var(--cat-squad); } .mail2.cat-transfer { border-left-color: var(--cat-transfer); }
+.mail2.cat-club { border-left-color: var(--cat-club); } .mail2.cat-season { border-left-color: var(--cat-season); }
+.mail2.unread { background: linear-gradient(90deg, rgba(124,92,255,.12), transparent 40%), var(--panel); }
+.m2-head { width: 100%; display: flex; align-items: center; gap: 10px; padding: 9px 11px; background: none; border: 0; color: var(--text); font: inherit; text-align: left; cursor: pointer; }
+.m2-ico { font-size: 1.15rem; flex: none; width: 24px; text-align: center; }
+.m2-title { flex: 1; min-width: 0; display: grid; gap: 1px; }
+.m2-title strong { font-size: .86rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mail2:not(.unread) .m2-title strong { font-weight: 600; opacity: .85; }
+.m2-title small { font-size: .7rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.m2-badge { flex: none; font-style: normal; font-size: .62rem; font-weight: 900; padding: 2px 7px; border-radius: 999px; background: rgba(251,146,60,.2); color: #fdba74; }
+.m2-dot { flex: none; width: 8px; height: 8px; border-radius: 50%; background: #a78bfa; }
+.m2-body { padding: 0 12px 11px 45px; font-size: .8rem; line-height: 1.6; }
+.m2-body p { margin: 0 0 6px; }
+/* 홈 대시보드 메시지 */
+.di-sub { margin: 6px 0 4px; font-size: .7rem; font-weight: 800; color: #fdba74; }
+.di-sub.muted { color: var(--muted); }
+.dash-inbox2 { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.dash-inbox2 li a { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 8px; color: var(--text); text-decoration: none; border-left: 3px solid var(--cat-club); background: var(--panel-2); }
+.dash-inbox2 li.cat-squad a { border-left-color: var(--cat-squad); } .dash-inbox2 li.cat-transfer a { border-left-color: var(--cat-transfer); } .dash-inbox2 li.cat-season a { border-left-color: var(--cat-season); }
+.dash-inbox2 .di-ico { flex: none; }
+.dash-inbox2 .di-text { flex: 1; min-width: 0; display: grid; }
+.dash-inbox2 .di-text strong { font-size: .76rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dash-inbox2 a:not(.unread) .di-text strong { font-weight: 600; opacity: .8; }
+.dash-inbox2 .di-text small { font-size: .64rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* 홈 팀 상태: 누르면 펼쳐지는 칸 */
+.ts-tile { display: grid; justify-items: center; gap: 2px; background: none; border: 1px solid transparent; border-radius: 10px; padding: 4px 2px; color: inherit; font: inherit; cursor: pointer; }
+.ts-tile:disabled { cursor: default; }
+.ts-tile.has:hover, .ts-tile.on { border-color: rgba(255,255,255,.15); background: var(--panel-2); }
+.ts-tile small { font-size: .58rem; color: var(--muted); }
+.ts-list { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 4px; }
+.ts-list button { width: 100%; display: flex; align-items: center; gap: 10px; padding: 7px 10px; border-radius: 9px; border: 0; background: var(--panel-2); color: var(--text); font: inherit; text-align: left; cursor: pointer; }
+.ts-ico { font-size: 1.1rem; flex: none; }
+.ts-who { flex: 1; min-width: 0; display: grid; }
+.ts-who strong { font-size: .82rem; }
+.ts-who small { font-size: .68rem; color: var(--muted); }
+.ts-games { flex: none; font-size: .74rem; color: #fca5a5; }
+/* 상단 바 칩: 무엇의 숫자인지 */
+.dt-chip small { font-size: .62rem; color: var(--muted); font-weight: 700; margin-right: 3px; }
+a.dt-chip { color: inherit; text-decoration: none; }

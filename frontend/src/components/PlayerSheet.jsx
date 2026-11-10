@@ -56,7 +56,6 @@ export default function PlayerSheet({ player, onClose, inLineup, onToggle }) {
           </div>
         </div>
 
-        {player.img && <p className="small muted photo-credit">사진: <a href={`https://en.wikipedia.org/wiki/${encodeURIComponent((player.imgPage || '').replace(/ /g, '_'))}`} target="_blank" rel="noreferrer">위키백과 · 위키미디어 공용</a> (자유 라이선스)</p>}
         <h4>세부 능력치 <span className="muted small">1~20점 · {player.role || player.pos} 기준</span></h4>
         <AttrRadar player={player} color={teams.find((t) => t.players.some((p) => p.id === player.id))?.color} sta={player.sta} />
 
@@ -118,7 +117,7 @@ function ContractBox({ player, save, contractOf, renewalAsk, renew, onRelease, o
     <div className="contract-box">
       <h4>계약</h4>
       <div className="ct-grid">
-        <div><span>연봉 <em className={`wage-src ${c.real ? 'real' : ''}`} title={c.real ? 'TheSportsDB에 올라온 실제 보도 연봉' : '실제 연봉 자료가 없거나 낡아서 능력·구단 규모로 추정'}>{c.real ? '실제 보도' : c.renewed ? '재계약' : '추정'}</em></span><b>{eur(c.wage)}</b></div>
+        <div><span>연봉 <em className={`wage-src ${c.real ? 'real' : ''}`} title={c.real ? '실제 보도 연봉' : '능력·구단 규모로 추정한 연봉'}>{c.real ? '실제 보도' : c.renewed ? '재계약' : '추정'}</em></span><b>{eur(c.wage)}</b></div>
         <div><span>남은 기간</span><b className={left <= 1 ? 'bad-text' : ''}>{left <= 1 ? '이번 시즌까지' : `${left}년`}</b></div>
         <div><span>방출 위약금</span><b>{eur(releaseCost(player))}</b></div>
       </div>

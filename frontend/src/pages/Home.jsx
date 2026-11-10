@@ -4,6 +4,8 @@ import PlayerCard from '../components/PlayerCard.jsx'
 import PlayerSheet from '../components/PlayerSheet.jsx'
 import { Crest } from '../components/Badges.jsx'
 import MgrBadge from '../components/MgrBadge.jsx'
+import { ICON, catOf, needsAnswer, preview } from './Inbox.jsx'
+import { moraleLabel, unavailable } from '../game/season.js'
 import { eur } from '../game/finance.js'
 import { fanLabel } from '../game/owner.js'
 import { ink, lineupOvr, playerOvr, short, teamOvr, useGame } from '../store.jsx'
@@ -129,7 +131,7 @@ export default function Home() {
         </div>
       </div>
 
-      <TeamStatus team={myTeam} status={status} lineup={save.lineup} inbox={save.inbox || []} unread={unread} />
+      <TeamStatus team={myTeam} status={status} lineup={save.lineup} inbox={save.inbox || []} unread={unread} onPick={setDetail} />
 
       <div className="card next-match">
         {seasonOver ? (
@@ -177,27 +179,67 @@ export default function Home() {
   )
 }
 
-// 팀 상태 요약: 선발 평균 컨디션, 부상·징계·불만, 최근 소식
-function TeamStatus({ team, status, lineup, inbox, unread }) {
+// 팀 상태 요약: 선발 평균 컨디션, 팀 사기, 부상·징계·불만 — 숫자를 누르면 누가 왜 그런지 펼쳐진다
+function TeamStatus({ team, status, lineup, inbox, unread, onPick }) {
+  const [open, setOpen] = useState(null) // 'out' | 'upset'
   const ids = team.players.map((p) => p.id)
-  const inj = ids.filter((id) => status[id]?.inj > 0).length
-  const susp = ids.filter((id) => status[id]?.susp > 0).length
-  const upset = ids.filter((id) => (status[id]?.morale ?? 60) < 40).length
+  const out = team.players.filter((p) => unavailable(status[p.id])).map((p) => ({ p, u: unavailable(status[p.id]) }))
+  // 불만: 사기 40 미만 — 이유를 상태에서 찾아 보여준다
+  const upset = team.players.filter((p) => (status[p.id]?.morale ?? 60) < 40).map((p) => {
+    const st = status[p.id] || {}
+    const why = [
+      st.wantsOut && '이적 요청 중',
+      st.benched >= 3 && `${st.benched}경기 연속 결장`,
+      st.sulk > 0 && '감독에게 서운함',
+      (st.promises || []).some((x) => x.broken) && '약속을 어김',
+      st.contractAsked && '재계약 요구',
+      st.wageAsked && '연봉 인상 요구',
+      st.fr?.length >= 3 && st.form < 6.3 && '최근 부진',
+    ].filter(Boolean)
+    return { p, st, why: why.length ? why : ['사기 저하'] }
+  }).sort((a, b) => (a.st.morale ?? 60) - (b.st.morale ?? 60))
   const cond = Math.round(lineup.reduce((s, id) => s + (status[id]?.cond ?? 100), 0) / (lineup.length || 1))
   const morale = Math.round(ids.reduce((s, id) => s + (status[id]?.morale ?? 60), 0) / (ids.length || 1))
-  const latest = inbox.slice(0, 2)
+  const latest = inbox[0]
+  const Tile = ({ k, label, value, tone }) => (
+    <button className={`ts-tile ${open === k ? 'on' : ''} ${value ? 'has' : ''}`} disabled={!value} onClick={() => setOpen(open === k ? null : k)}>
+      <span>{label}</span><strong className={tone}>{value}</strong>{value > 0 && <small>{open === k ? '접기 ▲' : '누가? ▼'}</small>}
+    </button>
+  )
   return (
     <div className="card team-status">
       <div className="ts-grid">
         <div><span>선발 컨디션</span><strong className={cond >= 80 ? 'good' : cond >= 65 ? 'ok' : 'bad'}>{cond}%</strong></div>
         <div><span>팀 사기</span><strong className={morale >= 60 ? 'good' : morale >= 45 ? 'ok' : 'bad'}>{morale}</strong></div>
-        <div><span>부상·징계</span><strong className={inj + susp ? 'bad' : 'good'}>{inj + susp}</strong></div>
-        <div><span>불만</span><strong className={upset ? 'bad' : 'good'}>{upset}</strong></div>
+        <Tile k="out" label="부상·징계" value={out.length} tone={out.length ? 'bad' : 'good'} />
+        <Tile k="upset" label="불만" value={upset.length} tone={upset.length ? 'bad' : 'good'} />
       </div>
-      {latest.length > 0 && (
+      {open === 'out' && (
+        <ul className="ts-list">
+          {out.map(({ p, u }) => (
+            <li key={p.id}><button onClick={() => onPick(p)}>
+              <span className={`ts-ico ${u.kind}`}>{u.icon}</span>
+              <span className="ts-who"><strong>{p.name}</strong><small>{p.role || p.pos} · {u.label}: {u.why}</small></span>
+              <b className="ts-games">{u.games}경기</b>
+            </button></li>
+          ))}
+        </ul>
+      )}
+      {open === 'upset' && (
+        <ul className="ts-list">
+          {upset.map(({ p, st, why }) => (
+            <li key={p.id}><button onClick={() => onPick(p)}>
+              <span className="ts-ico">{moraleLabel(st.morale)[0]}</span>
+              <span className="ts-who"><strong>{p.name}</strong><small>{why.join(' · ')}</small></span>
+              <b className="ts-games">사기 {Math.round(st.morale ?? 60)}</b>
+            </button></li>
+          ))}
+        </ul>
+      )}
+      {latest && (
         <Link to="/inbox" className="ts-inbox">
           <span>📬 {unread > 0 ? `새 소식 ${unread}개` : '메시지함'}</span>
-          <em>{latest[0].title}</em>
+          <em>{ICON[latest.type] || '📩'} {latest.title}</em>
         </Link>
       )}
     </div>
@@ -257,15 +299,27 @@ function OwnerCard({ finance, fans }) {
 
 // PC 대시보드: 최근 소식 (편지함 미리보기)
 function InboxPanel({ inbox, unread }) {
+  const todo = inbox.filter(needsAnswer)
+  const rest = inbox.filter((m) => !needsAnswer(m)).slice(0, 10)
+  const Row = ({ m }) => (
+    <li className={`cat-${catOf(m.type)}`}>
+      <Link to="/inbox" className={`${m.read ? '' : 'unread'} ${needsAnswer(m) ? 'todo' : ''}`}>
+        <span className="di-ico">{ICON[m.type] || '📩'}</span>
+        <span className="di-text"><strong>{m.title}</strong><small>{m.round + 1}R · {preview(m, 34)}</small></span>
+        {needsAnswer(m) ? <em className="m2-badge">답 필요</em> : !m.read && <i className="m2-dot" />}
+      </Link>
+    </li>
+  )
   return (
     <div className="card dash-panel desk-only">
       <h3>📬 메시지함 <Link className="link small" to="/inbox">{unread ? `새 소식 ${unread}` : '전체'} →</Link></h3>
       {inbox.length === 0 ? <p className="small muted">아직 소식이 없습니다.</p> : (
-        <ul className="dash-inbox">
-          {inbox.slice(0, 12).map((m) => (
-            <li key={m.id}><Link to="/inbox" className={m.read ? '' : 'unread'}><strong>{m.title}</strong><small>{m.round + 1}R · {m.body?.slice(0, 40)}</small></Link></li>
-          ))}
-        </ul>
+        <>
+          {todo.length > 0 && <p className="di-sub">⚡ 답이 필요한 메시지 {todo.length}</p>}
+          <ul className="dash-inbox2">{todo.slice(0, 4).map((m) => <Row key={m.id} m={m} />)}</ul>
+          {todo.length > 0 && <p className="di-sub muted">최근 소식</p>}
+          <ul className="dash-inbox2">{rest.map((m) => <Row key={m.id} m={m} />)}</ul>
+        </>
       )}
     </div>
   )

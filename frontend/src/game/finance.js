@@ -266,6 +266,9 @@ export function ffpReview(f = {}, bill = 0, seasonNo = 1) {
   return { finance: nf, penalty: { fine, ban: true, points: breaches >= 2 ? 6 : 0 }, st }
 }
 
+/** 현금만 움직이는 돈 (FFP 손익에 넣지 않는다): 사채 대출·상환 같은 빌리고 갚는 돈 */
+export const cashOnly = (f, amount) => ({ ...f, cash: r1((f.cash || 0) + amount) })
+
 /** 장부 기록 (영입·방출·매각 등 경기 밖의 돈) */
 export function book(f, amount, cat = amount >= 0 ? '기타 수입' : '기타 지출') {
   const ss = { rev: 0, exp: 0, wages: 0, ...(f.season || {}) }

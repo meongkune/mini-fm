@@ -83,7 +83,7 @@ export default function Club() {
           <h3>선수단 · 계약</h3>
           <span className="muted small">{myTeam.players.length}/{ROSTER_MAX}명 · <Link className="link" to="/transfer?tab=fa">FA 시장 →</Link></span>
         </div>
-        <p className="small muted" style={{ marginTop: 0 }}>연봉 <em className="wage-src real">실제</em> = TheSportsDB 실제 보도 연봉 · <em className="wage-src">추정</em> = 자료가 없거나 낡아서 능력·구단 규모로 추정</p>
+        <p className="small muted" style={{ marginTop: 0 }}>연봉 <em className="wage-src real">실제</em> 실제 보도 연봉 · <em className="wage-src">추정</em> 능력·구단 규모로 추정</p>
         {expiring.length > 0 && <p className="small bad-text">이번 시즌 끝나면 계약 만료: {expiring.length}명 — 선수를 눌러 재계약하세요.</p>}
         <ul className="contract-list">
           {[...myTeam.players].sort((a, b) => playerOvr(b) - playerOvr(a)).map((p) => {
@@ -104,7 +104,6 @@ export default function Club() {
         </ul>
       </div>
 
-      <p className="small muted center"><Link className="link" to="/deploy">📡 서버·배포 상태 보기</Link></p>
       {detail && <PlayerSheet player={detail} onClose={() => setDetail(null)} />}
     </section>
   )

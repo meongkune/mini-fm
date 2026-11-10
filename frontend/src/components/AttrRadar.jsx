@@ -32,7 +32,7 @@ export default function AttrRadar({ player, color = '#7c5cff', sta = null }) {
         ))}
         {sta !== null && <li><span>체력</span><i className={tone(sta)} style={{ width: `${((sta - 30) / 69) * 100}%` }} /><b>{to20(sta)}</b></li>}
       </ul>
-      {a.est && <p className="ar-est small muted">추정값 — 실제 데이터(SportsAPI 레이더)를 받으면 바뀝니다</p>}
+      {a.est && <p className="ar-est small muted">※ 추정 능력치</p>}
     </div>
   )
 }

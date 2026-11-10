@@ -345,6 +345,26 @@ aws ec2 describe-network-interfaces --network-interface-ids $ENI --query 'Networ
     └── gen_teams.py               # 초기 8개 구단 샘플 데이터
 ```
 
+## 데이터 출처
+
+게임 화면에는 출처를 표시하지 않고 여기에 모아 둡니다. 모두 무료로 쓸 수 있는 범위에서 가져오며, 원본 데이터를 그대로 공개하지 않고 게임에 필요한 값만 가공해 저장합니다.
+
+| 데이터 | 출처 | 가져오는 방법 | 저장 위치 |
+|---|---|---|---|
+| 9개 리그 2025-26 구단·선수 명단 | [football-data.org](https://www.football-data.org/) 무료 API | GitHub Actions `import-season.yml` (수동) | `frontend/public/data/<리그>/` |
+| 명단 손 보정 (원본 누락 선수) | 직접 확인 | `tools/squad_fixes.json` → `apply_squad_fixes.mjs` | 시즌 파일 |
+| 선수 능력(OVR) · 세부 능력치 | [SportsAPI Pro](https://sportsapipro.com/) 시장가치·레이더 (무료 하루 100회) | `sportsapi-ratings.yml` (매일) | `data/ratings/` (계산한 값만) |
+| K리그1·2 명단 | [API-Football](https://www.api-football.com/) 무료 플랜 | `import-kleague.yml` (수동) | `data/k-league/` |
+| 실제 보도 연봉 · 키 · 등번호 | [TheSportsDB](https://www.thesportsdb.com/) 무료 API (분당 30회) | `tsdb-wages.yml` (매일 50분) | `data/wages/` |
+| 선수 사진 | [위키백과](https://en.wikipedia.org/) 대표 이미지 · [위키미디어 공용](https://commons.wikimedia.org/) (자유 라이선스, 이미지별 라이선스는 각 파일 문서) | `player-photos.yml` (수동) | `data/photos/` (주소만) |
+| 선수 키·생년월일 (상세 화면) | 위키백과 · [위키데이터](https://www.wikidata.org/) (CC0) | 브라우저에서 바로 조회 | localStorage 캐시 |
+| 구단 엠블럼 | football-data.org 이미지 주소 | 브라우저에서 표시만 | 저장 안 함 |
+| 국기 | [flagcdn.com](https://flagcdn.com/) | 브라우저에서 표시만 | 저장 안 함 |
+| 환율 (원화 표시) | [frankfurter.app](https://www.frankfurter.app/) · 유럽중앙은행 기준 | 브라우저에서 하루 한 번 | localStorage |
+| AI 면담 대화 | Google Gemini API (Cloudflare Workers 경유, 무료 한도) | `worker/` | 저장 안 함 |
+
+연봉은 실제 보도 값이 추정치의 0.4~2.5배 안일 때만 쓰고, 나머지는 능력·리그·구단 규모로 추정합니다. 능력치·연봉·경기 결과는 게임용 값입니다.
+
 ## 면책 조항
 
 비공식·비상업 팬 프로젝트입니다. 구단 이름·엠블럼은 각 구단의 상표이며, 엠블럼 이미지는 [football-data.org](https://www.football-data.org/)가 제공하는 주소에서, 국기는 [flagcdn.com](https://flagcdn.com/)에서 불러와 표시만 합니다(레포에 저장하지 않음). 선수 명단은 football-data.org 데이터를 사용하고, 능력치와 경기 결과는 규칙에 따라 생성한 게임용 값입니다. 프리미어리그 및 각 구단과 관련이 없습니다.

@@ -123,7 +123,6 @@ function DesktopApp() {
         <div className="side-foot">
           {manager && <Link to="/manager" className="side-mgr"><MgrBadge name={manager.name} color={myTeam?.color} size={28} /><span>{manager.name}</span></Link>}
           <button className="linkish small" onClick={() => setViewMode('phone')}>📱 모바일 보기</button>
-          <Link className="linkish small" to="/deploy">📡 배포 정보</Link>
         </div>
       </aside>
       <div className="desk-body">
@@ -131,8 +130,8 @@ function DesktopApp() {
           {myTeam ? (
             <>
               <span className="dt-round">{seasonOver ? '시즌 종료' : `${save.round + 1} / ${totalRounds} 라운드`}</span>
-              {save.finance && <span className="dt-chip">💰 {eur(save.finance.cash)}</span>}
-              <span className="dt-chip">😊 민심 {save.fans ?? 60}</span>
+              {save.finance && <Link to="/club" className="dt-chip" title="구단이 지금 가진 현금 (이적료를 낼 수 있는 돈)"><small>구단 현금</small> {eur(save.finance.cash)}</Link>}
+              <Link to="/club" className="dt-chip" title="팬 민심 (0~100) — 성적·티켓 가격에 따라 변합니다"><small>팬 민심</small> {save.fans ?? 60}/100</Link>
               <span className="grow" />
               {opp && !seasonOver && <span className="dt-next"><Crest team={opp} size={20} /> 다음: {nextFixture.cup ? `${nextFixture.comp?.icon || '🏆'} ` : ''}{opp.name} ({nextFixture.isHome ? '홈' : '원정'})</span>}
               <Link className="btn dt-go" to={seasonOver ? '/' : '/match'}>{seasonOver ? '시즌 마감 ▶' : '경기 진행 ▶'}</Link>
@@ -184,9 +183,6 @@ function MobileApp() {
 
       <main><Pages /></main>
 
-      <footer>
-        비공식 팬 프로젝트입니다. 구단 엠블럼은 각 구단의 상표이며 이미지는 football-data.org, 국기는 flagcdn.com에서 불러옵니다. 능력치·경기 결과는 게임용 값으로 실제 구단·리그와 관계없습니다.
-      </footer>
 
       <nav className="tabbar" aria-label="주요 메뉴">
         {NAV.map(([to, label, icon, end]) => (

@@ -43,7 +43,7 @@ export default function PlayerCard({ player, selected = false, onClick, size = '
         : color ? <span className="pc-kit"><Kit color={color} number={player.number} size={size === 'lg' ? 52 : 40} /></span> : <span className="pc-badge" aria-hidden="true">{player.number}</span>}
       <span className="pc-name">{lastName(player.name)}</span>
       <span className="pc-stars"><Stars value={cur} /></span>
-      <span className="pc-stats" title={keys.est ? '추정 능력치 (1~20)' : 'SportsAPI 레이더 기반 (1~20)'}>
+      <span className="pc-stats" title={keys.est ? '추정 능력치 (1~20)' : '핵심 능력치 (1~20)'}>
         {keys.list.map(([k, v]) => <span key={k}><b>{v}</b><em>{k}</em></span>)}
       </span>
       {selected && <span className="pc-check" aria-hidden="true">✓</span>}

@@ -10,7 +10,7 @@ import { checkPromises } from './game/relations.js'
 import { PATIENCE, evaluateBid, executeTransfer, valueCtx, windowState } from './game/trade.js'
 import { boardMidCheck, newBoard, nextSeason, seasonLabel, seasonReview } from './game/career.js'
 import { COMPS, CUP_LEAGUES, buildCups, cupKey, cupStatus, dueMatchday, myCupFixture, playMatchday } from './game/cup.js'
-import { FX_DEFAULT, clubKOf, setClubK, setFx, wageInfo, ROSTER_MAX, book, checkBankruptcy, contractOf, eur, faDecision, ffpReview, newFinance, prizeMoney, releaseCost, renewalAsk, settleMatch, wageBill, wageBudget, wageFor, wageShock } from './game/finance.js'
+import { FX_DEFAULT, cashOnly, clubKOf, setClubK, setFx, wageInfo, ROSTER_MAX, book, checkBankruptcy, contractOf, eur, faDecision, ffpReview, newFinance, prizeMoney, releaseCost, renewalAsk, settleMatch, wageBill, wageBudget, wageFor, wageShock } from './game/finance.js'
 import { afterMatchOwner, decide } from './game/owner.js'
 import { valueOf } from './game/trade.js'
 
@@ -266,6 +266,11 @@ export function GameProvider({ children }) {
     const noReal = save.finance && save.finance.wageModel === 2 && team.players.some((p) => wageInfo(p, data.leagueId, save.finance.clubK).real) // 실제 연봉 반영 전
     if (save.finance?.base && !missing.length && !oldWages && !noReal) return
     setSave((s) => {
+      // 조건은 최신 상태로 다시 본다 (두 번 실행돼도 한 번만 바뀌게)
+      const oldWages = s.finance && !(s.finance.wageModel >= 2)
+      const noReal = s.finance && s.finance.wageModel === 2 && team.players.some((p) => wageInfo(p, data.leagueId, s.finance.clubK).real)
+      const missing = team.players.filter((p) => !s.contracts?.[p.id])
+      if (s.finance?.base && !missing.length && !oldWages && !noReal) return s
       const k = s.finance?.clubK ?? clubKOf(team)
       setClubK(k)
       const contracts = { ...(s.contracts || {}) }
@@ -307,7 +312,7 @@ export function GameProvider({ children }) {
           const bill = team.players.reduce((a, p) => a + (contracts[p.id]?.wage || 0), 0)
           const prev = bill - after + before
           finance = { ...(finance || s.finance), base: Math.round((finance || s.finance).base * (prev > 0 ? bill / prev : 1) * 10) / 10, clubK: k, wageModel: 3 }
-          inbox.push(news(s.round, 'finance', '📰 실제 보도 연봉 반영', `${fixed.length}명의 연봉을 실제 보도 값(TheSportsDB)으로 바꿨습니다: ${fixed.slice(0, 8).join(', ')}${fixed.length > 8 ? ' 외' : ''}. 나머지 선수는 추정 연봉입니다. 이 선수들 연봉 합계 ${eur(before)} → ${eur(after)}/년.`, { read: false }))
+          inbox.push(news(s.round, 'finance', '📰 실제 보도 연봉 반영', `${fixed.length}명의 연봉을 실제 보도 값으로 바꿨습니다: ${fixed.slice(0, 8).join(', ')}${fixed.length > 8 ? ' 외' : ''}. 나머지 선수는 추정 연봉입니다. 이 선수들 연봉 합계 ${eur(before)} → ${eur(after)}/년.`, { read: false }))
         }
       }
       for (const p of missing) contracts[p.id] = contractOf({ ...s, contracts }, p, data.leagueId)
@@ -317,6 +322,23 @@ export function GameProvider({ children }) {
       return { ...s, contracts, finance, fans: s.fans ?? 60, inbox: [...inbox, ...(s.inbox || [])].slice(0, 80) }
     })
   }, [data, save.teamId, save.rosters, save.signed?.length, save.youth?.length, save.finance?.base ? 1 : 0])
+
+  // FFP 징계 취소 (1회): 예전 규칙 오류로 받은 징계 — 사채 상환을 손실로 셈 + 연봉 개편으로 시즌 중간에 수입 규모가 바뀜
+  //   연봉 개편 알림과 FFP 징계가 둘 다 있는 세이브만, 이번 시즌 징계를 취소하고 벌금을 돌려준다
+  useEffect(() => {
+    const f = save.finance
+    if (!f || f.ffpAppeal || f.ban !== (save.seasonNo || 1)) return
+    const inbox = save.inbox || []
+    const verdict = inbox.find((m) => m.title === '⚖️ FFP 위반 징계')
+    if (!verdict || !inbox.some((m) => m.title === '💶 연봉 체계 개편')) return
+    const fine = Number(verdict.body?.match(/벌금 -?€([\d.]+)M/)?.[1] || 0)
+    setSave((s) => {
+      if (!s.finance || s.finance.ffpAppeal) return s // 이미 처리됨 (두 번 실행돼도 한 번만)
+      const nf = { ...s.finance, ban: null, ffpAppeal: true, breaches: Math.max(0, (s.finance.breaches || 1) - 1), cash: Math.round(((s.finance.cash || 0) + fine) * 10) / 10 }
+      const note = news(s.round, 'finance', '⚖️ FFP 징계 취소', `지난 시즌 FFP 심사에 계산 오류가 있었습니다 (사채 상환을 손실로 계산, 연봉 체계 개편으로 시즌 중간에 수입 기준이 바뀜). 징계를 취소하고 벌금${fine ? ` ${eur(fine)}` : ''}을 돌려드립니다. 이번 시즌 선수 영입이 가능합니다.`, { read: false })
+      return { ...s, finance: nf, pointsPenalty: s.pointsPenalty?.seasonNo === (s.seasonNo || 1) ? null : s.pointsPenalty, inbox: [note, ...(s.inbox || [])].slice(0, 80) }
+    })
+  }, [save.finance?.ban, save.seasonNo])
 
   // 이적 시장: 내 리그 말고 모든 리그(K리그 같은 '이적 시장 전용' 리그 포함) 명단을 불러 둔다
   useEffect(() => {
@@ -443,7 +465,8 @@ export function GameProvider({ children }) {
           const pos = standingsNow.findIndex((x) => x.id === s.teamId) + 1
           const prize = prizeMoney(pos, standingsNow.length, s.finance?.base || 40)
           const repay = Math.min(s.owner?.debt || 0, Math.round(((s.owner?.debt || 0) / 2) * 10) / 10)
-          const settled = book(book(r.save.finance || {}, prize, '리그 상금'), -repay, '사채 상환')
+          // 사채 상환은 빌린 돈을 갚는 것이라 FFP 손익에 넣지 않는다 (빌릴 때도 수입으로 치지 않았다)
+          const settled = cashOnly(book(r.save.finance || {}, prize, '리그 상금'), -repay)
           const ffp = ffpReview(settled, wageBill(s, myTeam, data.leagueId), s.seasonNo || 1)
           const finance = { ...ffp.finance, ...(ffp.penalty ? { ban: (s.seasonNo || 1) + 1 } : {}) }
           const owner = { ...(r.save.owner || {}), debt: Math.round(((s.owner?.debt || 0) - repay) * 10) / 10, used: {}, youthBoost: false, sponsorBoost: 0 }
