@@ -1,6 +1,6 @@
 """선수 사진을 중계 그래픽처럼 같은 틀로 만든다 (얼굴 위치·크기 통일 + 배경 제거)
 
-  1) 위키백과 대표 사진(data/photos/<리그>.json의 주소)을 큰 크기(800px)로 받는다
+  1) 위키백과 대표 사진(data/photos/<리그>.json의 주소)을 큰 크기(960px)로 받는다
   2) 얼굴을 찾아(OpenCV) 얼굴이 같은 위치·같은 크기가 되도록 '머리~가슴' 정사각형으로 자른다
   3) 배경을 지운다(rembg) → 투명 배경 PNG를 160x160 WebP로 저장
   4) 얼굴을 못 찾거나 너무 작은(흐린) 사진은 건너뛴다 → 게임에서 구단 색 실루엣으로 대신한다
@@ -44,9 +44,9 @@ index = json.load(open(os.path.join(DATA, 'index.json'), encoding='utf-8'))
 
 
 def big(url):
-    # 위키미디어 썸네일 주소의 폭을 키운다: .../240px-File.jpg → .../800px-File.jpg
+    # 위키미디어 썸네일 주소의 폭을 키운다. 표준 크기만 허용된다(250·330·500·960·1280, 800은 400 오류)
     import re
-    return re.sub(r'/(\d+)px-', '/800px-', url)
+    return re.sub(r'/(\d+)px-', '/960px-', url)
 
 
 def fetch(url):
