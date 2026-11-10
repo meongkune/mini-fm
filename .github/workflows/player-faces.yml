@@ -28,9 +28,15 @@ jobs:
         with:
           python-version: '3.11'
       - name: 라이브러리 설치
-        run: pip install --quiet opencv-python-headless pillow numpy "rembg[cpu]"
+        # rembg가 다른 opencv를 끌어와 충돌하므로, 설치 뒤 opencv를 하나만 다시 깐다
+        run: |
+          pip install --quiet "rembg[cpu]" pillow numpy
+          pip uninstall -y -q opencv-python opencv-python-headless opencv-contrib-python || true
+          pip install --quiet opencv-python-headless
+          python -c "import cv2; cv2.CascadeClassifier; print('opencv', cv2.__version__)"
       - name: 사진 통일
-        run: python tools/player_faces.py --teams "${{ inputs.teams }}" --leagues "${{ inputs.leagues }}" --limit ${{ inputs.limit }} | tee -a "$GITHUB_STEP_SUMMARY"
+        shell: bash
+        run: set -o pipefail; python tools/player_faces.py --teams "${{ inputs.teams }}" --leagues "${{ inputs.leagues }}" --limit ${{ inputs.limit }} | tee -a "$GITHUB_STEP_SUMMARY"
       - name: 변경 사항 커밋
         id: commit
         run: |
