@@ -1,129 +1,129 @@
 {
-  "default": {
-    "league": "premier-league",
-    "season": "2025-26"
-  },
-  "leagues": [
+ "default": {
+  "league": "premier-league",
+  "season": "2025-26"
+ },
+ "leagues": [
+  {
+   "id": "premier-league",
+   "name": "프리미어리그",
+   "country": "잉글랜드",
+   "seasons": [
     {
-      "id": "premier-league",
-      "name": "프리미어리그",
-      "country": "잉글랜드",
-      "seasons": [
-        {
-          "id": "2025-26",
-          "file": "premier-league/2025-26.json",
-          "teams": 20
-        }
-      ]
-    },
-    {
-      "id": "bundesliga",
-      "name": "분데스리가",
-      "country": "독일",
-      "seasons": [
-        {
-          "id": "2025-26",
-          "file": "bundesliga/2025-26.json",
-          "teams": 18
-        }
-      ]
-    },
-    {
-      "id": "la-liga",
-      "name": "라리가",
-      "country": "스페인",
-      "seasons": [
-        {
-          "id": "2025-26",
-          "file": "la-liga/2025-26.json",
-          "teams": 20
-        }
-      ]
-    },
-    {
-      "id": "serie-a",
-      "name": "세리에 A",
-      "country": "이탈리아",
-      "seasons": [
-        {
-          "id": "2025-26",
-          "file": "serie-a/2025-26.json",
-          "teams": 20
-        }
-      ]
-    },
-    {
-      "id": "eredivisie",
-      "name": "에레디비시",
-      "country": "네덜란드",
-      "seasons": [
-        {
-          "id": "2025-26",
-          "file": "eredivisie/2025-26.json",
-          "teams": 18
-        }
-      ]
-    },
-    {
-      "id": "championship",
-      "name": "챔피언십",
-      "country": "잉글랜드",
-      "seasons": [
-        {
-          "id": "2025-26",
-          "file": "championship/2025-26.json",
-          "teams": 24
-        }
-      ]
-    },
-    {
-      "id": "brasileirao",
-      "name": "브라질레이랑",
-      "country": "브라질",
-      "seasons": [
-        {
-          "id": "2025",
-          "file": "brasileirao/2025.json",
-          "teams": 20
-        }
-      ]
-    },
-    {
-      "id": "ligue-1",
-      "name": "리그 1",
-      "country": "프랑스",
-      "seasons": [
-        {
-          "id": "2025-26",
-          "file": "ligue-1/2025-26.json",
-          "teams": 18
-        }
-      ]
-    },
-    {
-      "id": "primeira-liga",
-      "name": "프리메이라 리가",
-      "country": "포르투갈",
-      "seasons": [
-        {
-          "id": "2025-26",
-          "file": "primeira-liga/2025-26.json",
-          "teams": 18
-        }
-      ]
-    },
-    {
-      "id": "k-league",
-      "name": "K리그",
-      "country": "대한민국",
-      "marketOnly": true,
-      "seasons": [
-        {
-          "id": "2026",
-          "file": "k-league/2026.json",
-          "teams": 25
-        }
-      ]
+     "id": "2025-26",
+     "file": "premier-league/2025-26.json",
+     "teams": 20
     }
-  ]
+   ]
+  },
+  {
+   "id": "bundesliga",
+   "name": "분데스리가",
+   "country": "독일",
+   "seasons": [
+    {
+     "id": "2025-26",
+     "file": "bundesliga/2025-26.json",
+     "teams": 18
+    }
+   ]
+  },
+  {
+   "id": "la-liga",
+   "name": "라리가",
+   "country": "스페인",
+   "seasons": [
+    {
+     "id": "2025-26",
+     "file": "la-liga/2025-26.json",
+     "teams": 20
+    }
+   ]
+  },
+  {
+   "id": "serie-a",
+   "name": "세리에 A",
+   "country": "이탈리아",
+   "seasons": [
+    {
+     "id": "2025-26",
+     "file": "serie-a/2025-26.json",
+     "teams": 20
+    }
+   ]
+  },
+  {
+   "id": "eredivisie",
+   "name": "에레디비시",
+   "country": "네덜란드",
+   "seasons": [
+    {
+     "id": "2025-26",
+     "file": "eredivisie/2025-26.json",
+     "teams": 18
+    }
+   ]
+  },
+  {
+   "id": "championship",
+   "name": "챔피언십",
+   "country": "잉글랜드",
+   "seasons": [
+    {
+     "id": "2025-26",
+     "file": "championship/2025-26.json",
+     "teams": 24
+    }
+   ]
+  },
+  {
+   "id": "brasileirao",
+   "name": "브라질레이랑",
+   "country": "브라질",
+   "seasons": [
+    {
+     "id": "2025",
+     "file": "brasileirao/2025.json",
+     "teams": 20
+    }
+   ]
+  },
+  {
+   "id": "ligue-1",
+   "name": "리그 1",
+   "country": "프랑스",
+   "seasons": [
+    {
+     "id": "2025-26",
+     "file": "ligue-1/2025-26.json",
+     "teams": 18
+    }
+   ]
+  },
+  {
+   "id": "primeira-liga",
+   "name": "프리메이라 리가",
+   "country": "포르투갈",
+   "seasons": [
+    {
+     "id": "2025-26",
+     "file": "primeira-liga/2025-26.json",
+     "teams": 18
+    }
+   ]
+  },
+  {
+   "id": "k-league",
+   "name": "K리그",
+   "country": "대한민국",
+   "marketOnly": true,
+   "seasons": [
+    {
+     "id": "2026",
+     "file": "k-league/2026.json",
+     "teams": 25
+    }
+   ]
+  }
+ ]
 }
