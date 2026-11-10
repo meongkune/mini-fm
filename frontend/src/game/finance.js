@@ -50,11 +50,29 @@ export const TICKETS = [
   ['gouge', '폭리', 1.8, -3, '돈은 많이 벌지만 팬들이 등을 돌립니다'],
 ]
 
-/** 연봉(€M/년): OVR·나이·리그 수준 */
-export function wageFor(p, leagueId) {
-  const m = moneyOf(leagueId).wage
-  const ageK = p.age <= 21 ? 0.6 : p.age <= 24 ? 0.85 : p.age <= 30 ? 1 : 0.85
-  return r1(Math.max(0.1, 0.9 * Math.pow(1.11, playerOvrOf(p) - 72) * m * ageK))
+// ── 연봉 ──
+// 실제 연봉은 선수 수준뿐 아니라 '어느 구단이 주느냐'에 크게 좌우된다 (같은 수준이라도 빅클럽이 더 준다).
+// 연봉 ≈ 능력가치(나이 할인 없는 몸값)에 완만하게 비례 × 슈퍼스타 프리미엄 × 리그 규모 × 구단 규모 × 나이
+//   공개 추정치에 맞춤: 홀란(맨시티) 약 €30M · 케인(바이에른) 약 €20M · 켈러허(브렌트퍼드) 약 €3~4M · 유망주는 수십만 유로
+const WAGE_LEAGUE = { 'premier-league': 1.15, 'la-liga': 1.0, bundesliga: 0.95, 'serie-a': 0.95, 'ligue-1': 0.9, eredivisie: 0.6, 'primeira-liga': 0.55, championship: 0.7, brasileirao: 0.6, 'k-league': 0.35 }
+const WAGE_MIN = { 'premier-league': 0.5, 'la-liga': 0.3, bundesliga: 0.35, 'serie-a': 0.3, 'ligue-1': 0.25, championship: 0.2, eredivisie: 0.15, 'primeira-liga': 0.12, brasileirao: 0.12 }
+/** 구단 규모: 주전 11명 평균 능력으로 (빅클럽 최대 1.45배, 작은 구단 최소 0.65배) */
+export function clubKOf(team) {
+  const top = (team?.players || []).map(playerOvrOf).sort((a, b) => b - a).slice(0, 11)
+  if (!top.length) return 1
+  const s = top.reduce((a, b) => a + b, 0) / top.length
+  return clamp(Math.pow(1.08, s - 86), 0.65, 1.45)
+}
+// 내 구단 규모 (화면이 그리기 전에 store가 정한다 — 통화 표시처럼)
+let CLUB_K = 1
+export const setClubK = (k) => { CLUB_K = k || 1 }
+/** 연봉(€M/년): 능력가치 · 리그 · 구단 규모(기본: 내 구단) · 나이 */
+export function wageFor(p, leagueId, clubK = CLUB_K) {
+  const worth = 0.1 * Math.pow(10, (playerOvrOf(p) - 58 - (p.pos === 'GK' ? 3 : 0)) / 10) // 나이 할인 없는 능력가치(€M)
+  const ageK = p.age <= 20 ? 0.5 : p.age <= 22 ? 0.7 : p.age <= 24 ? 0.85 : p.age <= 30 ? 1 : 0.92
+  const star = 1 + clamp((worth - 60) / 300, 0, 0.35) // 슈퍼스타 프리미엄
+  const w = 0.47 * Math.pow(worth, 0.653) * star * (WAGE_LEAGUE[leagueId] ?? 0.8) * clubK * ageK
+  return r1(Math.max(WAGE_MIN[leagueId] ?? 0.1, w))
 }
 
 /** 계약: 저장된 게 없으면 선수 ID로 고정 생성 (1~5년) */
@@ -78,9 +96,10 @@ export function initialCash(team, leagueId) {
  * 수입 = 연봉 × 1.15 (중계·스폰서 70%, 관중 30%) → 연봉을 늘리면 적자, 줄이면 흑자
  */
 export function newFinance(team, leagueId) {
-  const wages = team.players.reduce((s, p) => s + wageFor(p, leagueId), 0)
+  const k = clubKOf(team)
+  const wages = team.players.reduce((s, p) => s + wageFor(p, leagueId, k), 0)
   const base = r1(Math.max(8, wages * 1.15))
-  return { cash: r1(base * 0.15), base, ticket: 'normal', last: null, ledger: [], warn: 0 } // 시작 자금은 빠듯하게 (시즌 수입의 15%)
+  return { cash: r1(base * 0.15), base, ticket: 'normal', last: null, ledger: [], warn: 0, wageModel: 2, clubK: k } // 시작 자금은 빠듯하게 (시즌 수입의 15%)
 }
 
 /** 주급 총액 (€M/년) */

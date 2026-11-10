@@ -10,7 +10,7 @@ import { checkPromises } from './game/relations.js'
 import { PATIENCE, evaluateBid, executeTransfer, valueCtx, windowState } from './game/trade.js'
 import { boardMidCheck, newBoard, nextSeason, seasonLabel, seasonReview } from './game/career.js'
 import { COMPS, CUP_LEAGUES, buildCups, cupKey, cupStatus, dueMatchday, myCupFixture, playMatchday } from './game/cup.js'
-import { FX_DEFAULT, setFx, ROSTER_MAX, book, checkBankruptcy, contractOf, eur, faDecision, ffpReview, newFinance, prizeMoney, releaseCost, renewalAsk, settleMatch, wageBill, wageBudget, wageFor, wageShock } from './game/finance.js'
+import { FX_DEFAULT, clubKOf, setClubK, setFx, ROSTER_MAX, book, checkBankruptcy, contractOf, eur, faDecision, ffpReview, newFinance, prizeMoney, releaseCost, renewalAsk, settleMatch, wageBill, wageBudget, wageFor, wageShock } from './game/finance.js'
 import { afterMatchOwner, decide } from './game/owner.js'
 import { valueOf } from './game/trade.js'
 
@@ -183,6 +183,8 @@ export function GameProvider({ children }) {
   const [save, setSave] = useState(loadSave)
   // 직접 조정한 배치(경기장에서 끌어 옮긴 자리 좌표)를 자리 계산에 등록 — 렌더 전에
   if (save.layout?.name) setCustomLayout(save.layout.name, save.layout.pos)
+  // 연봉 계산에 쓰는 내 구단 규모 (구단 재정에 저장해 둔 값)
+  setClubK(save.finance?.clubK)
   const [manager, setManager] = useState(() => { try { return JSON.parse(localStorage.getItem(MANAGER_KEY) || 'null') } catch { return null } })
   const [cupTeams, setCupTeams] = useState({}) // 대항전에 나오는 다른 리그 팀 (키: 리그/팀ID)
   const [world, setWorld] = useState({}) // 이적 시장용 다른 리그 (K리그 포함): { 리그ID: { name, teams } }
@@ -260,14 +262,37 @@ export function GameProvider({ children }) {
     const team = effectiveTeams(data.teams, save).find((t) => t.id === save.teamId)
     if (!team) return
     const missing = team.players.filter((p) => !save.contracts?.[p.id])
-    if (save.finance?.base && !missing.length) return
+    const oldWages = save.finance && save.finance.wageModel !== 2 // 예전 연봉 공식(구단 규모 무시)으로 만든 세이브
+    if (save.finance?.base && !missing.length && !oldWages) return
     setSave((s) => {
+      const k = s.finance?.clubK ?? clubKOf(team)
+      setClubK(k)
       const contracts = { ...(s.contracts || {}) }
-      for (const p of missing) contracts[p.id] = contractOf(s, p, data.leagueId)
+      let finance = s.finance
+      const inbox = []
+      if (oldWages) {
+        // 연봉 개편: 예전 공식 대비 협상으로 더 받던 비율은 유지하고 새 기준으로 다시 매긴다. 수입 규모도 연봉 총액 비율만큼 맞춘다
+        const legacy = (p) => { const m = { 'premier-league': 1.6, 'la-liga': 1.25, bundesliga: 1.2, 'serie-a': 1.1, 'ligue-1': 1.0, eredivisie: 0.55, 'primeira-liga': 0.5, championship: 0.45, brasileirao: 0.4 }[data.leagueId] ?? 1; const ageK = p.age <= 21 ? 0.6 : p.age <= 24 ? 0.85 : p.age <= 30 ? 1 : 0.85; return Math.max(0.1, 0.9 * Math.pow(1.11, playerOvr(p) - 72) * m * ageK) }
+        let before = 0
+        let after = 0
+        for (const p of team.players) {
+          const c = contracts[p.id]
+          if (!c) continue
+          const premium = Math.max(0.8, Math.min(1.6, c.wage / legacy(p)))
+          const wage = Math.round(wageFor(p, data.leagueId, k) * premium * 10) / 10
+          before += c.wage
+          after += wage
+          contracts[p.id] = { ...c, wage }
+        }
+        const ratio = before > 0 ? after / before : 1
+        finance = { ...s.finance, base: Math.round(s.finance.base * ratio * 10) / 10, clubK: k, wageModel: 2 }
+        inbox.push(news(s.round, 'finance', '💶 연봉 체계 개편', `선수 연봉을 실제 시세에 맞게 다시 매겼습니다 (구단 규모·리그·선수 가치 기준). 연봉 총액 ${eur(before)} → ${eur(after)}/년, 구단 수입 규모도 같은 비율로 맞췄습니다. 협상으로 더 받던 선수는 그 비율을 유지합니다.`, { read: false }))
+      }
+      for (const p of missing) contracts[p.id] = contractOf({ ...s, contracts }, p, data.leagueId)
       const fresh = newFinance(team, data.leagueId)
       // 예전 재정(수입 기준 없음)은 수입 기준만 채운다
-      const finance = s.finance ? { ...s.finance, base: s.finance.base || fresh.base, cash: s.finance.base ? s.finance.cash : fresh.cash } : fresh
-      return { ...s, contracts, finance, fans: s.fans ?? 60 }
+      finance = finance ? { ...finance, base: finance.base || fresh.base, cash: finance.base ? finance.cash : fresh.cash, clubK: k, wageModel: 2 } : { ...fresh, clubK: k }
+      return { ...s, contracts, finance, fans: s.fans ?? 60, inbox: [...inbox, ...(s.inbox || [])].slice(0, 80) }
     })
   }, [data, save.teamId, save.rosters, save.signed?.length, save.youth?.length, save.finance?.base ? 1 : 0])
 
