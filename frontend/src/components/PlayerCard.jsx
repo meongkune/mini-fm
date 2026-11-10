@@ -4,6 +4,7 @@ import { fitTone, roleOf } from '../engine/formation.js'
 import { unavailable } from '../game/season.js'
 import { keyAttrs20 } from '../game/attributes.js'
 import Stars, { abilityStars, potentialStarsOf } from './Stars.jsx'
+import Avatar from './Avatar.jsx'
 
 // OVR 기준 선수 등급 — 카드 색을 정한다
 export function tierOf(ovr) {
@@ -38,9 +39,7 @@ export default function PlayerCard({ player, selected = false, onClick, size = '
         <span className="pc-pos">{roleOf(player)}{slot && slot.role !== roleOf(player) && <i className={`pc-slot ${fitTone(slot.fit)}`} title={`${slot.role} 자리 · 능력 ${Math.round(slot.fit * 100)}% 발휘`}>→{slot.role}</i>}</span>
         <span className="pc-flag-img"><Flag nation={player.nation} size={size === 'lg' ? 18 : 14} /></span>
       </span>
-      {player.img
-        ? <span className="pc-photo"><img src={player.img} alt="" loading="lazy" referrerPolicy="no-referrer" onError={(e) => { e.currentTarget.parentElement.style.display = 'none' }} />{player.number && <i>{player.number}</i>}</span>
-        : color ? <span className="pc-kit"><Kit color={color} number={player.number} size={size === 'lg' ? 52 : 40} /></span> : <span className="pc-badge" aria-hidden="true">{player.number}</span>}
+      <span className="pc-avatar"><Avatar player={player} color={color || '#475569'} size={size === 'lg' ? 66 : 50} /></span>
       <span className="pc-name">{lastName(player.name)}</span>
       <span className="pc-stars"><Stars value={cur} /></span>
       <span className="pc-stats" title={keys.est ? '추정 능력치 (1~20)' : '핵심 능력치 (1~20)'}>

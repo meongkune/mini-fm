@@ -22,14 +22,16 @@ async function getSeason(file) {
   const league = file.split('/')[0]
   if (!data.teams || file.startsWith('fa/')) return data
   // 능력치(SportsAPI)와 실제 사진(위키미디어 공용, data/photos/{리그}.json)을 함께 읽어 선수에 붙인다
-  const [ratings, photos, wages] = await Promise.all([
+  const [ratings, photos, wages, faces] = await Promise.all([
     getJson(dataUrl(`ratings/${league}.json`)).catch(() => null),
     getJson(dataUrl(`photos/${league}.json`)).catch(() => null),
     getJson(dataUrl(`wages/${league}.json`)).catch(() => null), // 실제 보도 연봉·키·등번호 (TheSportsDB)
+    getJson(dataUrl(`faces/${league}.json`)).catch(() => null), // 통일 사진(얼굴 기준 자르기·배경 제거)이 있는 선수
   ])
   const rp = ratings?.players || {}
   const ph = photos?.players || {}
   const wg = wages?.players || {}
+  const fc = faces?.players || {}
   return {
     ...data,
     ratingsAt: ratings?.updatedAt,
@@ -47,6 +49,7 @@ async function getSeason(file) {
             ...p,
             ...(rp[p.id] ? { ...rp[p.id], rated: true } : {}),
             ...(ph[p.id] ? { img: ph[p.id].img, imgPage: ph[p.id].page } : {}),
+            ...(fc[p.id] ? { face: dataUrl(`faces/${p.id}.webp`) } : {}),
             ...(w ? { number, ...(w.w ? { realWage: w.w } : {}), ...(w.h ? { height: w.h } : {}) } : {}),
           }
         }),

@@ -1550,3 +1550,12 @@ a.dt-chip { color: inherit; text-decoration: none; }
 .talk-choice { gap: 6px; }
 .talk-choice .btn { flex: 1; }
 .ignored-note { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 6px 9px; border-radius: 8px; background: rgba(148,163,184,.12); font-size: .74rem; color: #cbd5e1; }
+
+/* 통일 아바타: 구단 색 원 + 배경 지운 머리~가슴 사진 */
+.avatar { position: relative; display: inline-block; flex: none; border-radius: 50%; overflow: hidden; background: radial-gradient(circle at 50% 30%, color-mix(in srgb, var(--c) 75%, #fff 25%), var(--c) 55%, color-mix(in srgb, var(--c) 60%, #000 40%)); box-shadow: inset 0 0 0 2px rgba(255,255,255,.18); }
+.avatar img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.avatar svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.avatar .sil { fill: rgba(255,255,255,.5); }
+.avatar i { position: absolute; right: 6%; bottom: 4%; font-style: normal; font-size: .58rem; font-weight: 900; background: rgba(0,0,0,.65); color: #fff; border-radius: 6px; padding: 0 3px; }
+.pc-avatar { position: relative; z-index: 1; margin: 14px auto 2px; display: block; width: fit-content; }
+.mkc-pos .avatar { display: block; }

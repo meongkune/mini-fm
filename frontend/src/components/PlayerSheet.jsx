@@ -41,7 +41,7 @@ export default function PlayerSheet({ player, onClose, inLineup, onToggle }) {
           <button className="btn ghost small" onClick={onClose}>닫기</button>
         </div>
         <div className="ps-top">
-          <PlayerCard player={player.img || !profile?.photo ? player : { ...player, img: profile.photo }} size="lg" color={teams.find((t) => t.players.some((p) => p.id === player.id))?.color} />
+          <PlayerCard player={player} size="lg" color={teams.find((t) => t.players.some((p) => p.id === player.id))?.color} />
           <div className="ps-status">
             <div className="ps-row ps-stars"><AbilityStars player={player} /></div>
             {(player.height || profile?.height) && <div className="ps-row"><span>키</span><b>{player.height || profile.height}cm</b></div>}

@@ -1,4 +1,5 @@
 // 이적 시장: 이적료로 영입(상대 구단 AI와 협상) · 판매 목록 등록(제안은 메시지함으로) · FA
+import Avatar from '../components/Avatar.jsx'
 import Stars, { abilityStars, potentialStarsOf, starText } from '../components/Stars.jsx'
 import { useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
@@ -131,7 +132,7 @@ export default function Transfer() {
               const wage = Math.round(wageFor(p) * 1.15 * 10) / 10
               return (
                 <button key={p.id} className={`mk-card line-${LINE[p.pos]}`} onClick={() => setPick({ p, t, lid })}>
-                  <span className="mkc-pos">{p.img ? <img src={p.img} alt="" loading="lazy" referrerPolicy="no-referrer" /> : null}<em>{roleOf(p)}</em></span>
+                  <span className="mkc-pos"><Avatar player={p} color={t.color} size={34} number={false} /><em>{roleOf(p)}</em></span>
                   <span className="mkc-main">
                     <strong><Flag nation={p.nation} size={14} /> {p.name}{status[p.id]?.inj > 0 ? ' 🚑' : ''}</strong>
                     <small><Crest team={t} size={14} /> {short(t)}{lid !== data.leagueId ? ` · ${league}` : ''} · {p.age}세</small>
@@ -218,7 +219,7 @@ function BidSheet({ p, t, lid, onClose }) {
         <div className="sheet-head"><h3><Crest team={t} size={20} /> {p.name} 영입 협상</h3><button className="btn ghost small" onClick={onClose}>닫기</button></div>
         <div className="bid-info">
           <div className="bi-who">
-            {p.img ? <img src={p.img} alt="" referrerPolicy="no-referrer" /> : <span className="bi-pos">{p.role || p.pos}</span>}
+            <Avatar player={p} color={t.color} size={52} number={false} />
             <span><strong>{p.name}</strong><small>{t.name} · {p.role || p.pos} · {p.age}세</small></span>
           </div>
           <div className="bi-grid">
