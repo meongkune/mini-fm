@@ -1,21 +1,34 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { buildSlots, fitOf, fitTone } from '../engine/formation.js'
-import { MAX_SUBS, advance, benchOf, createMatch, dropInjured, fillVacant, moveToVacant, predict, ratings, reshape, step, substitute, summarize, swapPositions, tacticalEdges } from '../engine/match.js'
-import { styleName } from '../engine/tactics.js'
+import { CORNER_EDGE, MAX_SUBS, advance, benchOf, clockText, createMatch, halfOver, dropInjured, fillVacant, moveToVacant, predict, ratings, reshape, step, substitute, summarize, swapPositions, tacticalEdges } from '../engine/match.js'
+import { styleName, tacOf } from '../engine/tactics.js'
 import { TEAM_TALKS, teamTalkEffect, unavailable as outReason } from '../game/season.js'
 import Rating, { CondBar } from '../components/Rating.jsx'
 import { Crest, Flag, Kit } from '../components/Badges.jsx'
 import { ink, kitColors, lineupOvr, myTactics, onDark, playerOvr, short, teamOvr, useGame } from '../store.jsx'
-import TacticsPanel from '../components/TacticsPanel.jsx'
+import TacticsPanel, { CORNER_DEF_OPTS, CORNER_OPTS } from '../components/TacticsPanel.jsx'
 import MatchPitch from './MatchPitch.jsx'
 import NeedTeam from './NeedTeam.jsx'
 import { FormationPicker, LINE_OPTS, MENTALITY, OptionGroup, PRESSING, TEMPO_OPTS } from './Tactics.jsx'
 
-const SPEEDS = { '1x': 220, '3x': 70 }
-// 상황별로 1분이 흐르는 시간 배수 — 슈팅·골 장면은 천천히 보여준다
-const TICK_MULT = { build: 1, card: 2.5, miss: 4.5, save: 4.5, goal: 10 }
+// 장면 하나(보통 1분)를 보여주는 시간(ms). 배속은 화면 속도만 바꾸고 경기 결과에는 영향이 없다
+const SPEEDS = { '1x': 650, '2x': 325, '4x': 160, '8x': 80 }
+// 상황별 장면 길이 배수 — 슈팅·세트피스·골은 천천히, 재개(골킥·스로인)는 조금 더
+const TICK_MULT = { build: 1, card: 2, clear: 2, miss: 2.5, save: 2.5, goal: 5 }
+const tickDelay = (t, base) => base * ((TICK_MULT[t?.k] || 1) + (t?.sp ? 1.5 : 0) + (t?.sp === 'pen' ? 1.5 : 0) + (t?.r ? 0.6 : 0))
 const POS_ORDER = { GK: 0, DF: 1, MF: 2, FW: 3 }
+// 터치라인 지시(FM식 외침): 버튼 한 번으로 지금 전술을 그 방향으로 민다. 여러 번 누르면 더 세진다
+const cl = (v) => Math.max(0, Math.min(100, v))
+const SHOUTS = [
+  ['push', '⚔️ 공격 앞으로', '라인을 올리고 더 많이 공격합니다', (t) => ({ mentality: cl(t.mentality + 20), line: cl(t.line + 10) })],
+  ['hold', '🛡️ 지키자', '내려앉아 리드를 지킵니다', (t) => ({ mentality: cl(t.mentality - 20), line: cl(t.line - 15) })],
+  ['press', '🔥 압박 올려', '전방에서 공을 뺏습니다 (체력 소모 ↑)', (t) => ({ pressing: cl(t.press + 25) })],
+  ['breathe', '😮‍💨 숨 고르기', '압박·템포를 낮춰 체력을 아낍니다', (t) => ({ pressing: cl(t.press - 25), tempo: cl(t.tempo - 20) })],
+  ['wings', '↔️ 측면으로', '넓게 벌려 측면을 공략합니다', (t) => ({ width: cl(t.width + 25), focus: 'wings' })],
+  ['direct', '🎯 뒷공간으로', '길고 빠르게 수비 뒤를 노립니다', (t) => ({ passing: cl(t.passing + 25), tempo: cl(t.tempo + 15) })],
+  ['waste', '⏳ 시간 끌기', '템포를 늦추고 볼을 돌립니다', (t) => ({ tempo: cl(t.tempo - 30), mentality: cl(t.mentality - 10), passing: cl(t.passing - 20) })],
+]
 
 export default function Match() {
   const { myTeam, save, update, nextFixture, teamsById, seasonOver, finishRound, status } = useGame()
@@ -31,6 +44,9 @@ export default function Match() {
   const [talk, setTalk] = useState(null)
   const [tab, setTab] = useState('stats')
   const [saving, setSaving] = useState(false)
+  const [shown, setShown] = useState(-1) // 지금 보여주는 장면(timeline 번호) — 계산은 앞서 있고 화면이 차례로 따라간다
+  const [lastShout, setLastShout] = useState(null)
+  const [revealed, setRevealed] = useState(true) // 지금 장면의 결과(골·자막)를 드러냈는가
   const logRef = useRef(null)
 
   const fixtureKey = nextFixture ? `${nextFixture.cup ? 'cup' : 'lg'}-${save.round}-${nextFixture.home}-${nextFixture.away}` : ''
@@ -48,26 +64,37 @@ export default function Match() {
     matchRef.current = createMatch({ home: ctx.teams[0], away: ctx.teams[1], homeCfg: isHome ? myCfg : oppCfg, awayCfg: isHome ? oppCfg : myCfg, status, myIdx })
     matchRef.current.key = fixtureKey
     if ((save.owner?.campUntil ?? -1) >= save.round) matchRef.current.talk[myIdx] += 0.025 // 구단주 지옥 훈련 효과
-    setPhase('pre'); setTalk(null); setInterrupt(null); setPaused(false)
+    setPhase('pre'); setTalk(null); setInterrupt(null); setPaused(false); setShown(-1)
     rerender()
   }, [fixtureKey, save.lineup.join(), save.formation])
 
 
   const match = matchRef.current
   if (import.meta.env.DEV) window.__match = match // 개발 중 디버깅용
-  const lastTick = match?.timeline.at(-1)
-  const delay = SPEEDS[speed] * (TICK_MULT[lastTick?.k] || 1)
+  const lastTick = match && shown >= 0 ? match.timeline[shown] : null
+  const delay = tickDelay(lastTick, SPEEDS[speed])
 
-  // 경기 시계: 1분씩 계산하면서 보여준다 (멈춤·교체 화면·부상 알림 중에는 정지)
+  // 장면 결과는 슈팅이 날아간 뒤(장면의 약 75% 지점)에 드러낸다
+  useEffect(() => {
+    setRevealed(false)
+    const t = setTimeout(() => setRevealed(true), delay * 0.72)
+    return () => clearTimeout(t)
+  }, [shown])
+
+  // 경기 시계: 장면을 하나씩 보여주고, 다 보여주면 다음 1분을 계산한다 (멈춤·교체 화면·부상 알림 중에는 정지)
   useEffect(() => {
     if (phase !== 'live' || paused || sheet || interrupt || !match) return
+    const tl = match.timeline
     const t = setTimeout(() => {
+      if (shown < tl.length - 1) { setShown(shown + 1); return }
+      if (match.minute === 45 && halfOver(match, 1) && !match.htShown) { match.htShown = true; setPhase('ht'); return }
+      if (halfOver(match, 2)) { setPhase('ft'); return }
+      const before = tl.length
       const it = step(match, ctx)
       if (it) { setInterrupt(it); setSheet('subs') }
-      if (match.minute === 45) setPhase('ht')
-      if (match.minute >= 90) setPhase('ft')
+      setShown(before)
       rerender()
-    }, delay)
+    }, shown >= 0 ? delay : SPEEDS[speed])
     return () => clearTimeout(t)
   })
 
@@ -103,11 +130,13 @@ export default function Match() {
   })
 
   const kickoff = () => { setPhase('live'); rerender() }
+  // 건너뛰기: 같은 계산을 한 번에 돌릴 뿐이라 결과는 천천히 볼 때와 같다
   const skip = () => {
-    const to = match.minute < 45 ? 45 : 90
-    const it = advance(match, ctx, to)
+    const first = !halfOver(match, 1)
+    const it = advance(match, ctx, first ? 45 : 90)
+    setShown(match.timeline.length - 1)
     if (it) { setInterrupt(it); setSheet('subs') }
-    else setPhase(to === 45 ? 'ht' : 'ft')
+    else if (first) { match.htShown = true; setPhase('ht') } else setPhase('ft')
     rerender()
   }
   const secondHalf = () => { setPhase('live'); setPaused(false); rerender() }
@@ -131,6 +160,13 @@ export default function Match() {
     }
     rerender()
   }
+  // 터치라인 지시: 이 경기 전술만 바꾸고(저장된 팀 전술은 그대로) 문자 중계에 남긴다
+  const shout = ([key, label, , fn]) => {
+    mySide.tactics = { ...mySide.tactics, ...fn(tacOf(mySide.tactics)) }
+    match.events.push({ minute: match.minute, plus: match.plus || undefined, type: 'info', team: myIdx, text: `📣 ${mySide.name} 감독 지시: ${label.replace(/^\S+ /, '')}` })
+    setLastShout(key)
+    rerender()
+  }
   const doSub = (outId, inId) => {
     if (substitute(match, ctx, myIdx, outId, inId)) {
       if (interrupt?.playerId === outId) setInterrupt(null)
@@ -151,11 +187,17 @@ export default function Match() {
     navigate(nextFixture.cup ? '/league?tab=cup' : '/league')
   }
 
-  const score = match.score
-  const scorers = [0, 1].map((i) => match.scorers.filter((s) => s.team === i).map((s) => `${s.name.split(' ').at(-1)} ${s.minute}'`))
-  const lastKey = [...match.events].reverse().find((e) => e.type !== 'info')
-  const caption = live && lastKey && match.minute - lastKey.minute <= 2 ? lastKey : null
-  const clockLabel = phase === 'pre' ? '킥오프 전' : phase === 'ht' ? 'HT' : phase === 'ft' ? 'FT' : `${match.minute}'`
+  // 화면에 보이는 시점: 경기 중에는 지금 보여주는 장면까지의 스코어·득점·이벤트만 (계산이 앞서 있어도 결과를 미리 보여주지 않는다)
+  const view = phase === 'live' && lastTick ? lastTick : null
+  const seen = view && (revealed || paused || sheet) ? { sc: view.sc, n: view.n, gs: view.gs } : view ? { sc: view.sc0 ?? view.sc, n: view.n0 ?? view.n, gs: view.gs0 ?? view.gs } : null
+  const score = seen?.sc ?? match.score
+  const events = seen ? match.events.filter((_, i) => i < seen.n || i >= (match.evEnd ?? 0)) : match.events
+  const scorers = [0, 1].map((i) => match.scorers.slice(0, seen ? seen.gs : undefined).filter((s) => s.team === i).map((s) => `${s.name.split(' ').at(-1)} ${clockText(s.minute, s.plus)}'${s.how === 'pen' ? ' (P)' : ''}`))
+  const nowMin = view ? view.m : match.minute
+  const lastKey = [...events].reverse().find((e) => e.type !== 'info')
+  const caption = live && lastKey && nowMin - lastKey.minute <= 2 ? lastKey : null
+  const clockText_ = view ? clockText(view.m, view.plus) : clockText(match.minute, match.plus)
+  const clockLabel = phase === 'pre' ? '킥오프 전' : phase === 'ht' ? 'HT' : phase === 'ft' ? 'FT' : `${clockText_}'`
   const started = phase !== 'pre'
   const unavailable = save.lineup.filter((id) => id && (status[id]?.inj > 0 || status[id]?.susp > 0))
   const preFit = Math.round((mySide.onPitch.reduce((s, id, i) => s + fitOf(byId[id], mySide.slots[i]), 0) / (mySide.onPitch.length || 1)) * 100)
@@ -179,10 +221,10 @@ export default function Match() {
       </div>
       <div className="bc-sub">
         <span className="bc-scorers">{scorers[0].join(', ')}</span>
-        <span className={`bc-clock ${live && !paused ? 'live' : ''}`}>{paused && phase === 'live' ? `⏸ ${match.minute}'` : clockLabel}</span>
+        <span className={`bc-clock ${live && !paused ? 'live' : ''}`}>{paused && phase === 'live' ? `⏸ ${clockText_}'` : clockLabel}</span>
         <span className="bc-scorers right">{scorers[1].join(', ')}</span>
       </div>
-      <div className="progress"><span style={{ width: `${(match.minute / 90) * 100}%` }} /></div>
+      <div className="progress"><span style={{ width: `${(Math.min(90, nowMin) / 90) * 100}%` }} /></div>
 
       <div className="match-layout">
       <div className="ml-pitch">
@@ -195,7 +237,7 @@ export default function Match() {
         duration={live ? delay : 300}
         scorerName={lastTick?.p ? byId[lastTick.p]?.name : ''}
         idleLabel={phase === 'ht' ? '하프타임' : phase === 'ft' ? '경기 종료' : paused ? '일시정지' : '킥오프 대기'}
-        caption={caption && { text: caption.text, minute: caption.minute, type: caption.type, color: onDark(kits[caption.team]?.color || '#7c5cff') }}
+        caption={caption && { text: caption.text, minute: clockText(caption.minute, caption.plus), type: caption.type, color: onDark(kits[caption.team]?.color || '#7c5cff') }}
       />
       </div>
       <div className="ml-side">
@@ -218,6 +260,7 @@ export default function Match() {
               <div><span className="muted small">상대 전술</span><strong>{match.sides[1 - myIdx].tactics.formation} · {styleName(match.sides[1 - myIdx].tactics)}</strong></div>
             </div>
             <MatchupNotes match={match} ctx={ctx} myIdx={myIdx} />
+            <SetPieceNote mine={mySide.tactics} theirs={match.sides[1 - myIdx].tactics} />
             {promised.length > 0 && (
               <p className="small notice">🤝 선발 약속: {promised.map((p) => p.name).join(', ')} {promised.every((p) => save.lineup.includes(p.id)) ? '— 선발에 포함됨 ✓' : '— 선발에 없습니다! 약속을 어기면 사기가 크게 떨어집니다'}</p>
             )}
@@ -240,7 +283,17 @@ export default function Match() {
             {Object.keys(SPEEDS).map((s) => (
               <button key={s} className={`chip ${speed === s ? 'on' : ''}`} onClick={() => setSpeed(s)}>{s}</button>
             ))}
-            <button className="chip" onClick={skip} aria-label="하프·경기 끝까지 건너뛰기">⏭</button>
+            <button className="chip" onClick={skip} aria-label="하프·경기 끝까지 건너뛰기" title={halfOver(match, 1) ? '후반 끝까지 건너뛰기' : '전반 끝까지 건너뛰기'}>⏭ {halfOver(match, 1) ? '후반' : '전반'}</button>
+          </div>
+        )}
+        {(phase === 'live' || phase === 'ht') && (
+          <div className="shouts">
+            <span className="muted small">📣 터치라인 지시 <em>· 지금 {styleName(mySide.tactics)}</em></span>
+            <div className="shout-row">
+              {SHOUTS.map((s) => (
+                <button key={s[0]} className={`chip shout ${lastShout === s[0] ? 'on' : ''}`} title={s[2]} onClick={() => shout(s)}>{s[1]}</button>
+              ))}
+            </div>
           </div>
         )}
 
@@ -292,10 +345,10 @@ export default function Match() {
           {tab === 'feed' && (
             <div className="card log" ref={logRef}>
               <ol className="tl">
-                {match.events.map((e, i) => (
+                {events.map((e, i) => (
                   <li key={i} className={`tl-item ${e.type} ${e.team === undefined ? 'neutral' : e.team === myIdx ? 'mine' : 'theirs'}`}
                     style={e.team !== undefined ? { '--tc': onDark(kits[e.team].color) } : undefined}>
-                    <span className="tl-min">{e.minute}'</span>
+                    <span className="tl-min">{clockText(e.minute, e.plus)}'</span>
                     <span className="tl-text">{e.text}</span>
                   </li>
                 ))}
@@ -323,7 +376,7 @@ export default function Match() {
             <div className="sheet-head"><h3>전술 변경</h3><button className="btn ghost small" onClick={() => setSheet(null)}>완료</button></div>
             <h4>포메이션 <span className="muted small">(뛰고 있는 선수들이 새 자리로 재배치됩니다)</span></h4>
             <FormationPicker value={mySide.tactics.formation} onChange={(formation) => setTactics({ formation })} />
-            <TacticsPanel value={mySide.tactics} onChange={setTactics} compact />
+            <TacticsPanel value={mySide.tactics} onChange={setTactics} compact players={mySide.onPitch.map((id) => byId[id])} />
           </div>
         </div>
       )}
@@ -569,6 +622,22 @@ function Odds({ ctx, isHome, save, status, xi, preFit }) {
 }
 
 /** 전술 상성 분석: 우리에게 유리한 점(초록)과 상대가 우리를 공략하는 점(빨강) */
+/** 경기 전 세트피스 상성: 내 코너 루틴 vs 상대 코너 수비, 상대 루틴 vs 내 수비 */
+function SetPieceNote({ mine, theirs }) {
+  const name = (opts, k) => opts.find((o) => o[0] === k)?.[1] ?? k
+  const my = CORNER_EDGE[mine.corner || 'mixed']?.[theirs.cornerDef || 'zonal'] ?? 0
+  const op = CORNER_EDGE[theirs.corner || 'mixed']?.[mine.cornerDef || 'zonal'] ?? 0
+  const best = Object.entries(CORNER_EDGE).sort((a, b) => b[1][theirs.cornerDef || 'zonal'] - a[1][theirs.cornerDef || 'zonal'])[0][0]
+  return (
+    <p className="small muted sp-note">
+      🚩 상대 코너 수비: <b>{name(CORNER_DEF_OPTS, theirs.cornerDef || 'zonal')}</b>
+      {' → '}내 루틴 <b className={my > 0.02 ? 'good-text' : my < 0 ? 'bad-text' : ''}>{name(CORNER_OPTS, mine.corner || 'mixed')}</b>
+      {my <= 0.02 && best !== (mine.corner || 'mixed') ? ` (추천: ${name(CORNER_OPTS, best)})` : ' ✓'}
+      {' · '}상대 코너 루틴: <b className={op > 0.02 ? 'bad-text' : ''}>{name(CORNER_OPTS, theirs.corner || 'mixed')}</b>
+    </p>
+  )
+}
+
 function MatchupNotes({ match, ctx, myIdx }) {
   const mine = tacticalEdges(match, ctx, myIdx).notes
   const theirs = tacticalEdges(match, ctx, 1 - myIdx).notes

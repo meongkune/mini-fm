@@ -199,8 +199,8 @@ function Fixtures({ schedule, results, teamsById, myTeam, current }) {
               <span className={`fx-team ${sc && sc[1] > sc[0] ? 'win' : ''}`}><Crest team={a} /> {short(a)}</span>
               {f.res?.scorers?.length > 0 && (
                 <div className="fx-goals">
-                  <span>{f.res.scorers.filter((s) => s.team === f.home).map((s) => `${s.name.split(' ').at(-1)} ${s.minute ?? ''}'`).join(', ')}</span>
-                  <span>{f.res.scorers.filter((s) => s.team === f.away).map((s) => `${s.name.split(' ').at(-1)} ${s.minute ?? ''}'`).join(', ')}</span>
+                  <span>{f.res.scorers.filter((s) => s.team === f.home).map((s) => `${s.name.split(' ').at(-1)} ${s.minute ?? ''}${s.plus ? `+${s.plus}` : ''}'${s.how === 'pen' ? ' (P)' : ''}`).join(', ')}</span>
+                  <span>{f.res.scorers.filter((s) => s.team === f.away).map((s) => `${s.name.split(' ').at(-1)} ${s.minute ?? ''}${s.plus ? `+${s.plus}` : ''}'${s.how === 'pen' ? ' (P)' : ''}`).join(', ')}</span>
                 </div>
               )}
             </div>

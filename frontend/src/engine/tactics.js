@@ -57,7 +57,7 @@ export function aiTactics(team, strength = 75) {
   const h = hash(team.id)
   const pool = strength >= 82 ? ['gegen', 'tiki', 'wing', 'tiki'] : strength >= 76 ? ['wing', 'counter', 'gegen', 'route1'] : ['counter', 'bus', 'route1', 'counter']
   const [, , t] = presetOf(pool[h % pool.length])
-  return { ...t }
+  return { ...t, corner: ['mixed', 'near', 'far', 'short'][(h >>> 5) % 4], cornerDef: ['zonal', 'man', 'mixed'][(h >>> 9) % 3] }
 }
 
 /** 전형의 측면 자원 수 (풀백·윙백·측면 미드·윙어) */

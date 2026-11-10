@@ -95,6 +95,8 @@ export function teamOvr(team) {
 export const myTactics = (save) => ({
   formation: save.formation, mentality: save.mentality, pressing: save.pressing, line: save.line ?? 'normal', tempo: save.tempo ?? 'normal',
   width: save.width ?? 50, passing: save.passing ?? 50, approach: save.approach || 'balanced', focus: save.focus || 'mixed', trap: !!save.trap, tackling: save.tackling || 'normal',
+  // 세트피스: 코너킥 루틴 · 상대 코너킥 수비 · 키커(없으면 자동)
+  corner: save.corner || 'mixed', cornerDef: save.cornerDef || 'zonal', spTaker: save.spTaker || null, penTaker: save.penTaker || null,
 })
 
 /** 다른 리그 구단 명단에 이적 결과 반영: 내가 데려온 선수(gone)는 빼고, 내가 판 선수(abroad)는 넣는다 */

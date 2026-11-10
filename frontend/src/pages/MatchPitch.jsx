@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { ink, short } from '../store.jsx'
+import { clockText } from '../engine/match.js'
 
 // 경기장 좌표계: 가로 105 x 세로 68 (실제 경기장 m 비율). 홈(0)은 오른쪽(x=105), 원정(1)은 왼쪽(x=0)으로 공격
 const W = 105
@@ -160,6 +161,108 @@ function computeFrame(lineups, tick, sub, shotStage) {
   return { pos, ball, carrier: shot && shotStage ? null : holder, steps: chain.length }
 }
 
+/**
+ * 세트피스 장면: 코너킥·직접 프리킥·크로스 프리킥·페널티킥
+ *  sub 0 = 준비(공이 킥 지점, 선수들이 박스로 모인다) · sub 1 = 킥(크로스가 머리로) · shotStage = 슈팅 결과
+ */
+function setPieceFrame(lineups, tick, sub, shotStage) {
+  const base = { ...basePositions(lineups[0], 0), ...basePositions(lineups[1], 1) }
+  const atk = tick.t
+  const dir = atk === 0 ? 1 : -1
+  const goalX = atk === 0 ? W : 0
+  const side = tick.side || 1
+  const seed = tick.m * 97 + (tick.i || 0) * 13
+  const h = (id, k) => (hashId(`${id}-${k}`) % 1000) / 1000
+  let spot
+  if (tick.sp === 'corner') spot = { x: goalX - dir * 0.6, y: side > 0 ? H - 0.6 : 0.6 }
+  else if (tick.sp === 'pen') spot = { x: goalX - dir * 11, y: H / 2 }
+  else if (tick.sp === 'fk') spot = { x: goalX - dir * (21 + rand(seed) * 7), y: H / 2 + side * (3 + rand(seed + 1) * 10) }
+  else spot = { x: goalX - dir * (27 + rand(seed) * 8), y: side > 0 ? H - 7 - rand(seed + 2) * 6 : 7 + rand(seed + 2) * 6 }
+  const pos = {}
+  const kt = tick.kt ?? tick.p
+  const atkField = lineups[atk].filter((p) => base[p.id].pos !== 'GK')
+  // 공격팀: 가장 뒤에 선 2명은 역습 대비로 남고, 나머지는 박스 안으로
+  const stay = new Set([...atkField].sort((a, b) => (base[a.id].x - base[b.id].x) * dir).slice(0, 2).map((p) => p.id))
+  for (const p of lineups[atk]) {
+    const b = base[p.id]
+    if (b.pos === 'GK') { pos[p.id] = { ...b }; continue }
+    if (p.id === kt) { pos[p.id] = { ...b, x: spot.x - dir * 0.8, y: spot.y }; continue }
+    if (tick.sp === 'pen') { pos[p.id] = { ...b, x: goalX - dir * (18 + h(p.id, 1) * 5), y: H / 2 + (h(p.id, 2) - 0.5) * 34 }; continue }
+    if (stay.has(p.id)) { pos[p.id] = { ...b, x: W / 2 + dir * (4 + h(p.id, 1) * 8), y: H / 2 + (h(p.id, 2) - 0.5) * 30 }; continue }
+    pos[p.id] = { ...b, x: goalX - dir * (5 + h(p.id, 1) * 10), y: H / 2 + (h(p.id, 2) - 0.5) * 26 }
+  }
+  // 수비팀: 골키퍼는 골라인, 직접 프리킥이면 벽 4명, 역습 대비 1명은 하프라인 근처
+  const defField = lineups[1 - atk].filter((p) => base[p.id].pos !== 'GK')
+  const outlet = [...defField].sort((a, b) => (base[a.id].x - base[b.id].x) * dir)[0]?.id
+  const toGoal = { x: goalX - spot.x, y: H / 2 - spot.y }
+  const len = Math.hypot(toGoal.x, toGoal.y) || 1
+  const wallC = { x: spot.x + (toGoal.x / len) * 9.15, y: spot.y + (toGoal.y / len) * 9.15 }
+  let wi = 0
+  for (const p of lineups[1 - atk]) {
+    const b = base[p.id]
+    if (b.pos === 'GK') { pos[p.id] = { ...b, x: goalX - dir * 0.8, y: H / 2 + (tick.sp === 'corner' ? side * 1.5 : 0) }; continue }
+    if (tick.sp === 'pen') { pos[p.id] = { ...b, x: goalX - dir * (18 + h(p.id, 3) * 5), y: H / 2 + (h(p.id, 4) - 0.5) * 34 }; continue }
+    if (p.id === outlet && tick.sp !== 'fk') { pos[p.id] = { ...b, x: W / 2 - dir * 2, y: H / 2 + (h(p.id, 4) - 0.5) * 16 }; continue }
+    if (tick.sp === 'fk' && wi < 4) { const o = (wi++ - 1.5) * 0.9; pos[p.id] = { ...b, x: wallC.x - (toGoal.y / len) * o, y: wallC.y + (toGoal.x / len) * o }; continue }
+    pos[p.id] = { ...b, x: goalX - dir * (3 + h(p.id, 3) * 11), y: H / 2 + (h(p.id, 4) - 0.5) * 24 }
+  }
+  let ball = { x: spot.x, y: spot.y, z: 0 }
+  let carrier = kt
+  const aerial = tick.sp === 'corner' || tick.sp === 'fkx'
+  if (aerial && sub >= 1) {
+    // 크로스: 슈팅한 선수(헤더) 머리로, 걷어냈으면 수비 머리로 갔다가 박스 밖으로
+    const target = tick.k === 'clear' ? defField.map((p) => p.id).find((id) => id !== outlet) : tick.p
+    const q = pos[target]
+    if (q) { q.x = goalX - dir * (6 + h(target, 5) * 5); q.y = H / 2 + (h(target, 6) - 0.5) * 12; ball = { x: q.x, y: q.y, z: 6 } }
+    carrier = null
+    if (tick.k === 'clear') ball = { x: goalX - dir * 26, y: H / 2 + (rand(seed + 3) - 0.5) * 30, z: 8 }
+  }
+  if (shotStage) {
+    const jitter = rand(seed + 4) - 0.5
+    if (tick.k === 'goal') ball = { x: goalX + dir * 1.6, y: H / 2 + jitter * 5, z: 3 }
+    if (tick.k === 'save') {
+      ball = { x: goalX - dir * 1.2, y: H / 2 + jitter * 6, z: 2 }
+      const gk = lineups[1 - atk].find((p) => base[p.id].pos === 'GK')
+      if (gk) pos[gk.id] = { ...pos[gk.id], y: ball.y }
+    }
+    if (tick.k === 'miss') ball = { x: goalX + dir * 2.5, y: H / 2 + (jitter > 0 ? 1 : -1) * (5 + Math.abs(jitter) * 8), z: 9 }
+    carrier = null
+  }
+  for (const id in pos) { pos[id].x = clamp(pos[id].x, 0.8, W - 0.8); pos[id].y = clamp(pos[id].y, 0.8, H - 0.8) }
+  return { pos, ball, carrier, steps: aerial ? 2 : 1 }
+}
+
+/** 재개 장면: 골킥·골키퍼 캐치·스로인·프리킥 — 마지막 장면의 선수 위치에서 공만 재개 지점으로 */
+function applyRestart(f, tick, lineups) {
+  const atk = tick.t
+  const dir = atk === 0 ? 1 : -1
+  const goalX = atk === 0 ? W : 0
+  const dgk = lineups[1 - atk].find((p) => f.pos[p.id]?.pos === 'GK')
+  const near = (team, pt) => lineups[team].filter((p) => f.pos[p.id] && f.pos[p.id].pos !== 'GK')
+    .map((p) => ({ id: p.id, d: (f.pos[p.id].x - pt.x) ** 2 + (f.pos[p.id].y - pt.y) ** 2 })).sort((a, b) => a.d - b.d)[0]?.id
+  const pos = { ...f.pos }
+  let ball = f.ball
+  let carrier = f.carrier
+  if (tick.r === 'goalkick') {
+    ball = { x: goalX - dir * 5.5, y: H / 2 + 7, z: 0 }
+    if (dgk) { pos[dgk.id] = { ...pos[dgk.id], x: ball.x + dir * 0.9, y: ball.y }; carrier = dgk.id }
+  } else if (tick.r === 'gk') {
+    if (dgk) { const q = pos[dgk.id]; ball = { x: q.x, y: q.y, z: 1 }; carrier = dgk.id }
+  } else if (tick.r === 'throw') {
+    const c = pos[f.carrier] || f.ball
+    ball = { x: c.x, y: c.y < H / 2 ? 0.2 : H - 0.2, z: 2 }
+    const t = near(rand(tick.m * 7 + 3) < 0.5 ? atk : 1 - atk, ball)
+    if (t) { pos[t] = { ...pos[t], x: ball.x, y: ball.y < H / 2 ? 0.8 : H - 0.8 }; carrier = t }
+  } else if (tick.r === 'fk' || tick.r === 'offside') {
+    ball = { ...f.ball, z: 0 }
+    const t = near(tick.r === 'fk' ? atk : 1 - atk, ball)
+    if (t) { pos[t] = { ...pos[t], x: ball.x - dir * (tick.r === 'fk' ? 0.8 : -0.8), y: ball.y }; carrier = t }
+  }
+  return { ...f, pos, ball, carrier }
+}
+const SP_LABEL = { corner: '🚩 코너킥', fk: '🎯 직접 프리킥', fkx: '🎯 프리킥 크로스', pen: '⚠️ 페널티킥' }
+const RESTART_LABEL = { goalkick: '골킥', gk: '골키퍼가 잡아냅니다', throw: '스로인', fk: '프리킥', offside: '오프사이드 → 프리킥' }
+
 // 모바일 세로 화면: 경기 좌표(x 0~105, y 0~68)를 화면 좌표로 변환한다.
 // 내 팀(myIdx)이 항상 화면 아래 → 위로 공격하도록 돌린다.
 function toScreen(x, y, myIdx) {
@@ -171,9 +274,9 @@ function toScreen(x, y, myIdx) {
 export default function MatchPitch({ home, away, lineups, tick, duration = 300, scorerName, idleLabel = '킥오프 대기', myIdx = 0, caption = null }) {
   // 한 분(tick) 안에서 패스 몇 번(sub)을 차례로 보여주고, 슈팅이면 마지막에 공이 골문으로 날아간다
   const [sub, setSub] = useState(0)
-  const steps = tick && lineups ? computeFrame(lineups, tick, 0, false).steps : 1
+  const steps = tick && lineups ? (tick.sp ? setPieceFrame(lineups, tick, 0, false).steps : computeFrame(lineups, tick, 0, false).steps) : 1
   const shotTick = !!tick && ['goal', 'save', 'miss'].includes(tick.k)
-  const total = steps + (shotTick ? 1 : 0)
+  const total = steps + (shotTick ? 1 : 0) + (tick?.r ? 1 : 0)
   useEffect(() => {
     setSub(0)
     if (!tick) return undefined
@@ -182,9 +285,15 @@ export default function MatchPitch({ home, away, lineups, tick, duration = 300, 
     const t = setInterval(() => { i++; if (i >= total) { clearInterval(t); return } setSub(i) }, each)
     return () => clearInterval(t)
   }, [tick, duration])
-  const stage = shotTick && sub >= steps ? 1 : 0
+  // 0 = 플레이 · 1 = 슈팅 결과 · 2 = 재개(골킥·스로인·프리킥)
+  const stage = tick?.r && sub >= total - 1 && sub >= steps ? 2 : shotTick && sub >= steps ? 1 : 0
 
-  const frame = useMemo(() => (lineups ? computeFrame(lineups, tick, Math.min(sub, steps - 1), stage === 1) : null), [lineups, tick, sub, stage])
+  const frame = useMemo(() => {
+    if (!lineups) return null
+    const s = Math.min(sub, steps - 1)
+    const f = tick?.sp ? setPieceFrame(lineups, tick, s, stage >= 1 && shotTick) : computeFrame(lineups, tick, s, stage >= 1 && shotTick)
+    return stage === 2 ? applyRestart(f, tick, lineups) : f
+  }, [lineups, tick, sub, stage])
   if (!frame) return <div className="pitch-stage empty">선발 명단을 불러오는 중…</div>
 
   // 이동 속도: 분 간격에 맞춰 부드럽게 (너무 빠르면 순간이동처럼 보이므로 하한)
@@ -192,7 +301,7 @@ export default function MatchPitch({ home, away, lineups, tick, duration = 300, 
   const fly = Math.max(160, Math.min(650, duration * 0.4))
   const teams = [home, away]
   const goalFlash = tick?.k === 'goal' && stage === 1
-  const attackLabel = tick ? `${tick.m}' ${short(teams[tick.t])} 공격` : idleLabel
+  const attackLabel = tick ? `${clockText(tick.m, tick.plus)}' ${short(teams[tick.t])} ${tick.sp ? SP_LABEL[tick.sp] : '공격'}` : idleLabel
   const mine = teams[myIdx]
   const theirs = teams[1 - myIdx]
 
@@ -203,6 +312,8 @@ export default function MatchPitch({ home, away, lineups, tick, duration = 300, 
         {attackLabel}
         {tick?.k === 'save' && stage === 1 && <em> · 🧤 선방!</em>}
         {tick?.k === 'miss' && stage === 1 && <em> · 빗나감</em>}
+        {tick?.k === 'clear' && sub >= 1 && stage !== 2 && <em> · 걷어냅니다</em>}
+        {stage === 2 && <em> · {RESTART_LABEL[tick.r]}</em>}
       </div>
       <div className="pitch-plane">
         {/* 경기장은 가로(105x68) 좌표로 그리고 -90도 회전해 세로로 세운다 */}

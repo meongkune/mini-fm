@@ -1305,3 +1305,15 @@ html.desktop .tabs-line { position: static; margin: 0 0 12px; padding: 0; backgr
 .ar-est { grid-column: 1 / -1; margin: 0; }
 .screen .attr-radar { grid-template-columns: 130px 1fr; }
 .ask-price select { max-width: 120px; padding: 4px; border-radius: 7px; border: 1px solid var(--line); background: var(--panel-2); color: var(--text); font: inherit; font-size: .72rem; }
+
+/* 세트피스 지시 */
+.tp-select { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 6px 0; font-size: 13px; }
+.tp-select select { flex: 1; max-width: 62%; background: var(--card2, #1e1b2e); color: inherit; border: 1px solid rgba(255,255,255,.15); border-radius: 8px; padding: 5px 6px; font: inherit; }
+.tp-cols > section:nth-child(3) { grid-column: 1 / -1; }
+.sp-note { margin: 4px 0 8px; line-height: 1.5; }
+
+/* 터치라인 지시 */
+.shouts { margin-top: 8px; display: grid; gap: 4px; }
+.shouts em { font-style: normal; opacity: .8; }
+.shout-row { display: flex; flex-wrap: wrap; gap: 5px; }
+.chip.shout { font-size: 12px; padding: 4px 8px; }

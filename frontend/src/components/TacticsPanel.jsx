@@ -1,5 +1,6 @@
 // 팀 지시 (FM식): 스타일 프리셋 + 공격 시 · 수비 시 세부 지시. 전술 화면과 경기 중 전술 변경에서 같이 쓴다
 import { TAC_PRESETS, styleName, tacOf } from '../engine/tactics.js'
+import { autoTaker } from '../engine/match.js'
 
 const Slider = ({ label, value, onChange, left, right, hint }) => (
   <label className="tp-slider">
@@ -16,8 +17,11 @@ const Seg = ({ label, value, options, onChange }) => (
 )
 const word = (v, words) => words[Math.min(words.length - 1, Math.floor(v / (101 / words.length)))]
 
-/** value: 저장된 전술(예전 문자열 값도 가능), onChange(patch) */
-export default function TacticsPanel({ value, onChange, compact = false }) {
+export const CORNER_OPTS = [['mixed', '섞어서'], ['near', '니어 포스트'], ['far', '파 포스트'], ['short', '짧게']]
+export const CORNER_DEF_OPTS = [['zonal', '지역 방어'], ['man', '대인 방어'], ['mixed', '혼합']]
+
+/** value: 저장된 전술(예전 문자열 값도 가능), onChange(patch), players: 키커로 고를 선수(선발 11명) */
+export default function TacticsPanel({ value, onChange, compact = false, players = null }) {
   const t = tacOf(value)
   const set = (k) => (v) => onChange({ [k]: v })
   return (
@@ -46,7 +50,33 @@ export default function TacticsPanel({ value, onChange, compact = false }) {
           <Seg label="오프사이드 트랩" value={t.trap ? 'on' : 'off'} onChange={(v) => onChange({ trap: v === 'on' })} options={[['off', '안 씀'], ['on', '씀']]} />
           <p className="tp-tip small muted">압박·템포가 높을수록 빨리 지칩니다. 라인을 올리면 상대 역습에 뒷공간이 열립니다.</p>
         </section>
+        <SetPieces value={value} onChange={onChange} players={players} />
       </div>
     </div>
+  )
+}
+
+/** 세트피스: 골의 약 4분의 1이 여기서 나온다 — 약팀이 강팀을 잡는 통로 */
+function SetPieces({ value, onChange, players }) {
+  const field = (players || []).filter((p) => p && p.pos !== 'GK')
+  const auto = { sp: autoTaker(field, 'sp'), pen: autoTaker(field, 'pen') }
+  const Taker = ({ label, k, kind }) => (
+    <label className="tp-select">
+      <b>{label}</b>
+      <select value={value[k] && field.some((p) => p.id === value[k]) ? value[k] : ''} onChange={(e) => onChange({ [k]: e.target.value || null })}>
+        <option value="">자동{auto[kind] ? ` (${auto[kind].name})` : ''}</option>
+        {field.map((p) => <option key={p.id} value={p.id}>{p.name} · {p.pos}</option>)}
+      </select>
+    </label>
+  )
+  return (
+    <section>
+      <h4>🚩 세트피스</h4>
+      <Seg label="코너킥 루틴" value={value.corner || 'mixed'} onChange={(v) => onChange({ corner: v })} options={CORNER_OPTS} />
+      <Seg label="코너킥 수비" value={value.cornerDef || 'zonal'} onChange={(v) => onChange({ cornerDef: v })} options={CORNER_DEF_OPTS} />
+      {field.length > 0 && <Taker label="코너·프리킥 키커" k="spTaker" kind="sp" />}
+      {field.length > 0 && <Taker label="페널티킥 키커" k="penTaker" kind="pen" />}
+      <p className="tp-tip small muted">니어 포스트는 지역 방어에, 파 포스트는 대인 방어에 강합니다. 짧게 주면 헤더 대신 박스 앞 슈팅. 대인 방어는 공중볼이 강한 수비수가 있을 때 좋습니다.</p>
+    </section>
   )
 }

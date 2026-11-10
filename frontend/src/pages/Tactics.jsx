@@ -223,7 +223,7 @@ export default function Tactics() {
 
       <div className="card tac-orders">
         <h3>팀 지시</h3>
-        <TacticsPanel value={myTactics(save)} onChange={update} />
+        <TacticsPanel value={myTactics(save)} onChange={update} players={lineup.map((id) => myTeam.players.find((p) => p.id === id)).filter(Boolean)} />
       </div>
       </div>
 
