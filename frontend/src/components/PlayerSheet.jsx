@@ -92,7 +92,7 @@ export default function PlayerSheet({ player, onClose, inLineup, onToggle }) {
             {battle && (
               <TalkRoom player={player} team={myTeam} status={st} topic={st.wantsOut ? 'transfer' : 'general'}
                 wage={contractOf(player).wage} totalRounds={totalRounds}
-                situation={situationOf(player, myTeam, st, { contractYears: yearsLeft(save, contractOf(player)), inLineup })}
+                situation={situationOf(player, myTeam, st, { contractYears: yearsLeft(save, contractOf(player)), inLineup, round: save.round, apps: save.pstats?.[player.id]?.apps ?? 0 })}
                 onClose={() => setBattle(false)}
                 onFinish={(r) => { finishTalk(player.id, r); setBattle(false) }} />
             )}

@@ -130,7 +130,7 @@ export default function Inbox() {
         return (
           <TalkRoom player={p} team={myTeam} status={status[p.id]} reason={battle.body} topic={battle.topic || 'minutes'}
             wage={contractOf(p).wage} totalRounds={totalRounds}
-            situation={situationOf(p, myTeam, status[p.id] || {}, { inLineup: save.lineup.includes(p.id) })}
+            situation={situationOf(p, myTeam, status[p.id] || {}, { inLineup: save.lineup.includes(p.id), round: save.round, apps: save.pstats?.[p.id]?.apps ?? 0 })}
             onClose={() => setBattle(null)}
             onFinish={(r) => { finishTalk(p.id, r, battle.id); setBattle(null) }} />
         )

@@ -22,9 +22,13 @@ export function rankOf(player, team) {
 }
 
 /** 선수 상황 설명 (AI에게 주는 배경) */
-export function situationOf(player, team, st = {}, { contractYears = null, inLineup = false } = {}) {
+export function situationOf(player, team, st = {}, { contractYears = null, inLineup = false, round = null, apps = null } = {}) {
   const out = []
-  out.push(inLineup ? '현재 주전으로 뛰고 있음' : `최근 선발에서 빠져 있음${st.benched ? ` (${st.benched}경기 연속 벤치)` : ''}`)
+  // 사실만 준다 (AI가 경기 수·벤치 기간을 지어내지 않게): 시즌 진행·출전 기록·다음 경기 선발 여부
+  if (round === 0) out.push('시즌 개막 전 — 아직 이번 시즌 공식 경기를 한 번도 치르지 않았다 (벤치·출전 기록 없음)')
+  else if (round !== null) out.push(`시즌 ${round}경기 치름, 이 선수 출전 ${apps ?? 0}경기`)
+  out.push(inLineup ? '다음 경기 선발 명단에 들어 있음' : '다음 경기 선발 명단에는 없음')
+  if (st.benched > 0) out.push(`최근 ${st.benched}경기 연속 결장`)
   if (st.fr?.length) out.push(`최근 평점 ${st.form}`)
   if (st.inj > 0) out.push(`부상 중 (${st.injKind || '부상'}, ${st.inj}경기 결장)`)
   if (st.offpos >= 2) out.push('본 포지션이 아닌 자리에 계속 기용됨')
