@@ -74,10 +74,12 @@ function split(ovr, pos, gap) {
 // 우리 데이터: 리그별 최신 시즌 파일과 결과 파일
 const index = JSON.parse(fs.readFileSync(path.join(DATA, 'index.json'), 'utf8'))
 const ours = {}
+const stamps = {} // 리그별 시즌 파일 갱신일 (명단이 새로 만들어졌는지 확인)
 for (const l of index.leagues) {
   if (!TOURNAMENTS[l.id]) continue
   const season = JSON.parse(fs.readFileSync(path.join(DATA, l.seasons[0].file), 'utf8'))
   ours[l.id] = season.teams.flatMap((t) => t.players.map((p) => ({ ...p, lid: l.id })))
+  stamps[l.id] = season.updatedAt || null
 }
 // 이적·강등으로 리그가 바뀐 선수도 찾도록 전체 리그에서 매칭한다
 const everyone = Object.values(ours).flat()
@@ -124,6 +126,9 @@ try {
       for (const row of rows) L.teams[row.teamId] = { name: row.teamName, done: null }
       saveState()
     }
+    // 시즌 파일(명단)이 새로 만들어졌으면 팀 명단을 다시 받아 새 선수도 시장가치 능력치를 받게 한다
+    const stamp = stamps[lid]
+    if (stamp && L.fileStamp !== stamp) { for (const t of Object.values(L.teams)) t.done = null; L.fileStamp = stamp; saveState() }
     for (const [tid, t] of Object.entries(L.teams)) {
       if (t.done && (Date.parse(today) - Date.parse(t.done)) / 864e5 < 60) continue // 60일 지나면 다시 받아 이적·부상 반영
       const d = await tryGet(`/api/teams/${tid}/players`)

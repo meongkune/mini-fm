@@ -112,15 +112,19 @@ const clamp = (v) => Math.max(40, Math.min(95, Math.round(v)))
 const BIAS = { GK: [-30, 1], DF: [-12, 4], MF: [0, 0], FW: [8, -22] }
 const ovrOf = (p) => (p.pos === 'GK' ? p.def : p.pos === 'DF' ? p.def * 0.8 + p.att * 0.2 : p.pos === 'FW' ? p.att * 0.8 + p.def * 0.2 : (p.att + p.def) / 2)
 
-// 1군 등록 인원(프리미어리그 25명 규정). 포지션별 최소 인원을 먼저 채우고 나머지는 OVR 순
-const SQUAD_SIZE = 25
+// 1군 선수단 최대 인원 (게임의 선수단 상한 MAX_SQUAD와 같다). 포지션별 최소 인원을 먼저 채운다
+// 주의: 여기서 OVR은 실제 데이터가 아니라 나이·난수 추정값이라, 이것만으로 자르면 주전이 빠진다
+//   (예: 브렌트퍼드 이고르 치아구가 25명 컷에서 빠졌다) → 등번호가 있는 1군·성인 선수를 먼저 뽑는다
+const SQUAD_SIZE = 30
 const QUOTA = { GK: 3, DF: 8, MF: 8, FW: 5 }
 const POS_ORDER = ['GK', 'DF', 'MF', 'FW']
 // API가 등번호를 주지 않을 때 포지션별로 흔히 쓰는 번호를 주전(OVR 높은 순)부터 배정
 const NUMBERS = { GK: [1, 13, 31, 41], DF: [2, 5, 4, 3, 6, 15, 12, 24, 26, 33], MF: [8, 10, 6, 7, 16, 14, 18, 20, 17, 22], FW: [9, 11, 7, 19, 10, 21, 29, 23] }
 
 export function pickSquad(players) {
-  const sorted = [...players].sort((a, b) => ovrOf(b) - ovrOf(a))
+  // 1군 우선순위: 등번호 1~50 → 21세 이상 → 추정 OVR
+  const first = (p) => (p.number && p.number <= 50 ? 2 : 0) + ((p.age ?? 0) >= 21 ? 1 : 0)
+  const sorted = [...players].sort((a, b) => first(b) - first(a) || ovrOf(b) - ovrOf(a))
   const chosen = new Set()
   for (const pos of POS_ORDER) sorted.filter((p) => p.pos === pos).slice(0, QUOTA[pos]).forEach((p) => chosen.add(p))
   for (const p of sorted) if (chosen.size < SQUAD_SIZE) chosen.add(p)
