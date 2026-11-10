@@ -1,4 +1,5 @@
 // FM식 면담실: 왼쪽(또는 위) 선수 프로필 · 관계 기록, 가운데 대화 기록, 아래 답변 선택지와 직접 입력
+import { abilityStars, starText } from './Stars.jsx'
 import { useEffect, useRef, useState } from 'react'
 import { Kit, Flag } from './Badges.jsx'
 import { fetchProfile } from '../game/wiki.js'
@@ -72,7 +73,7 @@ export default function TalkRoom({ player, team, status, reason, situation, topi
               {photo ? <img className="tr-photo" src={photo} alt="" /> : <span className="tr-kit"><Kit color={team.color} number={player.number} size={54} /></span>}
               <div>
                 <strong>{player.name}</strong>
-                <span className="muted small"><Flag nation={player.nation} size={12} /> {player.age}세 · {player.role || player.pos} · OVR {playerOvr(player)}</span>
+                <span className="muted small"><Flag nation={player.nation} size={12} /> {player.age}세 · {player.role || player.pos} · 능력 {starText(abilityStars(player))}</span>
                 <span className="muted small">{rank.text}</span>
               </div>
             </div>

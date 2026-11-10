@@ -18,14 +18,16 @@ export const MAX_SUBS = 5
 // 전력 차가 결과에 미치는 정도 (클수록 이변이 잦다)
 const HOME_ADV = 4
 // 전술 효과 계수 (선수 능력 계수보다 작을수록 = 더 크게 반영)
-const K_TMID = 70
+const K_TMID = 120
 const K_TCHANCE = 200
 const K_TQUAL = 350
-const K_POSS = 110
+const K_POSS = 150
 const K_CHANCE = 520
 const K_QUAL = 800
 const K_FINISH = 500
 const CHANCE = 0.12
+// 창의성(공격 쪽) vs 조직력(수비 쪽 전술)이 찬스 수에 미치는 정도
+const K_CRE = 450
 // 오픈 플레이 결정력 기본값 (세트피스 골이 생긴 만큼 낮췄다)
 const OPEN_Q = 0.22
 // 반칙 위치 비율: 박스 안(페널티킥) · 직접 프리킥 거리 · 측면 크로스 프리킥
@@ -116,12 +118,11 @@ function dayForm(seed, k) {
 
 // 그 분의 선수 실효 능력치: 체력·사기(±8%)·폼(±5%)·하프타임 지시·태업·그날 컨디션
 // (상대 AI는 사기·폼 기본값이라 사실상 OVR과 그날 컨디션만 반영된다)
-function effective(match, ctx, idx, p) {
+function effFactor(match, ctx, idx, p) {
   const sd = match.sides[idx]
   const st = ctx.status?.[p.id] || {}
   const e = sd.energy[p.id] ?? 100
-  const f = (0.8 + 0.2 * e / 100) * (0.92 + 0.16 * (st.morale ?? 50) / 100) * (1 + clamp(((st.form ?? 6.6) - 6.6) * 0.05, -0.05, 0.05)) * (1 + match.talk[idx]) * (st.sulk > 0 ? 0.94 : 1) * (match.day?.[idx] ?? 1)
-  return { ...p, att: p.att * f, def: p.def * f }
+  return (0.8 + 0.2 * e / 100) * (0.92 + 0.16 * (st.morale ?? 50) / 100) * (1 + clamp(((st.form ?? 6.6) - 6.6) * 0.05, -0.05, 0.05)) * (1 + match.talk[idx]) * (st.sulk > 0 ? 0.94 : 1) * (match.day?.[idx] ?? 1)
 }
 
 /** 그 분의 출전 선수(실효 능력치·자리 포지션)와 포지션별 묶음 */
@@ -134,9 +135,13 @@ function xiOf(match, ctx, idx) {
   sd.onPitch.forEach((id, i) => {
     const p = byId[id]
     if (!p) return
-    const e = effective(match, ctx, idx, p)
     const fit = fitOf(p, sd.slots[i])
-    xi.push({ ...e, att: e.att * fit, def: e.def * fit, pos: ROLE_POS[sd.slots[i]], realPos: p.pos, slot: sd.slots[i] })
+    const k = effFactor(match, ctx, idx, p) * fit
+    // 세부 능력치(공격·기술·전술·수비·창의성 / 골키퍼: 선방·예측·빌드업·공중볼)도 같은 배수로
+    const A = {}
+    const am = attrsOf(p).map
+    for (const key in am) A[key] = am[key] * k
+    xi.push({ ...p, att: p.att * k, def: p.def * k, A, pos: ROLE_POS[sd.slots[i]], realPos: p.pos, slot: sd.slots[i] })
   })
   const g = Object.fromEntries(['GK', 'DF', 'MF', 'FW'].map((pos) => [pos, xi.filter((p) => p.pos === pos)]))
   return { xi, g, fwAtt: avg(g.FW.map((p) => p.att), 60), mfAtt: avg(g.MF.map((p) => p.att), 60), dfDef: avg(g.DF.map((p) => p.def), 60) }
@@ -166,18 +171,30 @@ function sideRatings(match, ctx, idx) {
   const hold = late * (diff > 0 ? 1 : 0)
   const gsAtt = chase * 3 - hold * 2
   const gsDef = -chase * 2.5 + hold * 2
+  // 세부 능력치를 장면별로 쓴다 (FM처럼): 데이터가 없으면 공격·수비로 추정한 값
+  const at = (p, k) => p.A?.[k] ?? (k === '수비' || k === '전술' ? p.def : p.att)
+  const fwAtt = g.FW.map((p) => at(p, '공격'))
+  const dfDef = g.DF.map((p) => at(p, '수비') * 0.7 + at(p, '전술') * 0.3)
+  const gk = g.GK[0]
   return {
     xi,
-    // 선수 능력(+전형) — 전력 차는 완만하게 반영
-    attack: avg([...g.FW.map((p) => p.att), ...g.FW.map((p) => p.att), ...g.MF.map((p) => p.att)]) + f.att - penalty,
-    midfield: avg(g.MF.map((p) => (p.att + p.def) / 2)) + f.mid - penalty,
-    defense: avg([...g.DF.map((p) => p.def), ...g.DF.map((p) => p.def), ...g.MF.map((p) => p.def)]) + f.def - penalty,
+    // 공격(결정적 찬스·마무리): 공격수의 공격 + 미드필더의 공격·창의성
+    attack: avg([...fwAtt, ...fwAtt, ...g.MF.map((p) => (at(p, '공격') + at(p, '창의성')) / 2)]) + f.att - penalty,
+    // 중원(점유): 미드필더의 기술·전술 + 공수 능력
+    midfield: avg(g.MF.map((p) => at(p, '기술') * 0.35 + at(p, '전술') * 0.3 + p.att * 0.15 + p.def * 0.2)) + f.mid - penalty,
+    // 수비(찬스 억제): 수비수의 수비·전술 + 미드필더의 수비·전술
+    defense: avg([...dfDef, ...dfDef, ...g.MF.map((p) => at(p, '수비') * 0.6 + at(p, '전술') * 0.4)]) + f.def - penalty,
+    // 창의성 vs 수비 조직력: 결정적 찬스를 만드는 양
+    create: avg([...g.MF, ...g.FW].map((p) => at(p, '창의성')), 60),
+    organise: avg([...g.DF, ...g.MF.filter((p) => p.slot === 'DM' || p.slot === 'CM')].map((p) => at(p, '전술')), 60),
+    // 패스 정확도: 미드필더 기술
+    passTech: avg(g.MF.map((p) => at(p, '기술')), 65),
     // 전술·경기 상황 — 선수 능력보다 크게 반영 (약팀도 전술로 뒤집을 수 있게)
     tAtt: e.att + gsAtt,
     tMid: e.mid,
     tDef: e.def + gsDef,
     notes: e.notes,
-    keeper: avg(g.GK.map((p) => p.def), 40),
+    keeper: gk ? (gk.A?.['선방'] != null ? gk.A['선방'] * 0.6 + gk.A['예측'] * 0.25 + gk.A['공중볼'] * 0.15 : gk.def) : 40,
     gk: g.GK[0] || null,
     drain: (0.6 + t.press * 0.008) * (0.9 + t.tempo * 0.002), // 압박·템포가 높을수록 빨리 지친다
     acc: ((50 - t.tempo) / 50) * 0.03 - ((t.passing - 50) / 50) * 0.04,
@@ -267,7 +284,7 @@ function injure(match, ctx, idx, rng, withEvents) {
 const AERIAL_ROLE = { CB: 8, ST: 5, DM: 2, CM: 0, LB: -3, RB: -3, LWB: -3, RWB: -3, LM: -4, RM: -4, AM: -5, LW: -7, RW: -7 }
 const aerialOf = (p) => p.def * 0.45 + p.att * 0.35 + (p.sta ?? 70) * 0.2 + (AERIAL_ROLE[p.slot] ?? 0)
 // 킥 능력(코너·프리킥): 기술·창의성 / 페널티: 결정력(공격)·기술
-const kickOf = (p) => { const a = attrsOf(p).map; return ((a['기술'] ?? p.att) + (a['창의성'] ?? p.att)) / 2 }
+const kickOf = (p) => { const a = p.A || attrsOf(p).map; return ((a['기술'] ?? p.att) + (a['창의성'] ?? p.att)) / 2 }
 const penOf = (p) => p.att * 0.6 + kickOf(p) * 0.4
 // 코너킥 루틴 vs 상대 코너 수비 → 슈팅으로 이어질 확률 보정
 //   니어 포스트는 지역 방어의 앞 공간을, 파 포스트는 대인 방어의 높이 싸움을 노린다
@@ -320,7 +337,7 @@ export function step(match, ctx, { withEvents = true } = {}) {
   const S = match.stats
   S[atk].poss++
   const n = 8 + Math.floor(rng.random() * 6)
-  const acc = clamp(0.8 + (r[atk].midfield - r[dfn].midfield) / 200 + r[atk].acc, 0.62, 0.94)
+  const acc = clamp(0.8 + (r[atk].midfield - r[dfn].midfield) / 200 + (r[atk].passTech - 70) / 400 + r[atk].acc, 0.62, 0.94)
   S[atk].passes += n
   S[atk].passesOk += Math.round(n * acc)
   const names = [match.sides[0].name, match.sides[1].name]
@@ -345,7 +362,7 @@ export function step(match, ctx, { withEvents = true } = {}) {
   const d = r[dfn].defense
   const tEdge = r[atk].tAtt - r[dfn].tDef // 전술 상성 (공격 쪽 전술 - 수비 쪽 전술)
   const keeper = r[dfn].keeper
-  const gkAttr = r[dfn].gk ? attrsOf(r[dfn].gk).map : null
+  const gkAttr = r[dfn].gk ? r[dfn].gk.A || attrsOf(r[dfn].gk).map : null
 
   // 슈팅 판정 (오픈 플레이·세트피스 공통): 'goal' | 'save' | 'miss'
   const resolve = ({ shooter, assister, pOn, pGoal, how }) => {
@@ -460,7 +477,7 @@ export function step(match, ctx, { withEvents = true } = {}) {
     const shooter = rng.weighted(shooters, shooters.map((p) => w[p.pos] * p.att * p.att / 70)) // 공격력이 높은 선수일수록 슈팅 기회가 많다
     const helpers = shooters.filter((p) => p.id !== shooter.id)
     const assister = helpers.length && rng.random() < (long ? 0.35 : 0.78) ? rng.weighted(helpers, helpers.map((p) => ({ MF: 2.2, FW: 1.6, DF: 0.7 })[p.pos] * p.att)) : null
-    const quality = long ? 0.09 : OPEN_Q + (shooter.att - keeper) / K_FINISH + (a - d) / K_QUAL + tEdge / K_TQUAL + r[atk].quality
+    const quality = long ? 0.09 : OPEN_Q + ((shooter.A?.['공격'] ?? shooter.att) - keeper) / K_FINISH + (a - d) / K_QUAL + tEdge / K_TQUAL + r[atk].quality
     const pOn = long ? 0.28 : clamp(0.45 + (shooter.att - 60) / 200, 0.25, 0.75)
     const pGoal = clamp(quality, long ? 0.04 : 0.08, 0.55)
     const res = resolve({ shooter, assister, pOn, pGoal, how: long ? 'long' : 'open' })
@@ -477,7 +494,7 @@ export function step(match, ctx, { withEvents = true } = {}) {
     }
   }
 
-  if (rng.random() > CHANCE + r[atk].chance + (a - d) / K_CHANCE + tEdge / K_TCHANCE) {
+  if (rng.random() > CHANCE + r[atk].chance + (a - d) / K_CHANCE + (r[atk].create - r[dfn].organise) / K_CRE + tEdge / K_TCHANCE) {
     // 결정적 찬스 없이 끝난 공격: 파울(→ 프리킥·페널티킥), 오프사이드, 중거리 슈팅, 태클, 크로스 → 코너킥
     const x = rng.random()
     const defenders = field(dfn)

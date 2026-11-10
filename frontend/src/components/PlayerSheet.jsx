@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { fetchProfile } from '../game/wiki.js'
 import PlayerCard from './PlayerCard.jsx'
 import AttrRadar from './AttrRadar.jsx'
+import { AbilityStars } from './Stars.jsx'
 import { Flag, nationName } from './Badges.jsx'
 import Rating, { CondBar } from './Rating.jsx'
 import { PLAYER_TALKS, moraleLabel } from '../game/season.js'
@@ -42,6 +43,7 @@ export default function PlayerSheet({ player, onClose, inLineup, onToggle }) {
         <div className="ps-top">
           <PlayerCard player={player} size="lg" color={teams.find((t) => t.players.some((p) => p.id === player.id))?.color} />
           <div className="ps-status">
+            <div className="ps-row ps-stars"><AbilityStars player={player} /></div>
             <div className="ps-row"><span>나이 · 국적</span><b>{player.age}세 <Flag nation={player.nation} size={16} /> {nationName(player.nation)}</b></div>
             <div className="ps-row"><span>컨디션</span><b><CondBar value={st.cond} /> {Math.round(st.cond ?? 100)}%</b></div>
             <div className="ps-row"><span>사기</span><b className={`mood ${mTone}`}>{face} {mLabel}</b></div>
@@ -53,7 +55,7 @@ export default function PlayerSheet({ player, onClose, inLineup, onToggle }) {
           </div>
         </div>
 
-        <h4>세부 능력치 <span className="muted small">{player.role || player.pos} 기준</span></h4>
+        <h4>세부 능력치 <span className="muted small">1~20점 · {player.role || player.pos} 기준</span></h4>
         <AttrRadar player={player} color={teams.find((t) => t.players.some((p) => p.id === player.id))?.color} sta={player.sta} />
 
         <WikiProfile profile={profile} />

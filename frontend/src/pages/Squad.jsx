@@ -1,3 +1,4 @@
+import Stars, { abilityStars } from '../components/Stars.jsx'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import PlayerCard from '../components/PlayerCard.jsx'
@@ -65,7 +66,7 @@ export default function Squad() {
 
       <div className={`card lineup-status ${ok && !blocked.length ? 'ok' : 'warn'}`}>
         <div className="ls-ovr">
-          <span><small>라인업 OVR</small><b className={nowOvr < bestOvr - 2 ? 'bad-text' : ''}>{nowOvr}</b></span>
+          <span><small>라인업 전력</small><b className={nowOvr < bestOvr - 2 ? 'bad-text' : ''}>{nowOvr}</b></span>
           <span className="muted"><small>최고 전력</small><b>{bestOvr}</b></span>
           <strong className="grow">선발 {selected.size} / 11</strong>
         </div>
@@ -93,9 +94,9 @@ export default function Squad() {
       {view === 'card' && (
         <>
           <div className="tier-legend">
-            <span><i style={{ background: 'var(--tier-elite)' }} />엘리트 88+</span>
-            <span><i style={{ background: 'var(--tier-gold)' }} />골드 82+</span>
-            <span><i style={{ background: 'var(--tier-silver)' }} />실버 76+</span>
+            <span><i style={{ background: 'var(--tier-elite)' }} />엘리트 ★5</span>
+            <span><i style={{ background: 'var(--tier-gold)' }} />골드 ★4+</span>
+            <span><i style={{ background: 'var(--tier-silver)' }} />실버 ★3+</span>
             <span><i style={{ background: 'var(--tier-bronze)' }} />브론즈</span>
           </div>
           {['GK', 'DF', 'MF', 'FW'].map((pos) => {
@@ -115,7 +116,7 @@ export default function Squad() {
       {view === 'list' && (
         <div className="card flush">
           <table className="sq">
-            <thead><tr><th /><th className="left">선수</th><th>OVR</th><th>컨디션</th><th>사기</th><th>폼</th><th>G/A</th></tr></thead>
+            <thead><tr><th /><th className="left">선수</th><th>능력</th><th>컨디션</th><th>사기</th><th>폼</th><th>G/A</th></tr></thead>
             <tbody>
               {['GK', 'DF', 'MF', 'FW'].flatMap((pos) => myTeam.players.filter((p) => p.pos === pos).sort((a, b) => playerOvr(b) - playerOvr(a))).map((p) => {
                 const st = status[p.id] || {}
@@ -131,7 +132,7 @@ export default function Squad() {
                       </div>
                       {unavailable(st) && <span className={`out-tag ${unavailable(st).kind}`}>{unavailable(st).icon} {unavailable(st).text}</span>}
                     </td>
-                    <td><b>{playerOvr(p)}</b></td>
+                    <td><Stars value={abilityStars(p)} compact /></td>
                     <td><CondBar value={st.cond} /></td>
                     <td>{moraleLabel(st.morale)[0]}</td>
                     <td>{st.fr?.length ? <Rating value={st.form} /> : <span className="muted">-</span>}</td>

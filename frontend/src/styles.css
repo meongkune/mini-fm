@@ -1317,3 +1317,21 @@ html.desktop .tabs-line { position: static; margin: 0 0 12px; padding: 0; backgr
 .shouts em { font-style: normal; opacity: .8; }
 .shout-row { display: flex; flex-wrap: wrap; gap: 5px; }
 .chip.shout { font-size: 12px; padding: 4px 8px; }
+
+/* 별점 (현재 능력·잠재력) */
+.stars { display: inline-flex; gap: 1px; line-height: 1; letter-spacing: 0; white-space: nowrap; }
+.stars i { font-style: normal; color: rgba(255,255,255,.22); }
+.stars i.full { color: #fbbf24; }
+.stars i.half { background: linear-gradient(90deg, #fbbf24 50%, rgba(255,255,255,.22) 50%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.stars.pot i.full { color: #60a5fa; }
+.stars.pot i.half { background: linear-gradient(90deg, #60a5fa 50%, rgba(255,255,255,.22) 50%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.stars.compact { color: #fbbf24; font-weight: 800; font-size: .85em; font-variant-numeric: tabular-nums; }
+.pc-stars { z-index: 1; font-size: .62rem; margin-top: 1px; }
+.pc-stars .stars i { color: rgba(0,0,0,.25); }
+.pc-stars .stars i.full { color: #b45309; }
+.pc-stars .stars i.half { background: linear-gradient(90deg, #b45309 50%, rgba(0,0,0,.25) 50%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.pcard.lg .pc-stars { font-size: .78rem; }
+.ability-stars { display: grid; gap: 3px; width: 100%; }
+.ability-stars > span { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.ability-stars em { font-style: normal; font-size: 12px; opacity: .75; }
+.ps-stars .stars { font-size: 15px; }

@@ -1,6 +1,7 @@
 // 포메이션 = 자리(slot) 11개. 각 자리는 세부 역할(role)과 경기장 좌표(x: 0 왼쪽~100 오른쪽, y: 0 우리 골문~100 상대 골문)를 가진다.
 // "4-2-3-1"처럼 숫자 줄로 적으면 어떤 전형이든 자리를 만든다.
 import { playerOvrOf } from './engine.js'
+import { roleScore } from '../game/attributes.js'
 
 export const ROLE_LABEL = {
   GK: '골키퍼', LB: '왼쪽 풀백', CB: '센터백', RB: '오른쪽 풀백', LWB: '왼쪽 윙백', RWB: '오른쪽 윙백',
@@ -114,11 +115,14 @@ export function fitOf(p, slotRole) {
   const r = roleOf(p)
   if (r === slotRole) return 1
   if ((slotRole === 'GK') !== (r === 'GK')) return 0.3
-  if (NEAR[r]?.includes(slotRole)) return 0.92
   const a = ROLE_POS[r]
   const b = ROLE_POS[slotRole]
-  if (a === b) return 0.82
-  return (a === 'DF' && b === 'FW') || (a === 'FW' && b === 'DF') ? 0.5 : 0.65
+  const fam = NEAR[r]?.includes(slotRole) ? 0.92 : a === b ? 0.82 : (a === 'DF' && b === 'FW') || (a === 'FW' && b === 'DF') ? 0.5 : 0.65
+  // 세부 능력치가 그 자리에 맞으면 경험 부족을 일부(최대 절반) 메운다
+  //   예: 수비력 좋은 윙어는 풀백에서 덜 어색하고, 기술·창의성 좋은 센터백은 수비형 미드필더로 쓸 만하다
+  const ratio = roleScore(p, slotRole) / Math.max(1, roleScore(p, r))
+  const bonus = Math.max(0, Math.min(1, (ratio - 0.85) / 0.15)) * 0.5
+  return Math.round((fam + (1 - fam) * bonus) * 100) / 100
 }
 export const fitTone = (f) => (f >= 1 ? 'best' : f >= 0.9 ? 'good' : f >= 0.8 ? 'ok' : 'bad')
 

@@ -20,26 +20,75 @@ const KEY = {
   LW: ['공격', '기술', '창의성'], RW: ['공격', '기술', '창의성'], ST: ['공격', '기술', '창의성'],
 }
 
-/** 세부 능력치 → { labels, values, map(이름→값), est(추정 여부), gk } */
+// 선수 객체마다 한 번만 계산 (경기 엔진이 1분마다 부른다)
+const cache = new WeakMap()
+
+/** 세부 능력치 → { labels, values, map(이름→값), est(추정 여부), gk } — 값은 30~99 (OVR과 같은 척도) */
 export function attrsOf(p) {
+  let c = cache.get(p)
+  if (!c) { c = calcAttrs(p); cache.set(p, c) }
+  return c
+}
+function calcAttrs(p) {
   const ovr = playerOvrOf(p)
   const role = roleOf(p)
   if (p.pos === 'GK' || role === 'GK') {
     const r = (k) => (hash(`${k}-${p.id}`) % 7) - 3
-    const values = p.gk || [p.def, p.def - 1 + r('a'), ovr - 6 + r('b'), p.def - 2 + r('c')].map(clamp)
-    return { labels: GK, values, map: Object.fromEntries(GK.map((l, i) => [l, values[i]])), est: !p.gk, gk: true }
+    const values = Array.isArray(p.gk) ? p.gk : [p.def, p.def - 1 + r('a'), ovr - 6 + r('b'), p.def - 2 + r('c')].map(clamp)
+    return { labels: GK, values, map: Object.fromEntries(GK.map((l, i) => [l, values[i]])), est: !Array.isArray(p.gk), gk: true }
   }
-  let values = p.rad
+  let values = Array.isArray(p.rad) ? p.rad : null
   if (!values) {
     const [t, ta, c] = BIAS[role] || [0, 0, 0]
     const r = (k) => (hash(`${k}-${p.id}`) % 5) - 2
     values = [p.att, ovr + t + r('t'), ovr + ta + r('ta'), p.def, ovr + c + r('c')].map(clamp)
   }
-  return { labels: FIELD, values, map: Object.fromEntries(FIELD.map((l, i) => [l, values[i]])), est: !p.rad, gk: false }
+  return { labels: FIELD, values, map: Object.fromEntries(FIELD.map((l, i) => [l, values[i]])), est: !Array.isArray(p.rad), gk: false }
 }
 
 /** 카드에 보여줄 포지션 핵심 능력치 3개 [[이름, 값]] */
 export function keyAttrs(p) {
   const a = attrsOf(p)
   return (KEY[roleOf(p)] || KEY.CM).map((k) => [k, a.map[k]])
+}
+
+/** FM식 1~20점: 30~99 척도를 바꾼다 (99 → 20, 85 → 15, 70 → 10, 55 → 5) */
+export const to20 = (v) => Math.max(1, Math.min(20, Math.round((v - 40) / 3)))
+
+/** 카드·목록에 보여줄 핵심 능력치 3개를 1~20점으로 */
+export const keyAttrs20 = (p) => keyAttrs(p).map(([k, v]) => [k, to20(v)])
+
+// 역할별로 중요한 능력치 비중 (FM의 역할 적합도처럼)
+const W_WIDE_FW = { 공격: 0.35, 기술: 0.3, 창의성: 0.25, 전술: 0.05, 수비: 0.05 }
+const W_WIDE_MF = { 기술: 0.3, 창의성: 0.25, 공격: 0.2, 전술: 0.15, 수비: 0.1 }
+const W_FB = { 수비: 0.45, 전술: 0.25, 기술: 0.15, 공격: 0.15 }
+const W_WB = { 수비: 0.3, 공격: 0.25, 기술: 0.25, 전술: 0.2 }
+export const ROLE_W = {
+  ST: { 공격: 0.5, 기술: 0.2, 창의성: 0.15, 전술: 0.1, 수비: 0.05 },
+  LW: W_WIDE_FW, RW: W_WIDE_FW,
+  AM: { 창의성: 0.35, 기술: 0.3, 공격: 0.25, 전술: 0.1 },
+  LM: W_WIDE_MF, RM: W_WIDE_MF,
+  CM: { 기술: 0.3, 전술: 0.3, 창의성: 0.2, 수비: 0.1, 공격: 0.1 },
+  DM: { 전술: 0.35, 수비: 0.35, 기술: 0.2, 창의성: 0.1 },
+  LB: W_FB, RB: W_FB, LWB: W_WB, RWB: W_WB,
+  CB: { 수비: 0.6, 전술: 0.3, 기술: 0.1 },
+  GK: { 선방: 0.55, 예측: 0.25, 공중볼: 0.12, 빌드업: 0.08 },
+}
+
+/** 그 역할에서의 능력 (30~99): 역할별 비중으로 세부 능력치를 더한다 */
+export function roleScore(p, role) {
+  const a = attrsOf(p)
+  const w = ROLE_W[role]
+  if (!w || a.gk !== (role === 'GK')) return playerOvrOf(p)
+  let s = 0
+  for (const k in w) s += w[k] * (a.map[k] ?? playerOvrOf(p))
+  return s
+}
+
+/** 현재 능력·잠재력 별점 (0.5 ~ 5, 반 개 단위) — FM의 코치 평가처럼 숫자 대신 보여준다 */
+export function starsOf(v) {
+  const steps = [60, 64, 68, 72, 76, 79, 82, 85, 88]
+  let s = 0.5
+  for (const t of steps) if (v >= t) s += 0.5
+  return s
 }

@@ -1,4 +1,5 @@
 // 이적 시장: 이적료로 영입(상대 구단 AI와 협상) · 판매 목록 등록(제안은 메시지함으로) · FA
+import Stars, { abilityStars, potentialStarsOf, starText } from '../components/Stars.jsx'
 import { useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import FreeAgents from './FreeAgents.jsx'
@@ -10,7 +11,7 @@ import { eur, wageBill, wageBudget } from '../game/finance.js'
 import { playerOvr, short, useGame } from '../store.jsx'
 
 const POS = ['전체', 'GK', 'DF', 'MF', 'FW']
-const SORTS = [['ovr', 'OVR'], ['value', '가치'], ['pot', '잠재력'], ['age', '나이']]
+const SORTS = [['ovr', '능력'], ['value', '가치'], ['pot', '잠재력'], ['age', '나이']]
 const stars = (n) => '★'.repeat(n) + '☆'.repeat(5 - n)
 
 export default function Transfer() {
@@ -100,7 +101,7 @@ export default function Transfer() {
                     <Crest team={t} />
                     <span className="mk-name"><strong><Flag nation={p.nation} size={14} /> {p.name}</strong><small>{short(t)}{lid !== data.leagueId ? ` · ${league}` : ''} · {p.role || p.pos} · {p.age}세{status[p.id]?.inj > 0 ? ' · 🚑' : ''}</small></span>
                     <span className="mk-pot" title="스카우트 잠재력 평가">{stars(pot)}</span>
-                    <span className="mk-ovr">{playerOvr(p)}</span>
+                    <span className="mk-ovr"><Stars value={abilityStars(p)} compact /></span>
                     <span className="mk-val">{money(v)}</span>
                   </button>
                 </li>
@@ -122,7 +123,7 @@ export default function Transfer() {
                     <div className={`mk-row ${listed ? 'on' : ''}`}>
                       <span className="lu-pos">{p.role || p.pos}</span>
                       <span className="mk-name"><strong><Flag nation={p.nation} size={14} /> {p.name}{status[p.id]?.wantsOut ? ' ✈️' : ''}</strong><small>{p.age}세 · 출전 {save.pstats?.[p.id]?.apps ?? 0}경기 <CondBar value={status[p.id]?.cond} /></small></span>
-                      <span className="mk-ovr">{playerOvr(p)}</span>
+                      <span className="mk-ovr"><Stars value={abilityStars(p)} compact /></span>
                       <span className="mk-val">{money(v)}</span>
                       {listed && (
                         <label className="ask-price" title="희망 가격 (몸값 대비)">
@@ -173,7 +174,7 @@ function BidSheet({ p, t, lid, onClose }) {
     <div className="sheet-wrap" onClick={onClose}>
       <div className="sheet" onClick={(e) => e.stopPropagation()}>
         <div className="sheet-head"><h3><Crest team={t} size={20} /> {p.name} 영입 협상</h3><button className="btn ghost small" onClick={onClose}>닫기</button></div>
-        <p className="small muted" style={{ marginTop: 0 }}>{t.name} · {p.role || p.pos} · {p.age}세 · OVR {playerOvr(p)} · 선수 가치 {money(v)} · 요구 연봉 약 {eur(wage)}/년</p>
+        <p className="small muted" style={{ marginTop: 0 }}>{t.name} · {p.role || p.pos} · {p.age}세 · 능력 {starText(abilityStars(p))} · 잠재력 {starText(potentialStarsOf(p))} · 선수 가치 {money(v)} · 요구 연봉 약 {eur(wage)}/년</p>
         {!done?.ok && (
           <>
             <label className="tp-slider">

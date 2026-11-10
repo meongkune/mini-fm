@@ -1,4 +1,5 @@
 // FA 시장: 방출·계약 만료 선수 (소속 구단 없음). 연봉·기간을 제시하면 선수가 판단한다
+import Stars, { abilityStars, starText } from '../components/Stars.jsx'
 import { useEffect, useMemo, useState } from 'react'
 import { loadSeasonFile } from '../api.js'
 import { Flag } from '../components/Badges.jsx'
@@ -49,7 +50,7 @@ export default function FreeAgents() {
                   <span className="lu-pos">{p.role || p.pos}</span>
                   <span className="mk-name"><strong><Flag nation={p.nation} size={14} /> {p.name}</strong><small>{p.age}세 · {p.lastClub || (p.from ? `전 소속 ${p.from}` : 'FA')}{p.posGuess ? ' · 포지션 추정' : ''}</small></span>
                   <span className="mk-pot">{stars(potentialStars(p))}</span>
-                  <span className="mk-ovr">{playerOvr(p)}</span>
+                  <span className="mk-ovr"><Stars value={abilityStars(p)} compact /></span>
                   <span className="mk-val">{eur(wageFor(p) * 1.1)}/년</span>
                 </button>
               </li>
@@ -74,7 +75,7 @@ function OfferSheet({ player, ask, onClose, offerFA, preview, cash }) {
     <div className="sheet-wrap" onClick={onClose}>
       <div className="sheet" onClick={(e) => e.stopPropagation()}>
         <div className="sheet-head"><h3>{player.name} 영입 제안</h3><button className="btn ghost small" onClick={onClose}>닫기</button></div>
-        <p className="small muted" style={{ marginTop: 0 }}>{player.nameEn && player.nameEn !== player.name ? `${player.nameEn} · ` : ''}{player.age}세 · {player.role || player.pos} · OVR {playerOvr(player)} · {player.lastClub || 'FA'}</p>
+        <p className="small muted" style={{ marginTop: 0 }}>{player.nameEn && player.nameEn !== player.name ? `${player.nameEn} · ` : ''}{player.age}세 · {player.role || player.pos} · 능력 {starText(abilityStars(player))} · {player.lastClub || 'FA'}</p>
         <label className="offer-slider"><span>연봉 {eur(wage)}/년 <em className="muted">(요구 수준의 {pct}%)</em></span>
           <input type="range" min={60} max={180} step={5} value={pct} onChange={(e) => { setPct(Number(e.target.value)); setRes(null) }} />
         </label>

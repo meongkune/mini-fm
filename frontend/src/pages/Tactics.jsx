@@ -1,3 +1,4 @@
+import Stars, { abilityStars } from '../components/Stars.jsx'
 import { useState } from 'react'
 import { Kit, Flag } from '../components/Badges.jsx'
 import { CondBar } from '../components/Rating.jsx'
@@ -214,7 +215,7 @@ export default function Tactics() {
           {bench.map((p) => (
             <span key={p.id} className={`bench-chip ${unavailable(status[p.id]) ? `out ${unavailable(status[p.id]).kind}` : 'draggable'}`} title={unavailable(status[p.id])?.text ?? '끌어서 경기장 자리에 놓기'}
               onPointerDown={unavailable(status[p.id]) ? undefined : (e) => dnd.startBench(p.id, e)}>
-              <span className="role-chip">{roleOf(p)}</span>{p.name.split(' ').at(-1)} <b>{playerOvr(p)}</b>
+              <span className="role-chip">{roleOf(p)}</span>{p.name.split(' ').at(-1)} <Stars value={abilityStars(p)} compact />
               {unavailable(status[p.id]) && <i className="bench-out">{unavailable(status[p.id]).icon} {unavailable(status[p.id]).games}경기</i>}
             </span>
           ))}

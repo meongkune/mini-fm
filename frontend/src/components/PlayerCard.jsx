@@ -2,7 +2,8 @@ import { playerOvr } from '../store.jsx'
 import { Flag, Kit } from './Badges.jsx'
 import { fitTone, roleOf } from '../engine/formation.js'
 import { unavailable } from '../game/season.js'
-import { keyAttrs } from '../game/attributes.js'
+import { keyAttrs20 } from '../game/attributes.js'
+import Stars, { abilityStars, potentialStarsOf } from './Stars.jsx'
 
 // OVR 기준 선수 등급 — 카드 색을 정한다
 export function tierOf(ovr) {
@@ -22,23 +23,25 @@ export default function PlayerCard({ player, selected = false, onClick, size = '
   const ovr = playerOvr(player)
   const tier = tierOf(ovr)
   const out = status ? unavailable(status) : null
-  const keys = { list: keyAttrs(player), est: !player.rad && !player.gk } // 포지션별 핵심 능력치 3개
+  const keys = { list: keyAttrs20(player), est: !Array.isArray(player.rad) && !Array.isArray(player.gk) } // 포지션별 핵심 능력치 3개 (1~20)
+  const cur = abilityStars(player)
+  const pot = potentialStarsOf(player)
   return (
     <button
       type="button"
       className={`pcard tier-${tier} ${size} ${selected ? 'on' : ''} ${out ? `out ${out.kind}` : ''}`}
       onClick={onClick}
       aria-pressed={onClick ? selected : undefined}
-      title={`${player.name} · ${player.pos} · OVR ${ovr} · ${player.age}세${out ? ` · ${out.label}: ${out.text}` : ''}`}
+      title={`${player.name} · ${player.pos} · 현재 능력 ★${cur} · 잠재력 ★${pot} · ${player.age}세${out ? ` · ${out.label}: ${out.text}` : ''}`}
     >
       <span className="pc-top">
-        <span className="pc-ovr">{ovr}</span>
         <span className="pc-pos">{roleOf(player)}{slot && slot.role !== roleOf(player) && <i className={`pc-slot ${fitTone(slot.fit)}`} title={`${slot.role} 자리 · 능력 ${Math.round(slot.fit * 100)}% 발휘`}>→{slot.role}</i>}</span>
         <span className="pc-flag-img"><Flag nation={player.nation} size={size === 'lg' ? 18 : 14} /></span>
       </span>
       {color ? <span className="pc-kit"><Kit color={color} number={player.number} size={size === 'lg' ? 52 : 40} /></span> : <span className="pc-badge" aria-hidden="true">{player.number}</span>}
       <span className="pc-name">{lastName(player.name)}</span>
-      <span className="pc-stats" title={keys.est ? '추정 능력치' : 'SportsAPI 레이더 기반'}>
+      <span className="pc-stars"><Stars value={cur} /></span>
+      <span className="pc-stats" title={keys.est ? '추정 능력치 (1~20)' : 'SportsAPI 레이더 기반 (1~20)'}>
         {keys.list.map(([k, v]) => <span key={k}><b>{v}</b><em>{k}</em></span>)}
       </span>
       {selected && <span className="pc-check" aria-hidden="true">✓</span>}

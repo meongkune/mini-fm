@@ -1,4 +1,5 @@
 // 구단주 사무실: 재정, 팬 민심, 티켓 가격, 구단주 결정, 계약 현황
+import Stars, { abilityStars } from '../components/Stars.jsx'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ROSTER_MAX, eur, ffpStatus, gateModel, ticketPct, wageBill, wageBudget, yearsLeft } from '../game/finance.js'
@@ -90,7 +91,7 @@ export default function Club() {
                 <button className="contract-row" onClick={() => setDetail(p)}>
                   <span className="lu-pos">{p.pos}</span>
                   <span className="lu-name">{p.name}</span>
-                  <b>{playerOvr(p)}</b>
+                  <Stars value={abilityStars(p)} compact />
                   <span className="ct-wage">{eur(c.wage)}/년</span>
                   <span className={`ct-left ${left <= 1 ? 'warn' : ''}`}>{left <= 1 ? '만료 임박' : `${left}년`}</span>
                 </button>
