@@ -5,7 +5,7 @@
   "country": "포르투갈"
  },
  "season": "2025-26",
- "updatedAt": "2026-10-20",
+ "updatedAt": "2026-11-10",
  "source": "football-data.org (PPL 2025)",
  "zones": [
   {
@@ -178,6 +178,30 @@
      "ext": 188099
     },
     {
+     "id": "RIO-8966",
+     "name": "Jakub Brabec",
+     "pos": "DF",
+     "number": 26,
+     "age": 33,
+     "att": 57,
+     "def": 68,
+     "sta": 64,
+     "nation": "Czech Republic",
+     "ext": 8966
+    },
+    {
+     "id": "RIO-149940",
+     "name": "Nelson Abbey",
+     "pos": "DF",
+     "number": 33,
+     "age": 21,
+     "att": 54,
+     "def": 68,
+     "sta": 77,
+     "nation": "England",
+     "ext": 149940
+    },
+    {
      "id": "RIO-81950",
      "name": "Georgios Liavas",
      "pos": "MF",
@@ -311,22 +335,10 @@
      "ext": 32141
     },
     {
-     "id": "RIO-274157",
-     "name": "Rafael Genuino",
-     "pos": "FW",
-     "number": 21,
-     "age": 19,
-     "att": 79,
-     "def": 49,
-     "sta": 62,
-     "nation": "Brazil",
-     "ext": 274157
-    },
-    {
      "id": "RIO-243745",
      "name": "Tamble Monteiro",
      "pos": "FW",
-     "number": 29,
+     "number": 21,
      "age": 24,
      "att": 75,
      "def": 56,
@@ -338,13 +350,61 @@
      "id": "RIO-211519",
      "name": "Tobias Medina",
      "pos": "FW",
-     "number": 23,
+     "number": 29,
      "age": 21,
      "att": 75,
      "def": 55,
      "sta": 70,
      "nation": "Argentina",
      "ext": 211519
+    },
+    {
+     "id": "RIO-246203",
+     "name": "Diogo Oliveira",
+     "pos": "FW",
+     "number": 23,
+     "age": 23,
+     "att": 77,
+     "def": 46,
+     "sta": 68,
+     "nation": "Brazil",
+     "ext": 246203
+    },
+    {
+     "id": "RIO-118074",
+     "name": "Dario Špikić",
+     "pos": "FW",
+     "number": 22,
+     "age": 26,
+     "att": 74,
+     "def": 54,
+     "sta": 73,
+     "nation": "Croatia",
+     "ext": 118074
+    },
+    {
+     "id": "RIO-274157",
+     "name": "Rafael Genuino",
+     "pos": "FW",
+     "number": 25,
+     "age": 19,
+     "att": 79,
+     "def": 49,
+     "sta": 62,
+     "nation": "Brazil",
+     "ext": 274157
+    },
+    {
+     "id": "RIO-244984",
+     "name": "Karem Zoabi",
+     "pos": "FW",
+     "number": 27,
+     "age": 19,
+     "att": 71,
+     "def": 44,
+     "sta": 67,
+     "nation": "Israel",
+     "ext": 244984
     }
    ]
   },
@@ -383,11 +443,24 @@
      "ext": 32014
     },
     {
+     "id": "SPO-178770",
+     "name": "Diego Callai",
+     "pos": "GK",
+     "role": "GK",
+     "number": 31,
+     "age": 21,
+     "att": 43,
+     "def": 74,
+     "sta": 83,
+     "nation": "Brazil",
+     "ext": 178770
+    },
+    {
      "id": "SPO-194860",
      "name": "Francisco Silva",
      "pos": "GK",
      "role": "GK",
-     "number": 31,
+     "number": 41,
      "age": 19,
      "att": 40,
      "def": 77,
@@ -490,6 +563,30 @@
      "sta": 88,
      "nation": "Portugal",
      "ext": 277088
+    },
+    {
+     "id": "SPO-160926",
+     "name": "Zeno Debast",
+     "pos": "DF",
+     "number": 26,
+     "age": 21,
+     "att": 67,
+     "def": 79,
+     "sta": 76,
+     "nation": "Belgium",
+     "ext": 160926
+    },
+    {
+     "id": "SPO-145357",
+     "name": "Gonçalo Inácio",
+     "pos": "DF",
+     "number": 33,
+     "age": 23,
+     "att": 62,
+     "def": 79,
+     "sta": 72,
+     "nation": "Portugal",
+     "ext": 145357
     },
     {
      "id": "SPO-144628",
@@ -658,6 +755,30 @@
      "sta": 69,
      "nation": "Senegal",
      "ext": 283132
+    },
+    {
+     "id": "SPO-275336",
+     "name": "Lucas Anjos",
+     "pos": "FW",
+     "number": 22,
+     "age": 21,
+     "att": 81,
+     "def": 58,
+     "sta": 73,
+     "nation": "Portugal",
+     "ext": 275336
+    },
+    {
+     "id": "SPO-229421",
+     "name": "Geovany Quenda",
+     "pos": "FW",
+     "number": 25,
+     "age": 18,
+     "att": 84,
+     "def": 48,
+     "sta": 75,
+     "nation": "Guinea-Bissau",
+     "ext": 229421
     }
    ]
   },
@@ -805,6 +926,18 @@
      "ext": 216825
     },
     {
+     "id": "FCP-3224",
+     "name": "Thiago Silva",
+     "pos": "DF",
+     "number": 26,
+     "age": 40,
+     "att": 61,
+     "def": 75,
+     "sta": 76,
+     "nation": "Brazil",
+     "ext": 3224
+    },
+    {
      "id": "FCP-7448",
      "name": "Pablo Rosario",
      "pos": "MF",
@@ -841,28 +974,28 @@
      "ext": 153629
     },
     {
-     "id": "FCP-221262",
-     "name": "Victor Froholdt",
-     "pos": "MF",
-     "number": 16,
-     "age": 19,
-     "att": 78,
-     "def": 75,
-     "sta": 78,
-     "nation": "Denmark",
-     "ext": 221262
-    },
-    {
      "id": "FCP-150519",
      "name": "Gabriel Veiga",
      "pos": "MF",
-     "number": 14,
+     "number": 16,
      "age": 23,
      "att": 72,
      "def": 78,
      "sta": 74,
      "nation": "Spain",
      "ext": 150519
+    },
+    {
+     "id": "FCP-221262",
+     "name": "Victor Froholdt",
+     "pos": "MF",
+     "number": 14,
+     "age": 19,
+     "att": 78,
+     "def": 75,
+     "sta": 78,
+     "nation": "Denmark",
+     "ext": 221262
     },
     {
      "id": "FCP-262669",
@@ -904,7 +1037,6 @@
      "id": "FCP-2018",
      "name": "Yann Karamoh",
      "pos": "FW",
-     "role": "LW",
      "number": 9,
      "age": 27,
      "att": 90,
@@ -973,6 +1105,54 @@
      "sta": 67,
      "nation": "Switzerland",
      "ext": 7452
+    },
+    {
+     "id": "FCP-215434",
+     "name": "Samu Aghehowa",
+     "pos": "FW",
+     "number": 22,
+     "age": 21,
+     "att": 85,
+     "def": 56,
+     "sta": 77,
+     "nation": "Spain",
+     "ext": 215434
+    },
+    {
+     "id": "FCP-39102",
+     "name": "William da Silva",
+     "pos": "FW",
+     "number": 25,
+     "age": 19,
+     "att": 80,
+     "def": 48,
+     "sta": 74,
+     "nation": "Brazil",
+     "ext": 39102
+    },
+    {
+     "id": "FCP-251113",
+     "name": "Gonçalo Sousa",
+     "pos": "FW",
+     "number": 27,
+     "age": 19,
+     "att": 80,
+     "def": 44,
+     "sta": 74,
+     "nation": "Portugal",
+     "ext": 251113
+    },
+    {
+     "id": "FCP-262708",
+     "name": "Tiago Andrade",
+     "pos": "FW",
+     "number": 28,
+     "age": 19,
+     "att": 78,
+     "def": 51,
+     "sta": 74,
+     "nation": "Portugal",
+     "ext": 262708
     }
    ]
   },
@@ -1096,10 +1276,22 @@
      "ext": 37555
     },
     {
+     "id": "EST-151006",
+     "name": "Kévin Boma",
+     "pos": "DF",
+     "number": 12,
+     "age": 22,
+     "att": 57,
+     "def": 73,
+     "sta": 67,
+     "nation": "France",
+     "ext": 151006
+    },
+    {
      "id": "EST-190742",
      "name": "Or Israelov",
      "pos": "DF",
-     "number": 12,
+     "number": 24,
      "age": 20,
      "att": 62,
      "def": 76,
@@ -1111,13 +1303,25 @@
      "id": "EST-281951",
      "name": "Longin Bimai",
      "pos": "DF",
-     "number": 24,
+     "number": 26,
      "age": 19,
      "att": 62,
      "def": 76,
      "sta": 72,
      "nation": "France",
      "ext": 281951
+    },
+    {
+     "id": "EST-292946",
+     "name": "Jan Montes",
+     "pos": "DF",
+     "number": 33,
+     "age": 19,
+     "att": 53,
+     "def": 74,
+     "sta": 70,
+     "nation": "Spain",
+     "ext": 292946
     },
     {
      "id": "EST-135650",
@@ -1214,6 +1418,19 @@
      "sta": 75,
      "nation": "Belgium",
      "ext": 175853
+    },
+    {
+     "id": "EST-16754",
+     "name": "Pizzi",
+     "pos": "MF",
+     "role": "AM",
+     "number": 22,
+     "age": 35,
+     "att": 63,
+     "def": 72,
+     "sta": 71,
+     "nation": "Portugal",
+     "ext": 16754
     },
     {
      "id": "EST-249234",
@@ -1374,22 +1591,10 @@
      "ext": 213097
     },
     {
-     "id": "MOR-263709",
-     "name": "Leandro Santos",
-     "pos": "DF",
-     "number": 3,
-     "age": 19,
-     "att": 58,
-     "def": 77,
-     "sta": 68,
-     "nation": "Portugal",
-     "ext": 263709
-    },
-    {
      "id": "MOR-271514",
      "name": "Álvaro Martínez",
      "pos": "DF",
-     "number": 6,
+     "number": 3,
      "age": 23,
      "att": 59,
      "def": 74,
@@ -1401,7 +1606,7 @@
      "id": "MOR-179028",
      "name": "Michel Augusto",
      "pos": "DF",
-     "number": 15,
+     "number": 6,
      "age": 22,
      "att": 59,
      "def": 73,
@@ -1413,7 +1618,7 @@
      "id": "MOR-13839",
      "name": "Maracás",
      "pos": "DF",
-     "number": 12,
+     "number": 15,
      "age": 31,
      "att": 61,
      "def": 71,
@@ -1425,7 +1630,7 @@
      "id": "MOR-245259",
      "name": "Diogo Travassos",
      "pos": "DF",
-     "number": 24,
+     "number": 12,
      "age": 21,
      "att": 59,
      "def": 70,
@@ -1437,13 +1642,37 @@
      "id": "MOR-262652",
      "name": "Kiko",
      "pos": "DF",
-     "number": 26,
+     "number": 24,
      "age": 23,
      "att": 51,
      "def": 70,
      "sta": 75,
      "nation": "Portugal",
      "ext": 262652
+    },
+    {
+     "id": "MOR-263709",
+     "name": "Leandro Santos",
+     "pos": "DF",
+     "number": 26,
+     "age": 19,
+     "att": 58,
+     "def": 77,
+     "sta": 68,
+     "nation": "Portugal",
+     "ext": 263709
+    },
+    {
+     "id": "MOR-249408",
+     "name": "Kevyn Monteiro",
+     "pos": "DF",
+     "number": 33,
+     "age": 19,
+     "att": 53,
+     "def": 67,
+     "sta": 70,
+     "nation": "Brazil",
+     "ext": 249408
     },
     {
      "id": "MOR-178712",
@@ -1483,22 +1712,10 @@
      "ext": 263535
     },
     {
-     "id": "MOR-274500",
-     "name": "Afonso Assis",
-     "pos": "MF",
-     "number": 16,
-     "age": 19,
-     "att": 72,
-     "def": 69,
-     "sta": 77,
-     "nation": "Portugal",
-     "ext": 274500
-    },
-    {
      "id": "MOR-191985",
      "name": "Mateja Stjepanovic",
      "pos": "MF",
-     "number": 14,
+     "number": 16,
      "age": 21,
      "att": 68,
      "def": 72,
@@ -1510,13 +1727,25 @@
      "id": "MOR-191408",
      "name": "Rodri Alonso",
      "pos": "MF",
-     "number": 18,
+     "number": 14,
      "age": 22,
      "att": 69,
      "def": 64,
      "sta": 62,
      "nation": "Spain",
      "ext": 191408
+    },
+    {
+     "id": "MOR-274500",
+     "name": "Afonso Assis",
+     "pos": "MF",
+     "number": 18,
+     "age": 19,
+     "att": 72,
+     "def": 69,
+     "sta": 77,
+     "nation": "Portugal",
+     "ext": 274500
     },
     {
      "id": "MOR-270448",
@@ -1724,10 +1953,34 @@
      "ext": 153734
     },
     {
+     "id": "FCA-131240",
+     "name": "Amadou Dante",
+     "pos": "DF",
+     "number": 12,
+     "age": 24,
+     "att": 61,
+     "def": 74,
+     "sta": 70,
+     "nation": "Mali",
+     "ext": 131240
+    },
+    {
+     "id": "FCA-216483",
+     "name": "Omar Fayed",
+     "pos": "DF",
+     "number": 24,
+     "age": 22,
+     "att": 57,
+     "def": 70,
+     "sta": 68,
+     "nation": "Egypt",
+     "ext": 216483
+    },
+    {
      "id": "FCA-275631",
      "name": "José Silva",
      "pos": "DF",
-     "number": 12,
+     "number": 26,
      "age": 19,
      "att": 63,
      "def": 76,
@@ -1736,16 +1989,16 @@
      "ext": 275631
     },
     {
-     "id": "FCA-131240",
-     "name": "Amadou Dante",
+     "id": "FCA-157101",
+     "name": "Diogo Monteiro",
      "pos": "DF",
-     "number": 24,
-     "age": 24,
-     "att": 61,
-     "def": 74,
-     "sta": 70,
-     "nation": "Mali",
-     "ext": 131240
+     "number": 33,
+     "age": 20,
+     "att": 59,
+     "def": 68,
+     "sta": 59,
+     "nation": "Switzerland",
+     "ext": 157101
     },
     {
      "id": "FCA-136929",
@@ -1915,6 +2168,30 @@
      "sta": 68,
      "nation": "Uruguay",
      "ext": 161005
+    },
+    {
+     "id": "FCA-178782",
+     "name": "Brian Mansilla",
+     "pos": "FW",
+     "number": 22,
+     "age": 23,
+     "att": 76,
+     "def": 50,
+     "sta": 66,
+     "nation": "Uruguay",
+     "ext": 178782
+    },
+    {
+     "id": "FCA-281961",
+     "name": "Batata",
+     "pos": "FW",
+     "number": 25,
+     "age": 18,
+     "att": 76,
+     "def": 42,
+     "sta": 61,
+     "nation": "Portugal",
+     "ext": 281961
     }
    ]
   },
@@ -1964,6 +2241,19 @@
      "sta": 75,
      "nation": "Brazil",
      "ext": 263552
+    },
+    {
+     "id": "TON-281728",
+     "name": "Rodrigo Silva",
+     "pos": "GK",
+     "role": "GK",
+     "number": 41,
+     "age": 16,
+     "att": 40,
+     "def": 54,
+     "sta": 64,
+     "nation": "Portugal",
+     "ext": 281728
     },
     {
      "id": "TON-98947",
@@ -2038,28 +2328,52 @@
      "ext": 166113
     },
     {
-     "id": "TON-281956",
-     "name": "Tomás Brito",
-     "pos": "DF",
-     "number": 12,
-     "age": 17,
-     "att": 49,
-     "def": 70,
-     "sta": 63,
-     "nation": "Portugal",
-     "ext": 281956
-    },
-    {
      "id": "TON-32288",
      "name": "João Afonso",
      "pos": "DF",
-     "number": 24,
+     "number": 12,
      "age": 35,
      "att": 47,
      "def": 70,
      "sta": 60,
      "nation": "Portugal",
      "ext": 32288
+    },
+    {
+     "id": "TON-45331",
+     "name": "Bebeto",
+     "pos": "DF",
+     "number": 24,
+     "age": 35,
+     "att": 49,
+     "def": 64,
+     "sta": 72,
+     "nation": "Brazil",
+     "ext": 45331
+    },
+    {
+     "id": "TON-178447",
+     "name": "Brayan Medina",
+     "pos": "DF",
+     "number": 26,
+     "age": 23,
+     "att": 52,
+     "def": 62,
+     "sta": 56,
+     "nation": "Colombia",
+     "ext": 178447
+    },
+    {
+     "id": "TON-281956",
+     "name": "Tomás Brito",
+     "pos": "DF",
+     "number": 33,
+     "age": 17,
+     "att": 49,
+     "def": 70,
+     "sta": 63,
+     "nation": "Portugal",
+     "ext": 281956
     },
     {
      "id": "TON-243612",
@@ -2253,30 +2567,30 @@
      "ext": 111481
     },
     {
-     "id": "BEN-282866",
-     "name": "Arnas Voitinovičius",
-     "pos": "GK",
-     "role": "GK",
-     "number": 13,
-     "age": 18,
-     "att": 40,
-     "def": 70,
-     "sta": 70,
-     "nation": "Lithuania",
-     "ext": 282866
-    },
-    {
      "id": "BEN-153846",
      "name": "Samuel Soares",
      "pos": "GK",
      "role": "GK",
-     "number": 31,
+     "number": 13,
      "age": 23,
      "att": 40,
      "def": 69,
      "sta": 70,
      "nation": "Portugal",
      "ext": 153846
+    },
+    {
+     "id": "BEN-282866",
+     "name": "Arnas Voitinovičius",
+     "pos": "GK",
+     "role": "GK",
+     "number": 31,
+     "age": 18,
+     "att": 40,
+     "def": 70,
+     "sta": 70,
+     "nation": "Lithuania",
+     "ext": 282866
     },
     {
      "id": "BEN-81816",
@@ -2339,22 +2653,10 @@
      "ext": 175753
     },
     {
-     "id": "BEN-262714",
-     "name": "Joshua Wynder",
-     "pos": "DF",
-     "number": 15,
-     "age": 20,
-     "att": 59,
-     "def": 81,
-     "sta": 73,
-     "nation": "USA",
-     "ext": 262714
-    },
-    {
      "id": "BEN-3205",
      "name": "Nicolás Otamendi",
      "pos": "DF",
-     "number": 12,
+     "number": 15,
      "age": 37,
      "att": 54,
      "def": 79,
@@ -2363,16 +2665,52 @@
      "ext": 3205
     },
     {
+     "id": "BEN-185610",
+     "name": "Antonio Silva",
+     "pos": "DF",
+     "number": 12,
+     "age": 21,
+     "att": 63,
+     "def": 74,
+     "sta": 73,
+     "nation": "Portugal",
+     "ext": 185610
+    },
+    {
+     "id": "BEN-262714",
+     "name": "Joshua Wynder",
+     "pos": "DF",
+     "number": 24,
+     "age": 20,
+     "att": 59,
+     "def": 81,
+     "sta": 73,
+     "nation": "USA",
+     "ext": 262714
+    },
+    {
      "id": "BEN-262856",
      "name": "Gonçalo Oliveira",
      "pos": "DF",
-     "number": 24,
+     "number": 26,
      "age": 19,
      "att": 60,
      "def": 76,
      "sta": 64,
      "nation": "Portugal",
      "ext": 262856
+    },
+    {
+     "id": "BEN-273524",
+     "name": "Kevin Pinto",
+     "pos": "DF",
+     "number": 33,
+     "age": 18,
+     "att": 64,
+     "def": 74,
+     "sta": 62,
+     "nation": "Portugal",
+     "ext": 273524
     },
     {
      "id": "BEN-38088",
@@ -2531,16 +2869,52 @@
      "ext": 8128
     },
     {
+     "id": "BEN-183643",
+     "name": "Franjo Ivanovic",
+     "pos": "FW",
+     "number": 23,
+     "age": 21,
+     "att": 83,
+     "def": 47,
+     "sta": 71,
+     "nation": "Austria",
+     "ext": 183643
+    },
+    {
+     "id": "BEN-157796",
+     "name": "Andreas Schjelderup",
+     "pos": "FW",
+     "number": 22,
+     "age": 21,
+     "att": 80,
+     "def": 54,
+     "sta": 70,
+     "nation": "Norway",
+     "ext": 157796
+    },
+    {
      "id": "BEN-182123",
      "name": "Gianluca Prestianni",
      "pos": "FW",
-     "number": 23,
+     "number": 25,
      "age": 19,
      "att": 84,
      "def": 45,
      "sta": 72,
      "nation": "Argentina",
      "ext": 182123
+    },
+    {
+     "id": "BEN-263708",
+     "name": "Rodrigo Rêgo",
+     "pos": "FW",
+     "number": 27,
+     "age": 20,
+     "att": 80,
+     "def": 46,
+     "sta": 69,
+     "nation": "Portugal",
+     "ext": 263708
     }
    ]
   },
@@ -2579,11 +2953,24 @@
      "ext": 178927
     },
     {
+     "id": "CDN-229282",
+     "name": "Cesar Augusto",
+     "pos": "GK",
+     "role": "GK",
+     "number": 31,
+     "age": 21,
+     "att": 40,
+     "def": 69,
+     "sta": 77,
+     "nation": "Brazil",
+     "ext": 229282
+    },
+    {
      "id": "CDN-249175",
      "name": "Kevyn",
      "pos": "GK",
      "role": "GK",
-     "number": 31,
+     "number": 41,
      "age": 20,
      "att": 43,
      "def": 72,
@@ -2796,6 +3183,30 @@
      "ext": 179837
     },
     {
+     "id": "CDN-37447",
+     "name": "João Aurélio",
+     "pos": "MF",
+     "number": 19,
+     "age": 36,
+     "att": 62,
+     "def": 63,
+     "sta": 65,
+     "nation": "Portugal",
+     "ext": 37447
+    },
+    {
+     "id": "CDN-280035",
+     "name": "Deivison",
+     "pos": "MF",
+     "number": 21,
+     "age": 19,
+     "att": 62,
+     "def": 68,
+     "sta": 71,
+     "nation": "Brazil",
+     "ext": 280035
+    },
+    {
      "id": "CDN-37194",
      "name": "Witi",
      "pos": "FW",
@@ -2823,7 +3234,7 @@
      "id": "CDN-218644",
      "name": "Pablo Ruan",
      "pos": "FW",
-     "number": 19,
+     "number": 29,
      "age": 22,
      "att": 81,
      "def": 46,
@@ -2835,7 +3246,7 @@
      "id": "CDN-169258",
      "name": "Paulinho Bóia",
      "pos": "FW",
-     "number": 21,
+     "number": 23,
      "age": 27,
      "att": 79,
      "def": 51,
@@ -2847,13 +3258,37 @@
      "id": "CDN-188085",
      "name": "Chuchu",
      "pos": "FW",
-     "number": 29,
+     "number": 25,
      "age": 27,
      "att": 78,
      "def": 48,
      "sta": 66,
      "nation": "Venezuela",
      "ext": 188085
+    },
+    {
+     "id": "CDN-11541",
+     "name": "Lucas João",
+     "pos": "FW",
+     "number": 26,
+     "age": 31,
+     "att": 75,
+     "def": 50,
+     "sta": 66,
+     "nation": "Portugal",
+     "ext": 11541
+    },
+    {
+     "id": "CDN-242472",
+     "name": "Martim Watts",
+     "pos": "FW",
+     "number": 27,
+     "age": 20,
+     "att": 68,
+     "def": 40,
+     "sta": 66,
+     "nation": "Portugal",
+     "ext": 242472
     }
    ]
   },
@@ -3001,6 +3436,18 @@
      "ext": 32569
     },
     {
+     "id": "CD-278473",
+     "name": "Italo Cabelinho",
+     "pos": "DF",
+     "number": 26,
+     "age": 21,
+     "att": 64,
+     "def": 75,
+     "sta": 84,
+     "nation": "Brazil",
+     "ext": 278473
+    },
+    {
      "id": "CD-37393",
      "name": "Serginho",
      "pos": "MF",
@@ -3085,16 +3532,16 @@
      "ext": 176614
     },
     {
-     "id": "CD-289589",
-     "name": "Tiago Queiroz",
+     "id": "CD-179772",
+     "name": "Andrey",
      "pos": "MF",
      "number": 17,
-     "age": 19,
-     "att": 69,
-     "def": 74,
-     "sta": 67,
-     "nation": "Portugal",
-     "ext": 289589
+     "age": 23,
+     "att": 71,
+     "def": 70,
+     "sta": 70,
+     "nation": "Brazil",
+     "ext": 179772
     },
     {
      "id": "CD-289588",
@@ -3167,6 +3614,54 @@
      "sta": 83,
      "nation": "Brazil",
      "ext": 129463
+    },
+    {
+     "id": "CD-287899",
+     "name": "Tiago Duarte",
+     "pos": "FW",
+     "number": 22,
+     "age": 21,
+     "att": 82,
+     "def": 51,
+     "sta": 81,
+     "nation": "Portugal",
+     "ext": 287899
+    },
+    {
+     "id": "CD-261163",
+     "name": "João Costa",
+     "pos": "FW",
+     "number": 25,
+     "age": 25,
+     "att": 81,
+     "def": 51,
+     "sta": 70,
+     "nation": "Portugal",
+     "ext": 261163
+    },
+    {
+     "id": "CD-15919",
+     "name": "Gonçalo Paciência",
+     "pos": "FW",
+     "number": 27,
+     "age": 31,
+     "att": 79,
+     "def": 56,
+     "sta": 80,
+     "nation": "Portugal",
+     "ext": 15919
+    },
+    {
+     "id": "CD-276960",
+     "name": "Adriel",
+     "pos": "FW",
+     "number": 28,
+     "age": 19,
+     "att": 82,
+     "def": 47,
+     "sta": 70,
+     "nation": "Brazil",
+     "ext": 276960
     }
    ]
   },
@@ -3254,46 +3749,10 @@
      "ext": 126147
     },
     {
-     "id": "FAM-276284",
-     "name": "Renan",
-     "pos": "DF",
-     "number": 3,
-     "age": 20,
-     "att": 61,
-     "def": 78,
-     "sta": 79,
-     "nation": "Brazil",
-     "ext": 276284
-    },
-    {
-     "id": "FAM-213107",
-     "name": "Pedro",
-     "pos": "DF",
-     "number": 6,
-     "age": 20,
-     "att": 57,
-     "def": 78,
-     "sta": 65,
-     "nation": "Angola",
-     "ext": 213107
-    },
-    {
-     "id": "FAM-286283",
-     "name": "Matheus Mattara",
-     "pos": "DF",
-     "number": 15,
-     "age": 18,
-     "att": 55,
-     "def": 77,
-     "sta": 71,
-     "nation": "Brazil",
-     "ext": 286283
-    },
-    {
      "id": "FAM-169260",
      "name": "Gustavo Garcia",
      "pos": "DF",
-     "number": 12,
+     "number": 3,
      "age": 23,
      "att": 57,
      "def": 76,
@@ -3305,13 +3764,73 @@
      "id": "FAM-11587",
      "name": "Rafa Soares",
      "pos": "DF",
-     "number": 24,
+     "number": 6,
      "age": 30,
      "att": 66,
      "def": 73,
      "sta": 82,
      "nation": "Portugal",
      "ext": 11587
+    },
+    {
+     "id": "FAM-221571",
+     "name": "Ibrahima Ba",
+     "pos": "DF",
+     "number": 15,
+     "age": 21,
+     "att": 64,
+     "def": 70,
+     "sta": 78,
+     "nation": "Senegal",
+     "ext": 221571
+    },
+    {
+     "id": "FAM-276284",
+     "name": "Renan",
+     "pos": "DF",
+     "number": 12,
+     "age": 20,
+     "att": 61,
+     "def": 78,
+     "sta": 79,
+     "nation": "Brazil",
+     "ext": 276284
+    },
+    {
+     "id": "FAM-213107",
+     "name": "Pedro",
+     "pos": "DF",
+     "number": 24,
+     "age": 20,
+     "att": 57,
+     "def": 78,
+     "sta": 65,
+     "nation": "Angola",
+     "ext": 213107
+    },
+    {
+     "id": "FAM-286283",
+     "name": "Matheus Mattara",
+     "pos": "DF",
+     "number": 26,
+     "age": 18,
+     "att": 55,
+     "def": 77,
+     "sta": 71,
+     "nation": "Brazil",
+     "ext": 286283
+    },
+    {
+     "id": "FAM-217397",
+     "name": "Vojin Serafimović",
+     "pos": "DF",
+     "number": 33,
+     "age": 19,
+     "att": 60,
+     "def": 71,
+     "sta": 68,
+     "nation": "Serbia",
+     "ext": 217397
     },
     {
      "id": "FAM-182916",
@@ -3326,10 +3845,22 @@
      "ext": 182916
     },
     {
+     "id": "FAM-7533",
+     "name": "Tommie van de Looi",
+     "pos": "MF",
+     "number": 10,
+     "age": 26,
+     "att": 77,
+     "def": 69,
+     "sta": 67,
+     "nation": "Netherlands",
+     "ext": 7533
+    },
+    {
      "id": "FAM-207131",
      "name": "Marcos Peña",
      "pos": "MF",
-     "number": 10,
+     "number": 7,
      "age": 20,
      "att": 75,
      "def": 75,
@@ -3341,25 +3872,13 @@
      "id": "FAM-272442",
      "name": "Gonzalo Pastor",
      "pos": "MF",
-     "number": 7,
+     "number": 16,
      "age": 19,
      "att": 76,
      "def": 71,
      "sta": 64,
      "nation": "Spain",
      "ext": 272442
-    },
-    {
-     "id": "FAM-7533",
-     "name": "Tommie van de Looi",
-     "pos": "MF",
-     "number": 16,
-     "age": 26,
-     "att": 77,
-     "def": 69,
-     "sta": 67,
-     "nation": "Netherlands",
-     "ext": 7533
     },
     {
      "id": "FAM-187280",
@@ -3470,16 +3989,52 @@
      "ext": 147884
     },
     {
+     "id": "FAM-1785",
+     "name": "Gil Dias",
+     "pos": "FW",
+     "number": 23,
+     "age": 28,
+     "att": 82,
+     "def": 54,
+     "sta": 79,
+     "nation": "Portugal",
+     "ext": 1785
+    },
+    {
+     "id": "FAM-154741",
+     "name": "Óscar Aranda",
+     "pos": "FW",
+     "number": 22,
+     "age": 23,
+     "att": 81,
+     "def": 49,
+     "sta": 72,
+     "nation": "Spain",
+     "ext": 154741
+    },
+    {
      "id": "FAM-292393",
      "name": "Rudi Almeida",
      "pos": "FW",
-     "number": 23,
+     "number": 25,
      "age": 20,
      "att": 84,
      "def": 49,
      "sta": 65,
      "nation": "Portugal",
      "ext": 292393
+    },
+    {
+     "id": "FAM-280680",
+     "name": "Umar Abubakar",
+     "pos": "FW",
+     "number": 27,
+     "age": 19,
+     "att": 78,
+     "def": 49,
+     "sta": 66,
+     "nation": "Nigeria",
+     "ext": 280680
     }
    ]
   },
@@ -3724,6 +4279,18 @@
      "ext": 267932
     },
     {
+     "id": "GIL-262713",
+     "name": "Gil Martins",
+     "pos": "MF",
+     "number": 22,
+     "age": 19,
+     "att": 65,
+     "def": 66,
+     "sta": 71,
+     "nation": "Portugal",
+     "ext": 262713
+    },
+    {
      "id": "GIL-32309",
      "name": "Héctor Hernández",
      "pos": "FW",
@@ -3794,6 +4361,54 @@
      "sta": 80,
      "nation": "Uruguay",
      "ext": 260041
+    },
+    {
+     "id": "GIL-144710",
+     "name": "Joelson Fernandes",
+     "pos": "FW",
+     "number": 25,
+     "age": 22,
+     "att": 78,
+     "def": 44,
+     "sta": 63,
+     "nation": "Guinea-Bissau",
+     "ext": 144710
+    },
+    {
+     "id": "GIL-252836",
+     "name": "Gustavo Varela",
+     "pos": "FW",
+     "number": 26,
+     "age": 20,
+     "att": 77,
+     "def": 45,
+     "sta": 69,
+     "nation": "Portugal",
+     "ext": 252836
+    },
+    {
+     "id": "GIL-278446",
+     "name": "Rodrigo Rodrigues",
+     "pos": "FW",
+     "number": 27,
+     "age": 17,
+     "att": 76,
+     "def": 40,
+     "sta": 61,
+     "nation": "Portugal",
+     "ext": 278446
+    },
+    {
+     "id": "GIL-218939",
+     "name": "Bassco Soyer",
+     "pos": "FW",
+     "number": 28,
+     "age": 18,
+     "att": 71,
+     "def": 40,
+     "sta": 60,
+     "nation": "Peru",
+     "ext": 218939
     }
    ]
   },
@@ -3941,6 +4556,30 @@
      "ext": 293863
     },
     {
+     "id": "GUI-204259",
+     "name": "Anthony Strata",
+     "pos": "DF",
+     "number": 26,
+     "age": 20,
+     "att": 59,
+     "def": 73,
+     "sta": 60,
+     "nation": "France",
+     "ext": 204259
+    },
+    {
+     "id": "GUI-290177",
+     "name": "André Oliveira",
+     "pos": "DF",
+     "number": 33,
+     "age": 19,
+     "att": 61,
+     "def": 70,
+     "sta": 64,
+     "nation": "Portugal",
+     "ext": 290177
+    },
+    {
      "id": "GUI-295512",
      "name": "Hugo Nunes",
      "pos": "MF",
@@ -3989,28 +4628,28 @@
      "ext": 45514
     },
     {
-     "id": "GUI-262361",
-     "name": "Diogo Lobão",
-     "pos": "MF",
-     "number": 14,
-     "age": 19,
-     "att": 77,
-     "def": 67,
-     "sta": 64,
-     "nation": "Portugal",
-     "ext": 262361
-    },
-    {
      "id": "GUI-191013",
      "name": "Goncalo Nogueira",
      "pos": "MF",
-     "number": 18,
+     "number": 14,
      "age": 21,
      "att": 70,
      "def": 71,
      "sta": 79,
      "nation": "Portugal",
      "ext": 191013
+    },
+    {
+     "id": "GUI-262361",
+     "name": "Diogo Lobão",
+     "pos": "MF",
+     "number": 18,
+     "age": 19,
+     "att": 77,
+     "def": 67,
+     "sta": 64,
+     "nation": "Portugal",
+     "ext": 262361
     },
     {
      "id": "GUI-280042",
@@ -4107,6 +4746,42 @@
      "sta": 68,
      "nation": "Portugal",
      "ext": 289174
+    },
+    {
+     "id": "GUI-4003",
+     "name": "Nélson Oliveira",
+     "pos": "FW",
+     "number": 22,
+     "age": 34,
+     "att": 76,
+     "def": 44,
+     "sta": 73,
+     "nation": "Portugal",
+     "ext": 4003
+    },
+    {
+     "id": "GUI-284497",
+     "name": "Ejike Opara",
+     "pos": "FW",
+     "number": 25,
+     "age": 20,
+     "att": 79,
+     "def": 50,
+     "sta": 77,
+     "nation": "Nigeria",
+     "ext": 284497
+    },
+    {
+     "id": "GUI-262363",
+     "name": "Miguel Nogueira",
+     "pos": "FW",
+     "number": 27,
+     "age": 20,
+     "att": 73,
+     "def": 45,
+     "sta": 73,
+     "nation": "Portugal",
+     "ext": 262363
     }
    ]
   },
@@ -4219,22 +4894,10 @@
      "ext": 185146
     },
     {
-     "id": "SCB-246367",
-     "name": "Nuno Matos",
-     "pos": "DF",
-     "number": 6,
-     "age": 20,
-     "att": 63,
-     "def": 83,
-     "sta": 77,
-     "nation": "Portugal",
-     "ext": 246367
-    },
-    {
      "id": "SCB-180150",
      "name": "Victor Gómez",
      "pos": "DF",
-     "number": 15,
+     "number": 6,
      "age": 25,
      "att": 63,
      "def": 80,
@@ -4246,7 +4909,7 @@
      "id": "SCB-146987",
      "name": "Bright Arrey-Mbi",
      "pos": "DF",
-     "number": 12,
+     "number": 15,
      "age": 22,
      "att": 60,
      "def": 80,
@@ -4258,13 +4921,61 @@
      "id": "SCB-469",
      "name": "Sikou Niakaté",
      "pos": "DF",
-     "number": 24,
+     "number": 12,
      "age": 26,
      "att": 62,
      "def": 78,
      "sta": 77,
      "nation": "France",
      "ext": 469
+    },
+    {
+     "id": "SCB-33339",
+     "name": "Paulo Oliveira",
+     "pos": "DF",
+     "number": 24,
+     "age": 33,
+     "att": 60,
+     "def": 73,
+     "sta": 71,
+     "nation": "Portugal",
+     "ext": 33339
+    },
+    {
+     "id": "SCB-246367",
+     "name": "Nuno Matos",
+     "pos": "DF",
+     "number": 26,
+     "age": 20,
+     "att": 63,
+     "def": 83,
+     "sta": 77,
+     "nation": "Portugal",
+     "ext": 246367
+    },
+    {
+     "id": "SCB-294814",
+     "name": "Afonso Sousa",
+     "pos": "DF",
+     "number": 33,
+     "age": 18,
+     "att": 54,
+     "def": 76,
+     "sta": 75,
+     "nation": "Portugal",
+     "ext": 294814
+    },
+    {
+     "id": "SCB-265148",
+     "name": "Jonatás Noro",
+     "pos": "DF",
+     "number": 14,
+     "age": 20,
+     "att": 58,
+     "def": 75,
+     "sta": 78,
+     "nation": "Portugal",
+     "ext": 265148
     },
     {
      "id": "SCB-404",
@@ -4318,25 +5029,13 @@
      "id": "SCB-121007",
      "name": "Rodrigo Zalazar",
      "pos": "MF",
-     "number": 14,
+     "number": 18,
      "age": 26,
      "att": 72,
      "def": 73,
      "sta": 82,
      "nation": "Uruguay",
      "ext": 121007
-    },
-    {
-     "id": "SCB-275993",
-     "name": "Vasconcelos",
-     "pos": "MF",
-     "number": 18,
-     "age": 20,
-     "att": 69,
-     "def": 75,
-     "sta": 80,
-     "nation": "Portugal",
-     "ext": 275993
     },
     {
      "id": "SCB-180185",
@@ -4351,10 +5050,34 @@
      "ext": 180185
     },
     {
+     "id": "SCB-281002",
+     "name": "Yanis Da Rocha",
+     "pos": "MF",
+     "number": 17,
+     "age": 21,
+     "att": 70,
+     "def": 69,
+     "sta": 76,
+     "nation": "France",
+     "ext": 281002
+    },
+    {
+     "id": "SCB-275993",
+     "name": "Vasconcelos",
+     "pos": "MF",
+     "number": 22,
+     "age": 20,
+     "att": 69,
+     "def": 75,
+     "sta": 80,
+     "nation": "Portugal",
+     "ext": 275993
+    },
+    {
      "id": "SCB-273888",
      "name": "Diego Rodrigues",
      "pos": "MF",
-     "number": 17,
+     "number": 19,
      "age": 20,
      "att": 69,
      "def": 72,
@@ -4390,7 +5113,7 @@
      "id": "SCB-144579",
      "name": "Pau Victor Delgado",
      "pos": "FW",
-     "number": 19,
+     "number": 21,
      "age": 23,
      "att": 88,
      "def": 54,
@@ -4402,7 +5125,7 @@
      "id": "SCB-45401",
      "name": "Ricardo Horta",
      "pos": "FW",
-     "number": 21,
+     "number": 29,
      "age": 30,
      "att": 85,
      "def": 59,
@@ -4414,13 +5137,25 @@
      "id": "SCB-206816",
      "name": "Rodrigo Mordomo",
      "pos": "FW",
-     "number": 29,
+     "number": 23,
      "age": 20,
      "att": 86,
      "def": 47,
      "sta": 65,
      "nation": "Portugal",
      "ext": 206816
+    },
+    {
+     "id": "SCB-286765",
+     "name": "João Aragão",
+     "pos": "FW",
+     "number": 25,
+     "age": 17,
+     "att": 80,
+     "def": 45,
+     "sta": 57,
+     "nation": "Portugal",
+     "ext": 286765
     }
    ]
   },
@@ -4470,6 +5205,19 @@
      "sta": 75,
      "nation": "Croatia",
      "ext": 246140
+    },
+    {
+     "id": "CAS-77869",
+     "name": "Ricardo Batista",
+     "pos": "GK",
+     "role": "GK",
+     "number": 41,
+     "age": 38,
+     "att": 40,
+     "def": 62,
+     "sta": 61,
+     "nation": "Portugal",
+     "ext": 77869
     },
     {
      "id": "CAS-263516",
@@ -4544,30 +5292,41 @@
      "ext": 126877
     },
     {
-     "id": "CAS-126156",
-     "name": "Rafael Brito",
-     "pos": "DF",
-     "role": "DM",
-     "number": 12,
-     "age": 23,
-     "att": 59,
-     "def": 77,
-     "sta": 81,
-     "nation": "Portugal",
-     "ext": 126156
-    },
-    {
      "id": "CAS-3245",
      "name": "José Fonte",
      "pos": "DF",
      "role": "CB",
-     "number": 24,
+     "number": 12,
      "age": 41,
      "att": 52,
      "def": 75,
      "sta": 67,
      "nation": "Portugal",
      "ext": 3245
+    },
+    {
+     "id": "CAS-45303",
+     "name": "Geraldes",
+     "pos": "DF",
+     "number": 24,
+     "age": 34,
+     "att": 58,
+     "def": 71,
+     "sta": 74,
+     "nation": "Portugal",
+     "ext": 45303
+    },
+    {
+     "id": "CAS-274982",
+     "name": "Kaly",
+     "pos": "DF",
+     "number": 26,
+     "age": 21,
+     "att": 57,
+     "def": 69,
+     "sta": 65,
+     "nation": "Angola",
+     "ext": 274982
     },
     {
      "id": "CAS-171553",
@@ -4594,10 +5353,22 @@
      "ext": 39959
     },
     {
+     "id": "CAS-126156",
+     "name": "Rafael Brito",
+     "pos": "MF",
+     "number": 7,
+     "age": 23,
+     "att": 71,
+     "def": 73,
+     "sta": 81,
+     "nation": "Portugal",
+     "ext": 126156
+    },
+    {
      "id": "CAS-11702",
      "name": "Sebastián Pérez",
      "pos": "MF",
-     "number": 7,
+     "number": 16,
      "age": 32,
      "att": 72,
      "def": 65,
@@ -4609,7 +5380,7 @@
      "id": "CAS-270882",
      "name": "Kevin Prieto",
      "pos": "MF",
-     "number": 16,
+     "number": 14,
      "age": 22,
      "att": 68,
      "def": 68,
@@ -4621,7 +5392,7 @@
      "id": "CAS-294326",
      "name": "Abdu Dafe",
      "pos": "MF",
-     "number": 14,
+     "number": 18,
      "age": 17,
      "att": 67,
      "def": 69,
@@ -4718,7 +5489,7 @@
      "name": "Kiki Silva",
      "pos": "FW",
      "role": "RW",
-     "number": 18,
+     "number": 20,
      "age": 27,
      "att": 80,
      "def": 49,
@@ -4730,13 +5501,25 @@
      "id": "CAS-14003",
      "name": "Cassiano",
      "pos": "FW",
-     "number": 20,
+     "number": 22,
      "age": 36,
      "att": 77,
      "def": 48,
      "sta": 74,
      "nation": "Brazil",
      "ext": 14003
+    },
+    {
+     "id": "CAS-136091",
+     "name": "Kelian Nsona Wa Saka",
+     "pos": "FW",
+     "number": 25,
+     "age": 23,
+     "att": 75,
+     "def": 48,
+     "sta": 66,
+     "nation": "France",
+     "ext": 136091
     }
    ]
   },
@@ -4788,6 +5571,19 @@
      "ext": 154616
     },
     {
+     "id": "ALV-192010",
+     "name": "Andre Gomes",
+     "pos": "GK",
+     "role": "GK",
+     "number": 41,
+     "age": 20,
+     "att": 40,
+     "def": 62,
+     "sta": 56,
+     "nation": "Portugal",
+     "ext": 192010
+    },
+    {
      "id": "ALV-249393",
      "name": "Diogo Spencer",
      "pos": "DF",
@@ -4800,22 +5596,10 @@
      "ext": 249393
     },
     {
-     "id": "ALV-212863",
-     "name": "Steven Baseya",
-     "pos": "DF",
-     "number": 5,
-     "age": 20,
-     "att": 53,
-     "def": 71,
-     "sta": 70,
-     "nation": "France",
-     "ext": 212863
-    },
-    {
      "id": "ALV-253528",
      "name": "Julian Martinez",
      "pos": "DF",
-     "number": 4,
+     "number": 5,
      "age": 21,
      "att": 50,
      "def": 71,
@@ -4824,10 +5608,34 @@
      "ext": 253528
     },
     {
+     "id": "ALV-33620",
+     "name": "Sergi Gómez",
+     "pos": "DF",
+     "number": 4,
+     "age": 33,
+     "att": 50,
+     "def": 60,
+     "sta": 63,
+     "nation": "Spain",
+     "ext": 33620
+    },
+    {
+     "id": "ALV-212863",
+     "name": "Steven Baseya",
+     "pos": "DF",
+     "number": 3,
+     "age": 20,
+     "att": 53,
+     "def": 71,
+     "sta": 70,
+     "nation": "France",
+     "ext": 212863
+    },
+    {
      "id": "ALV-214507",
      "name": "Bastien Meupiyou Menadjou",
      "pos": "DF",
-     "number": 3,
+     "number": 6,
      "age": 19,
      "att": 50,
      "def": 67,
@@ -4839,25 +5647,13 @@
      "id": "ALV-246741",
      "name": "Francisco Chissumba",
      "pos": "DF",
-     "number": 6,
+     "number": 15,
      "age": 20,
      "att": 53,
      "def": 62,
      "sta": 61,
      "nation": "Portugal",
      "ext": 246741
-    },
-    {
-     "id": "ALV-33620",
-     "name": "Sergi Gómez",
-     "pos": "DF",
-     "number": 15,
-     "age": 33,
-     "att": 50,
-     "def": 60,
-     "sta": 63,
-     "nation": "Spain",
-     "ext": 33620
     },
     {
      "id": "ALV-264461",
@@ -4920,28 +5716,28 @@
      "ext": 18602
     },
     {
-     "id": "ALV-176854",
-     "name": "Tomas Mendes",
-     "pos": "MF",
-     "number": 14,
-     "age": 20,
-     "att": 69,
-     "def": 62,
-     "sta": 73,
-     "nation": "Spain",
-     "ext": 176854
-    },
-    {
      "id": "ALV-178839",
      "name": "Kaiky Marques",
      "pos": "MF",
-     "number": 18,
+     "number": 14,
      "age": 23,
      "att": 64,
      "def": 66,
      "sta": 61,
      "nation": "Brazil",
      "ext": 178839
+    },
+    {
+     "id": "ALV-176854",
+     "name": "Tomas Mendes",
+     "pos": "MF",
+     "number": 18,
+     "age": 20,
+     "att": 69,
+     "def": 62,
+     "sta": 73,
+     "nation": "Spain",
+     "ext": 176854
     },
     {
      "id": "ALV-280267",
@@ -4966,6 +5762,18 @@
      "sta": 71,
      "nation": "Brazil",
      "ext": 281159
+    },
+    {
+     "id": "ALV-280296",
+     "name": "Davy Gui",
+     "pos": "MF",
+     "number": 22,
+     "age": 19,
+     "att": 58,
+     "def": 62,
+     "sta": 68,
+     "nation": "Ivory Coast",
+     "ext": 280296
     },
     {
      "id": "ALV-137985",
@@ -5040,16 +5848,52 @@
      "ext": 37269
     },
     {
+     "id": "ALV-179607",
+     "name": "Mathis Clairicia",
+     "pos": "FW",
+     "number": 24,
+     "age": 22,
+     "att": 71,
+     "def": 45,
+     "sta": 65,
+     "nation": "France",
+     "ext": 179607
+    },
+    {
+     "id": "ALV-103003",
+     "name": "Stéphane Diarra",
+     "pos": "FW",
+     "number": 25,
+     "age": 26,
+     "att": 72,
+     "def": 41,
+     "sta": 61,
+     "nation": "Ivory Coast",
+     "ext": 103003
+    },
+    {
      "id": "ALV-280037",
      "name": "Cédric Nuozzi",
      "pos": "FW",
-     "number": 22,
+     "number": 26,
      "age": 19,
      "att": 74,
      "def": 41,
      "sta": 63,
      "nation": "Belgium",
      "ext": 280037
+    },
+    {
+     "id": "ALV-267815",
+     "name": "Felipe Lima",
+     "pos": "FW",
+     "number": 27,
+     "age": 19,
+     "att": 69,
+     "def": 40,
+     "sta": 54,
+     "nation": "Brazil",
+     "ext": 267815
     }
    ]
   },
@@ -5062,24 +5906,11 @@
    "ext": 9136,
    "players": [
     {
-     "id": "AMA-202975",
-     "name": "Dudu",
-     "pos": "GK",
-     "role": "GK",
-     "number": 1,
-     "age": 26,
-     "att": 51,
-     "def": 75,
-     "sta": 74,
-     "nation": "Germany",
-     "ext": 202975
-    },
-    {
      "id": "AMA-231213",
      "name": "David Grilo",
      "pos": "GK",
      "role": "GK",
-     "number": 13,
+     "number": 1,
      "age": 29,
      "att": 40,
      "def": 73,
@@ -5092,13 +5923,26 @@
      "name": "Renan Ribeiro",
      "pos": "GK",
      "role": "GK",
-     "number": 31,
+     "number": 13,
      "age": 35,
      "att": 40,
      "def": 64,
      "sta": 67,
      "nation": "Brazil",
      "ext": 45159
+    },
+    {
+     "id": "AMA-202181",
+     "name": "Diogo Pinto",
+     "pos": "GK",
+     "role": "GK",
+     "number": 31,
+     "age": 21,
+     "att": 40,
+     "def": 62,
+     "sta": 72,
+     "nation": "Portugal",
+     "ext": 202181
     },
     {
      "id": "AMA-80875",
@@ -5197,10 +6041,35 @@
      "ext": 150419
     },
     {
+     "id": "AMA-45195",
+     "name": "Ruben Lima",
+     "pos": "DF",
+     "role": "LB",
+     "number": 26,
+     "age": 35,
+     "att": 47,
+     "def": 70,
+     "sta": 64,
+     "nation": "Portugal",
+     "ext": 45195
+    },
+    {
+     "id": "AMA-202975",
+     "name": "Dudu",
+     "pos": "MF",
+     "number": 8,
+     "age": 26,
+     "att": 81,
+     "def": 74,
+     "sta": 74,
+     "nation": "Germany",
+     "ext": 202975
+    },
+    {
      "id": "AMA-154435",
      "name": "Paulo Moreira",
      "pos": "MF",
-     "number": 8,
+     "number": 10,
      "age": 25,
      "att": 79,
      "def": 75,
@@ -5212,7 +6081,7 @@
      "id": "AMA-209792",
      "name": "Tom Moustier",
      "pos": "MF",
-     "number": 10,
+     "number": 7,
      "age": 23,
      "att": 72,
      "def": 74,
@@ -5224,7 +6093,7 @@
      "id": "AMA-122432",
      "name": "Kevin Höög-Jansson",
      "pos": "MF",
-     "number": 7,
+     "number": 16,
      "age": 24,
      "att": 65,
      "def": 76,
@@ -5236,7 +6105,7 @@
      "id": "AMA-277809",
      "name": "Robinho",
      "pos": "MF",
-     "number": 16,
+     "number": 14,
      "age": 23,
      "att": 71,
      "def": 69,
@@ -5248,7 +6117,7 @@
      "id": "AMA-274552",
      "name": "Alexandre Sola",
      "pos": "MF",
-     "number": 14,
+     "number": 18,
      "age": 21,
      "att": 69,
      "def": 67,
@@ -5260,7 +6129,7 @@
      "id": "AMA-280840",
      "name": "Loureiro",
      "pos": "MF",
-     "number": 18,
+     "number": 20,
      "age": 20,
      "att": 68,
      "def": 68,
@@ -5272,25 +6141,13 @@
      "id": "AMA-291311",
      "name": "Eddy Doué",
      "pos": "MF",
-     "number": 20,
+     "number": 17,
      "age": 19,
      "att": 62,
      "def": 65,
      "sta": 58,
      "nation": "Ivory Coast",
      "ext": 291311
-    },
-    {
-     "id": "AMA-284756",
-     "name": "Pape Fuhrer",
-     "pos": "MF",
-     "number": 17,
-     "age": 19,
-     "att": 64,
-     "def": 61,
-     "sta": 65,
-     "nation": "Senegal",
-     "ext": 284756
     },
     {
      "id": "AMA-80336",
@@ -5353,16 +6210,64 @@
      "ext": 45350
     },
     {
+     "id": "AMA-37116",
+     "name": "Jovane Cabral",
+     "pos": "FW",
+     "number": 23,
+     "age": 27,
+     "att": 77,
+     "def": 47,
+     "sta": 66,
+     "nation": "Cape Verde Islands",
+     "ext": 37116
+    },
+    {
+     "id": "AMA-81357",
+     "name": "Ianis Stoica",
+     "pos": "FW",
+     "number": 22,
+     "age": 22,
+     "att": 75,
+     "def": 51,
+     "sta": 64,
+     "nation": "Romania",
+     "ext": 81357
+    },
+    {
+     "id": "AMA-262611",
+     "name": "Jorge Meireles",
+     "pos": "FW",
+     "number": 25,
+     "age": 21,
+     "att": 73,
+     "def": 46,
+     "sta": 70,
+     "nation": "Portugal",
+     "ext": 262611
+    },
+    {
      "id": "AMA-261052",
      "name": "Chilohem Onuoha",
      "pos": "FW",
-     "number": 23,
+     "number": 27,
      "age": 20,
      "att": 81,
      "def": 44,
      "sta": 66,
      "nation": "Germany",
      "ext": 261052
+    },
+    {
+     "id": "AMA-216107",
+     "name": "Mathew Gbomadu",
+     "pos": "FW",
+     "number": 28,
+     "age": 20,
+     "att": 78,
+     "def": 48,
+     "sta": 69,
+     "nation": "Nigeria",
+     "ext": 216107
     }
    ]
   },
@@ -5522,6 +6427,18 @@
      "ext": 33110
     },
     {
+     "id": "AVS-294840",
+     "name": "Afonso Silva",
+     "pos": "DF",
+     "number": 33,
+     "age": 17,
+     "att": 43,
+     "def": 66,
+     "sta": 53,
+     "nation": "Portugal",
+     "ext": 294840
+    },
+    {
      "id": "AVS-169554",
      "name": "Roni",
      "pos": "MF",
@@ -5666,10 +6583,22 @@
      "ext": 2470
     },
     {
+     "id": "AVS-242230",
+     "name": "Edson Mucuana",
+     "pos": "FW",
+     "number": 18,
+     "age": 21,
+     "att": 68,
+     "def": 41,
+     "sta": 71,
+     "nation": "Mozambique",
+     "ext": 242230
+    },
+    {
      "id": "AVS-182441",
      "name": "Oscar Perea",
      "pos": "FW",
-     "number": 18,
+     "number": 20,
      "age": 19,
      "att": 71,
      "def": 40,
