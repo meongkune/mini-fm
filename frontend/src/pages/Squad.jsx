@@ -16,6 +16,7 @@ export default function Squad() {
   const { myTeam, save, update, autoPick, status } = useGame()
   const [msg, setMsg] = useState('')
   const [view, setView] = useState('card')
+  const [sortBy, setSortBy] = useState('ovr') // 기록표 정렬: 포지션 묶음 안에서
   const [detail, setDetail] = useState(null)
   if (!myTeam) return <NeedTeam />
 
@@ -86,7 +87,7 @@ export default function Squad() {
       <div className="row between" style={{ marginBottom: 10 }}>
         <div className="seg small inline">
           <button className={view === 'card' ? 'on' : ''} onClick={() => setView('card')}>카드</button>
-          <button className={view === 'list' ? 'on' : ''} onClick={() => setView('list')}>상태표</button>
+          <button className={view === 'list' ? 'on' : ''} onClick={() => setView('list')}>기록표</button>
         </div>
         <Link className="link" to="/transfer">🔄 이적 시장 →</Link>
       </div>
@@ -113,37 +114,67 @@ export default function Squad() {
         </>
       )}
 
-      {view === 'list' && (
-        <div className="card flush">
-          <table className="sq">
-            <thead><tr><th /><th className="left">선수</th><th>능력</th><th>컨디션</th><th>사기</th><th>폼</th><th>G/A</th></tr></thead>
-            <tbody>
-              {['GK', 'DF', 'MF', 'FW'].flatMap((pos) => myTeam.players.filter((p) => p.pos === pos).sort((a, b) => playerOvr(b) - playerOvr(a))).map((p) => {
-                const st = status[p.id] || {}
-                const ps = save.pstats?.[p.id]
-                return (
-                  <tr key={p.id} className={`${selected.has(p.id) ? 'sel' : ''} ${out(p.id) ? 'out' : ''}`} onClick={() => setDetail(p)}>
-                    <td className="sq-sel">{placed(p) ? <span className={`slot-tag ${fitTone(placed(p).fit)}`}>{placed(p).role}</span> : ''}</td>
-                    <td className="left">
-                      <div className="sq-name">
-                        <span className="lu-pos">{roleOf(p)}</span>
-                        <Flag nation={p.nation} size={14} /><strong>{p.name}</strong>
-                        {st.wantsOut && <em>✈️</em>}
-                      </div>
-                      {unavailable(st) && <span className={`out-tag ${unavailable(st).kind}`}>{unavailable(st).icon} {unavailable(st).text}</span>}
-                    </td>
-                    <td><Stars value={abilityStars(p)} compact /></td>
-                    <td><CondBar value={st.cond} /></td>
-                    <td>{moraleLabel(st.morale)[0]}</td>
-                    <td>{st.fr?.length ? <Rating value={st.form} /> : <span className="muted">-</span>}</td>
-                    <td className="muted">{ps ? `${ps.g}/${ps.a}` : '-'}</td>
+      {view === 'list' && (() => {
+        // 기록표: 포지션별 묶음 · 머리글을 누르면 그 묶음 안에서 정렬
+        const COLS = [['ovr', '능력'], ['apps', '경기'], ['g', '골'], ['a', '도움'], ['avg', '평점'], ['form', '최근 폼'], ['cond', '컨디션'], ['morale', '사기']]
+        const rec = (p) => {
+          const ps = save.pstats?.[p.id] || {}
+          const st = status[p.id] || {}
+          return { apps: ps.apps || 0, g: ps.g || 0, a: ps.a || 0, mom: ps.mom || 0, avg: ps.apps ? ps.rsum / ps.apps : null, fr: st.fr || [], form: st.fr?.length ? st.form : null, cond: st.cond ?? 100, morale: st.morale ?? 60 }
+        }
+        const key = (p) => (sortBy === 'ovr' ? playerOvr(p) : rec(p)[sortBy] ?? -1)
+        const tot = myTeam.players.reduce((t, p) => { const r = rec(p); return { g: t.g + r.g, a: t.a + r.a } }, { g: 0, a: 0 })
+        return (
+          <div className="card flush">
+            <p className="small muted sq-legend">팀 합계 골 {tot.g} · 도움 {tot.a} · 평점 <span className="rt great">8.0+</span> <span className="rt good">7.0+</span> <span className="rt ok">6.0+</span> <span className="rt bad">6.0 미만</span> · 최근 폼은 최근 5경기 평점</p>
+            <div className="sq-scroll">
+              <table className="sq rec">
+                <thead>
+                  <tr>
+                    <th /><th className="left">선수</th>
+                    {COLS.map(([k, l]) => <th key={k} className={`sortable ${sortBy === k ? 'on' : ''}`} onClick={() => setSortBy(k)}>{l}{sortBy === k ? ' ▼' : ''}</th>)}
                   </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </div>
-      )}
+                </thead>
+                {['GK', 'DF', 'MF', 'FW'].map((pos) => {
+                  const list = myTeam.players.filter((p) => p.pos === pos).sort((a, b) => key(b) - key(a))
+                  if (!list.length) return null
+                  const sum = list.reduce((t, p) => { const r = rec(p); return { g: t.g + r.g, a: t.a + r.a } }, { g: 0, a: 0 })
+                  return (
+                    <tbody key={pos} className={`pos-${pos}`}>
+                      <tr className="sq-group"><td colSpan={10}><b>{POS_LABEL[pos]}</b> <span className="muted small">{list.length}명 · 골 {sum.g} · 도움 {sum.a}</span></td></tr>
+                      {list.map((p) => {
+                        const st = status[p.id] || {}
+                        const r = rec(p)
+                        return (
+                          <tr key={p.id} className={`${selected.has(p.id) ? 'sel' : ''} ${out(p.id) ? 'out' : ''}`} onClick={() => setDetail(p)}>
+                            <td className="sq-sel">{placed(p) ? <span className={`slot-tag ${fitTone(placed(p).fit)}`}>{placed(p).role}</span> : ''}</td>
+                            <td className="left">
+                              <div className="sq-name">
+                                <span className="lu-pos">{roleOf(p)}</span>
+                                <Flag nation={p.nation} size={14} /><strong>{p.name}</strong>
+                                {st.wantsOut && <em>✈️</em>}
+                              </div>
+                              {unavailable(st) && <span className={`out-tag ${unavailable(st).kind}`}>{unavailable(st).icon} {unavailable(st).text}</span>}
+                            </td>
+                            <td><Stars value={abilityStars(p)} compact /></td>
+                            <td className="num">{r.apps || <span className="muted">-</span>}</td>
+                            <td className={`num ${r.g ? 'stat-g' : 'muted'}`}>{r.g || '-'}</td>
+                            <td className={`num ${r.a ? 'stat-a' : 'muted'}`}>{r.a || '-'}</td>
+                            <td>{r.avg !== null ? <Rating value={r.avg} /> : <span className="muted">-</span>}</td>
+                            <td><span className="form-dots">{r.fr.length ? r.fr.slice(-5).map((v, i) => <Rating key={i} value={v} />) : <span className="muted">-</span>}</span></td>
+                            <td><CondBar value={st.cond} /></td>
+                            <td>{moraleLabel(st.morale)[0]}</td>
+                          </tr>
+                        )
+                      })}
+                    </tbody>
+                  )
+                })}
+              </table>
+            </div>
+          </div>
+        )
+      })()}
 
       {detail && <PlayerSheet player={detail} onClose={() => setDetail(null)} inLineup={selected.has(detail.id)} onToggle={() => toggle(detail)} />}
     </section>

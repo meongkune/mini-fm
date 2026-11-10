@@ -1,0 +1,8 @@
+{
+  "_설명": "football-data.org 시즌 명단에 빠진 선수를 손으로 채우는 목록. 시즌 가져오기 때마다 자동으로 다시 적용된다. API-Football '현재 명단'은 다음 시즌 이적이 섞여 쓸 수 없어서 확인한 선수만 적는다.",
+  "premier-league": {
+    "BRE": [
+      { "name": "Igor Thiago", "pos": "FW", "role": "ST", "age": 24, "number": 9, "nation": "Brazil", "why": "2025-26 브렌트퍼드 주전 공격수 — football-data 명단 누락" }
+    ]
+  }
+}

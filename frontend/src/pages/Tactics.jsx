@@ -1,5 +1,6 @@
 import Stars, { abilityStars } from '../components/Stars.jsx'
-import { useState } from 'react'
+import { baseOf, isCustom, layoutShift, roleAt } from '../engine/formation.js'
+import { useRef, useState } from 'react'
 import { Kit, Flag } from '../components/Badges.jsx'
 import { CondBar } from '../components/Rating.jsx'
 import { PRESETS, ROLE_LABEL, buildSlots, fitOf, fitTone, parseShape, roleOf } from '../engine/formation.js'
@@ -73,31 +74,70 @@ export function FormationPicker({ value, onChange }) {
 }
 
 /** 세로 경기장 위의 포메이션 자리. 자리를 누르면 onSlot(i) */
-export function SlotPitch({ team, formation, lineup, onSlot, active = null, status = {}, dnd = null }) {
-  const slots = buildSlots(formation)
+export function SlotPitch({ team, formation, lineup, onSlot, active = null, status = {}, dnd = null, edit = false, onLayout = null }) {
+  const base = buildSlots(formation)
+  const [moving, setMoving] = useState(null) // 자리 조정 중: { i, pos: [{x,y}] }
+  const ref = useRef(null)
+  const slots = moving ? base.map((s, i) => (i === 0 ? s : { role: roleAt(moving.pos[i].x, moving.pos[i].y), x: moving.pos[i].x, y: moving.pos[i].y })) : base
   const byId = Object.fromEntries(team.players.map((p) => [p.id, p]))
+  // 자리 조정: 누른 자리를 손가락·마우스를 따라 옮기고, 떼면 저장 (골키퍼는 고정)
+  const startMove = (i, e) => {
+    if (!edit || i === 0 || e.button > 0) return
+    e.preventDefault()
+    const pos = base.map((s) => ({ x: s.x, y: s.y }))
+    const at = (ev) => {
+      const r = ref.current.getBoundingClientRect()
+      return { x: Math.round(Math.max(5, Math.min(95, ((ev.clientX - r.left) / r.width) * 100))), y: Math.round(Math.max(14, Math.min(90, 100 - ((ev.clientY - r.top) / r.height) * 100))) }
+    }
+    let cur = pos
+    setMoving({ i, pos })
+    const move = (ev) => { ev.preventDefault(); cur = cur.map((p, j) => (j === i ? at(ev) : p)); setMoving({ i, pos: cur }) }
+    const up = () => {
+      window.removeEventListener('pointermove', move)
+      window.removeEventListener('pointerup', up)
+      window.removeEventListener('pointercancel', up)
+      setMoving(null)
+      onLayout?.(cur)
+    }
+    window.addEventListener('pointermove', move, { passive: false })
+    window.addEventListener('pointerup', up)
+    window.addEventListener('pointercancel', up)
+  }
   return (
-    <div className="slot-pitch">
+    <div className={`slot-pitch ${edit ? 'editing' : ''}`} ref={ref}>
       <div className="sp-lines" aria-hidden="true"><i className="half" /><i className="circle" /><i className="box top" /><i className="box bottom" /></div>
+      {edit && [[32, '수비'], [42, '수비형 미드'], [62, '중원'], [76, '공격형 미드 · 윙어']].map(([y, l]) => <div key={y} className="zone-guide" style={{ top: `${100 - y}%` }}><small>{l} ↓</small></div>)}
       {slots.map((s, i) => {
         const p = byId[lineup[i]]
         const fit = p ? fitOf(p, s.role) : 0
         const out = p && unavailable(status[p.id])
         return (
-          <button key={i} data-slot={i} className={`slot ${p ? `fit-${fitTone(fit)}` : 'empty'} ${active === i ? 'active' : ''} ${out ? 'out' : ''} ${dnd?.drag?.over === i ? 'drop' : ''} ${dnd?.drag && dnd.drag.id === p?.id ? 'lifted' : ''}`}
+          <button key={i} data-slot={i} className={`slot ${p ? `fit-${fitTone(fit)}` : 'empty'} ${active === i ? 'active' : ''} ${out ? 'out' : ''} ${dnd?.drag?.over === i ? 'drop' : ''} ${dnd?.drag && dnd.drag.id === p?.id ? 'lifted' : ''} ${moving?.i === i ? 'moving' : ''}`}
             style={{ left: `${s.x}%`, top: `${100 - s.y}%` }} title={ROLE_LABEL[s.role]}
-            onPointerDown={dnd ? (e) => dnd.startSlot(i, p?.id ?? null, e) : undefined}
-            onClick={dnd ? undefined : () => onSlot(i)}>
+            onPointerDown={edit ? (e) => startMove(i, e) : dnd ? (e) => dnd.startSlot(i, p?.id ?? null, e) : undefined}
+            onClick={edit || dnd ? undefined : () => onSlot(i)}>
             {p ? <Kit color={team.color} number={p.number} size={30} /> : <span className="slot-plus">+</span>}
             <span className="slot-role">{s.role}</span>
             {p && <span className="slot-name">{p.name.split(' ').at(-1)}</span>}
-            {p && <span className="slot-ovr">{Math.round(playerOvr(p) * fit)}</span>}
+            {p && <span className="slot-ovr">{Math.round(fit * 100)}%</span>}
             {out && <span className={`slot-out ${out.kind}`}>{out.icon} {out.label}</span>}
           </button>
         )
       })}
     </div>
   )
+}
+
+/** 직접 조정한 배치가 전술에 주는 효과 */
+function LayoutEffects({ formation }) {
+  const g = layoutShift(formation)
+  if (!g.d) return null
+  const items = []
+  if (Math.abs(g.d.dfY) >= 3) items.push(g.d.dfY > 0 ? ['mid', `수비 라인 높음 (+${Math.round(g.line)}): 압박·오프사이드 ↑, 상대 역습에 뒷공간 위험`] : ['mid', `수비 라인 낮음 (${Math.round(g.line)}): 뒷공간은 안전, 중원 장악력 ↓`])
+  if (Math.abs(g.d.width) >= 3) items.push(g.d.width > 0 ? ['good', `폭 넓음 (+${Math.round(g.width)}): 측면 공격 ↑ (측면 자원이 적은 상대에 강함)`] : ['mid', `폭 좁음 (${Math.round(g.width)}): 중앙이 촘촘, 내려앉은 상대 공략은 어려움`])
+  if (Math.abs(g.att) >= 0.5 || Math.abs(g.def) >= 0.5) items.push([g.att > g.def ? 'good' : 'mid', `팀 높이·간격: 공격 ${g.att >= 0 ? '+' : ''}${g.att.toFixed(1)} · 수비 ${g.def >= 0 ? '+' : ''}${g.def.toFixed(1)}`])
+  if (!items.length) return <p className="small muted">기본 위치와 거의 같습니다.</p>
+  return <ul className="layout-fx">{items.map(([t, x], i) => <li key={i} className={t}>📐 {x}</li>)}</ul>
 }
 
 /** 자리 하나에 넣을 선수 고르기 */
@@ -157,6 +197,7 @@ export function placeInSlot(lineup, index, playerId) {
 export default function Tactics() {
   const { myTeam, save, update, status } = useGame()
   const [slot, setSlot] = useState(null)
+  const [edit, setEdit] = useState(false) // 자리 조정 모드: 자리 표시를 끌어 위치를 바꾼다
   const lineupNow = () => Array.from({ length: buildSlots(save.formation).length }, (_, i) => save.lineup[i] ?? null)
   const dnd = usePitchDrag({
     onTap: (i) => setSlot(i),
@@ -175,7 +216,7 @@ export default function Tactics() {
   const avgFit = filled.length ? Math.round((filled.reduce((s, id, i) => s + fitOf(byId[id], slots[lineup.indexOf(id)].role), 0) / filled.length) * 100) : 0
   const bench = myTeam.players.filter((p) => !lineup.includes(p.id)).sort((a, b) => playerOvr(b) - playerOvr(a))
 
-  const changeFormation = (f) => update({ formation: f, lineup: (() => {
+  const changeFormation = (f) => update({ formation: f, layout: null, lineup: (() => {
     // 고른 선수는 그대로 두고 새 전형의 자리로 옮긴 뒤, 빈 자리만 채운다
     // 단, 새 자리에서 같은 포지션 계열(적합도 0.82) 미만이 되는 선수는 빼고 알맞은 선수로 채운다
     const kept = alignLineup(myTeam, f, lineup)
@@ -196,13 +237,19 @@ export default function Tactics() {
 
       <div className="tac-layout">
       <div className="card tac-form">
-        <h3>포메이션 <span className="muted small">{formation}</span></h3>
-        <FormationPicker value={formation} onChange={changeFormation} />
+        <h3>포메이션 <span className="muted small">{isCustom(formation) ? `${baseOf(formation)} · 직접 조정` : formation}</span></h3>
+        <FormationPicker value={baseOf(formation)} onChange={changeFormation} />
       </div>
 
       <div className="card tac-pitch">
-        <SlotPitch team={myTeam} formation={formation} lineup={lineup} onSlot={setSlot} active={slot} status={status} dnd={dnd} />
-        <p className="small muted dnd-hint">선수를 끌어 다른 자리에 놓으면 맞바꾸고, 벤치 선수를 끌어 자리에 놓으면 투입합니다. 짧게 누르면 선수 목록이 열립니다.</p>
+        <div className="row between layout-bar">
+          <button className={`btn small ${edit ? '' : 'ghost'}`} onClick={() => setEdit(!edit)}>{edit ? '✔ 자리 조정 끝' : '📐 자리 조정'}</button>
+          {isCustom(formation) && <button className="btn small ghost" onClick={() => update({ formation: baseOf(formation), layout: null })}>↺ 기본 위치로</button>}
+        </div>
+        <SlotPitch team={myTeam} formation={formation} lineup={lineup} onSlot={setSlot} active={slot} status={status} dnd={edit ? null : dnd} edit={edit}
+          onLayout={(pos) => { const name = `${baseOf(formation)}*`; update({ formation: name, layout: { name, pos } }) }} />
+        <p className="small muted dnd-hint">{edit ? '자리 표시를 끌어 원하는 위치로 옮기세요. 위치에 따라 역할이 바뀌고(예: 중앙 미드를 앞으로 → 공격형 미드), 수비 라인 높이·폭·간격이 전술에 반영됩니다.' : '선수를 끌어 다른 자리에 놓으면 맞바꾸고, 벤치 선수를 끌어 자리에 놓으면 투입합니다. 짧게 누르면 선수 목록이 열립니다.'}</p>
+        <LayoutEffects formation={formation} />
         {dnd.drag && (() => { const p = byId[dnd.drag.id]; return p ? <div className="drag-ghost" style={{ left: dnd.drag.x, top: dnd.drag.y }}><Kit color={myTeam.color} number={p.number} size={30} /><span>{p.name.split(' ').at(-1)}</span></div> : null })()}
         <div className="fit-legend">
           {Object.entries(FIT_LABEL).map(([k, l]) => <span key={k}><i className={`fit-dot ${k}`} />{l}</span>)}

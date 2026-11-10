@@ -9,13 +9,18 @@ import { CondBar } from '../components/Rating.jsx'
 import { PATIENCE, money, potentialStars, valueOf } from '../game/trade.js'
 import { eur, wageBill, wageBudget } from '../game/finance.js'
 import { playerOvr, short, useGame } from '../store.jsx'
+import { keyAttrs20 } from '../game/attributes.js'
+import { roleOf } from '../engine/formation.js'
+import CurrencyToggle from '../components/CurrencyToggle.jsx'
 
 const POS = ['전체', 'GK', 'DF', 'MF', 'FW']
 const SORTS = [['ovr', '능력'], ['value', '가치'], ['pot', '잠재력'], ['age', '나이']]
-const stars = (n) => '★'.repeat(n) + '☆'.repeat(5 - n)
+const AGES = [['all', '전 연령'], ['u21', '21세 이하'], ['prime', '22~29세'], ['vet', '30세 이상']]
+const ageOk = (a, k) => k === 'all' || (k === 'u21' ? a <= 21 : k === 'prime' ? a >= 22 && a <= 29 : a >= 30)
+const LINE = { GK: 'gk', DF: 'df', MF: 'mf', FW: 'fw' }
 
 export default function Transfer() {
-  const { myTeam, teams, teamsById, status, save, data, transferWindow, totalRounds, toggleSale, valueFor, setAskPrice, worldTeams } = useGame()
+  const { myTeam, teams, teamsById, status, save, data, transferWindow, totalRounds, toggleSale, valueFor, setAskPrice, worldTeams, wageFor } = useGame()
   const [params] = useSearchParams()
   const [tab, setTab] = useState(params.get('tab') || 'buy')
   const [pos, setPos] = useState('전체')
@@ -23,6 +28,9 @@ export default function Transfer() {
   const [leagueFilter, setLeagueFilter] = useState('all') // all | mine | 리그ID
   const [sort, setSort] = useState('ovr')
   const [q, setQ] = useState('')
+  const [age, setAge] = useState('all')
+  const [afford, setAfford] = useState(false) // 살 수 있는 선수만 (이적료 ≤ 현금, 연봉 ≤ 임금 예산 여유)
+  const [shown, setShown] = useState(40)
   const [pick, setPick] = useState(null) // { p, t }
 
   const market = useMemo(() => {
@@ -35,10 +43,13 @@ export default function Transfer() {
   if (!myTeam) return <NeedTeam />
 
   const sorter = { ovr: (a, b) => playerOvr(b.p) - playerOvr(a.p), value: (a, b) => b.v - a.v, pot: (a, b) => b.pot - a.pot || a.p.age - b.p.age, age: (a, b) => a.p.age - b.p.age }[sort]
-  const list = market
-    .filter(({ p, t, lid }) => (leagueFilter === 'all' || (leagueFilter === 'mine' ? lid === data.leagueId : lid === leagueFilter)) && (pos === '전체' || p.pos === pos) && (teamFilter === 'all' || `${lid}/${t.id}` === teamFilter) && (!q || `${p.name} ${p.nameEn || ''}`.toLowerCase().includes(q.toLowerCase())))
+  const f0 = save.finance || {}
+  const room0 = Math.max(0, wageBudget(f0) - wageBill(save, myTeam, data.leagueId))
+  const canBuy = (p, v) => v <= (f0.cash ?? 0) && wageFor(p) * 1.15 <= room0
+  const filtered = market
+    .filter(({ p, t, lid, v }) => (leagueFilter === 'all' || (leagueFilter === 'mine' ? lid === data.leagueId : lid === leagueFilter)) && (pos === '전체' || p.pos === pos) && ageOk(p.age, age) && (!afford || canBuy(p, v)) && (teamFilter === 'all' || `${lid}/${t.id}` === teamFilter) && (!q || `${p.name} ${p.nameEn || ''}`.toLowerCase().includes(q.toLowerCase())))
     .sort(sorter)
-    .slice(0, 60)
+  const list = filtered.slice(0, shown)
   const mineList = [...myTeam.players].map((p) => ({ p, v: valueFor(p), pot: potentialStars(p) })).sort((a, b) => playerOvr(b.p) - playerOvr(a.p))
   const byId = Object.fromEntries([...teams, ...worldTeams.map((w) => w.team)].flatMap((t) => t.players).concat(save.signed || []).concat(Object.values(save.abroad || {}).map((a) => a.player)).map((p) => [p.id, p]))
   const clubName = (id, lid) => (lid && lid !== data.leagueId ? worldTeams.find((w) => w.lid === lid && w.team.id === id)?.team : teamsById[id])
@@ -56,6 +67,7 @@ export default function Transfer() {
         </div>
         <span className={`pill ${transferWindow.open ? 'ok' : 'bad'}`}>{transferWindow.open ? `🟢 ${transferWindow.label}` : '🔒 닫힘'}</span>
       </div>
+      <CurrencyToggle />
       <div className="budget-strip">
         <div><span>현금(이적 자금)</span><b className={(f.cash ?? 0) < 0 ? 'bad-text' : ''}>{eur(f.cash ?? 0)}</b></div>
         <div><span>임금 예산 여유</span><b className={room <= 0 ? 'bad-text' : ''}>{eur(room)}/년</b></div>
@@ -88,26 +100,43 @@ export default function Transfer() {
               {[...new Map(market.filter(({ lid }) => leagueFilter === 'all' || (leagueFilter === 'mine' ? lid === data.leagueId : lid === leagueFilter)).map(({ t, lid }) => [`${lid}/${t.id}`, t.name])).entries()].map(([k, n]) => <option key={k} value={k}>{n}</option>)}
             </select>
           </div>
-          <div className="chips-scroll">
-            {POS.map((x) => <button key={x} className={`chip ${pos === x ? 'on' : ''}`} onClick={() => setPos(x)}>{x}</button>)}
-            <span className="chip-sep" />
-            {SORTS.map(([k, l]) => <button key={k} className={`chip ${sort === k ? 'on' : ''}`} onClick={() => setSort(k)}>{l}순</button>)}
+          <div className="mk-filters">
+            <div className="chips-scroll">
+              {POS.map((x) => <button key={x} className={`chip ${pos === x ? 'on' : ''}`} onClick={() => { setPos(x); setShown(40) }}>{x}</button>)}
+              <span className="chip-sep" />
+              {AGES.map(([k, l]) => <button key={k} className={`chip ${age === k ? 'on' : ''}`} onClick={() => { setAge(k); setShown(40) }}>{l}</button>)}
+            </div>
+            <div className="chips-scroll">
+              <span className="muted small">정렬</span>
+              {SORTS.map(([k, l]) => <button key={k} className={`chip ${sort === k ? 'on' : ''}`} onClick={() => setSort(k)}>{l}순</button>)}
+              <span className="chip-sep" />
+              <button className={`chip ${afford ? 'on' : ''}`} onClick={() => { setAfford(!afford); setShown(40) }}>💰 살 수 있는 선수만</button>
+            </div>
+            <p className="small muted mk-count">{filtered.length.toLocaleString()}명 중 {list.length}명 · 줄을 누르면 영입 제안</p>
           </div>
-          <div className="card flush">
-            <ul className="mk">
-              {list.map(({ p, t, lid, league, v, pot }) => (
-                <li key={p.id}>
-                  <button className="mk-row" onClick={() => setPick({ p, t, lid })}>
-                    <Crest team={t} />
-                    <span className="mk-name"><strong><Flag nation={p.nation} size={14} /> {p.name}</strong><small>{short(t)}{lid !== data.leagueId ? ` · ${league}` : ''} · {p.role || p.pos} · {p.age}세{status[p.id]?.inj > 0 ? ' · 🚑' : ''}</small></span>
-                    <span className="mk-pot" title="스카우트 잠재력 평가">{stars(pot)}</span>
-                    <span className="mk-ovr"><Stars value={abilityStars(p)} compact /></span>
-                    <span className="mk-val">{money(v)}</span>
-                  </button>
-                </li>
-              ))}
-            </ul>
+          <div className="mk-cards">
+            {list.map(({ p, t, lid, league, v }) => {
+              const ok = canBuy(p, v)
+              const wage = Math.round(wageFor(p) * 1.15 * 10) / 10
+              return (
+                <button key={p.id} className={`mk-card line-${LINE[p.pos]}`} onClick={() => setPick({ p, t, lid })}>
+                  <span className="mkc-pos">{p.img ? <img src={p.img} alt="" loading="lazy" referrerPolicy="no-referrer" /> : null}<em>{roleOf(p)}</em></span>
+                  <span className="mkc-main">
+                    <strong><Flag nation={p.nation} size={14} /> {p.name}{status[p.id]?.inj > 0 ? ' 🚑' : ''}</strong>
+                    <small><Crest team={t} size={14} /> {short(t)}{lid !== data.leagueId ? ` · ${league}` : ''} · {p.age}세</small>
+                    <span className="mkc-attrs">{keyAttrs20(p).map(([k, x]) => <span key={k} className={x >= 16 ? 'hi' : x >= 12 ? 'mid' : 'lo'}><b>{x}</b>{k}</span>)}</span>
+                  </span>
+                  <span className="mkc-side">
+                    <span className="mkc-stars"><Stars value={abilityStars(p)} /><Stars value={potentialStarsOf(p)} tone="pot" /></span>
+                    <b className="mkc-val">{money(v)}</b>
+                    <small className={ok ? 'good-text' : 'muted'}>{ok ? '✔ 예산 안' : `연봉 ${eur(wage)}`}</small>
+                  </span>
+                </button>
+              )
+            })}
           </div>
+          {filtered.length > list.length && <button className="btn ghost wide" onClick={() => setShown(shown + 40)}>더 보기 ({filtered.length - list.length}명 남음)</button>}
+          <p className="small muted">⭐ 노란 별 = 현재 능력 · 🔵 파란 별 = 잠재력 · 숫자 = 포지션 핵심 능력치(1~20)</p>
         </>
       )}
 

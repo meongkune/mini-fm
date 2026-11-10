@@ -12,6 +12,16 @@ const BIAS = {
   ST: [0, -3, -2], LW: [3, -4, 2], RW: [3, -4, 2], AM: [3, 0, 5], CM: [2, 3, 1], DM: [-1, 5, -3],
   LM: [1, 0, 1], RM: [1, 0, 1], CB: [-5, 3, -8], LB: [-1, 1, -3], RB: [-1, 1, -3], LWB: [0, 0, -2], RWB: [0, 0, -2],
 }
+// 레이더 → 절대 척도 보정: [공격, 기술, 전술, 수비, 창의성]
+const RAD_FW = [2, -1, -6, -20, -2]
+const RAD_W = [0, 1, -6, -18, 0]
+const RAD_FB = [-10, -5, -1, 0, -8]
+const RAD_WB = [-6, -3, -2, -3, -5]
+const RAD_SM = [-3, 0, -4, -10, -1]
+const RAD_ROLE = {
+  ST: RAD_FW, LW: RAD_W, RW: RAD_W, AM: [-3, 1, -3, -15, 2], LM: RAD_SM, RM: RAD_SM,
+  CM: [-7, 0, 0, -6, -2], DM: [-12, -3, 1, 0, -7], LB: RAD_FB, RB: RAD_FB, LWB: RAD_WB, RWB: RAD_WB, CB: [-20, -9, 0, 2, -14],
+}
 // 포지션별로 카드에 보여줄 핵심 능력치
 const KEY = {
   GK: ['선방', '예측', '공중볼'],
@@ -37,7 +47,9 @@ function calcAttrs(p) {
     const values = Array.isArray(p.gk) ? p.gk : [p.def, p.def - 1 + r('a'), ovr - 6 + r('b'), p.def - 2 + r('c')].map(clamp)
     return { labels: GK, values, map: Object.fromEntries(GK.map((l, i) => [l, values[i]])), est: !Array.isArray(p.gk), gk: true }
   }
-  let values = Array.isArray(p.rad) ? p.rad : null
+  // SportsAPI 레이더는 '같은 포지션 안에서의 위치'다 (윙어의 수비 91 = 윙어 중 수비 기여 최상위).
+  // 포지션별 기준을 더해 모든 포지션이 같은 척도가 되게 바꾼다 (예: 사카 수비 91 → 73, 홀란 수비 93 → 71)
+  let values = Array.isArray(p.rad) ? p.rad.map((v, i) => clamp(v + (RAD_ROLE[role]?.[i] ?? 0))) : null
   if (!values) {
     const [t, ta, c] = BIAS[role] || [0, 0, 0]
     const r = (k) => (hash(`${k}-${p.id}`) % 5) - 2

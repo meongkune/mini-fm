@@ -1,4 +1,5 @@
 // 이적료 이적: 선수 가치 평가, 상대 구단 AI의 수락·역제안·거절, 이적 실행, 내 선수에게 들어오는 제안
+import { eur } from './finance.js'
 import { playerOvrOf } from '../engine/engine.js'
 import { news } from './season.js'
 import { contractOf, yearsLeft } from './finance.js'
@@ -38,6 +39,7 @@ export function valueOf(p, st = {}, ctx = {}) {
   if (p.age <= 23) v *= 1 + Math.max(0, potentialOf(p) - ovr) * 0.02 // 스카우트가 보는 성장 여지
   if ((st.fr?.length || 0) >= 3) v *= 1 + Math.max(-0.2, Math.min(0.3, ((st.form ?? 6.6) - 6.6) * 0.25)) // 최근 폼
   if (ctx.apps >= 5 && p.pos !== 'GK' && p.pos !== 'DF') v *= 1 + Math.min(0.25, ((ctx.g || 0) + (ctx.a || 0) * 0.6) / ctx.apps * 0.35) // 공격 포인트
+  if (ctx.mom) v *= 1 + Math.min(0.15, ctx.mom * 0.03) // 경기 최우수 선수(MOM) 횟수
   if (ctx.yearsLeft === 1) v *= 0.75 // 계약 1년 남으면 싸진다 (곧 FA)
   else if (ctx.yearsLeft === 2) v *= 0.9
   if (st.wantsOut) v *= 0.85
@@ -49,9 +51,9 @@ export function valueOf(p, st = {}, ctx = {}) {
 export function valueCtx(save, p, leagueId) {
   const c = contractOf(save, p, leagueId)
   const ps = save.pstats?.[p.id] || {}
-  return { yearsLeft: yearsLeft(save, c), apps: ps.apps || 0, g: ps.g || 0, a: ps.a || 0 }
+  return { yearsLeft: yearsLeft(save, c), apps: ps.apps || 0, g: ps.g || 0, a: ps.a || 0, mom: ps.mom || 0 }
 }
-export const money = (v) => (v >= 100 ? `€${Math.round(v)}M` : `€${v.toFixed(1)}M`)
+export const money = (v) => eur(v) // 통화 설정(유로·원화)을 따른다
 
 /** 이적 시장이 열리는 라운드: 시즌 초반 4라운드, 중반 4라운드 */
 export function windowState(round, totalRounds) {

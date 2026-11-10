@@ -41,7 +41,7 @@ jobs:
       - name: football-data.org에서 가져오기
         env:
           FOOTBALL_DATA_TOKEN: ${{ secrets.FOOTBALL_DATA_TOKEN }}
-        run: node tools/import_season.mjs --competition ${{ inputs.competition }} --season ${{ inputs.season }} --default ${{ inputs.make_default }}
+        run: node tools/import_season.mjs --competition ${{ inputs.competition }} --season ${{ inputs.season }} --default ${{ inputs.make_default }} && node tools/apply_squad_fixes.mjs
 
       - name: 변경 사항 커밋
         id: commit

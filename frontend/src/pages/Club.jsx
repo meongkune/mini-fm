@@ -6,6 +6,7 @@ import { ROSTER_MAX, eur, ffpStatus, gateModel, ticketPct, wageBill, wageBudget,
 import { DECISIONS, decisionReady, fanLabel } from '../game/owner.js'
 import { playerOvr, useGame } from '../store.jsx'
 import PlayerSheet from '../components/PlayerSheet.jsx'
+import CurrencyToggle from '../components/CurrencyToggle.jsx'
 import NeedTeam from './NeedTeam.jsx'
 
 export default function Club() {
@@ -30,6 +31,7 @@ export default function Club() {
           <p className="muted">구단주는 당신입니다. 무엇이든 할 수 있지만, 결과는 장담할 수 없습니다.</p>
         </div>
       </div>
+      <CurrencyToggle />
 
       <div className="owner-top">
         <div className={`card own-cash ${f.cash < 0 ? 'neg' : ''}`}>
@@ -107,7 +109,7 @@ export default function Club() {
   )
 }
 
-/** 재정 패널: 시즌 손익 · FFP · 임금 예산 · 티켓 가격(%) */
+/** 재정 패널: 한눈에 보는 재정 상태(신호등·할 일) · 핵심 지표 · FFP 게이지 · 항목별 수입/지출 · 임금 예산 · 티켓 가격 */
 function FinancePanel({ f, bill, save, setTicket, setWageRatio, fans, totalRounds }) {
   const pct = ticketPct(f)
   const g = gateModel(f, fans, save, pct)
@@ -116,23 +118,69 @@ function FinancePanel({ f, bill, save, setTicket, setWageRatio, fans, totalRound
   const budget = wageBudget(f)
   const ss = f.season || { rev: 0, exp: 0 }
   const banned = f.ban === (save.seasonNo || 1)
+  // 시즌 말 예상 손익: 최근 경기 정산 평균으로 남은 라운드를 채운다
+  const recent = (f.ledger || []).slice(-Math.max(1, Math.min(10, save.round || 1)))
+  const matchNet = recent.length ? recent.reduce((a, x) => a + x.net, 0) / recent.length : 0
+  const left = Math.max(0, totalRounds - (save.round || 0))
+  const projected = ffp.cur + matchNet * left
+  const room = ffp.allowance + ffp.total // 3시즌 허용 적자까지 남은 여유
+  const used = Math.max(0, -ffp.total) / ffp.allowance // 허용 적자 사용률
+  // 할 일 (위험한 것부터)
+  const todo = []
+  if (f.cash < 0) todo.push(['bad', `현금이 ${eur(f.cash)}입니다. 선수 판매나 구단주 결정(스폰서 등)으로 메우세요.`])
+  if (ffp.ratio > 1) todo.push(['bad', `연봉이 예상 매출의 ${Math.round(ffp.ratio * 100)}% — FFP 위반입니다. 연봉 높은 벤치 선수를 파세요.`])
+  else if (ffp.ratio > 0.85) todo.push(['warn', `연봉이 예상 매출의 ${Math.round(ffp.ratio * 100)}% — 85%를 넘었습니다. 새 영입은 연봉을 보고 고르세요.`])
+  if (ffp.total < -ffp.allowance) todo.push(['bad', `최근 3시즌 적자 ${eur(-ffp.total)}가 허용(${eur(ffp.allowance)})을 넘었습니다. 이적료 지출을 멈추고 선수를 파세요.`])
+  else if (used >= 0.6) todo.push(['warn', `허용 적자의 ${Math.round(used * 100)}%를 썼습니다. 남은 여유 ${eur(room)}.`])
+  if (recent.length >= 3 && projected < -ffp.allowance * 0.5) todo.push(['warn', `이대로면 시즌 말 손익 ${eur(projected)} 예상 — 티켓 가격·임금 예산을 점검하세요.`])
+  if (fans < 35) todo.push(['warn', `팬 민심 ${fans} — 티켓 가격을 내리면 민심이 회복됩니다.`])
+  const health = todo.some((t) => t[0] === 'bad') ? 'bad' : todo.length ? 'warn' : 'ok'
+  const HEALTH = {
+    ok: ['🟢', '재정 건전', `영입 여유: 3시즌 허용 적자까지 ${eur(Math.max(0, room))} · 임금 예산 여유 ${eur(Math.max(0, budget - bill))}/년`],
+    warn: ['🟡', '주의 필요', '아래 항목을 확인하세요'],
+    bad: ['🔴', '위험', '시즌 말 FFP 심사에서 징계를 받을 수 있습니다'],
+  }[health]
+  // 항목별 시즌 수입·지출
+  const cats = Object.entries(ss.cats || {}).filter(([, v]) => Math.abs(v) >= 0.05)
+  const inc = cats.filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1])
+  const out = cats.filter(([, v]) => v < 0).sort((a, b) => a[1] - b[1])
+  const maxCat = Math.max(1, ...cats.map(([, v]) => Math.abs(v)))
   return (
     <>
+      <div className={`card fin-health ${health}`}>
+        <div className="fh-head">
+          <span className="fh-light">{HEALTH[0]}</span>
+          <div><strong>{HEALTH[1]}</strong><small>{HEALTH[2]}</small></div>
+          <span className={`ffp-badge ${ffp.level}`}>FFP {ffp.label}</span>
+        </div>
+        {todo.length > 0 && <ul className="fh-todo">{todo.map(([tone, text], i) => <li key={i} className={tone}>{tone === 'bad' ? '⛔' : '⚠️'} {text}</li>)}</ul>}
+        {banned && <p className="small bad-text" style={{ margin: '6px 0 0' }}>⚖️ FFP 징계: 이번 시즌 선수 영입 금지</p>}
+      </div>
+
+      <div className="fin-kpis">
+        <div className={`card kpi ${ffp.cur >= 0 ? 'good' : 'bad'}`}><span>이번 시즌 손익</span><b>{ffp.cur >= 0 ? '+' : ''}{eur(ffp.cur)}</b><small>시즌 말 예상 {projected >= 0 ? '+' : ''}{eur(projected)}</small></div>
+        <div className={`card kpi ${ffp.ratio > 1 ? 'bad' : ffp.ratio > 0.85 ? 'warn' : 'good'}`}><span>매출 대비 연봉</span><b>{Math.round(ffp.ratio * 100)}%</b><small>연봉 {eur(bill)} / 매출 {eur(ffp.revenue)}</small></div>
+        <div className={`card kpi ${room < 0 ? 'bad' : used >= 0.6 ? 'warn' : 'good'}`}><span>FFP 적자 여유</span><b>{eur(Math.max(0, room))}</b><small>3시즌 손익 {eur(ffp.total)} · 허용 -{eur(ffp.allowance)}</small></div>
+        <div className={`card kpi ${bill > budget ? 'bad' : bill > budget * 0.9 ? 'warn' : 'good'}`}><span>임금 예산 여유</span><b>{eur(budget - bill)}</b><small>예산 {eur(budget)}/년</small></div>
+      </div>
+
       <div className={`card ffp ${ffp.level}`}>
-        <div className="row between"><h3>재정 · FFP</h3><span className={`ffp-badge ${ffp.level}`}>FFP {ffp.label}</span></div>
-        <div className="ffp-grid">
-          <div><span>이번 시즌 수입</span><b className="good-text">{eur(ss.rev)}</b></div>
-          <div><span>이번 시즌 지출</span><b className="bad-text">{eur(ss.exp)}</b></div>
-          <div><span>시즌 손익</span><b className={ffp.cur >= 0 ? 'good-text' : 'bad-text'}>{ffp.cur >= 0 ? '+' : ''}{eur(ffp.cur)}</b></div>
-          <div><span>최근 3시즌 손익</span><b className={ffp.total >= -ffp.allowance ? '' : 'bad-text'}>{eur(ffp.total)}</b><small>허용 -{eur(ffp.allowance)}</small></div>
-        </div>
-        <div className="ffp-ratio">
-          <span className="small">매출 대비 연봉 <b className={ffp.ratio > 1 ? 'bad-text' : ffp.ratio > 0.85 ? 'warn-text' : 'good-text'}>{Math.round(ffp.ratio * 100)}%</b> <span className="muted">(85% 넘으면 주의, 100% 넘으면 위반)</span></span>
-          <div className="ratio-bar"><i style={{ width: `${Math.min(100, ffp.ratio * 100)}%` }} className={ffp.ratio > 1 ? 'lo' : ffp.ratio > 0.85 ? 'mid' : 'hi'} /><em style={{ left: '85%' }} /><em style={{ left: '99%' }} /></div>
-        </div>
-        {banned && <p className="small bad-text">⚖️ FFP 징계: 이번 시즌 선수 영입 금지</p>}
+        <h3>FFP 게이지 <span className="muted small">🟩 안전 · 🟨 주의 · 🟥 위반 — 시즌이 끝나면 심사</span></h3>
+        <Gauge label="매출 대비 연봉" value={ffp.ratio * 100} max={130} marks={[[85, '85%'], [100, '100%']]} text={`${Math.round(ffp.ratio * 100)}%`} />
+        <Gauge label="3시즌 허용 적자 사용" value={used * 100} max={130} marks={[[60, '60%'], [100, '100%']]} text={`${Math.round(used * 100)}%`} />
         {(f.history || []).length > 0 && <p className="small muted">지난 시즌: {(f.history || []).slice(-3).map((h) => `${h.seasonNo}시즌 ${h.net >= 0 ? '+' : ''}${eur(h.net)}`).join(' · ')}</p>}
-        <p className="small muted" style={{ margin: 0 }}>시즌이 끝나면 심사합니다. 위반하면 벌금과 다음 시즌 영입 금지, 두 번째 위반부터 승점 6점 감점.</p>
+        <p className="small muted" style={{ margin: 0 }}>위반하면 벌금과 다음 시즌 영입 금지, 두 번째 위반부터 승점 6점 감점.</p>
+      </div>
+
+      <div className="card">
+        <h3>이번 시즌 수입 · 지출 <span className="muted small">수입 {eur(ss.rev)} · 지출 {eur(ss.exp)}</span></h3>
+        {!cats.length && <p className="small muted">아직 항목별 기록이 없습니다. 다음 경기부터 항목별로 쌓입니다.</p>}
+        <div className="fin-cats">
+          {inc.length > 0 && <h4 className="good-text">수입</h4>}
+          {inc.map(([k, v]) => <CatBar key={k} label={k} v={v} max={maxCat} />)}
+          {out.length > 0 && <h4 className="bad-text">지출</h4>}
+          {out.map(([k, v]) => <CatBar key={k} label={k} v={v} max={maxCat} />)}
+        </div>
       </div>
 
       <div className="card">
@@ -158,5 +206,31 @@ function FinancePanel({ f, bill, save, setTicket, setWageRatio, fans, totalRound
         {f.last?.att !== undefined && <p className="small muted" style={{ marginBottom: 0 }}>지난 홈경기: 관중 {Math.round(f.last.att * 100)}% (가격 {f.last.pct > 0 ? '+' : ''}{f.last.pct}%)</p>}
       </div>
     </>
+  )
+}
+
+/** 구간이 있는 게이지: 초록(안전) · 노랑(주의) · 빨강(위반) */
+function Gauge({ label, value, max, marks, text }) {
+  const at = (v) => `${Math.min(100, (v / max) * 100)}%`
+  const tone = value >= marks[1][0] ? 'bad' : value >= marks[0][0] ? 'warn' : 'good'
+  return (
+    <div className="gauge">
+      <div className="gauge-head"><span>{label}</span><b className={`${tone}-text`}>{text}</b></div>
+      <div className="gauge-bar" style={{ '--w': at(marks[0][0]), '--r': at(marks[1][0]) }}>
+        <i className={tone} style={{ width: at(Math.max(0, value)) }} />
+        {marks.map(([v, l]) => <em key={v} style={{ left: at(v) }}><small>{l}</small></em>)}
+      </div>
+    </div>
+  )
+}
+
+/** 항목별 수입·지출 막대 */
+function CatBar({ label, v, max }) {
+  return (
+    <div className="cat-bar">
+      <span>{label}</span>
+      <div><i className={v >= 0 ? 'plus' : 'minus'} style={{ width: `${(Math.abs(v) / max) * 100}%` }} /></div>
+      <b className={v >= 0 ? 'good-text' : 'bad-text'}>{v >= 0 ? '+' : '-'}{eur(Math.abs(v))}</b>
+    </div>
   )
 }

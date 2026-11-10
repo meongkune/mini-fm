@@ -1,6 +1,6 @@
 // 팀 전술(연속값) · AI 구단 스타일 · 전술 상성
 // 전술 값은 0~100 (50 = 보통). 예전 저장값(문자열: 'attacking', 'high' …)도 그대로 읽는다.
-import { buildSlots, ROLE_POS } from './formation.js'
+import { buildSlots, layoutShift, ROLE_POS } from './formation.js'
 
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v))
 const hash = (s) => { let h = 2166136261; for (const c of String(s)) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return h >>> 0 }
@@ -73,8 +73,10 @@ function centralMid(formation) {
  * me/opp: { tac, formation, fwAtt, mfAtt, dfDef }
  */
 export function edges(me, opp) {
-  const a = tacOf(me.tac)
-  const b = tacOf(opp.tac)
+  // 직접 조정한 배치의 수비 라인 높이·폭은 팀 지시(라인·폭)에 더해진다
+  const withLayout = (t, f) => { const g = layoutShift(f); return { ...t, line: clamp(t.line + g.line, 0, 100), width: clamp(t.width + g.width, 0, 100) } }
+  const a = withLayout(tacOf(me.tac), me.formation)
+  const b = withLayout(tacOf(opp.tac), opp.formation)
   const out = { att: 0, mid: 0, def: 0, chance: 0, quality: 0, foul: 1, offside: 1, notes: [] }
   const add = (k, v, note) => { out[k] += v; if (note && Math.abs(v) >= 0.8) out.notes.push([note, v > 0 ? 1 : -1]) }
 

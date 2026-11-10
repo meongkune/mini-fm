@@ -14,17 +14,25 @@ async function getJson(url) {
 }
 
 /**
- * 시즌 파일 + 실제 데이터 기반 능력치(data/ratings/{리그}.json, SportsAPI 시장가치·능력치로 계산한 값)를 덮어씌운다.
+ * 시즌 파일 + 실제 데이터 기반 능력치 + 선수 사진(data/ratings/{리그}.json, SportsAPI 시장가치·능력치로 계산한 값)를 덮어씌운다.
  * 능력치 파일이 없거나 그 선수가 아직 없으면 원래 값을 그대로 쓴다.
  */
 async function getSeason(file) {
   const data = await getJson(dataUrl(file))
   const league = file.split('/')[0]
   if (!data.teams || file.startsWith('fa/')) return data
-  const ratings = await getJson(dataUrl(`ratings/${league}.json`)).catch(() => null)
-  const rp = ratings?.players
-  if (!rp) return data
-  return { ...data, ratingsAt: ratings.updatedAt, teams: data.teams.map((t) => ({ ...t, players: t.players.map((p) => (rp[p.id] ? { ...p, ...rp[p.id], rated: true } : p)) })) }
+  // 능력치(SportsAPI)와 실제 사진(위키미디어 공용, data/photos/{리그}.json)을 함께 읽어 선수에 붙인다
+  const [ratings, photos] = await Promise.all([
+    getJson(dataUrl(`ratings/${league}.json`)).catch(() => null),
+    getJson(dataUrl(`photos/${league}.json`)).catch(() => null),
+  ])
+  const rp = ratings?.players || {}
+  const ph = photos?.players || {}
+  return {
+    ...data,
+    ratingsAt: ratings?.updatedAt,
+    teams: data.teams.map((t) => ({ ...t, players: t.players.map((p) => ({ ...p, ...(rp[p.id] ? { ...rp[p.id], rated: true } : {}), ...(ph[p.id] ? { img: ph[p.id].img, imgPage: ph[p.id].page } : {}) })) })),
+  }
 }
 
 let indexCache = null

@@ -1,0 +1,40 @@
+# 선수 사진 모으기 (수동 실행): 위키백과 대표 이미지(위키미디어 공용, 자유 라이선스) → data/photos/<리그>.json → 커밋 → Pages 재배포
+# 명단을 새로 가져온 뒤 한 번 실행하면 새 선수 사진도 채워진다 (리그당 요청 약 15~25회)
+name: Player photos
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  photos:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: 사진 모으기
+        run: node tools/player_photos.mjs | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: 변경 사항 커밋
+        id: commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add frontend/public/data/photos
+          if git diff --cached --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            git commit -m "data: 선수 사진 (위키미디어 공용)"
+            git pull --rebase origin main
+            git push
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: GitHub Pages 재배포
+        if: steps.commit.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run pages.yml --ref main

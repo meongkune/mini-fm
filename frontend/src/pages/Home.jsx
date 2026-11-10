@@ -88,7 +88,6 @@ export default function Home() {
   const me = standings[rank - 1]
   const isHome = nextFixture?.isHome
   const opp = nextFixture && (isHome ? nextFixture.awayTeam : nextFixture.homeTeam)
-  const stars = [...myTeam.players].sort((a, b) => playerOvr(b) - playerOvr(a)).slice(0, 6)
   const played = save.results.length > 0
   const form = me.form.slice(-5)
 
@@ -157,12 +156,10 @@ export default function Home() {
       </div>
 
       <div className="section-head" style={{ marginBottom: 8 }}>
-        <h3 style={{ margin: 0 }}>핵심 선수</h3>
-        <Link className="link" to="/squad">전체 보기 →</Link>
+        <h3 style={{ margin: 0 }}>팀 기록</h3>
+        <Link className="link" to="/squad">선수단 기록표 →</Link>
       </div>
-      <div className="scroll-row" style={{ marginBottom: 16 }}>
-        {stars.map((p) => <PlayerCard key={p.id} player={p} size="lg" color={myTeam.color} status={status[p.id]} onClick={() => setDetail(p)} />)}
-      </div>
+      <TeamLeaders team={myTeam} save={save} status={status} onPick={setDetail} />
 
       {detail && <PlayerSheet player={detail} onClose={() => setDetail(null)} />}
 
@@ -294,6 +291,37 @@ function MiniTable({ standings, teamsById, myId }) {
           ))}
         </tbody>
       </table>
+    </div>
+  )
+}
+
+/** 팀 기록: 득점·도움·평점·MOM·최근 폼 1위와 부진한 선수 — 누르면 선수 상세 */
+function TeamLeaders({ team, save, status, onPick }) {
+  const rows = team.players.map((p) => {
+    const ps = save.pstats?.[p.id] || {}
+    const st = status[p.id] || {}
+    return { p, g: ps.g || 0, a: ps.a || 0, mom: ps.mom || 0, apps: ps.apps || 0, avg: ps.apps >= 3 ? ps.rsum / ps.apps : null, form: (st.fr || []).length >= 3 ? st.form : null }
+  })
+  const top = (k, min = 1) => [...rows].filter((r) => r[k] !== null && r[k] >= min).sort((a, b) => b[k] - a[k])[0]
+  const low = [...rows].filter((r) => r.form !== null).sort((a, b) => a.form - b.form)[0]
+  const items = [
+    ['⚽', '최다 득점', top('g'), (r) => `${r.g}골`],
+    ['🅰️', '최다 도움', top('a'), (r) => `${r.a}도움`],
+    ['⭐', '평균 평점 (3경기+)', top('avg', 0), (r) => r.avg.toFixed(2)],
+    ['🏅', '최다 MOM', top('mom'), (r) => `${r.mom}회`],
+    ['🔥', '최근 폼 최고', top('form', 0), (r) => r.form.toFixed(1)],
+    ['🧊', '최근 폼 부진', low && low.form < 6.6 ? low : null, (r) => r.form.toFixed(1)],
+  ]
+  if (!rows.some((r) => r.apps)) return <p className="small muted" style={{ marginBottom: 16 }}>시즌이 시작되면 득점·도움·평점 순위가 여기에 나옵니다.</p>
+  return (
+    <div className="leaders">
+      {items.map(([icon, label, r, val]) => (
+        <button key={label} className="card leader" disabled={!r} onClick={() => r && onPick(r.p)}>
+          <span className="ld-icon">{icon}</span>
+          <span className="ld-who"><span>{label}</span><strong>{r ? r.p.name : '—'}</strong></span>
+          <span className="ld-val">{r ? val(r) : ''}</span>
+        </button>
+      ))}
     </div>
   )
 }

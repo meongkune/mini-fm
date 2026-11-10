@@ -43,8 +43,71 @@ const LINE_ROLES = {
 }
 const fill = (table, n, fallback) => table[n] || Array.from({ length: n }, () => fallback)
 
-/** 포메이션 이름 → 자리 11개 [{ role, x, y }] (첫 자리는 GK) */
+// ── 직접 조정한 배치 ──
+// 경기장에서 자리를 끌어 옮기면 기본 전형 이름 뒤에 '*'를 붙인 배치가 된다 (예: '4-4-2*').
+// 좌표는 세이브(save.layout)에 있고, 화면이 그리기 전에 여기 등록한다. AI 구단은 쓰지 않는다.
+const CUSTOM = new Map()
+export const isCustom = (name) => String(name).endsWith('*')
+export const baseOf = (name) => String(name).replace(/\*$/, '')
+export function setCustomLayout(name, pos) { if (name && Array.isArray(pos)) CUSTOM.set(name, pos) }
+
+/**
+ * 위치 → 역할 (x: 0 왼쪽~100 오른쪽, y: 0 우리 골문~100 상대 골문)
+ *  수비 줄(y<32): 측면 풀백 · 가운데 센터백 / 32~42: 측면 윙백 · 가운데 수비형 미드
+ *  42~62: 측면 미드 · 중앙 미드 / 62~76: 측면 윙어 · 공격형 미드 / 76~: 윙어 · 스트라이커
+ */
+export function roleAt(x, y) {
+  const side = x < 50 ? 'L' : 'R'
+  const wide = Math.abs(x - 50)
+  if (y < 32) return wide >= 26 ? `${side}B` : 'CB'
+  if (y < 42) return wide >= 26 ? `${side}WB` : 'DM'
+  if (y < 62) return wide >= 27 ? `${side}M` : 'CM'
+  if (y < 76) return wide >= 22 ? `${side}W` : 'AM'
+  return wide >= 22 ? `${side}W` : 'ST'
+}
+
+const avg = (v) => (v.length ? v.reduce((a, b) => a + b, 0) / v.length : 0)
+function geometry(slots) {
+  const f = slots.slice(1)
+  const df = f.filter((s) => ROLE_POS[s.role] === 'DF')
+  const ys = f.map((s) => s.y)
+  return {
+    y: avg(ys), // 팀 전체 높이
+    dfY: df.length ? avg(df.map((s) => s.y)) : 22, // 수비 라인 높이
+    width: avg(f.map((s) => Math.abs(s.x - 50))), // 폭
+    span: Math.max(...ys) - Math.min(...ys), // 맨 뒤 ~ 맨 앞 간격 (작을수록 촘촘)
+  }
+}
+/**
+ * 직접 조정한 배치가 기본 전형과 얼마나 다른지 → 전술 보정
+ *  line·width: 팀 지시(수비 라인·공격 폭)에 더해진다 (0~100 척도)
+ *  att·def: 팀 전체를 올리면 공격 +·수비 −, 간격을 좁히면 수비 +·공격 −
+ */
+export function layoutShift(name) {
+  const zero = { line: 0, width: 0, att: 0, def: 0, d: null }
+  if (!isCustom(name) || !CUSTOM.has(name)) return zero
+  const g = geometry(buildSlots(name))
+  const b = geometry(buildSlots(baseOf(name)))
+  const cl = (v, m) => Math.max(-m, Math.min(m, v))
+  const dy = g.y - b.y
+  const compact = b.span - g.span
+  return {
+    line: cl((g.dfY - b.dfY) * 2.5, 35),
+    width: cl((g.width - b.width) * 2, 35),
+    att: cl(dy * 0.18 - Math.max(0, compact) * 0.05, 4),
+    def: cl(-dy * 0.14 + Math.max(0, compact) * 0.09, 4),
+    d: { dy, dfY: g.dfY - b.dfY, width: g.width - b.width, compact },
+  }
+}
+
+/** 포메이션 이름 → 자리 11개 [{ role, x, y }] (첫 자리는 GK) — '4-4-2*'처럼 *가 붙으면 직접 조정한 배치 */
 export function buildSlots(name) {
+  if (isCustom(name)) {
+    const base = buildSlots(baseOf(name))
+    const pos = CUSTOM.get(name)
+    if (!pos || pos.length !== base.length) return base
+    return base.map((s, i) => (i === 0 ? s : { role: roleAt(pos[i].x, pos[i].y), x: pos[i].x, y: pos[i].y }))
+  }
   const lines = parseShape(name) || parseShape('4-4-2')
   const k = lines.length
   // 줄 종류: 첫 줄 수비, 마지막 줄 공격, 가운데는 개수에 따라 수비형·중앙·공격형
@@ -78,10 +141,11 @@ export function shapeMods(name) {
   const am = c(['AM'])
   const dm = c(['DM'])
   const mid = c(['CM', 'LM', 'RM', 'DM', 'AM'])
+  const geo = layoutShift(name) // 직접 조정한 배치: 전체 높이·간격 보정
   return {
-    att: (fw - 2) * 3 + am * 1.5 - dm * 1,
+    att: (fw - 2) * 3 + am * 1.5 - dm * 1 + geo.att,
     mid: (mid - 4) * 2,
-    def: (df - 4) * 2.5 + dm * 1.5 - am * 0.5,
+    def: (df - 4) * 2.5 + dm * 1.5 - am * 0.5 + geo.def,
   }
 }
 

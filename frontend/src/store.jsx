@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import { api, loadSeasonFile } from './api.js'
 import { playerOvrOf } from './engine/engine.js'
 import { available } from './engine/match.js'
-import { assignSlots, buildSlots, fitOf, shapeNeeds } from './engine/formation.js'
+import { assignSlots, buildSlots, fitOf, setCustomLayout, shapeNeeds } from './engine/formation.js'
 import { applyCupMatch, applyRound, customTalk, engineStatus, news, playerTalk, resolveTalk } from './game/season.js'
 import { cleanName, effectiveTeams } from './game/roster.js'
 import { applyTalkResult } from './game/aiTalk.js'
@@ -10,7 +10,7 @@ import { checkPromises } from './game/relations.js'
 import { PATIENCE, evaluateBid, executeTransfer, valueCtx, windowState } from './game/trade.js'
 import { boardMidCheck, newBoard, nextSeason, seasonLabel, seasonReview } from './game/career.js'
 import { COMPS, CUP_LEAGUES, buildCups, cupKey, cupStatus, dueMatchday, myCupFixture, playMatchday } from './game/cup.js'
-import { ROSTER_MAX, book, checkBankruptcy, contractOf, eur, faDecision, ffpReview, newFinance, prizeMoney, releaseCost, renewalAsk, settleMatch, wageBill, wageBudget, wageFor, wageShock } from './game/finance.js'
+import { FX_DEFAULT, setFx, ROSTER_MAX, book, checkBankruptcy, contractOf, eur, faDecision, ffpReview, newFinance, prizeMoney, releaseCost, renewalAsk, settleMatch, wageBill, wageBudget, wageFor, wageShock } from './game/finance.js'
 import { afterMatchOwner, decide } from './game/owner.js'
 import { valueOf } from './game/trade.js'
 
@@ -175,13 +175,45 @@ export function computeStandings(teams, results, penalty = null) {
 
 const GameContext = createContext(null)
 
+const FX_KEY = 'mini-fm-fx' // 통화 표시 설정·오늘 환율
+
 export function GameProvider({ children }) {
   const [data, setData] = useState(null) // { league, teams, formations, schedule }
   const [error, setError] = useState(null)
   const [save, setSave] = useState(loadSave)
+  // 직접 조정한 배치(경기장에서 끌어 옮긴 자리 좌표)를 자리 계산에 등록 — 렌더 전에
+  if (save.layout?.name) setCustomLayout(save.layout.name, save.layout.pos)
   const [manager, setManager] = useState(() => { try { return JSON.parse(localStorage.getItem(MANAGER_KEY) || 'null') } catch { return null } })
   const [cupTeams, setCupTeams] = useState({}) // 대항전에 나오는 다른 리그 팀 (키: 리그/팀ID)
   const [world, setWorld] = useState({}) // 이적 시장용 다른 리그 (K리그 포함): { 리그ID: { name, teams } }
+  // 통화 표시(유로·원화·둘 다)와 오늘 환율 — 바뀌면 화면 전체를 다시 그린다
+  const [fx, setFxState] = useState(() => {
+    let saved = null
+    try { saved = JSON.parse(localStorage.getItem(FX_KEY) || 'null') } catch { /* 없음 */ }
+    const v = { rate: saved?.rate || FX_DEFAULT, date: saved?.date || null, rateDate: saved?.rateDate || null, mode: saved?.mode || 'both' }
+    setFx(v)
+    return v
+  })
+  const changeFx = (patch) => setFxState((f) => {
+    const v = { ...f, ...patch }
+    setFx(v)
+    try { localStorage.setItem(FX_KEY, JSON.stringify(v)) } catch { /* 저장 못 해도 이번 화면에는 적용 */ }
+    return v
+  })
+  useEffect(() => {
+    const today = new Date().toISOString().slice(0, 10)
+    if (fx.date === today) return
+    // 유럽중앙은행 기준 환율 (영업일마다 갱신). 주소가 바뀌어도 되도록 두 곳을 차례로 시도
+    const urls = ['https://api.frankfurter.app/latest?from=EUR&to=KRW', 'https://api.frankfurter.dev/v1/latest?base=EUR&symbols=KRW']
+    ;(async () => {
+      for (const u of urls) {
+        try {
+          const j = await fetch(u).then((r) => r.json())
+          if (j?.rates?.KRW) { changeFx({ rate: j.rates.KRW, date: today, rateDate: j.date }); return }
+        } catch { /* 다음 주소 */ }
+      }
+    })()
+  }, [])
 
   // 리그·시즌이 바뀔 때마다 해당 시즌 데이터를 불러온다
   useEffect(() => {
@@ -334,6 +366,7 @@ export function GameProvider({ children }) {
     const update = (patch) => setSave((s) => ({ ...s, ...patch }))
 
     return {
+      fx, changeFx,
       manager,
       saveManager(m) { setManager(m); try { localStorage.setItem(MANAGER_KEY, JSON.stringify(m)) } catch { /* 저장 실패 무시 */ } },
       data, error, save, teams, teamsById, myTeam, totalRounds, seasonOver, nextFixture, update, status,
@@ -363,7 +396,7 @@ export function GameProvider({ children }) {
           const pos = standingsNow.findIndex((x) => x.id === s.teamId) + 1
           const prize = prizeMoney(pos, standingsNow.length, s.finance?.base || 40)
           const repay = Math.min(s.owner?.debt || 0, Math.round(((s.owner?.debt || 0) / 2) * 10) / 10)
-          const settled = book(book(r.save.finance || {}, prize), -repay)
+          const settled = book(book(r.save.finance || {}, prize, '리그 상금'), -repay, '사채 상환')
           const ffp = ffpReview(settled, wageBill(s, myTeam, data.leagueId), s.seasonNo || 1)
           const finance = { ...ffp.finance, ...(ffp.penalty ? { ban: (s.seasonNo || 1) + 1 } : {}) }
           const owner = { ...(r.save.owner || {}), debt: Math.round(((s.owner?.debt || 0) - repay) * 10) / 10, used: {}, youthBoost: false, sponsorBoost: 0 }
@@ -430,7 +463,7 @@ export function GameProvider({ children }) {
               })()
             : executeTransfer(s, teams, theirId, s.teamId, playerId, { contract })
           const item = news(s.round, 'trade', `✍️ 영입: ${player.name}`, `${theirs.name}${foreign ? ` (${world[ref.lid]?.name})` : ''}에서 이적료 ${eur(fee)}, 연봉 ${eur(wage)}/년 · ${years}년 계약.`, { read: true })
-          return { ...moved, finance: book(moved.finance, -fee), tradeLog: [...(s.tradeLog || []), { round: s.round, in: playerId, from: theirId, lid: foreign ? ref.lid : undefined, fee }], inbox: [item, ...(moved.inbox || [])] }
+          return { ...moved, finance: book(moved.finance, -fee, '이적료 지출'), tradeLog: [...(s.tradeLog || []), { round: s.round, in: playerId, from: theirId, lid: foreign ? ref.lid : undefined, fee }], inbox: [item, ...(moved.inbox || [])] }
         })
         return { ok: true, wage }
       },
@@ -474,7 +507,7 @@ export function GameProvider({ children }) {
                 return { ...s, rosters: { ...rosters, [s.teamId]: rosters[s.teamId].filter((id) => id !== playerId) }, lineup: s.lineup.map((id) => (id === playerId ? null : id)), forSale: (s.forSale || []).filter((id) => id !== playerId), gone, abroad: { ...(s.abroad || {}), [playerId]: { lid, teamId, player: { ...p } } } }
               })()
             : executeTransfer(s, teams, s.teamId, teamId, playerId)
-          return mark({ ...moved, finance: book(moved.finance, fee), tradeLog: [...(s.tradeLog || []), { round: s.round, out: playerId, to: teamId, fee }] }, `${p.name}을(를) ${eur(fee)}에 팔았습니다.`)
+          return mark({ ...moved, finance: book(moved.finance, fee, '이적료 수입'), tradeLog: [...(s.tradeLog || []), { round: s.round, out: playerId, to: teamId, fee }] }, `${p.name}을(를) ${eur(fee)}에 팔았습니다.`)
         })
       },
       /** 구단주 결정 실행 → { title, text, good } */
@@ -517,7 +550,7 @@ export function GameProvider({ children }) {
             ...s,
             rosters: { ...rosters, [s.teamId]: rosters[s.teamId].filter((id) => id !== p.id) },
             lineup: s.lineup.map((id) => (id === p.id ? null : id)),
-            finance: book(s.finance, -cost),
+            finance: book(s.finance, -cost, '방출 위약금'),
             released: [...(s.released || []), { ...p, from: s.teamId }],
             fans: Math.max(0, (s.fans ?? 60) - (playerOvr(p) >= 80 ? 4 : 0)),
             inbox: [news(s.round, 'contract', `🚪 ${p.name} 방출`, `위약금 ${eur(cost)}을 내고 계약을 해지했습니다.`), ...(s.inbox || [])],
@@ -537,7 +570,7 @@ export function GameProvider({ children }) {
             ...s,
             rosters: { ...rosters, [s.teamId]: rosters[s.teamId].filter((id) => id !== p.id), [buyer.id]: [...rosters[buyer.id], p.id] },
             lineup: s.lineup.map((id) => (id === p.id ? null : id)),
-            finance: book(s.finance, fee),
+            finance: book(s.finance, fee, '이적료 수입'),
             fans: Math.max(0, (s.fans ?? 60) - (star ? 10 : 2)),
             inbox: [news(s.round, 'trade', `💸 ${p.name} 강제 매각`, `${buyer.name}에 ${eur(fee)}을 받고 팔았습니다.${star ? ' 핵심 선수를 판 구단주에게 팬들이 분노합니다. (민심 -10)' : ''}`), ...(s.inbox || [])],
           }
@@ -573,7 +606,7 @@ export function GameProvider({ children }) {
             released: (s.released || []).filter((x) => x.id !== p.id),
             rosters: { ...rosters, [s.teamId]: [...rosters[s.teamId].filter((id) => id !== p.id), p.id] },
             contracts: { ...s.contracts, [p.id]: { until: (s.seasonNo || 1) + years - 1, wage: offerWage } },
-            finance: book(s.finance, -fee),
+            finance: book(s.finance, -fee, 'FA 계약금'),
             status: { ...s.status, [p.id]: { morale: 72, cond: 100 } },
             fans: Math.min(100, (s.fans ?? 60) + (playerOvr(p) >= 75 ? 3 : 1)),
             inbox: [news(s.round, 'trade', `✍️ FA 영입: ${p.name}`, `${years}년 계약, 연봉 ${eur(offerWage)}, 계약금 ${eur(fee)}.`), ...(s.inbox || [])],
@@ -660,7 +693,7 @@ export function GameProvider({ children }) {
         })
       },
     }
-  }, [data, error, save, manager, cupTeams, world])
+  }, [data, error, save, manager, cupTeams, world, fx])
 
   return <GameContext.Provider value={value}>{children}</GameContext.Provider>
 }

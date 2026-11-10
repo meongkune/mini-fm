@@ -55,6 +55,7 @@ export default function PlayerSheet({ player, onClose, inLineup, onToggle }) {
           </div>
         </div>
 
+        {player.img && <p className="small muted photo-credit">사진: <a href={`https://en.wikipedia.org/wiki/${encodeURIComponent((player.imgPage || '').replace(/ /g, '_'))}`} target="_blank" rel="noreferrer">위키백과 · 위키미디어 공용</a> (자유 라이선스)</p>}
         <h4>세부 능력치 <span className="muted small">1~20점 · {player.role || player.pos} 기준</span></h4>
         <AttrRadar player={player} color={teams.find((t) => t.players.some((p) => p.id === player.id))?.color} sta={player.sta} />
 

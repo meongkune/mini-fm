@@ -19,7 +19,28 @@ export const LEAGUE_MONEY = {
   brasileirao: { tv: 0.55, sponsor: 0.35, gate: 0.6, wage: 0.4, prize: 7, cash: 0.5 },
 }
 export const moneyOf = (leagueId) => LEAGUE_MONEY[leagueId] || LEAGUE_MONEY['ligue-1']
-export const eur = (v) => `${v < 0 ? '-' : ''}€${Math.abs(v) >= 10 ? Math.round(Math.abs(v)) : Math.abs(v).toFixed(1)}M`
+// ── 통화 표시: 유로(백만 단위)와 원화 ──
+// 환율은 매일 유럽중앙은행 기준 환율(frankfurter.app, 무료·키 없음)을 받아 쓴다. 못 받으면 마지막 값 → 기본값
+export const FX_DEFAULT = 1600
+let FX = { rate: FX_DEFAULT, date: null, mode: 'both' } // mode: 'eur' | 'krw' | 'both'
+export const fxState = () => FX
+export function setFx(patch) { FX = { ...FX, ...patch } }
+/** 원화: 1조 2천억 → '1.2조', 4억 8천만 → '4.8억', 3천5백만 → '3,500만' */
+export function wonText(m) {
+  const won = Math.abs(m) * 1e6 * FX.rate
+  if (won >= 1e12) return `${(won / 1e12).toFixed(won >= 1e13 ? 0 : 1)}조`
+  if (won >= 1e8) return `${won >= 1e10 ? Math.round(won / 1e8).toLocaleString() : (won / 1e8).toFixed(1)}억`
+  return `${Math.round(won / 1e4).toLocaleString()}만`
+}
+const euroText = (a) => `€${a >= 10 ? Math.round(a) : a.toFixed(1)}M`
+/** 금액(€M) 표시: 설정에 따라 '€0.3M' · '4.8억 원' · '€0.3M (4.8억)' */
+export const eur = (v) => {
+  const sign = v < 0 ? '-' : ''
+  const a = Math.abs(v)
+  if (FX.mode === 'krw') return `${sign}${wonText(a)}원`
+  if (FX.mode === 'both') return `${sign}${euroText(a)} (${wonText(a)})`
+  return `${sign}${euroText(a)}`
+}
 
 // 티켓 가격: 관중 수입 배수와 팬 민심 변화(홈경기마다)
 export const TICKETS = [
@@ -94,7 +115,9 @@ export function settleMatch(save, { team, leagueId, home, result, totalRounds, c
   f.ledger = [...(f.ledger || []), { r: save.round, net }].slice(-40)
   // 시즌 손익 누적 (FFP 판단용)
   const ss = { rev: 0, exp: 0, wages: 0, ...(f.season || {}) }
-  for (const [k, v] of items) { if (v >= 0) ss.rev = r1(ss.rev + v); else { ss.exp = r1(ss.exp - v); if (k === '주급') ss.wages = r1(ss.wages - v) } }
+  const cats = { ...(ss.cats || {}) } // 항목별 시즌 누적 (구단 화면 그래프)
+  for (const [k, v] of items) { cats[k] = r1((cats[k] || 0) + v); if (v >= 0) ss.rev = r1(ss.rev + v); else { ss.exp = r1(ss.exp - v); if (k === '주급') ss.wages = r1(ss.wages - v) } }
+  ss.cats = cats
   f.season = ss
   const dFans = (result > 0 ? 2 : result < 0 ? -2 : 0) + (home ? tk.dFans : 0)
   return { finance: f, fans: clamp(Math.round(fans + dFans), 0, 100) }
@@ -208,8 +231,9 @@ export function ffpReview(f = {}, bill = 0, seasonNo = 1) {
 }
 
 /** 장부 기록 (영입·방출·매각 등 경기 밖의 돈) */
-export function book(f, amount) {
+export function book(f, amount, cat = amount >= 0 ? '기타 수입' : '기타 지출') {
   const ss = { rev: 0, exp: 0, wages: 0, ...(f.season || {}) }
+  ss.cats = { ...(ss.cats || {}), [cat]: r1((ss.cats?.[cat] || 0) + amount) }
   if (amount >= 0) ss.rev = r1(ss.rev + amount)
   else ss.exp = r1(ss.exp - amount)
   return { ...f, cash: r1((f.cash || 0) + amount), season: ss }

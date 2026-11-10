@@ -181,7 +181,11 @@ export function applyRound(save, { teamsById, schedule, myTeamId, mine, buyers =
     }
     if (mine.summary.mom && my.players.some((p) => p.id === mine.summary.mom)) {
       const p = my.players.find((x) => x.id === mine.summary.mom)
-      inbox.push(news(round, 'mom', `경기 최우수 선수: ${p.name}`, `${p.name} 선수가 평점 ${mine.summary.players[p.id].r}로 이 경기 MOM에 선정됐습니다.`, { playerId: p.id }))
+      // MOM 보상: 사기 +6 · 시즌 MOM 횟수만큼 몸값 상승(1회당 +3%, 최대 +15%)
+      const before = st[p.id]?.morale ?? 60
+      st[p.id] = { ...(st[p.id] || {}), morale: Math.min(100, before + 6) }
+      const moms = (ps[p.id]?.mom || 0)
+      inbox.push(news(round, 'mom', `🏅 경기 최우수 선수: ${p.name}`, `${p.name} 선수가 평점 ${mine.summary.players[p.id].r}로 이 경기 MOM에 선정됐습니다. 사기 ${Math.round(before)} → ${Math.round(st[p.id].morale)} · 이번 시즌 MOM ${moms}회(몸값 +${Math.min(15, moms * 3)}%).`, { playerId: p.id }))
     }
   }
 
