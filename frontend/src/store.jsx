@@ -10,7 +10,7 @@ import { checkPromises } from './game/relations.js'
 import { PATIENCE, evaluateBid, executeTransfer, valueCtx, windowState } from './game/trade.js'
 import { boardMidCheck, newBoard, nextSeason, seasonLabel, seasonReview } from './game/career.js'
 import { COMPS, CUP_LEAGUES, buildCups, cupKey, cupStatus, dueMatchday, myCupFixture, playMatchday } from './game/cup.js'
-import { FX_DEFAULT, cashOnly, clubKOf, setClubK, setFx, wageInfo, ROSTER_MAX, book, checkBankruptcy, contractOf, eur, faDecision, ffpReview, newFinance, prizeMoney, releaseCost, renewalAsk, settleMatch, wageBill, wageBudget, wageFor, wageShock } from './game/finance.js'
+import { FX_DEFAULT, cashOnly, clubKOf, legacyWageV3, setClubK, setFx, wageInfo, ROSTER_MAX, book, checkBankruptcy, contractOf, eur, faDecision, ffpReview, newFinance, prizeMoney, releaseCost, renewalAsk, settleMatch, wageBill, wageBudget, wageFor, wageShock } from './game/finance.js'
 import { afterMatchOwner, decide } from './game/owner.js'
 import { valueOf } from './game/trade.js'
 
@@ -263,15 +263,18 @@ export function GameProvider({ children }) {
     if (!team) return
     const missing = team.players.filter((p) => !save.contracts?.[p.id])
     const oldWages = save.finance && !(save.finance.wageModel >= 2) // 예전 연봉 공식(구단 규모 무시)으로 만든 세이브
-    const noReal = save.finance && save.finance.wageModel === 2 && team.players.some((p) => wageInfo(p, data.leagueId, save.finance.clubK).real) // 실제 연봉 반영 전
-    if (save.finance?.base && !missing.length && !oldWages && !noReal) return
+    // 실제 보도 연봉이 새로 들어온 선수가 있는데 계약은 아직 추정 연봉 (재계약한 계약은 제외) — 매일 수집되므로 계속 확인
+    const noReal = save.finance && save.finance.wageModel >= 2 && team.players.some((p) => { const c = save.contracts?.[p.id]; return c && !c.real && !c.renewed && wageInfo(p, data.leagueId, save.finance.clubK).real })
+    const toV4 = save.finance && (save.finance.wageModel === 2 || save.finance.wageModel === 3) // 구단 연봉 총액 방식(4판) 전
+    if (save.finance?.base && !missing.length && !oldWages && !noReal && !toV4) return
     setSave((s) => {
       // 조건은 최신 상태로 다시 본다 (두 번 실행돼도 한 번만 바뀌게)
       const oldWages = s.finance && !(s.finance.wageModel >= 2)
-      const noReal = s.finance && s.finance.wageModel === 2 && team.players.some((p) => wageInfo(p, data.leagueId, s.finance.clubK).real)
+      const noReal = s.finance && s.finance.wageModel >= 2 && team.players.some((p) => { const c = s.contracts?.[p.id]; return c && !c.real && !c.renewed && wageInfo(p, data.leagueId, s.finance.clubK).real })
       const missing = team.players.filter((p) => !s.contracts?.[p.id])
-      if (s.finance?.base && !missing.length && !oldWages && !noReal) return s
-      const k = s.finance?.clubK ?? clubKOf(team)
+      const toV4 = s.finance && (s.finance.wageModel === 2 || s.finance.wageModel === 3)
+      if (s.finance?.base && !missing.length && !oldWages && !noReal && !toV4) return s
+      const k = !s.finance || oldWages || toV4 ? clubKOf(team, data.leagueId) : s.finance.clubK
       setClubK(k)
       const contracts = { ...(s.contracts || {}) }
       let finance = s.finance
@@ -291,8 +294,27 @@ export function GameProvider({ children }) {
           contracts[p.id] = { ...c, wage }
         }
         const ratio = before > 0 ? after / before : 1
-        finance = { ...s.finance, base: Math.round(s.finance.base * ratio * 10) / 10, clubK: k, wageModel: 3 }
+        finance = { ...s.finance, base: Math.round(s.finance.base * ratio * 10) / 10, clubK: k, wageModel: 4 }
         inbox.push(news(s.round, 'finance', '💶 연봉 체계 개편', `선수 연봉을 실제 시세에 맞게 다시 매겼습니다 (구단 규모·리그·선수 가치 기준). 연봉 총액 ${eur(before)} → ${eur(after)}/년, 구단 수입 규모도 같은 비율로 맞췄습니다. 협상으로 더 받던 선수는 그 비율을 유지합니다.`, { read: false }))
+      }
+      if (toV4) {
+        // 연봉 기준 4판: 구단 연봉 총액을 먼저 정하고 선수 가치 비율대로 나눈다. 협상으로 더 받던 비율·실제 보도 연봉·재계약 연봉은 유지
+        let before = 0
+        let after = 0
+        for (const p of team.players) {
+          const c = contracts[p.id]
+          if (!c) continue
+          before += c.wage
+          if (c.real || c.renewed) { after += c.wage; continue }
+          const premium = Math.max(0.8, Math.min(1.6, c.wage / Math.max(0.1, legacyWageV3(p, data.leagueId, s.finance.clubK))))
+          const w = wageInfo(p, data.leagueId, k)
+          const wage = w.real ? w.wage : Math.round(w.wage * premium * 10) / 10
+          after += wage
+          contracts[p.id] = { ...c, wage, ...(w.real ? { real: true } : {}) }
+        }
+        const ratio = before > 0 ? after / before : 1
+        finance = { ...s.finance, base: Math.round(s.finance.base * ratio * 10) / 10, clubK: k, wageModel: 4 }
+        inbox.push(news(s.round, 'finance', '💶 연봉 기준 조정', `연봉을 실제 구단들처럼 '구단 연봉 총액 → 선수 가치 비율로 나누기' 방식으로 다시 매겼습니다. 연봉 총액 ${eur(before)} → ${eur(after)}/년, 구단 수입 규모도 같은 비율로 맞췄습니다 (FFP 비율은 그대로).`, { read: false }))
       }
       if (noReal || oldWages) {
         // 실제 보도 연봉이 있는 선수는 계약 연봉을 그 값으로 (재계약으로 바뀐 계약은 그대로)
@@ -311,14 +333,14 @@ export function GameProvider({ children }) {
         if (fixed.length) {
           const bill = team.players.reduce((a, p) => a + (contracts[p.id]?.wage || 0), 0)
           const prev = bill - after + before
-          finance = { ...(finance || s.finance), base: Math.round((finance || s.finance).base * (prev > 0 ? bill / prev : 1) * 10) / 10, clubK: k, wageModel: 3 }
+          finance = { ...(finance || s.finance), base: Math.round((finance || s.finance).base * (prev > 0 ? bill / prev : 1) * 10) / 10, clubK: k, wageModel: 4 }
           inbox.push(news(s.round, 'finance', '📰 실제 보도 연봉 반영', `${fixed.length}명의 연봉을 실제 보도 값으로 바꿨습니다: ${fixed.slice(0, 8).join(', ')}${fixed.length > 8 ? ' 외' : ''}. 나머지 선수는 추정 연봉입니다. 이 선수들 연봉 합계 ${eur(before)} → ${eur(after)}/년.`, { read: false }))
         }
       }
       for (const p of missing) contracts[p.id] = contractOf({ ...s, contracts }, p, data.leagueId)
       const fresh = newFinance(team, data.leagueId)
       // 예전 재정(수입 기준 없음)은 수입 기준만 채운다
-      finance = finance ? { ...finance, base: finance.base || fresh.base, cash: finance.base ? finance.cash : fresh.cash, clubK: k, wageModel: 3 } : { ...fresh, clubK: k }
+      finance = finance ? { ...finance, base: finance.base || fresh.base, cash: finance.base ? finance.cash : fresh.cash, clubK: k, wageModel: 4 } : { ...fresh, clubK: k }
       return { ...s, contracts, finance, fans: s.fans ?? 60, inbox: [...inbox, ...(s.inbox || [])].slice(0, 80) }
     })
   }, [data, save.teamId, save.rosters, save.signed?.length, save.youth?.length, save.finance?.base ? 1 : 0])
@@ -527,7 +549,9 @@ export function GameProvider({ children }) {
         const foreign = typeof ref !== 'string' && ref.lid !== data.leagueId
         const theirId = typeof ref === 'string' ? ref : ref.id
         const player = theirs.players.find((p) => p.id === playerId)
-        const wage = Math.round(wageFor(player, data.leagueId) * 1.15 * 10) / 10
+        // 요구 연봉: 우리 구단 기준과 지금 구단에서 받는 연봉 중 큰 쪽 + 15% (빅클럽 선수는 연봉을 깎고 오지 않는다)
+        const fromLid = typeof ref === 'string' ? data.leagueId : ref.lid
+        const wage = Math.round(Math.max(wageFor(player, data.leagueId), wageFor(player, fromLid, clubKOf(theirs, fromLid))) * 1.15 * 10) / 10
         if (myTeam.players.length >= ROSTER_MAX) return { ok: false, reason: `로스터가 가득 찼습니다 (${ROSTER_MAX}명).` }
         if ((save.finance?.cash ?? 0) < fee) return { ok: false, reason: `현금이 부족합니다 (보유 ${eur(save.finance?.cash ?? 0)} < 이적료 ${eur(fee)}).` }
         const billNow = wageBill(save, myTeam, data.leagueId)
@@ -603,6 +627,8 @@ export function GameProvider({ children }) {
       setWageRatio(ratio) { setSave((s) => ({ ...s, finance: { ...s.finance, wageRatio: ratio } })) },
       contractOf: (p) => contractOf(save, p, data?.leagueId),
       wageFor: (p) => wageFor(p, data?.leagueId),
+      /** 영입 요구 연봉: 우리 구단 기준과 지금 구단 연봉 중 큰 쪽 + 15% */
+      askWage: (p, team, lid = data?.leagueId) => Math.round(Math.max(wageFor(p, data?.leagueId), wageFor(p, lid, clubKOf(team, lid))) * 1.15 * 10) / 10,
       /** 지금 몸값 (폼·공격 포인트·남은 계약 반영) */
       valueFor: (p) => valueOf(p, status[p.id], valueCtx(save, p, data?.leagueId)),
       renewalAsk: (p) => renewalAsk(save, p, data?.leagueId, status[p.id]),

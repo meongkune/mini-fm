@@ -201,7 +201,7 @@ export default function Transfer() {
 
 /** 영입 협상: 이적료 제시 → 상대 구단 답 → 수락되면 계약 기간 정하고 확정 */
 function BidSheet({ p, t, lid, onClose }) {
-  const { bidFor, signTransfer, wageFor, transferWindow, valueFor, save, myTeam, data } = useGame()
+  const { bidFor, signTransfer, wageFor, askWage, transferWindow, valueFor, save, myTeam, data } = useGame()
   const cash = save.finance?.cash ?? 0
   const room = Math.max(0, wageBudget(save.finance || {}) - wageBill(save, myTeam, data.leagueId))
   const v = valueFor(p)
@@ -209,7 +209,7 @@ function BidSheet({ p, t, lid, onClose }) {
   const [years, setYears] = useState(p.age >= 31 ? 2 : 4)
   const [reply, setReply] = useState(null)
   const [done, setDone] = useState(null)
-  const wage = Math.round(wageFor(p) * 1.15 * 10) / 10
+  const wage = askWage(p, t, lid)
   const ref = { lid, id: t.id }
   const offer = () => { setDone(null); setReply(bidFor(ref, p.id, fee)) }
   const sign = () => setDone(signTransfer(ref, p.id, reply.verdict === 'counter' ? reply.ask : fee, years))
