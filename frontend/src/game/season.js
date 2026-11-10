@@ -189,13 +189,19 @@ export function applyRound(save, { teamsById, schedule, myTeamId, mine, buyers =
     }
   }
 
+  // 지난 라운드에 온 면담 요청에 답하지 않고 경기를 치렀으면 '무시함'으로 기록 (사기 −4). 기록은 남아서 나중에 따로 면담할 수 있다
+  const prev = (save.inbox || []).map((m) => {
+    if (m.type !== 'talk' || m.resolved) return m
+    if (m.playerId && st[m.playerId]) st[m.playerId] = { ...st[m.playerId], morale: Math.max(0, (st[m.playerId].morale ?? 60) - 4) }
+    return { ...m, resolved: 'ignored', read: true, ignoredAt: round }
+  })
   return {
     ...save,
     round: round + 1,
     results: [...save.results, ...results],
     status: st,
     pstats: ps,
-    inbox: [...inbox, ...(save.inbox || [])].slice(0, 80),
+    inbox: [...inbox, ...prev].slice(0, 80),
   }
 }
 

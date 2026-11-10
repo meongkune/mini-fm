@@ -51,9 +51,18 @@ export default function Club() {
           <h3>지난 경기 정산 <span className={`small ${f.last.net >= 0 ? 'good-text' : 'bad-text'}`}>{f.last.net >= 0 ? '+' : ''}{eur(f.last.net)}</span></h3>
           <div className="ledger-items">{f.last.items.map(([k, v]) => <span key={k} className={v >= 0 ? 'plus' : 'minus'}>{k} {v >= 0 ? '+' : ''}{eur(v)}</span>)}</div>
           {ledger.length > 1 && (
-            <div className="ledger-chart" aria-label="최근 경기 수지">
-              {ledger.map((x, i) => <i key={i} className={x.net >= 0 ? 'plus' : 'minus'} style={{ height: `${(Math.abs(x.net) / maxAbs) * 100}%` }} title={`${x.r + 1}R ${eur(x.net)}`} />)}
-            </div>
+            <>
+              <p className="small muted ledger-title">최근 {ledger.length}경기 수지 — 막대 하나가 한 경기의 (수입 − 지출). 위로 초록 = 흑자, 아래로 빨강 = 적자</p>
+              <div className="ledger2" aria-label="최근 경기 수지">
+                {ledger.map((x, i) => (
+                  <div key={i} className="lg-col" title={`${x.r + 1}라운드: ${x.net >= 0 ? '+' : ''}${eur(x.net)}`}>
+                    <div className="lg-up">{x.net >= 0 && <i className="plus" style={{ height: `${(Math.abs(x.net) / maxAbs) * 100}%` }} />}</div>
+                    <div className="lg-down">{x.net < 0 && <i className="minus" style={{ height: `${(Math.abs(x.net) / maxAbs) * 100}%` }} />}</div>
+                    <small>{x.r + 1}R</small>
+                  </div>
+                ))}
+              </div>
+            </>
           )}
         </div>
       )}

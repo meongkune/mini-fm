@@ -19,6 +19,7 @@ const SPEEDS = { '1x': 650, '2x': 325, '4x': 160, '8x': 80 }
 const TICK_MULT = { build: 1, card: 2, clear: 2, miss: 2.5, save: 2.5, goal: 5 }
 const tickDelay = (t, base) => base * ((TICK_MULT[t?.k] || 1) + (t?.sp ? 1.5 : 0) + (t?.sp === 'pen' ? 1.5 : 0) + (t?.r ? 0.6 : 0))
 const POS_ORDER = { GK: 0, DF: 1, MF: 2, FW: 3 }
+const seedOf = (s) => { let h = 2166136261; for (const c of String(s)) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return (h >>> 0) % 1e9 + 1 }
 // 터치라인 지시(FM식 외침): 버튼 한 번으로 지금 전술을 그 방향으로 민다. 여러 번 누르면 더 세진다
 const cl = (v) => Math.max(0, Math.min(100, v))
 const SHOUTS = [
@@ -32,7 +33,11 @@ const SHOUTS = [
 ]
 
 export default function Match() {
-  const { myTeam, save, update, nextFixture, teamsById, seasonOver, finishRound, status } = useGame()
+  const { myTeam, save, update, nextFixture: realNext, teamsById, seasonOver, finishRound, status } = useGame()
+  // 경기가 끝나 자동 저장하면 리그는 다음 라운드로 넘어간다 → 결과 화면은 끝난 경기 기준으로 고정해서 보여준다
+  const frozen = useRef(null)
+  const nextFixture = frozen.current?.fixture || realNext
+  const [notice, setNotice] = useState(null)
   const navigate = useNavigate()
   const matchRef = useRef(null)
   const [, setVersion] = useState(0)
@@ -50,7 +55,7 @@ export default function Match() {
   const [revealed, setRevealed] = useState(true) // 지금 장면의 결과(골·자막)를 드러냈는가
   const logRef = useRef(null)
 
-  const fixtureKey = nextFixture ? `${nextFixture.cup ? 'cup' : 'lg'}-${save.round}-${nextFixture.home}-${nextFixture.away}` : ''
+  const fixtureKey = frozen.current?.key || (nextFixture ? `${nextFixture.cup ? 'cup' : 'lg'}-${save.round}-${nextFixture.home}-${nextFixture.away}` : '')
   const isHome = nextFixture ? nextFixture.isHome : true
   const myIdx = isHome ? 0 : 1
   const ctx = useMemo(() => (nextFixture ? { teams: [nextFixture.homeTeam, nextFixture.awayTeam], status } : null), [fixtureKey, teamsById, status])
@@ -62,7 +67,9 @@ export default function Match() {
     if (matchRef.current?.key === fixtureKey && matchRef.current.minute > 0) return
     const myCfg = { lineup: save.lineup, tactics: myTactics(save) }
     const oppCfg = {} // 상대는 구단 고유 전형 + 자동 배치
-    matchRef.current = createMatch({ home: ctx.teams[0], away: ctx.teams[1], homeCfg: isHome ? myCfg : oppCfg, awayCfg: isHome ? oppCfg : myCfg, status, myIdx })
+    // 경기마다 고정된 seed: 나갔다 들어와도 같은 경기 (결과를 다시 뽑는 꼼수 방지)
+    const seed = seedOf(`${save.seasonNo || 1}-${fixtureKey}`)
+    matchRef.current = createMatch({ home: ctx.teams[0], away: ctx.teams[1], homeCfg: isHome ? myCfg : oppCfg, awayCfg: isHome ? oppCfg : myCfg, status, myIdx, seed })
     matchRef.current.key = fixtureKey
     if ((save.owner?.campUntil ?? -1) >= save.round) matchRef.current.talk[myIdx] += 0.025 // 구단주 지옥 훈련 효과
     setPhase('pre'); setTalk(null); setInterrupt(null); setPaused(false); setShown(-1)
@@ -74,6 +81,50 @@ export default function Match() {
   if (import.meta.env.DEV) window.__match = match // 개발 중 디버깅용
   const lastTick = match && shown >= 0 ? match.timeline[shown] : null
   const delay = tickDelay(lastTick, SPEEDS[speed])
+
+  // ── 자동 저장 · 중간 이탈 ──
+  const saveResult = (m) => {
+    if (frozen.current || !m || !realNext) return
+    frozen.current = { fixture: realNext, key: m.key }
+    finishRound({ key: m.key, home: realNext.home, away: realNext.away, summary: summarize(m, ctx) })
+    setSaving(true)
+  }
+  // 경기가 끝나면 버튼 없이 바로 저장
+  useEffect(() => { if (phase === 'ft' && match && !frozen.current) saveResult(match) }, [phase])
+  // 남은 시간을 AI가 대신 지휘해 끝까지 진행 (내 팀 부상도 자동 교체)
+  const playOut = (m, c) => {
+    m.myIdx = null
+    let guard = 0
+    while (!halfOver(m, 2) && guard++ < 200) advance(m, c, 90)
+  }
+  const liveRef = useRef({})
+  liveRef.current = { phase, match, ctx, saveResult }
+  // 경기 중에 다른 화면으로 나가면: 그 자리에서 끝까지 자동 진행하고 저장 (다시 들어와 결과를 바꾸는 꼼수 방지)
+  useEffect(() => () => {
+    const L = liveRef.current
+    if (!L.match || frozen.current || !(L.phase === 'live' || L.phase === 'ht')) return
+    playOut(L.match, L.ctx)
+    L.saveResult(L.match)
+  }, [])
+  // 경기 시작을 세이브에 표시 → 새로 고침·창 닫기로 빠져나가도 다음에 열면 끝까지 진행해 저장한다
+  useEffect(() => {
+    if (phase === 'live' && match && save.liveMatch !== match.key) update({ liveMatch: match.key })
+  }, [phase])
+  useEffect(() => {
+    if (!match || frozen.current || phase !== 'pre' || match.minute > 0) return
+    if (save.liveMatch && save.liveMatch === match.key) {
+      playOut(match, ctx)
+      setNotice('지난번에 경기 도중 나가서, 남은 시간을 자동으로 진행해 결과를 저장했습니다.')
+      setPhase('ft')
+      rerender()
+    }
+  }, [match?.key])
+  useEffect(() => {
+    if (phase !== 'live' && phase !== 'ht') return
+    const warn = (e) => { e.preventDefault(); e.returnValue = '' }
+    window.addEventListener('beforeunload', warn)
+    return () => window.removeEventListener('beforeunload', warn)
+  }, [phase])
 
   // 장면 결과는 슈팅이 날아간 뒤(장면의 약 75% 지점)에 드러낸다
   useEffect(() => {
@@ -104,7 +155,7 @@ export default function Match() {
   }, [match?.events.length])
 
   if (!myTeam) return <NeedTeam />
-  if (seasonOver) {
+  if (seasonOver && !frozen.current) {
     return <div className="card"><p>시즌이 끝났습니다.</p><Link className="btn" to="/league">최종 순위 보기</Link></div>
   }
   if (!match || !ctx) return <div className="card muted">경기 준비 중…</div>
@@ -182,11 +233,8 @@ export default function Match() {
     if (!keepOpen) setSheet(null)
     rerender()
   }
-  const finish = () => {
-    setSaving(true)
-    finishRound({ home: nextFixture.home, away: nextFixture.away, summary: summarize(match, ctx) })
-    navigate(nextFixture.cup ? '/league?tab=cup' : '/league')
-  }
+  // 다음 경기 준비: 고정해 둔 결과 화면을 풀고 새 경기를 만든다
+  const nextMatch = () => { frozen.current = null; setSaving(false); setNotice(null); setPhase('pre'); rerender() }
 
   // 화면에 보이는 시점: 경기 중에는 지금 보여주는 장면까지의 스코어·득점·이벤트만 (계산이 앞서 있어도 결과를 미리 보여주지 않는다)
   const view = phase === 'live' && lastTick ? lastTick : null
@@ -262,6 +310,10 @@ export default function Match() {
             </div>
             <MatchupNotes match={match} ctx={ctx} myIdx={myIdx} />
             <SetPieceNote mine={mySide.tactics} theirs={match.sides[1 - myIdx].tactics} />
+            {(save.inbox || []).some((m) => m.type === 'talk' && !m.resolved) && (
+              <p className="small notice">💬 답하지 않은 면담 요청 {(save.inbox || []).filter((m) => m.type === 'talk' && !m.resolved).length}건 — 이 경기를 치르면 넘긴 것으로 처리됩니다 (사기 −4). <Link className="link" to="/inbox">메시지함 →</Link></p>
+            )}
+            <p className="small muted">⚠️ 경기 중에 다른 화면으로 나가면 남은 시간은 자동으로 진행되고 결과가 저장됩니다.</p>
             {promised.length > 0 && (
               <p className="small notice">🤝 선발 약속: {promised.map((p) => p.name).join(', ')} {promised.every((p) => save.lineup.includes(p.id)) ? '— 선발에 포함됨 ✓' : '— 선발에 없습니다! 약속을 어기면 사기가 크게 떨어집니다'}</p>
             )}
@@ -326,9 +378,12 @@ export default function Match() {
                 <Rating value={rt[mom]} big />
               </div>
             )}
-            <button className="btn wide" disabled={saving} onClick={finish}>
-              {saving ? '다른 경기 진행 중…' : '결과 저장 → 리그 순위 보기'}
-            </button>
+            {notice && <p className="notice small">⏩ {notice}</p>}
+            <p className="small good-text" style={{ margin: '6px 0' }}>✅ 결과가 자동으로 저장됐습니다</p>
+            <div className="row">
+              <button className="btn ghost" onClick={() => navigate(nextFixture.cup ? '/league?tab=cup' : '/league')}>순위 보기</button>
+              <button className="btn" onClick={nextMatch}>다음 경기 ▶</button>
+            </div>
           </>
         )}
       </div>

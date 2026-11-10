@@ -1502,3 +1502,51 @@ html.desktop .mk-cards { grid-template-columns: repeat(2, 1fr); }
 /* 상단 바 칩: 무엇의 숫자인지 */
 .dt-chip small { font-size: .62rem; color: var(--muted); font-weight: 700; margin-right: 3px; }
 a.dt-chip { color: inherit; text-decoration: none; }
+
+/* 영입 협상 창 */
+.bid-info { display: grid; gap: 10px; margin-bottom: 12px; }
+.bi-who { display: flex; align-items: center; gap: 10px; }
+.bi-who img, .bi-pos { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; object-position: 50% 18%; background: var(--panel-2); display: grid; place-items: center; font-weight: 900; font-size: .8rem; flex: none; }
+.bi-who strong { display: block; font-size: 1.05rem; }
+.bi-who small { color: var(--muted); font-size: .76rem; }
+.bi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.bi-grid > div { background: var(--panel-2); border-radius: 9px; padding: 7px 9px; display: grid; gap: 2px; }
+.bi-grid span { font-size: .66rem; color: var(--muted); font-weight: 700; }
+.bi-grid b { font-size: .92rem; font-variant-numeric: tabular-nums; }
+.bi-grid b small { font-size: .62rem; color: var(--muted); }
+.bi-keys { display: flex; gap: 6px; }
+.bi-keys span { font-size: .66rem; color: var(--muted); padding: 3px 8px; border-radius: 7px; background: var(--panel-2); display: inline-flex; gap: 4px; align-items: baseline; }
+.bi-keys b { font-size: .9rem; color: var(--text); }
+.bi-keys .hi b { color: #86efac; } .bi-keys .mid b { color: #fde68a; } .bi-keys .lo b { color: #fca5a5; }
+@media (max-width: 520px) { .bi-grid { grid-template-columns: repeat(2, 1fr); } }
+/* 보는 법 안내 */
+.guide { border: 1px solid rgba(167,139,250,.35); border-radius: 10px; background: rgba(124,92,255,.07); margin-bottom: 8px; }
+.guide-head { width: 100%; display: flex; justify-content: space-between; padding: 7px 11px; background: none; border: 0; color: var(--text); font: inherit; font-size: .8rem; font-weight: 800; cursor: pointer; }
+.guide-head span { font-size: .68rem; color: var(--muted); font-weight: 700; }
+.guide dl { margin: 0; padding: 0 11px 9px; display: grid; gap: 4px; }
+.guide dl > div { display: grid; grid-template-columns: 96px 1fr; gap: 8px; font-size: .74rem; }
+.guide dt { font-weight: 800; color: #c4b5fd; }
+.guide dd { margin: 0; color: #d6d0ee; }
+
+/* 적합도 색: 본 포지션 = 청록(민트), 비슷한 포지션 = 연두 — 확실히 구분 */
+.slot.fit-best .kit { box-shadow: 0 0 0 2px #2dd4bf; }
+.fit-dot.best { background: #2dd4bf; }
+.role-chip.best { border-color: #2dd4bf; color: #99f6e4; }
+.fit-label.best { color: #5eead4; }
+.slot-tag { background: #0d9488; }
+.pc-slot { background: #0d9488; }
+.slot.fit-best .slot-ovr { background: #0f766e; }
+/* 정산 그래프: 0선 위아래 */
+.ledger-title { margin: 10px 0 4px; }
+.ledger2 { display: flex; gap: 3px; height: 92px; }
+.lg-col { flex: 1; display: grid; grid-template-rows: 1fr 1fr auto; min-width: 0; }
+.lg-up { display: flex; align-items: flex-end; border-bottom: 1px solid rgba(255,255,255,.35); }
+.lg-down { display: flex; align-items: flex-start; }
+.lg-col i { display: block; width: 100%; min-height: 2px; }
+.lg-col i.plus { background: #22c55e; border-radius: 3px 3px 0 0; }
+.lg-col i.minus { background: #ef4444; border-radius: 0 0 3px 3px; }
+.lg-col small { font-size: .55rem; color: var(--muted); text-align: center; margin-top: 2px; white-space: nowrap; overflow: hidden; }
+
+.talk-choice { gap: 6px; }
+.talk-choice .btn { flex: 1; }
+.ignored-note { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 6px 9px; border-radius: 8px; background: rgba(148,163,184,.12); font-size: .74rem; color: #cbd5e1; }

@@ -340,6 +340,19 @@ export function GameProvider({ children }) {
     })
   }, [save.finance?.ban, save.seasonNo])
 
+  // FFP 기록 다시 시작 (1회): 연봉 개편 전 시즌 손익은 예전(높은) 연봉 기준이라, 줄어든 새 허용 기준으로 심사하면 부당하다
+  //   연봉 개편을 거친 세이브만: 지난 시즌들 손익 기록을 지우고 새 기준으로 다시 쌓는다
+  useEffect(() => {
+    const f = save.finance
+    if (!f || f.ffpReset || !(f.history || []).length) return
+    if (!(save.inbox || []).some((m) => m.title === '💶 연봉 체계 개편')) return
+    setSave((s) => {
+      if (!s.finance || s.finance.ffpReset) return s
+      const note = news(s.round, 'finance', '⚖️ FFP 기록 다시 시작', '연봉 체계가 바뀌기 전 시즌들의 손익은 예전 연봉 기준이라 새 기준과 맞지 않습니다. 최근 3시즌 FFP 기록을 지우고 이번 시즌부터 새 기준으로 다시 쌓습니다.', { read: false })
+      return { ...s, finance: { ...s.finance, history: [], ffpReset: true }, inbox: [note, ...(s.inbox || [])].slice(0, 80) }
+    })
+  }, [save.finance?.history?.length])
+
   // 이적 시장: 내 리그 말고 모든 리그(K리그 같은 '이적 시장 전용' 리그 포함) 명단을 불러 둔다
   useEffect(() => {
     if (!data) return
@@ -714,6 +727,16 @@ export function GameProvider({ children }) {
         return r.result
       },
       /** 배틀식 면담 결과 반영 (itemId: 편지함 면담 요청) */
+      /** 면담 요청을 지금은 받지 않기: 기록으로 남고 사기 −4 (나중에 선수 상세에서 따로 면담할 수 있다) */
+      ignoreTalk(itemId) {
+        setSave((s) => {
+          const m = (s.inbox || []).find((x) => x.id === itemId)
+          if (!m || m.resolved) return s
+          const st = { ...(s.status || {}) }
+          if (m.playerId) st[m.playerId] = { ...(st[m.playerId] || {}), morale: Math.max(0, (st[m.playerId]?.morale ?? 60) - 4) }
+          return { ...s, status: st, inbox: s.inbox.map((x) => (x.id === itemId ? { ...x, resolved: 'ignored', read: true, ignoredAt: s.round, ignoredByChoice: true } : x)) }
+        })
+      },
       finishTalk(playerId, result, itemId = null) {
         const player = myTeam?.players.find((p) => p.id === playerId)
         if (!player) return
@@ -737,21 +760,24 @@ export function GameProvider({ children }) {
       },
       /** 내 경기 요약을 넣고 라운드 마무리 (다른 경기는 여기서 시뮬레이션) */
       finishRound(mine) {
+        const done = (x) => ({ ...x, lastMatchKey: mine.key || x.lastMatchKey, liveMatch: null })
         if (nextFixture?.cup) {
           // 대항전 경기: 대회 결과 반영 + 내 선수 상태 (리그 라운드는 그대로)
           const md = cupMd
           setSave((s) => {
+            if (mine.key && s.lastMatchKey === mine.key) return s // 이미 저장한 경기
             const r = playMatchday(s.cups[cupIdx], md, allTeams, engineStatus(s, Object.values(allTeams)), { home: nextFixture.home, away: nextFixture.away, summary: mine.summary }, seasonNo)
             const mineIdx = nextFixture.isHome ? 0 : 1
             const opp = mineIdx === 0 ? nextFixture.awayTeam : nextFixture.homeTeam
             const after = applyCupMatch({ ...s, cups: s.cups.map((c, i) => (i === cupIdx ? r.cup : c)) }, { myTeam, mineIdx, summary: mine.summary, label: `${cup.name} ${md.label}`, oppName: opp.name })
             const [gf, ga] = mineIdx === 0 ? mine.summary.score : [...mine.summary.score].reverse()
             const money = settleMatch(after, { team: myTeam, leagueId: data.leagueId, home: nextFixture.isHome, result: Math.sign(gf - ga), totalRounds: data.schedule.length, cupStage: md.stage, cupPay: comp.pay })
-            return afterMatchOwner({ ...after, ...money }, Math.sign(gf - ga))
+            return done(afterMatchOwner({ ...after, ...money }, Math.sign(gf - ga)))
           })
           return
         }
         setSave((s) => {
+          if (mine.key && s.lastMatchKey === mine.key) return s // 이미 저장한 경기 (두 번 눌러도 한 번만)
           const next = applyRound(s, { teamsById, schedule: data.schedule, myTeamId: s.teamId, mine, buyers: worldTeams })
           const mineIdx = mine.home === s.teamId ? 0 : 1
           const [gf, ga] = mineIdx === 0 ? mine.summary.score : [...mine.summary.score].reverse()
@@ -759,7 +785,7 @@ export function GameProvider({ children }) {
           const owned = afterMatchOwner({ ...next, ...money }, Math.sign(gf - ga))
           const b = checkBankruptcy(owned, data.leagueId)
           if (b.bankrupt) return { ...EMPTY_SAVE, league: s.league, season: s.season, sacked: { team: s.teamId, history: s.history, bankrupt: true, cash: b.save.finance.cash } }
-          return b.save
+          return done(b.save)
         })
       },
     }

@@ -1,3 +1,4 @@
+import { Guide } from './Transfer.jsx'
 import Stars, { abilityStars } from '../components/Stars.jsx'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
@@ -92,6 +93,13 @@ export default function Squad() {
         <Link className="link" to="/transfer">🔄 이적 시장 →</Link>
       </div>
 
+      <Guide items={[
+        ['★ 별', '현재 능력 (5개 = 월드클래스, 3개 = 중위권 주전, 1~2개 = 백업·유망주)'],
+        ['카드 숫자 3개', '포지션 핵심 능력치 (1~20, 16 이상 정상급 · 12 안팎 평범 · 8 이하 약점)'],
+        ['ST→LB', '본 포지션(ST)이 아닌 자리(LB)에서 뛰는 중. 색이 적합도'],
+        ['적합도 색', '청록 = 본 포지션 · 연두 = 비슷한 포지션 · 노랑 = 어색함 · 빨강 = 부적합'],
+        ['카드 아래 막대', '컨디션 (경기 후 떨어지고 쉬면 회복)'],
+      ]} />
       {view === 'card' && (
         <>
           <div className="tier-legend">

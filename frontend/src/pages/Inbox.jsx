@@ -22,7 +22,7 @@ export const needsAnswer = (m) => !m.resolved && (m.type === 'talk' || !!m.actio
 export const preview = (m, n = 70) => { const t = (m.type === 'talk-log' ? (m.body || '').split(NL)[0] : m.body || '').replace(/\s+/g, ' '); return t.length > n ? `${t.slice(0, n)}…` : t }
 
 export default function Inbox() {
-  const { myTeam, save, readInbox, answerTalk, answerOffer, finishTalk, status, totalRounds, contractOf } = useGame()
+  const { myTeam, save, readInbox, answerTalk, answerOffer, finishTalk, ignoreTalk, status, totalRounds, contractOf } = useGame()
   const [battle, setBattle] = useState(null) // 면담 요청 메일
   const [log, setLog] = useState(null) // 다시 볼 면담 기록
   const [filter, setFilter] = useState('all')
@@ -71,9 +71,23 @@ export default function Inbox() {
                 ))}
               </div>
             )}
-            {!m.resolved && m.type === 'talk' && <button className="btn wide talk-start" onClick={() => setBattle(m)}>🗣️ 면담하기</button>}
+            {!m.resolved && m.type === 'talk' && (
+              <>
+                <div className="row talk-choice">
+                  <button className="btn talk-start" onClick={() => setBattle(m)}>🗣️ 지금 면담하기</button>
+                  <button className="btn ghost" onClick={() => ignoreTalk(m.id)}>🙅 넘기기</button>
+                </div>
+                <p className="small muted" style={{ margin: '4px 0 0' }}>다음 경기 전에 답하지 않으면 넘긴 것으로 처리됩니다 (그 선수 사기 −4).</p>
+              </>
+            )}
+            {m.resolved === 'ignored' && (
+              <div className="ignored-note">
+                <span>🙅 {m.ignoredByChoice ? '넘김' : '답하지 않음'} · {(m.ignoredAt ?? m.round) + 1}라운드 · 사기 −4</span>
+                {myTeam.players.some((p) => p.id === m.playerId) && <button className="btn small ghost" onClick={() => setBattle(m)}>지금이라도 면담</button>}
+              </div>
+            )}
             {m.said && !t && <p className="small muted">내가 한 말: "{m.said}"</p>}
-            {m.resolved && m.reply && !t && <p className="notice">{(m.actions || TALK_ACTIONS).find((a) => a[0] === m.resolved)?.[1] ?? '답변'} → {m.reply}</p>}
+            {m.resolved && m.resolved !== 'ignored' && m.reply && !t && <p className="notice">{(m.actions || TALK_ACTIONS).find((a) => a[0] === m.resolved)?.[1] ?? '답변'} → {m.reply}</p>}
           </div>
         )}
       </li>

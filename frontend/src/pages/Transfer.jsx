@@ -27,6 +27,7 @@ export default function Transfer() {
   const [teamFilter, setTeamFilter] = useState('all')
   const [leagueFilter, setLeagueFilter] = useState('all') // all | mine | 리그ID
   const [sort, setSort] = useState('ovr')
+  const [desc, setDesc] = useState(true) // 정렬 방향 (같은 버튼을 다시 누르면 반대로)
   const [q, setQ] = useState('')
   const [age, setAge] = useState('all')
   const [afford, setAfford] = useState(false) // 살 수 있는 선수만 (이적료 ≤ 현금, 연봉 ≤ 임금 예산 여유)
@@ -45,10 +46,12 @@ export default function Transfer() {
   const sorter = { ovr: (a, b) => playerOvr(b.p) - playerOvr(a.p), value: (a, b) => b.v - a.v, pot: (a, b) => b.pot - a.pot || a.p.age - b.p.age, age: (a, b) => a.p.age - b.p.age }[sort]
   const f0 = save.finance || {}
   const room0 = Math.max(0, wageBudget(f0) - wageBill(save, myTeam, data.leagueId))
-  const canBuy = (p, v) => v <= (f0.cash ?? 0) && wageFor(p) * 1.15 <= room0
+  const canPay = (p, v) => v <= (f0.cash ?? 0) // 이적료를 현금으로 낼 수 있나
+  const wageOk = (p) => wageFor(p) * 1.15 <= room0 // 연봉이 임금 예산 여유 안인가
+  const canBuy = (p, v) => canPay(p, v) && wageOk(p)
   const filtered = market
-    .filter(({ p, t, lid, v }) => (leagueFilter === 'all' || (leagueFilter === 'mine' ? lid === data.leagueId : lid === leagueFilter)) && (pos === '전체' || p.pos === pos) && ageOk(p.age, age) && (!afford || canBuy(p, v)) && (teamFilter === 'all' || `${lid}/${t.id}` === teamFilter) && (!q || `${p.name} ${p.nameEn || ''}`.toLowerCase().includes(q.toLowerCase())))
-    .sort(sorter)
+    .filter(({ p, t, lid, v }) => (leagueFilter === 'all' || (leagueFilter === 'mine' ? lid === data.leagueId : lid === leagueFilter)) && (pos === '전체' || p.pos === pos) && ageOk(p.age, age) && (!afford || canPay(p, v)) && (teamFilter === 'all' || `${lid}/${t.id}` === teamFilter) && (!q || `${p.name} ${p.nameEn || ''}`.toLowerCase().includes(q.toLowerCase())))
+    .sort((a, b) => (desc ? sorter(a, b) : -sorter(a, b)))
   const list = filtered.slice(0, shown)
   const mineList = [...myTeam.players].map((p) => ({ p, v: valueFor(p), pot: potentialStars(p) })).sort((a, b) => playerOvr(b.p) - playerOvr(a.p))
   const byId = Object.fromEntries([...teams, ...worldTeams.map((w) => w.team)].flatMap((t) => t.players).concat(save.signed || []).concat(Object.values(save.abroad || {}).map((a) => a.player)).map((p) => [p.id, p]))
@@ -100,6 +103,13 @@ export default function Transfer() {
               {[...new Map(market.filter(({ lid }) => leagueFilter === 'all' || (leagueFilter === 'mine' ? lid === data.leagueId : lid === leagueFilter)).map(({ t, lid }) => [`${lid}/${t.id}`, t.name])).entries()].map(([k, n]) => <option key={k} value={k}>{n}</option>)}
             </select>
           </div>
+          <Guide items={[
+            ['★ 노란 별', '현재 능력 (5개 = 월드클래스, 3개 = 중위권 주전)'],
+            ['★ 파란 별', '잠재력 — 앞으로 클 수 있는 최대치'],
+            ['숫자 3개', '그 포지션의 핵심 능력치 (1~20, 16 이상이면 정상급)'],
+            ['초록 금액', '선수 가치(이적료 기준). 아래 작은 글씨는 요구 연봉'],
+            ['✔ 영입 가능', '이적료를 현금으로 낼 수 있고 연봉도 임금 예산 안'],
+          ]} />
           <div className="mk-filters">
             <div className="chips-scroll">
               {POS.map((x) => <button key={x} className={`chip ${pos === x ? 'on' : ''}`} onClick={() => { setPos(x); setShown(40) }}>{x}</button>)}
@@ -108,11 +118,12 @@ export default function Transfer() {
             </div>
             <div className="chips-scroll">
               <span className="muted small">정렬</span>
-              {SORTS.map(([k, l]) => <button key={k} className={`chip ${sort === k ? 'on' : ''}`} onClick={() => setSort(k)}>{l}순</button>)}
+              {SORTS.map(([k, l]) => <button key={k} className={`chip ${sort === k ? 'on' : ''}`} onClick={() => { if (sort === k) setDesc(!desc); else { setSort(k); setDesc(true) } }}>{l}순{sort === k ? (desc === (k !== 'age') ? ' ▼' : ' ▲') : ''}</button>)}
               <span className="chip-sep" />
-              <button className={`chip ${afford ? 'on' : ''}`} onClick={() => { setAfford(!afford); setShown(40) }}>💰 살 수 있는 선수만</button>
+              <button className={`chip ${afford ? 'on' : ''}`} onClick={() => { setAfford(!afford); setShown(40) }}>💰 이적료 낼 수 있는 선수만</button>
             </div>
             <p className="small muted mk-count">{filtered.length.toLocaleString()}명 중 {list.length}명 · 줄을 누르면 영입 제안</p>
+            {room0 <= 0.05 && <p className="notice bad small">💼 임금 예산 여유가 없습니다 (연봉 총액이 예산을 꽉 채움). 이적료를 낼 수 있어도 새 연봉 때문에 영입이 막힙니다 → 구단 운영에서 임금 예산을 올리거나, 연봉 높은 선수를 판 뒤 영입하세요.</p>}
           </div>
           <div className="mk-cards">
             {list.map(({ p, t, lid, league, v }) => {
@@ -129,7 +140,7 @@ export default function Transfer() {
                   <span className="mkc-side">
                     <span className="mkc-stars"><Stars value={abilityStars(p)} /><Stars value={potentialStarsOf(p)} tone="pot" /></span>
                     <b className="mkc-val">{money(v)}</b>
-                    <small className={ok ? 'good-text' : 'muted'}>{ok ? '✔ 예산 안' : `연봉 ${eur(wage)}`}</small>
+                    <small className={ok ? 'good-text' : canPay(p, v) ? 'warn-text' : 'muted'}>{ok ? '✔ 영입 가능' : canPay(p, v) ? `연봉 예산 초과 · ${eur(wage)}` : `연봉 ${eur(wage)}`}</small>
                   </span>
                 </button>
               )
@@ -189,7 +200,9 @@ export default function Transfer() {
 
 /** 영입 협상: 이적료 제시 → 상대 구단 답 → 수락되면 계약 기간 정하고 확정 */
 function BidSheet({ p, t, lid, onClose }) {
-  const { bidFor, signTransfer, wageFor, transferWindow, valueFor } = useGame()
+  const { bidFor, signTransfer, wageFor, transferWindow, valueFor, save, myTeam, data } = useGame()
+  const cash = save.finance?.cash ?? 0
+  const room = Math.max(0, wageBudget(save.finance || {}) - wageBill(save, myTeam, data.leagueId))
   const v = valueFor(p)
   const [fee, setFee] = useState(Math.round(v * 10) / 10)
   const [years, setYears] = useState(p.age >= 31 ? 2 : 4)
@@ -203,7 +216,21 @@ function BidSheet({ p, t, lid, onClose }) {
     <div className="sheet-wrap" onClick={onClose}>
       <div className="sheet" onClick={(e) => e.stopPropagation()}>
         <div className="sheet-head"><h3><Crest team={t} size={20} /> {p.name} 영입 협상</h3><button className="btn ghost small" onClick={onClose}>닫기</button></div>
-        <p className="small muted" style={{ marginTop: 0 }}>{t.name} · {p.role || p.pos} · {p.age}세 · 능력 {starText(abilityStars(p))} · 잠재력 {starText(potentialStarsOf(p))} · 선수 가치 {money(v)} · 요구 연봉 약 {eur(wage)}/년</p>
+        <div className="bid-info">
+          <div className="bi-who">
+            {p.img ? <img src={p.img} alt="" referrerPolicy="no-referrer" /> : <span className="bi-pos">{p.role || p.pos}</span>}
+            <span><strong>{p.name}</strong><small>{t.name} · {p.role || p.pos} · {p.age}세</small></span>
+          </div>
+          <div className="bi-grid">
+            <div><span>현재 능력</span><b><Stars value={abilityStars(p)} /></b></div>
+            <div><span>잠재력</span><b><Stars value={potentialStarsOf(p)} tone="pot" /></b></div>
+            <div><span>선수 가치</span><b className="good-text">{money(v)}</b></div>
+            <div><span>요구 연봉</span><b>{eur(wage)}<small>/년</small></b></div>
+            <div><span>우리 현금</span><b className={cash < fee ? 'bad-text' : ''}>{eur(cash)}</b></div>
+            <div><span>임금 예산 여유</span><b className={room < wage ? 'bad-text' : ''}>{eur(room)}<small>/년</small></b></div>
+          </div>
+          <div className="bi-keys">{keyAttrs20(p).map(([k, x]) => <span key={k} className={x >= 16 ? 'hi' : x >= 12 ? 'mid' : 'lo'}><b>{x}</b>{k}</span>)}</div>
+        </div>
         {!done?.ok && (
           <>
             <label className="tp-slider">
@@ -228,6 +255,17 @@ function BidSheet({ p, t, lid, onClose }) {
         )}
         {done && <p className={`notice ${done.ok ? 'ok' : 'bad'}`}>{done.ok ? `✍️ 영입 완료! 연봉 ${eur(done.wage)}/년 · ${years}년 계약` : done.reason}</p>}
       </div>
+    </div>
+  )
+}
+
+/** 화면 위 '보는 법' 안내 (접었다 폈다) */
+export function Guide({ items, title = '❓ 보는 법' }) {
+  const [open, setOpen] = useState(false)
+  return (
+    <div className={`guide ${open ? 'open' : ''}`}>
+      <button className="guide-head" onClick={() => setOpen(!open)}>{title} <span>{open ? '접기 ▲' : '펼치기 ▼'}</span></button>
+      {open && <dl>{items.map(([k, v]) => <div key={k}><dt>{k}</dt><dd>{v}</dd></div>)}</dl>}
     </div>
   )
 }
