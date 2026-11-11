@@ -1,3 +1,4 @@
+import Avatar from '../components/Avatar.jsx'
 import Stars, { abilityStars } from '../components/Stars.jsx'
 import { baseOf, isCustom, layoutShift, roleAt } from '../engine/formation.js'
 import { useRef, useState } from 'react'
@@ -258,14 +259,34 @@ export default function Tactics() {
 
       <div className="card tac-bench">
         <h3>벤치 <span className="muted small">{bench.length}명</span></h3>
-        <div className="bench">
-          {bench.map((p) => (
-            <span key={p.id} className={`bench-chip ${unavailable(status[p.id]) ? `out ${unavailable(status[p.id]).kind}` : 'draggable'}`} title={unavailable(status[p.id])?.text ?? '끌어서 경기장 자리에 놓기'}
-              onPointerDown={unavailable(status[p.id]) ? undefined : (e) => dnd.startBench(p.id, e)}>
-              <span className="role-chip">{roleOf(p)}</span>{p.name.split(' ').at(-1)} <Stars value={abilityStars(p)} compact />
-              {unavailable(status[p.id]) && <i className="bench-out">{unavailable(status[p.id]).icon} {unavailable(status[p.id]).games}경기</i>}
-            </span>
-          ))}
+        {/* 벤치: 경기장 옆 교체 명단처럼 얼굴 카드 — 끌어서 자리에 놓는다 */}
+        <div className="bench2">
+          {['GK', 'DF', 'MF', 'FW'].map((pos) => {
+            const list = bench.filter((p) => p.pos === pos)
+            if (!list.length) return null
+            return (
+              <div key={pos} className={`bench-group line-${pos.toLowerCase()}`}>
+                <span className="bg-label">{{ GK: '골키퍼', DF: '수비', MF: '미드필더', FW: '공격' }[pos]}</span>
+                <div className="bg-cards">
+                  {list.map((p) => {
+                    const out = unavailable(status[p.id])
+                    const cond = Math.round(status[p.id]?.cond ?? 100)
+                    return (
+                      <div key={p.id} className={`bench-card ${out ? `out ${out.kind}` : 'draggable'}`} title={out?.text ?? '끌어서 경기장 자리에 놓기'}
+                        onPointerDown={out ? undefined : (e) => dnd.startBench(p.id, e)}>
+                        <Avatar player={p} color={myTeam.color} size={42} />
+                        <span className="bc-role">{roleOf(p)}</span>
+                        <strong>{p.name.split(' ').at(-1)}</strong>
+                        <Stars value={abilityStars(p)} compact />
+                        <span className={`bc-cond ${cond >= 80 ? 'hi' : cond >= 60 ? 'mid' : 'lo'}`}><i style={{ width: `${cond}%` }} /></span>
+                        {out && <em className="bc-out">{out.icon} {out.games}경기</em>}
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )
+          })}
         </div>
       </div>
 

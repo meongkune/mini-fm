@@ -71,6 +71,7 @@ export default function Inbox() {
                 ))}
               </div>
             )}
+            {m.offer && !m.resolved && m.actions?.some(([k]) => k === 'counter') && <AskBox offer={m.offer} onAsk={(v) => answerOffer(m.id, 'counter', v)} />}
             {!m.resolved && m.type === 'talk' && (
               <>
                 <div className="row talk-choice">
@@ -137,5 +138,19 @@ export default function Inbox() {
       })()}
       {log && <TalkLog talk={log} onClose={() => setLog(null)} />}
     </section>
+  )
+}
+
+/** 판매 제안에 직접 원하는 금액을 적어 역제안 */
+function AskBox({ offer, onAsk }) {
+  const [v, setV] = useState(Math.round((offer.ask ?? offer.fee * 1.2) * 10) / 10)
+  return (
+    <div className="ask-box">
+      <span className="small">💬 직접 금액 요구</span>
+      <input type="number" min={0} step={0.5} value={v} onChange={(e) => setV(Number(e.target.value))} />
+      <span className="small muted">€M</span>
+      <button className="btn small" disabled={!(v > 0)} onClick={() => onAsk(v)}>이 금액 요구</button>
+      <small className="muted">제안 {offer.fee}M · 너무 높게 부르면 협상이 깨질 수 있습니다</small>
+    </div>
   )
 }

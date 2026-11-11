@@ -78,15 +78,29 @@ const isCore = (team, id) => [...team.players].sort((a, b) => playerOvrOf(b) - p
  * 영입 제안(이적료)에 대한 상대 구단 AI의 판단
  * @returns { verdict: 'accept'|'counter'|'reject', reason, ask?(역제안 금액), need }
  */
-export function evaluateBid({ theirs, player, fee, status = {}, value = null }) {
+/**
+ * 상대 구단의 판단: 선수 역할(핵심·주전·후보)·나이에 따라 원하는 금액이 다르고, 협상을 거듭하면 조금씩 양보한다
+ *   핵심(팀 상위 3명) 가치의 130% · 주전 105% · 후보(팀 상위 18명 밖) 90% · 30세 이상은 10% 덜
+ *   협상 1회마다 4%씩 내려준다 (단 가치의 85% 밑으로는 안 내려감)
+ *   제시액이 원하는 금액의 65% 이상이면 역제안 (원하는 금액과 제시액 사이), 그 밑이면 거절
+ */
+export function evaluateBid({ theirs, player, fee, status = {}, value = null, tries = 0 }) {
   const after = theirs.players.filter((p) => p.id !== player.id)
   const prob = squadProblem(after, { minOnly: true }) // 파는 쪽은 최소 인원만 본다 (K리그처럼 명단이 40명 넘는 구단도 있다)
   if (prob) return { verdict: 'reject', reason: `"그 선수를 팔면 우리 팀 ${prob}. 팔 수 없습니다."` }
+  const v = value ?? valueOf(player, status[player.id])
   const core = isCore(theirs, player.id)
-  const need = Math.round((value ?? valueOf(player, status[player.id])) * (core ? 1.4 : 1.1) * 10) / 10
+  const rank = [...theirs.players].sort((a, b) => playerOvrOf(b) - playerOvrOf(a)).findIndex((p) => p.id === player.id)
+  const role = core ? 1.3 : rank < 18 ? 1.05 : 0.9
+  const age = player.age >= 30 ? 0.9 : 1
+  const need = Math.round(v * Math.max(0.85, role * age - tries * 0.04) * 10) / 10
+  const why = core ? ' 우리 팀 핵심 선수입니다.' : rank >= 18 ? ' 출전 기회가 적은 선수라 조건만 맞으면 보내겠습니다.' : ''
   if (fee >= need) return { verdict: 'accept', reason: `"좋습니다. ${money(fee)}이면 보내드리죠."`, need }
-  if (fee >= need * 0.75) return { verdict: 'counter', ask: need, reason: `"${money(need)}은 받아야 합니다.${core ? ' 우리 팀 핵심 선수입니다.' : ''}"`, need }
-  return { verdict: 'reject', reason: `"${money(fee)}은 말도 안 되는 금액입니다.${core ? ' 핵심 선수는 쉽게 내주지 않습니다.' : ''}"`, need }
+  if (fee >= need * 0.65) {
+    const ask = Math.round(Math.max(need * 0.97, (fee + need) / 2) * 10) / 10
+    return { verdict: 'counter', ask, reason: `"${money(ask)}이면 생각해 보겠습니다.${why}"`, need }
+  }
+  return { verdict: 'reject', reason: `"${money(fee)}은 너무 낮습니다.${core ? ' 핵심 선수는 쉽게 내주지 않습니다.' : ''}"`, need }
 }
 
 /** 이적 실행: fromId 구단의 선수를 toId 구단으로 (save.rosters에 기록). contract는 내 팀으로 올 때만 */

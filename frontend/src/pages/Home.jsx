@@ -20,7 +20,7 @@ function strengthLabel(rank, total) {
 }
 
 export default function Home() {
-  const { data, myTeam, save, standings, nextFixture, teamsById, totalRounds, seasonOver, chooseTeam, chooseSeason, quitTeam, status, unread, seasonText, review, startNextSeason, manager } = useGame()
+  const { data, myTeam, save, standings, nextFixture, teamsById, totalRounds, seasonOver, chooseTeam, chooseSeason, quitTeam, status, unread, seasonText, review, startNextSeason, manager, venueOf } = useGame()
   const [busy, setBusy] = useState(null)
   const [detail, setDetail] = useState(null)
 
@@ -140,6 +140,7 @@ export default function Home() {
           <>
             <div className="row between">
               <span className="eyebrow">{nextFixture.cup ? <b className="cup-badge">{nextFixture.comp?.icon || '🏆'} {nextFixture.label}</b> : `다음 경기 · ${save.round + 1}/${totalRounds} 라운드`}</span>
+              {venueOf(nextFixture.home) && <span className="small muted venue-mini">🏟️ {venueOf(nextFixture.home).name}{venueOf(nextFixture.home).cap ? ` · 수용 ${venueOf(nextFixture.home).cap.toLocaleString()}명` : ''}</span>}
               <span className="pill">{isHome ? '홈' : '원정'}</span>
             </div>
             <div className="versus">

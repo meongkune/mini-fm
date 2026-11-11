@@ -33,7 +33,7 @@ const SHOUTS = [
 ]
 
 export default function Match() {
-  const { myTeam, save, update, nextFixture: realNext, teamsById, seasonOver, finishRound, status } = useGame()
+  const { myTeam, save, update, nextFixture: realNext, teamsById, seasonOver, finishRound, status, venueOf } = useGame()
   // 경기가 끝나 자동 저장하면 리그는 다음 라운드로 넘어간다 → 결과 화면은 끝난 경기 기준으로 고정해서 보여준다
   const frozen = useRef(null)
   const nextFixture = frozen.current?.fixture || realNext
@@ -268,6 +268,10 @@ export default function Match() {
           <span className="bc-name">{short(away)}</span><span className="bc-crest"><Crest team={away} size={24} /></span>
         </div>
       </div>
+      {(() => {
+        const v = venueOf(nextFixture.home, nextFixture.cup ? nextFixture.homeLid : undefined, fixtureKey)
+        return v ? <div className="venue-line">🏟️ {v.name}{v.crowd ? <> · 관중 <b>{v.crowd.toLocaleString()}</b>명{v.cap ? ` (수용 ${v.cap.toLocaleString()}명 · ${Math.round(v.rate * 100)}%)` : ''}</> : ''}</div> : null
+      })()}
       <div className="bc-sub">
         <span className="bc-scorers">{scorers[0].join(', ')}</span>
         <span className={`bc-clock ${live && !paused ? 'live' : ''}`}>{paused && phase === 'live' ? `⏸ ${clockText_}'` : clockLabel}</span>

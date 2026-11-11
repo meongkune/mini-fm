@@ -95,6 +95,9 @@ export async function loadSeasonFile(file) {
   return fileCache[file]
 }
 
+/** 홈구장 이름·수용 인원 (data/stadiums.json, 없으면 빈 값) */
+export const loadStadiums = () => getJson(dataUrl('stadiums.json')).catch(() => ({}))
+
 export const api = {
   /** 리그·시즌 목록 (data/index.json) */
   index: () => loadIndex(),

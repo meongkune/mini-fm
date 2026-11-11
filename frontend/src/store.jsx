@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
-import { api, loadSeasonFile } from './api.js'
+import { api, loadSeasonFile, loadStadiums } from './api.js'
 import { playerOvrOf } from './engine/engine.js'
 import { available } from './engine/match.js'
 import { assignSlots, buildSlots, fitOf, setCustomLayout, shapeNeeds } from './engine/formation.js'
@@ -10,7 +10,7 @@ import { checkPromises } from './game/relations.js'
 import { PATIENCE, evaluateBid, executeTransfer, valueCtx, windowState } from './game/trade.js'
 import { boardMidCheck, newBoard, nextSeason, seasonLabel, seasonReview } from './game/career.js'
 import { COMPS, CUP_LEAGUES, buildCups, cupKey, cupStatus, dueMatchday, myCupFixture, playMatchday } from './game/cup.js'
-import { FX_DEFAULT, cashOnly, clubKOf, legacyWageV3, setClubK, setFx, wageInfo, ROSTER_MAX, book, checkBankruptcy, contractOf, eur, faDecision, ffpReview, newFinance, prizeMoney, releaseCost, renewalAsk, settleMatch, wageBill, wageBudget, wageFor, wageShock } from './game/finance.js'
+import { FX_DEFAULT, cashOnly, gateModel, clubKOf, legacyWageV3, setClubK, setFx, wageInfo, ROSTER_MAX, book, checkBankruptcy, contractOf, eur, faDecision, ffpReview, newFinance, prizeMoney, releaseCost, renewalAsk, settleMatch, wageBill, wageBudget, wageFor, wageShock } from './game/finance.js'
 import { afterMatchOwner, decide } from './game/owner.js'
 import { valueOf } from './game/trade.js'
 
@@ -188,6 +188,8 @@ export function GameProvider({ children }) {
   const [manager, setManager] = useState(() => { try { return JSON.parse(localStorage.getItem(MANAGER_KEY) || 'null') } catch { return null } })
   const [cupTeams, setCupTeams] = useState({}) // 대항전에 나오는 다른 리그 팀 (키: 리그/팀ID)
   const [world, setWorld] = useState({}) // 이적 시장용 다른 리그 (K리그 포함): { 리그ID: { name, teams } }
+  const [stadiums, setStadiums] = useState({}) // 홈구장 { 리그ID: { 구단ID: { name, cap } } }
+  useEffect(() => { loadStadiums().then(setStadiums) }, [])
   // 통화 표시(유로·원화·둘 다)와 오늘 환율 — 바뀌면 화면 전체를 다시 그린다
   const [fx, setFxState] = useState(() => {
     let saved = null
@@ -469,7 +471,16 @@ export function GameProvider({ children }) {
 
     const update = (patch) => setSave((s) => ({ ...s, ...patch }))
 
+    /** 이 경기의 구장·관중: 홈 구단 구장, 내 홈경기는 티켓 가격·민심으로 정한 관중률, 다른 경기는 82~99% */
+    const venueOf = (homeId, lid = data?.leagueId, seed = '') => {
+      const st = stadiums[lid]?.[homeId]
+      if (!st) return null
+      let rate = 0.82 + ((([...String(`${homeId}-${seed}`)].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7)) % 1000) / 1000) * 0.17
+      if (homeId === save.teamId && save.finance) rate = gateModel(save.finance, save.fans ?? 60, save).att
+      return { name: st.name, cap: st.cap, crowd: st.cap ? Math.round(st.cap * Math.min(1, rate)) : null, rate }
+    }
     return {
+      venueOf,
       fx, changeFx,
       manager,
       saveManager(m) { setManager(m); try { localStorage.setItem(MANAGER_KEY, JSON.stringify(m)) } catch { /* 저장 실패 무시 */ } },
@@ -539,7 +550,7 @@ export function GameProvider({ children }) {
         if (tries >= PATIENCE) return { verdict: 'reject', reason: '"더 이상 이야기하지 않겠습니다." (이번 이적 시장 협상 횟수 소진)' }
         const theirs = findTeam(ref)
         const player = theirs.players.find((p) => p.id === playerId)
-        const r = evaluateBid({ theirs, player, fee, status, value: valueOf(player, status[player.id], valueCtx(save, player, data.leagueId)) })
+        const r = evaluateBid({ theirs, player, fee, status, tries, value: valueOf(player, status[player.id], valueCtx(save, player, data.leagueId)) })
         setSave((s) => ({ ...s, bidTalks: { ...(s.bidTalks || {}), [key]: tries + 1 } }))
         return { ...r, tries: tries + 1 }
       },
@@ -581,7 +592,7 @@ export function GameProvider({ children }) {
         setSave((s) => ({ ...s, forSale: (s.forSale || []).includes(playerId) ? s.forSale.filter((x) => x !== playerId) : [...(s.forSale || []), playerId] }))
       },
       /** 편지함의 다른 구단 이적료 제안에 답 */
-      answerOffer(id, action) {
+      answerOffer(id, action, amount = null) {
         setSave((s) => {
           const item = s.inbox.find((x) => x.id === id)
           if (!item?.offer || item.resolved) return s
@@ -590,13 +601,16 @@ export function GameProvider({ children }) {
           if (action === 'counter') {
             // 더 달라고 하기: 상대 최대 금액 안이면 희망 가격에 합의, 넘으면 한 번은 중간 금액으로 '최종 제안', 그 뒤엔 협상 결렬
             const o = item.offer
-            const want = Math.max(o.ask ?? o.fee * 1.15, Math.round(o.fee * 1.1 * 10) / 10)
+            // 직접 적은 금액이 있으면 그 금액, 없으면 희망 가격(또는 제안의 1.1배)
+            const want = amount ? Math.round(amount * 10) / 10 : Math.max(o.ask ?? o.fee * 1.15, Math.round(o.fee * 1.1 * 10) / 10)
             const club = teamsById[o.teamId]?.name || '상대 구단'
             const pName = teamsById[s.teamId]?.players.find((x) => x.id === o.playerId)?.name || '선수'
             const acts = (fee, last) => [['accept', '✅ 수락', `${eur(fee)}에 판매합니다`], ...(last ? [] : [['counter', '↗️ 한 번 더 요구', '더 올려 달라고 합니다']]), ['decline', '❌ 거절', '제안을 거절합니다']]
             let follow
-            if (want <= o.cap) follow = news(s.round, 'offer', `🤝 ${club}: ${pName} ${eur(want)}에 합의`, `${club}이(가) 요구를 받아들였습니다. ${eur(want)}에 판매할 수 있습니다.`, { offer: { ...o, fee: want, tries: (o.tries || 0) + 1 }, actions: acts(want, true) })
-            else if ((o.tries || 0) < 1) { const mid = Math.round(((o.fee + o.cap) / 2) * 10) / 10; follow = news(s.round, 'offer', `📈 ${club}의 수정 제안: ${pName} ${eur(mid)}`, `"${eur(want)}은 무리입니다. ${eur(mid)}이 우리 최종 제안입니다."`, { offer: { ...o, fee: mid, tries: 1 }, actions: acts(mid, true) }) }
+            if (want <= o.fee) follow = news(s.round, 'offer', `🤝 ${club}: ${pName} ${eur(o.fee)}에 합의`, `요구한 금액이 이미 제안보다 낮아, 제안 금액 ${eur(o.fee)} 그대로 판매할 수 있습니다.`, { offer: { ...o, tries: (o.tries || 0) + 1 }, actions: acts(o.fee, true) })
+            else if (want <= o.cap) follow = news(s.round, 'offer', `🤝 ${club}: ${pName} ${eur(want)}에 합의`, `${club}이(가) 요구를 받아들였습니다. ${eur(want)}에 판매할 수 있습니다.`, { offer: { ...o, fee: want, tries: (o.tries || 0) + 1 }, actions: acts(want, true) })
+            else if (want > o.cap * 1.6) follow = news(s.round, 'offer', `🚪 ${club}: 협상 결렬`, `"${eur(want)}이라니요. 말이 안 되는 금액입니다." ${club}이(가) 협상을 접었습니다.`)
+            else if ((o.tries || 0) < 2) { const mid = Math.round(Math.min(o.cap, (o.fee + o.cap) / 2 + (o.tries || 0) * (o.cap - o.fee) / 4) * 10) / 10; follow = news(s.round, 'offer', `📈 ${club}의 수정 제안: ${pName} ${eur(mid)}`, `"${eur(want)}은 무리입니다. ${eur(mid)}이 우리 최종 제안입니다."`, { offer: { ...o, fee: mid, tries: (o.tries || 0) + 1 }, actions: acts(mid, (o.tries || 0) >= 1) }) }
             else follow = news(s.round, 'offer', `🚪 ${club}: 협상 결렬`, `${club}이(가) 더 이상 금액을 올릴 수 없다며 협상을 접었습니다.`)
             return { ...mark(s, `${eur(want)}을 요구했습니다.`), inbox: [follow, ...mark(s, `${eur(want)}을 요구했습니다.`).inbox] }
           }
@@ -614,7 +628,9 @@ export function GameProvider({ children }) {
                 return { ...s, rosters: { ...rosters, [s.teamId]: rosters[s.teamId].filter((id) => id !== playerId) }, lineup: s.lineup.map((id) => (id === playerId ? null : id)), forSale: (s.forSale || []).filter((id) => id !== playerId), gone, abroad: { ...(s.abroad || {}), [playerId]: { lid, teamId, player: { ...p } } } }
               })()
             : executeTransfer(s, teams, s.teamId, teamId, playerId)
-          return mark({ ...moved, finance: book(moved.finance, fee, '이적료 수입'), tradeLog: [...(s.tradeLog || []), { round: s.round, out: playerId, to: teamId, fee }] }, `${p.name}을(를) ${eur(fee)}에 팔았습니다.`)
+          const sold = mark({ ...moved, finance: book(moved.finance, fee, '이적료 수입'), tradeLog: [...(s.tradeLog || []), { round: s.round, out: playerId, to: teamId, fee }] }, `${p.name}을(를) ${eur(fee)}에 팔았습니다.`)
+          // 같은 선수에게 온 다른 구단 제안은 자동으로 취소 (이미 팔린 선수)
+          return { ...sold, inbox: sold.inbox.map((x) => (x.id !== id && x.offer?.playerId === playerId && !x.resolved ? { ...x, resolved: 'void', reply: `${p.name}이(가) 다른 구단으로 이적해 이 제안은 취소됐습니다.`, read: true } : x)) }
         })
       },
       /** 구단주 결정 실행 → { title, text, good } */
@@ -815,7 +831,7 @@ export function GameProvider({ children }) {
         })
       },
     }
-  }, [data, error, save, manager, cupTeams, world, fx])
+  }, [data, error, save, manager, cupTeams, world, fx, stadiums])
 
   return <GameContext.Provider value={value}>{children}</GameContext.Provider>
 }

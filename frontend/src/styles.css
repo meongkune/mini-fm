@@ -1559,3 +1559,29 @@ a.dt-chip { color: inherit; text-decoration: none; }
 .avatar i { position: absolute; right: 6%; bottom: 4%; font-style: normal; font-size: .58rem; font-weight: 900; background: rgba(0,0,0,.65); color: #fff; border-radius: 6px; padding: 0 3px; }
 .pc-avatar { position: relative; z-index: 1; margin: 14px auto 2px; display: block; width: fit-content; }
 .mkc-pos .avatar { display: block; }
+
+.ask-box { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 8px; padding: 8px 10px; border-radius: 9px; background: var(--panel-2); }
+.ask-box input { width: 80px; background: var(--panel); color: inherit; border: 1px solid rgba(255,255,255,.15); border-radius: 7px; padding: 4px 6px; font: inherit; }
+.ask-box small { flex-basis: 100%; }
+
+.venue-line { text-align: center; font-size: .74rem; color: var(--muted); margin: 4px 0 2px; }
+.venue-line b { color: var(--text); }
+.venue-mini { display: block; margin-top: 2px; }
+
+/* 전술 화면 벤치: 얼굴 카드 */
+.bench2 { display: grid; gap: 8px; }
+.bench-group { display: grid; gap: 4px; }
+.bg-label { font-size: .66rem; font-weight: 800; color: var(--muted); padding-left: 6px; border-left: 3px solid #888; }
+.line-gk .bg-label { border-left-color: #f59e0b; } .line-df .bg-label { border-left-color: #3b82f6; } .line-mf .bg-label { border-left-color: #22c55e; } .line-fw .bg-label { border-left-color: #ef4444; }
+.bg-cards { display: flex; flex-wrap: wrap; gap: 6px; }
+.bench-card { position: relative; width: 74px; display: grid; justify-items: center; gap: 2px; padding: 6px 4px 7px; border-radius: 11px; background: linear-gradient(180deg, var(--panel-2), var(--panel)); border: 1px solid rgba(255,255,255,.08); text-align: center; }
+.bench-card.draggable { cursor: grab; touch-action: none; user-select: none; }
+.bench-card.draggable:hover { border-color: rgba(167,139,250,.6); transform: translateY(-1px); }
+.bench-card strong { font-size: .7rem; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bench-card .bc-role { position: absolute; top: 4px; left: 4px; font-size: .55rem; font-weight: 900; padding: 0 4px; border-radius: 4px; background: rgba(0,0,0,.45); }
+.bench-card .stars.compact { font-size: .66rem; }
+.bc-cond { width: 80%; height: 4px; border-radius: 2px; background: rgba(255,255,255,.1); overflow: hidden; }
+.bc-cond i { display: block; height: 100%; }
+.bc-cond.hi i { background: #22c55e; } .bc-cond.mid i { background: #eab308; } .bc-cond.lo i { background: #ef4444; }
+.bench-card.out { opacity: .75; background: rgba(239,68,68,.1); border-color: rgba(239,68,68,.4); }
+.bench-card .bc-out { position: absolute; inset: auto 0 22px 0; font-style: normal; font-size: .58rem; font-weight: 800; color: #fca5a5; }

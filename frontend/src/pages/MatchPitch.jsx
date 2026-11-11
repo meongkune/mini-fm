@@ -215,7 +215,8 @@ function setPieceFrame(lineups, tick, sub, shotStage) {
     const q = pos[target]
     if (q) { q.x = goalX - dir * (6 + h(target, 5) * 5); q.y = H / 2 + (h(target, 6) - 0.5) * 12; ball = { x: q.x, y: q.y, z: 6 } }
     carrier = null
-    if (tick.k === 'clear') ball = { x: goalX - dir * 26, y: H / 2 + (rand(seed + 3) - 0.5) * 30, z: 8 }
+    // 걷어낸 경우: 1단계 = 크로스가 수비 머리에 닿음 → 2단계 = 박스 밖으로 걷어냄 (예전엔 1단계를 건너뛰어 크로스가 빈 곳으로 가는 것처럼 보였다)
+    if (tick.k === 'clear' && sub >= 2) ball = { x: goalX - dir * 26, y: H / 2 + (rand(seed + 3) - 0.5) * 30, z: 8 }
   }
   if (shotStage) {
     const jitter = rand(seed + 4) - 0.5
@@ -229,7 +230,7 @@ function setPieceFrame(lineups, tick, sub, shotStage) {
     carrier = null
   }
   for (const id in pos) { pos[id].x = clamp(pos[id].x, 0.8, W - 0.8); pos[id].y = clamp(pos[id].y, 0.8, H - 0.8) }
-  return { pos, ball, carrier, steps: aerial ? 2 : 1 }
+  return { pos, ball, carrier, steps: aerial ? (tick.k === 'clear' ? 3 : 2) : 1 }
 }
 
 /** 재개 장면: 골킥·골키퍼 캐치·스로인·프리킥 — 마지막 장면의 선수 위치에서 공만 재개 지점으로 */
@@ -312,7 +313,7 @@ export default function MatchPitch({ home, away, lineups, tick, duration = 300, 
         {attackLabel}
         {tick?.k === 'save' && stage === 1 && <em> · 🧤 선방!</em>}
         {tick?.k === 'miss' && stage === 1 && <em> · 빗나감</em>}
-        {tick?.k === 'clear' && sub >= 1 && stage !== 2 && <em> · 걷어냅니다</em>}
+        {tick?.k === 'clear' && sub >= 2 && stage !== 2 && <em> · 걷어냅니다</em>}
         {stage === 2 && <em> · {RESTART_LABEL[tick.r]}</em>}
       </div>
       <div className="pitch-plane">
