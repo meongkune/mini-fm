@@ -20,7 +20,6 @@ const ro = (w) => { const c = w.charCodeAt(w.length - 1) - 0xac00; return w + (c
 // 시즌 진행 상황은 서버가 아니라 브라우저 localStorage에 저장한다 (서버는 stateless).
 // v2: 프리미어리그 구단 데이터로 바뀌면서 이전 저장(가상 구단 ID)과 호환되지 않아 키를 올림
 const STORAGE_KEY = 'mini-fm-save-v1'
-const MANAGER_KEY = 'mini-fm-manager' // 감독 프로필은 세이브와 따로 (경질·팀 변경에도 유지)
 try { indexedDB.deleteDatabase('mini-fm') } catch { /* 예전 VRM 감독 파일 정리 */ }
 const EMPTY_SAVE = {
   league: null, // 리그 ID (예: premier-league) — null이면 index.json 기본값
@@ -188,7 +187,6 @@ export function GameProvider({ children }) {
   if (save.layout?.name) setCustomLayout(save.layout.name, save.layout.pos)
   // 연봉 계산에 쓰는 내 구단 규모 (구단 재정에 저장해 둔 값)
   setClubK(save.finance?.clubK)
-  const [manager, setManager] = useState(() => { try { return JSON.parse(localStorage.getItem(MANAGER_KEY) || 'null') } catch { return null } })
   const [cupTeams, setCupTeams] = useState({}) // 대항전에 나오는 다른 리그 팀 (키: 리그/팀ID)
   const [world, setWorld] = useState({}) // 이적 시장용 다른 리그 (K리그 포함): { 리그ID: { name, teams } }
   const [stadiums, setStadiums] = useState({}) // 홈구장 { 리그ID: { 구단ID: { name, cap } } }
@@ -526,8 +524,6 @@ export function GameProvider({ children }) {
     return {
       venueOf,
       fx, changeFx,
-      manager,
-      saveManager(m) { setManager(m); try { localStorage.setItem(MANAGER_KEY, JSON.stringify(m)) } catch { /* 저장 실패 무시 */ } },
       data, error, save, teams, teamsById, myTeam, totalRounds, seasonOver, nextFixture, update, status,
       cups, cup, cupIdx, cupMd, allTeams, myKey, worldTeams, cupState: cup ? cupStatus(cup, myKey) : null,
       standings: data ? computeStandings(teams, save.results, penaltyOf(save)) : [],
@@ -1001,7 +997,7 @@ export function GameProvider({ children }) {
         })
       },
     }
-  }, [data, error, save, manager, cupTeams, world, fx, stadiums])
+  }, [data, error, save, cupTeams, world, fx, stadiums])
 
   return <GameContext.Provider value={value}>{children}</GameContext.Provider>
 }

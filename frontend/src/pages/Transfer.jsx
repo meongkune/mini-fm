@@ -355,7 +355,7 @@ function DirectorTalk({ t, facts, ask, onReply, onCut }) {
   const [open, setOpen] = useState(false)
   const [lines, setLines] = useState([]) // { role: 'manager'|'club', text, mood?, cut? }
   const [input, setInput] = useState('')
-  const [attach, setAttach] = useState(true)
+  const [attach, setAttach] = useState(false) // 기본은 대화만 (조건을 정식으로 내밀 때만 협상 횟수를 쓴다)
   const [busy, setBusy] = useState(false)
   const [walked, setWalked] = useState(false)
   const turns = lines.filter((l) => l.role === 'manager').length
@@ -393,7 +393,7 @@ function DirectorTalk({ t, facts, ask, onReply, onCut }) {
         <input value={input} maxLength={250} placeholder="단장에게 할 말" disabled={walked || turns >= MAX} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && send()} />
         <button className="btn small" disabled={busy || walked || !input.trim() || turns >= MAX} onClick={send}>보내기</button>
       </div>
-      <label className="small dr-attach"><input type="checkbox" checked={attach} onChange={(e) => setAttach(e.target.checked)} /> 지금 화면의 조건도 함께 제안 (협상 횟수 1회 사용)</label>
+      <label className="small dr-attach"><input type="checkbox" checked={attach} onChange={(e) => setAttach(e.target.checked)} /> 이 말과 함께 위 조건(금액·연봉 부담)을 정식 제안으로 보내기 <em className="muted">— 켜면 이적 시장마다 {PATIENCE}번뿐인 협상 횟수를 1번 씁니다. 끄면 말로만 설득 (횟수 안 씀)</em></label>
     </div>
   )
 }

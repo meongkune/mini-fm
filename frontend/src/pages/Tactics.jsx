@@ -8,6 +8,7 @@ import { PRESETS, ROLE_LABEL, buildSlots, fitOf, fitTone, parseShape, roleOf } f
 import { alignLineup, autoSlots, lineupOvr, myTactics, playerOvr, teamOvr, useGame } from '../store.jsx'
 import TacticsPanel from '../components/TacticsPanel.jsx'
 import { unavailable } from '../game/season.js'
+import { keyAttrs20, roleScore } from '../game/attributes.js'
 import NeedTeam from './NeedTeam.jsx'
 import usePitchDrag from '../components/usePitchDrag.js'
 
@@ -120,7 +121,7 @@ export function SlotPitch({ team, formation, lineup, onSlot, active = null, stat
             {p ? <Kit color={team.color} number={p.number} size={30} /> : <span className="slot-plus">+</span>}
             <span className="slot-role">{s.role}</span>
             {p && <span className="slot-name">{p.name.split(' ').at(-1)}</span>}
-            {p && <span className="slot-ovr">{Math.round(fit * 100)}%</span>}
+            {p && <span className="slot-ovr" title={`이 자리 능력 (적합도 ${Math.round(fit * 100)}%)`}>{Math.round(roleScore(p, s.role) * fit)}<small>{Math.round(fit * 100)}%</small></span>}
             {out && <span className={`slot-out ${out.kind}`}>{out.icon} {out.label}</span>}
           </button>
         )
@@ -186,6 +187,47 @@ export function SlotSheet({ team, formation, lineup, index, status, onPick, onCl
   )
 }
 
+// 전술 저장 칸에 담는 것: 전형(직접 조정한 위치 포함)·선발·팀 지시·세트피스
+const SET_KEYS = ['formation', 'layout', 'lineup', 'mentality', 'pressing', 'line', 'tempo', 'width', 'passing', 'approach', 'focus', 'trap', 'tackling', 'corner', 'cornerDef', 'spTaker', 'penTaker']
+/**
+ * 전술 저장 칸 A·B·C: 지금 전술을 통째로 저장해 두고 언제든 불러온다 (다른 전형을 시험해도 공들인 배치를 잃지 않게)
+ * 불러올 때 팀을 떠났거나 다치거나 징계 중인 선수 자리만 알맞은 선수로 채운다
+ */
+function TacSets({ save, update, team, status }) {
+  const sets = save.tacSets || {}
+  const ids = new Set(team.players.map((p) => p.id))
+  const saveTo = (k) => {
+    if (sets[k] && !confirm(`${k} 칸에 저장된 전술(${sets[k].formation})을 지금 전술로 덮어쓸까요?`)) return
+    update({ tacSets: { ...sets, [k]: Object.fromEntries(SET_KEYS.map((x) => [x, save[x] ?? null])) }, tacSet: k })
+  }
+  const load = (k) => {
+    const t = sets[k]
+    if (!t) return
+    const keep = Object.fromEntries((t.lineup || []).map((id, i) => [i, id]).filter(([, id]) => id && ids.has(id) && !unavailable(status[id])))
+    const lineup = autoSlots(team, t.formation, status, keep)
+    const missing = (t.lineup || []).filter((id) => id && !Object.values(keep).includes(id)).length
+    update({ ...Object.fromEntries(SET_KEYS.filter((x) => x !== 'lineup').map((x) => [x, t[x] ?? undefined])), lineup, tacSet: k })
+    if (missing) alert(`${k} 전술을 불러왔습니다. 팀을 떠났거나 뛸 수 없는 선수 ${missing}명의 자리는 알맞은 선수로 채웠습니다.`)
+  }
+  return (
+    <div className="card tac-sets">
+      <h3>전술 저장 <span className="muted small">지금 전형·선발·자리 조정·팀 지시를 통째로 저장해 두고 불러오기</span></h3>
+      <div className="ts-row">
+        {['A', 'B', 'C'].map((k) => (
+          <div key={k} className={`ts-slot ${save.tacSet === k ? 'on' : ''}`}>
+            <b>{k}</b>
+            <small>{sets[k] ? `${baseOf(sets[k].formation)}${isCustom(sets[k].formation) ? ' · 직접 조정' : ''}` : '비어 있음'}</small>
+            <span>
+              <button className="btn small ghost" onClick={() => saveTo(k)}>저장</button>
+              <button className="btn small" disabled={!sets[k]} onClick={() => load(k)}>불러오기</button>
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 /** 자리 배정 변경: 다른 자리에 있던 선수면 서로 맞바꾼다 */
 export function placeInSlot(lineup, index, playerId) {
   const next = [...lineup]
@@ -237,6 +279,8 @@ export default function Tactics() {
       </div>
 
       <div className="tac-layout">
+      <TacSets save={save} update={update} team={myTeam} status={status} />
+
       <div className="card tac-form">
         <h3>포메이션 <span className="muted small">{isCustom(formation) ? `${baseOf(formation)} · 직접 조정` : formation}</span></h3>
         <FormationPicker value={baseOf(formation)} onChange={changeFormation} />
@@ -277,7 +321,8 @@ export default function Tactics() {
                         <Avatar player={p} color={myTeam.color} size={42} />
                         <span className="bc-role">{roleOf(p)}</span>
                         <strong>{p.name.split(' ').at(-1)}</strong>
-                        <Stars value={abilityStars(p)} compact />
+                        <b className="bc-ovr" title="능력 (OVR)">{playerOvr(p)}</b>
+                        <span className="bc-keys">{keyAttrs20(p).map(([k, x]) => <i key={k} className={x >= 16 ? 'hi' : x >= 12 ? 'mid' : 'lo'} title={`${k} ${x}/20`}>{k[0]}{x}</i>)}</span>
                         <span className={`bc-cond ${cond >= 80 ? 'hi' : cond >= 60 ? 'mid' : 'lo'}`}><i style={{ width: `${cond}%` }} /></span>
                         {out && <em className="bc-out">{out.icon} {out.games}경기</em>}
                       </div>

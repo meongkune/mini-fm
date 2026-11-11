@@ -10,9 +10,7 @@ import DeployInfo from './pages/DeployInfo.jsx'
 import Admin from './pages/Admin.jsx'
 import Inbox from './pages/Inbox.jsx'
 import Transfer from './pages/Transfer.jsx'
-import Manager from './pages/Manager.jsx'
 import Club from './pages/Club.jsx'
-import MgrBadge from './components/MgrBadge.jsx'
 import { Crest } from './components/Badges.jsx'
 import { setViewMode, useViewMode } from './components/DeviceFrame.jsx'
 import { eur } from './game/finance.js'
@@ -55,7 +53,6 @@ const SIDE = [
   ['/league', '리그·대회', '🏆'],
   ['/transfer', '이적 시장', '💰'],
   ['/club', '구단 운영', '🏛️'],
-  ['/manager', '감독', '👔'],
 ]
 
 export default function App() {
@@ -85,7 +82,6 @@ function Pages() {
           <Route path="/deploy" element={<DeployInfo />} />
           <Route path="/inbox" element={<Inbox />} />
           <Route path="/transfer" element={<Transfer />} />
-          <Route path="/manager" element={<Manager />} />
           <Route path="/club" element={<Club />} />
           <Route path="*" element={<div className="card">페이지를 찾을 수 없습니다.</div>} />
         </Routes>
@@ -97,7 +93,7 @@ function Pages() {
 
 /** PC: FM식 — 왼쪽 메뉴 + 위쪽 상태줄(라운드·현금·다음 경기) + 넓은 본문 */
 function DesktopApp() {
-  const { myTeam, unread, seasonText, manager, save, nextFixture, totalRounds, seasonOver } = useGame()
+  const { myTeam, unread, seasonText, save, nextFixture, totalRounds, seasonOver } = useGame()
   const { pathname } = useLocation()
   const mainRef = useRef(null)
   useEffect(() => { mainRef.current?.scrollTo(0, 0) }, [pathname])
@@ -121,7 +117,6 @@ function DesktopApp() {
           ))}
         </nav>
         <div className="side-foot">
-          {manager && <Link to="/manager" className="side-mgr"><MgrBadge name={manager.name} color={myTeam?.color} size={28} /><span>{manager.name}</span></Link>}
           <button className="linkish small" onClick={() => setViewMode('phone')}>📱 모바일 보기</button>
         </div>
       </aside>
@@ -146,7 +141,7 @@ function DesktopApp() {
 
 /** 폰·좁은 화면 (그리고 PC '모바일 보기') */
 function MobileApp() {
-  const { data, error, myTeam, unread, seasonText, manager } = useGame()
+  const { data, error, myTeam, unread, seasonText } = useGame()
   const { pathname } = useLocation()
   // 중괄호 필수: scrollTo의 반환값(최신 브라우저는 Promise)을 cleanup으로 반환하면 다음 이동 때 React가 터진다
   // PC 휴대폰 프레임에서는 .app이 스크롤 영역이므로 둘 다 맨 위로
@@ -163,11 +158,6 @@ function MobileApp() {
           </div>
         </div>
         <div className="top-actions">
-        {manager && (
-          <Link to="/manager" className="top-avatar" aria-label="감독 프로필">
-            <MgrBadge name={manager.name} color={myTeam?.color} size={32} />
-          </Link>
-        )}
         {myTeam && (
           <Link to="/inbox" className="bell" aria-label={`메시지함${unread ? ` (새 소식 ${unread}개)` : ''}`}>
             📬{unread > 0 && <b>{unread > 9 ? '9+' : unread}</b>}

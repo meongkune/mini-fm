@@ -33,6 +33,10 @@ const SHOUTS = [
   ['waste', '⏳ 시간 끌기', '템포를 늦추고 볼을 돌립니다', (t) => ({ tempo: cl(t.tempo - 30), mentality: cl(t.mentality - 10), passing: cl(t.passing - 20) })],
 ]
 
+// 진행 중인 경기 (앱 안에서 다른 탭에 다녀와도 이어서 하도록 화면 밖에 보관). 새로 고침·창 닫기로는 사라진다
+const LIVE = { match: null, ui: null }
+export const liveMatchKey = () => (LIVE.match ? LIVE.match.key : null)
+
 export default function Match() {
   const { myTeam, save, update, nextFixture: realNext, teamsById, seasonOver, finishRound, status, venueOf } = useGame()
   // 경기가 끝나 자동 저장하면 리그는 다음 라운드로 넘어간다 → 결과 화면은 끝난 경기 기준으로 고정해서 보여준다
@@ -79,6 +83,8 @@ export default function Match() {
   }, [fixtureKey, save.lineup.join(), save.formation])
 
 
+  // 다른 탭에 다녀왔으면 보관해 둔 경기를 다시 꺼낸다 (같은 경기일 때만)
+  if (!matchRef.current && LIVE.match && LIVE.match.key === fixtureKey) matchRef.current = LIVE.match
   const match = matchRef.current
   if (import.meta.env.DEV) window.__match = match // 개발 중 디버깅용
   const lastTick = match && shown >= 0 ? match.timeline[shown] : null
@@ -88,6 +94,7 @@ export default function Match() {
   const saveResult = (m) => {
     if (frozen.current || !m || !realNext) return
     frozen.current = { fixture: realNext, key: m.key }
+    LIVE.match = null; LIVE.ui = null
     finishRound({ key: m.key, home: realNext.home, away: realNext.away, summary: summarize(m, ctx) })
     setSaving(true)
   }
@@ -100,13 +107,20 @@ export default function Match() {
     while (!halfOver(m, 2) && guard++ < 200) advance(m, c, 90)
   }
   const liveRef = useRef({})
-  liveRef.current = { phase, match, ctx, saveResult }
-  // 경기 중에 다른 화면으로 나가면: 그 자리에서 끝까지 자동 진행하고 저장 (다시 들어와 결과를 바꾸는 꼼수 방지)
+  liveRef.current = { phase, match, shown, speed }
+  // 다시 들어오면: 보관해 둔 화면 상태(전반/후반·장면 위치·배속)를 되살리고 멈춘 상태로 기다린다
+  useEffect(() => {
+    if (LIVE.match && LIVE.match === matchRef.current && LIVE.ui) {
+      setPhase(LIVE.ui.phase); setShown(LIVE.ui.shown); setSpeed(LIVE.ui.speed); setPaused(LIVE.ui.phase === 'live')
+    }
+  }, [])
+  // 경기 중에 다른 탭으로 나가면: 경기를 멈춘 채 보관한다 (결과를 미리 정하지 않는다).
+  //   같은 경기는 같은 seed라 다시 들어와도 결과를 바꿀 수 없다. 새로 고침·창 닫기만 아래 liveMatch 표시로 자동 진행된다
   useEffect(() => () => {
     const L = liveRef.current
-    if (!L.match || frozen.current || !(L.phase === 'live' || L.phase === 'ht')) return
-    playOut(L.match, L.ctx)
-    L.saveResult(L.match)
+    if (!L.match || frozen.current || !(L.phase === 'live' || L.phase === 'ht')) { if (frozen.current) { LIVE.match = null; LIVE.ui = null } return }
+    LIVE.match = L.match
+    LIVE.ui = { phase: L.phase, shown: L.shown, speed: L.speed }
   }, [])
   // 경기 시작을 세이브에 표시 → 새로 고침·창 닫기로 빠져나가도 다음에 열면 끝까지 진행해 저장한다
   useEffect(() => {
