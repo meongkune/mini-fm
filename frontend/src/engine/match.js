@@ -52,7 +52,9 @@ const P_PEN = 0.015
 const P_FK = 0.05
 const P_FKX = 0.09
 // 크로스·돌파가 수비 맞고 나가 코너킥이 되는 확률 (분당)
-const P_CROSS_CORNER = 0.06
+const P_CROSS_CORNER = 0.05
+// 코너킥을 걷어냈는데 다시 코너로 나가는 확률 (연속 코너킥)
+const P_CORNER_AGAIN = 0.13
 
 // ── 난수: 상태에 정수 하나만 저장 (mulberry32) ──
 function rngOf(match) {
@@ -588,7 +590,7 @@ export function step(match, ctx, { withEvents = true } = {}) {
   const field = (idx) => r[idx].xi.filter((p) => p.pos !== 'GK')
 
   // 코너킥·크로스 프리킥: 키커의 킥 + 공중볼 싸움(공격 4명 vs 수비 5명 + 골키퍼) + 루틴 상성
-  const aerialPlay = (sp) => {
+  const aerialPlay = (sp, again = 0) => {
     const xa = field(atk)
     const xd = field(dfn)
     if (xa.length < 2) return
@@ -606,6 +608,11 @@ export function step(match, ctx, { withEvents = true } = {}) {
     if (routine === 'short') pShot -= 0.1
     if (rng.random() >= clamp(pShot, 0.1, 0.5)) {
       if (hash(`c-${match.seed}-${minute}-${match.plus}`) < 0.25 && withEvents) say({ type: 'chance', text: `${sp === 'corner' ? '🚩 코너킥' : '🎯 프리킥 크로스'}, ${names[dfn]} 수비가 걷어냅니다.` })
+      // 걷어낸 공이 다시 골라인 밖으로 → 연속 코너킥 (공격 쪽이 세트피스를 이어 간다, 최대 2번 더)
+      if (sp === 'corner' && again < 2 && rng.random() < P_CORNER_AGAIN) {
+        if (withEvents) say({ type: 'chance', text: `🚩 걷어낸 공이 다시 밖으로! ${names[atk]}의 코너킥이 이어집니다.` })
+        aerialPlay('corner', again + 1)
+      }
       return
     }
     let shooter
