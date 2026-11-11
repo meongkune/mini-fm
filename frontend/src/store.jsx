@@ -555,14 +555,15 @@ export function GameProvider({ children }) {
         return { ...r, tries: tries + 1 }
       },
       /** 이적 확정: 이적료 + 개인 조건(연봉은 선수 요구액) → { ok, reason } */
-      signTransfer(ref, playerId, fee, years) {
+      signTransfer(ref, playerId, fee, years, agreedWage = null) {
         const theirs = findTeam(ref)
         const foreign = typeof ref !== 'string' && ref.lid !== data.leagueId
         const theirId = typeof ref === 'string' ? ref : ref.id
         const player = theirs.players.find((p) => p.id === playerId)
         // 요구 연봉: 우리 구단 기준과 지금 구단에서 받는 연봉 중 큰 쪽 + 15% (빅클럽 선수는 연봉을 깎고 오지 않는다)
         const fromLid = typeof ref === 'string' ? data.leagueId : ref.lid
-        const wage = Math.round(Math.max(wageFor(player, data.leagueId), wageFor(player, fromLid, clubKOf(theirs, fromLid))) * 1.15 * 10) / 10
+        // 연봉 협상(대화)으로 합의했으면 그 금액, 아니면 요구 연봉
+        const wage = agreedWage ?? Math.round(Math.max(wageFor(player, data.leagueId), wageFor(player, fromLid, clubKOf(theirs, fromLid))) * 1.15 * 10) / 10
         if (myTeam.players.length >= ROSTER_MAX) return { ok: false, reason: `로스터가 가득 찼습니다 (${ROSTER_MAX}명).` }
         if ((save.finance?.cash ?? 0) < fee) return { ok: false, reason: `현금이 부족합니다 (보유 ${eur(save.finance?.cash ?? 0)} < 이적료 ${eur(fee)}).` }
         const billNow = wageBill(save, myTeam, data.leagueId)
@@ -655,7 +656,7 @@ export function GameProvider({ children }) {
         if (wage > old && billNow - old + wage > wageBudget(save.finance)) return { ok: false, reason: `임금 예산 초과: 재계약하면 연봉 총액 ${eur(billNow - old + wage)} > 예산 ${eur(wageBudget(save.finance))}` }
         setSave((s) => {
           const st = { ...(s.status?.[p.id] || {}), morale: Math.min(100, (s.status?.[p.id]?.morale ?? 60) + 6), contractAsked: false }
-          const kept = checkPromises(p, st, { round: s.round, sum: null, fitOk: false, renewed: true, sold: false }) // 재계약 약속을 지켰는지
+          const kept = checkPromises(p, st, { round: s.round, sum: null, fitOk: false, renewed: true, sold: false, wage }) // 재계약 약속을 지켰는지
           return {
             ...s,
             contracts: { ...s.contracts, [p.id]: { until: (s.seasonNo || 1) + years, wage, renewed: true } }, // 재계약한 연봉은 협상 값 (실제 보도 연봉으로 덮지 않는다)
@@ -778,6 +779,10 @@ export function GameProvider({ children }) {
           if (m.playerId) st[m.playerId] = { ...(st[m.playerId] || {}), morale: Math.max(0, (st[m.playerId]?.morale ?? 60) - 4) }
           return { ...s, status: st, inbox: s.inbox.map((x) => (x.id === itemId ? { ...x, resolved: 'ignored', read: true, ignoredAt: s.round, ignoredByChoice: true } : x)) }
         })
+      },
+      /** 약속 추가 (연봉 협상의 '활약 시 인상' 등) */
+      addPromise(playerId, pr) {
+        setSave((s) => ({ ...s, status: { ...s.status, [playerId]: { ...(s.status?.[playerId] || {}), promises: [...(s.status?.[playerId]?.promises || []).filter((x) => x.kind !== pr.kind), pr] } } }))
       },
       finishTalk(playerId, result, itemId = null) {
         const player = myTeam?.players.find((p) => p.id === playerId)

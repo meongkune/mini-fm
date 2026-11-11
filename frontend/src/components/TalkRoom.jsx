@@ -3,7 +3,7 @@ import { abilityStars, starText } from './Stars.jsx'
 import { useEffect, useRef, useState } from 'react'
 import { Kit, Flag } from './Badges.jsx'
 import { fetchProfile } from '../game/wiki.js'
-import { MAX_TURNS, OUTCOME_LABEL, rankOf, sayToPlayer, startTrust } from '../game/aiTalk.js'
+import { MAX_TURNS, OUTCOME_LABEL, dealFloor, rankOf, sayToPlayer, startTrust } from '../game/aiTalk.js'
 import { TOPICS, relOf } from '../game/relations.js'
 import { personality, personalityText } from '../game/speech.js'
 import { moraleLabel } from '../game/season.js'
@@ -12,7 +12,7 @@ import { playerOvr } from '../store.jsx'
 const Bar = ({ value, tone }) => <span className={`tr-bar ${tone}`}><i style={{ width: `${Math.max(2, value)}%` }} /></span>
 const toneOf = (v) => (v >= 60 ? 'hi' : v >= 35 ? 'mid' : 'lo')
 
-export default function TalkRoom({ player, team, status, reason, situation, topic = 'general', wage = null, totalRounds = 38, onFinish, onClose }) {
+export default function TalkRoom({ player, team, status, reason, situation, topic = 'general', wage = null, totalRounds = 38, deal = null, onFinish, onClose }) {
   const st = status || {}
   const T = TOPICS[topic] || TOPICS.general
   const rel = relOf(st)
@@ -26,6 +26,10 @@ export default function TalkRoom({ player, team, status, reason, situation, topi
   const [photo, setPhoto] = useState(null)
   const logRef = useRef(null)
   const turns = lines.filter((l) => l.role === 'manager').length
+  // 연봉 협상: 내가 내미는 조건 · 선수 역제안
+  const [offer, setOffer] = useState(deal ? { wage: Math.round(deal.ask * 0.9 * 10) / 10, years: Math.min(3, deal.maxYears), raise: false } : null)
+  const [counter, setCounter] = useState(null)
+  const maxTurns = deal ? MAX_TURNS + 4 : MAX_TURNS
   const rank = rankOf(player, team)
   const [face, mLabel] = moraleLabel(st.morale)
 
@@ -33,13 +37,23 @@ export default function TalkRoom({ player, team, status, reason, situation, topi
   useEffect(() => { talk('(면담이 시작됐다. 네가 먼저 하고 싶은 말을 꺼내라)', null, true) }, [])
   useEffect(() => { logRef.current?.scrollTo({ top: logRef.current.scrollHeight, behavior: 'smooth' }) }, [lines.length, busy])
 
-  async function talk(message, intent, opening = false) {
+  async function talk(message, intent, opening = false, withOffer = null) {
     if (outcome) return
     setBusy(true)
     const before = lines
     const withMine = opening ? before : [...before, { role: 'manager', text: message }]
     setLines(withMine)
-    const r = await sayToPlayer({ player, team, status: st, message, intent, history: before.map(({ role, text }) => ({ role, text })), trust, reason, situation, topic, wage })
+    let r = await sayToPlayer({ player, team, status: st, message, intent, history: before.map(({ role, text }) => ({ role, text })), trust, reason, situation, topic, wage, deal, offer: withOffer })
+    // 계약 수락은 게임이 다시 확인: 하한 밑이면 '수락'을 역제안으로 바꾼다 (말로 연봉을 후려치는 것 방지)
+    if (deal && r.outcome === 'sign') {
+      const floor = dealFloor(player, deal, withOffer, trust)
+      if (!withOffer || withOffer.wage < floor) r = { ...r, outcome: 'counter', counterWage: floor, counterYears: withOffer?.years ?? 3, reply: `${r.reply} …다만 €${floor}M 밑으로는 사인하기 어렵습니다.`, end: false }
+    }
+    if (deal && r.outcome === 'counter') {
+      const floor = dealFloor(player, deal, withOffer, trust)
+      const cw = Math.round(Math.min(deal.ask * 1.25, Math.max(floor, r.counterWage || deal.ask)) * 10) / 10
+      setCounter({ wage: cw, years: Math.min(deal.maxYears, r.counterYears || withOffer?.years || 3), raise: !!withOffer?.raise })
+    }
     setAi(r.ai)
     const delta = opening ? 0 : r.trustDelta
     const nextTrust = Math.max(0, Math.min(100, trust + delta))
@@ -48,13 +62,18 @@ export default function TalkRoom({ player, team, status, reason, situation, topi
     const next = [...withMine, { role: 'player', text: said, mood: r.mood, delta: opening ? null : delta }]
     setLines(next)
     const mTurns = next.filter((l) => l.role === 'manager').length
-    if (!opening && (r.outcome !== 'none' || r.end || mTurns >= MAX_TURNS)) {
+    if (deal && r.outcome === 'sign') { setOutcome({ outcome: 'sign', deal: withOffer, trustStart: trust0, trustEnd: nextTrust, lines: next, ai: r.ai, topic, totalRounds }); setBusy(false); return }
+    if (deal && r.outcome === 'counter' && mTurns < maxTurns) { setBusy(false); return } // 역제안: 협상 계속
+    if (!opening && (r.outcome !== 'none' || r.end || mTurns >= maxTurns)) {
       setOutcome({ outcome: r.outcome === 'none' ? (nextTrust >= trust0 + 8 ? 'resolved' : nextTrust <= trust0 - 8 ? 'rejected' : 'none') : r.outcome, trustStart: trust0, trustEnd: nextTrust, lines: next, ai: r.ai, topic, totalRounds })
     }
     setBusy(false)
   }
 
-  const send = () => { const t = input.trim(); if (!t || busy) return; setInput(''); talk(t, null) }
+  const send = () => { const t = input.trim(); if (!t || busy) return; setInput(''); talk(t, null, false, null) }
+  const propose = () => { if (busy || !offer) return; setCounter(null); talk(`제안: 연봉 €${offer.wage}M/년, ${offer.years}년 계약${offer.raise ? '. 이번 시즌 활약하면(평균 평점 6.9 이상) 다음 시즌에 연봉을 25% 올려 주겠다고 약속하겠다' : ''}.`, 'offer', false, offer) }
+  // 선수 역제안을 그대로 받아들이면 바로 합의
+  const acceptCounter = () => setOutcome({ outcome: 'sign', deal: counter, trustStart: trust0, trustEnd: trust, lines: [...lines, { role: 'manager', text: `좋다. €${counter.wage}M · ${counter.years}년으로 하자.` }], ai, topic, totalRounds })
   const quit = () => setOutcome({ outcome: turns ? 'none' : 'none', trustStart: trust0, trustEnd: trust, lines, ai, topic, totalRounds })
   const res = outcome && OUTCOME_LABEL[outcome.outcome]
 
@@ -63,7 +82,7 @@ export default function TalkRoom({ player, team, status, reason, situation, topi
       <div className="tr-panel">
         <header className="tr-head">
           <span className="tr-topic">{T.icon} {T.label} 면담</span>
-          <span className="muted small">{ai ? 'AI 대화' : '규칙 기반 대화'} · 남은 발언 {Math.max(0, MAX_TURNS - turns)}</span>
+          <span className="muted small">{ai ? 'AI 대화' : '규칙 기반 대화'} · 남은 발언 {Math.max(0, maxTurns - turns)}</span>
           {!turns && !outcome && <button className="tr-x" onClick={onClose} aria-label="닫기">✕</button>}
         </header>
 
@@ -101,11 +120,27 @@ export default function TalkRoom({ player, team, status, reason, situation, topi
 
             {!outcome ? (
               <div className="tr-answers">
-                <ul>
+                {deal && offer && (
+                  <div className="deal-panel">
+                    <div className="dp-row">
+                      <span className="dp-ask">선수 희망 <b>€{deal.ask}M</b>/년 · 최대 {deal.maxYears}년{deal.current ? <> · 지금 €{deal.current}M</> : null}</span>
+                    </div>
+                    <div className="dp-row">
+                      <label>연봉 <input type="number" min={0.1} step={0.1} value={offer.wage} onChange={(e) => setOffer({ ...offer, wage: Math.max(0.1, Number(e.target.value)) })} /> €M/년 <em>({Math.round((offer.wage / deal.ask) * 100)}%)</em></label>
+                      <label>기간 <select value={offer.years} onChange={(e) => setOffer({ ...offer, years: Number(e.target.value) })}>{Array.from({ length: deal.maxYears }, (_, i) => i + 1).map((y) => <option key={y} value={y}>{y}년</option>)}</select></label>
+                      <label className="dp-check"><input type="checkbox" checked={offer.raise} onChange={(e) => setOffer({ ...offer, raise: e.target.checked })} /> 활약하면 다음 시즌 25% 인상 약속</label>
+                    </div>
+                    <div className="dp-row">
+                      <button className="btn small" disabled={busy} onClick={propose}>📝 이 조건 제안</button>
+                      {counter && <button className="btn small ghost" disabled={busy} onClick={acceptCounter}>🤝 역제안 수락 (€{counter.wage}M · {counter.years}년)</button>}
+                    </div>
+                  </div>
+                )}
+                {!deal && <ul>
                   {T.options.map(([intent, text, tone]) => (
                     <li key={intent}><button disabled={busy} onClick={() => talk(text, intent)}><span className="tr-tone">{tone}</span>{text}</button></li>
                   ))}
-                </ul>
+                </ul>}
                 <div className="tr-input">
                   <input value={input} maxLength={150} disabled={busy} placeholder="직접 말하기 (구체적일수록 선수가 진지하게 받아들입니다)" onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && send()} />
                   <button className="btn small" disabled={busy || !input.trim()} onClick={send}>말하기</button>
@@ -118,6 +153,7 @@ export default function TalkRoom({ player, team, status, reason, situation, topi
                 <span>감독 신뢰 {outcome.trustStart} → {outcome.trustEnd}</span>
                 {outcome.outcome.startsWith('promise_') && <span className="small warn-text">⚠️ 약속은 자동으로 확인됩니다. 지키지 않으면 신뢰와 사기가 크게 떨어집니다.</span>}
                 {outcome.outcome === 'promise_contract' && <span className="small">👉 선수 상세 → 계약에서 5라운드 안에 재계약(연봉 인상)을 제안하세요.</span>}
+                {outcome.deal && <span className="small good-text">✍️ 연봉 €{outcome.deal.wage}M/년 · {outcome.deal.years}년{outcome.deal.raise ? ' · 활약 시 다음 시즌 25% 인상 약속 (시즌 끝에 자동 확인)' : ''}</span>}
                 <button className="btn wide" onClick={() => onFinish(outcome)}>확인</button>
               </div>
             )}

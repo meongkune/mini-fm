@@ -75,7 +75,30 @@ function ruleReply(player, st, { intent, message, topic, rank }) {
  * 한 번 말하기 → { reply, mood, trustDelta, outcome, end, ai(bool) }
  * history: [{ role: 'manager'|'player', text }], intent: 고른 답변 종류(직접 입력이면 없음)
  */
-export async function sayToPlayer({ player, team, status, message, intent = null, history, trust, reason, situation, topic = 'general', wage = null }) {
+/**
+ * 연봉 협상 하한: 선수가 실제로 받아들이는 최저 연봉 (AI가 '수락'해도 이 밑이면 역제안으로 바꾼다 — 말로 후려치기 방지)
+ *  원하는 연봉의 95% 기준 · '활약 시 인상' 약속 + 신뢰 50 이상이면 −7% · 충성심 높으면 −5% · 자존심 높으면 +5% (80~100%)
+ */
+export function dealFloor(player, deal, offer, trust) {
+  const p = personality(player)
+  let f = 0.95
+  if (offer?.raise && trust >= 50) f -= 0.07
+  if (p.loyalty >= 65) f -= 0.05
+  if (p.pride >= 70) f += 0.05
+  return Math.round(deal.ask * clamp(f, 0.8, 1) * 10) / 10
+}
+/** AI가 안 될 때 규칙으로 답하는 연봉 협상 */
+function ruleDeal(player, deal, offer, trust) {
+  if (!offer) return { reply: '조건을 말씀해 주시면 검토하겠습니다.', mood: '담담', trustDelta: 0, outcome: 'none', end: false }
+  const floor = dealFloor(player, deal, offer, trust)
+  const r = offer.wage / deal.ask
+  if (offer.wage >= floor) return { reply: '좋습니다. 그 조건이면 사인하겠습니다.', mood: '기대', trustDelta: 3, outcome: 'sign', end: true }
+  if (r < 0.6) return { reply: '이건 저를 무시하는 제안입니다. 더 이야기할 게 없네요.', mood: '분노', trustDelta: -8, outcome: 'refuse_deal', end: true }
+  const counterWage = Math.round(((deal.ask + offer.wage) / 2) * 10) / 10
+  return { reply: `그 금액은 어렵습니다. €${counterWage}M이면 생각해 보겠습니다.`, mood: '신중', trustDelta: r < 0.75 ? -3 : 0, outcome: 'counter', counterWage, counterYears: offer.years, end: false }
+}
+
+export async function sayToPlayer({ player, team, status, message, intent = null, history, trust, reason, situation, topic = 'general', wage = null, deal = null, offer = null }) {
   const st = status || {}
   const T = TOPICS[topic] || TOPICS.general
   const rank = rankOf(player, team)
@@ -92,6 +115,7 @@ export async function sayToPlayer({ player, team, status, message, intent = null
           name: player.name, age: player.age, pos: player.role || player.pos, ovr: playerOvrOf(player), club: team.name, rank: rank.text,
           wage: wage ? `€${wage}M/년` : null, personality: personality(player), morale: st.morale ?? 60, trust,
           situation, reason, topic: T.label, demand: T.demand, memory: memoryText({ ...st, trust }),
+          ...(deal ? { deal: { ...deal, offer } } : {}),
         },
       }),
     })
@@ -107,6 +131,7 @@ export async function sayToPlayer({ player, team, status, message, intent = null
               : (st.morale ?? 60) < 40 ? '솔직히 요즘 많이 힘듭니다.' : '부르셨어요, 감독님?'
       return { reply, mood: topic === 'general' ? '담담' : '불만', trustDelta: 0, outcome: 'none', end: false, ai: false }
     }
+    if (deal) return { ...ruleDeal(player, deal, offer, trust), ai: false }
     return { ...ruleReply(player, st, { intent, message, topic, rank }), ai: false }
   }
 }
@@ -124,9 +149,12 @@ export const OUTCOME_LABEL = {
   sulk: ['😒', '태업'],
   press_leak: ['📰', '언론 폭로'],
   loyal: ['💙', '충성 맹세'],
+  sign: ['✍️', '계약 합의'],
+  counter: ['💬', '조건 차이로 보류'],
+  refuse_deal: ['🚪', '협상 결렬'],
 }
 // 결과별 사기 변화 (신뢰 변화와 별개로)
-const MORALE_BY = { none: 0, resolved: 5, promise_start: 8, promise_role: 6, promise_contract: 8, promise_transfer: 4, accepted_role: 3, rejected: -6, transfer_request: -10, sulk: -8, press_leak: -10, loyal: 10 }
+const MORALE_BY = { sign: 6, counter: 0, refuse_deal: -6, none: 0, resolved: 5, promise_start: 8, promise_role: 6, promise_contract: 8, promise_transfer: 4, accepted_role: 3, rejected: -6, transfer_request: -10, sulk: -8, press_leak: -10, loyal: 10 }
 
 /**
  * 면담 결과를 세이브에 반영: 신뢰(저장) · 사기 · 약속 등록 · 결론별 효과 · 면담 기록
@@ -156,11 +184,23 @@ export function applyTalkResult(save, player, { trustStart, trustEnd, outcome, l
   const [icon, label] = OUTCOME_LABEL[outcome] || OUTCOME_LABEL.none
   const quote = lines.filter((l) => l.role === 'player').at(-1)?.text?.slice(0, 40) || ''
   s.talks = [...(s.talks || []), { round: save.round, topic: (TOPICS[topic] || TOPICS.general).label, outcome: label, quote }].slice(-6)
-  const summary = `${icon} ${label} · 신뢰 ${trustStart}→${trustEnd} · 사기 ${dMorale >= 0 ? '+' : ''}${dMorale}${pr ? ` · 약속: ${pr.text}` : ''}${ai ? '' : ' (규칙 기반 대화)'}`
+  const dealText = arguments[2]?.deal ? ` · 계약: 연봉 €${arguments[2].deal.wage}M × ${arguments[2].deal.years}년${arguments[2].deal.raise ? ' (활약 시 인상 약속)' : ''}` : ''
+  const summary = `${icon} ${label} · 신뢰 ${trustStart}→${trustEnd} · 사기 ${dMorale >= 0 ? '+' : ''}${dMorale}${pr ? ` · 약속: ${pr.text}` : ''}${dealText}${ai ? '' : ' (규칙 기반 대화)'}`
   // 대화 기록은 말풍선으로 다시 볼 수 있게 구조 그대로 남긴다
   const talk = { player: player.name, topic: (TOPICS[topic] || TOPICS.general).label, outcome: label, icon, trustStart, trustEnd, dMorale, promise: pr?.text || null, ai, round: save.round, lines: lines.map(({ role, text, mood, delta }) => ({ role, text, mood: mood || null, delta: delta ?? null })) }
   let next = { ...save, status, inbox: [...inbox, ...(save.inbox || [])].slice(0, 80) }
   if (itemId) next = { ...next, inbox: next.inbox.map((x) => (x.id === itemId ? { ...x, resolved: 'custom', reply: summary, talk, read: true } : x)) }
   else next = { ...next, inbox: [news(save.round, 'talk-log', `${player.name} 면담 · ${talk.topic}`, summary, { playerId: player.id, read: true, talk }), ...next.inbox].slice(0, 80) }
   return { save: next, dMorale }
+}
+
+/** 연봉 협상 결과: 재계약하고, '활약 시 인상' 약속이 있으면 약속으로 기록 */
+export function applyDeal({ player, deal, renew, addPromise, round }) {
+  const r = renew(player, deal.years, deal.wage)
+  if (r?.ok === false) return r
+  if (deal.raise) {
+    const target = Math.round(deal.wage * 1.25 * 10) / 10
+    addPromise(player.id, { kind: 'raise', cond: 6.9, minApps: 10, target, made: round, text: `이번 시즌 활약(평균 평점 6.9·10경기 이상)하면 다음 시즌 €${target}M으로 인상` })
+  }
+  return { ok: true }
 }

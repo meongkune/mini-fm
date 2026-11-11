@@ -9,12 +9,14 @@ import Rating, { CondBar } from './Rating.jsx'
 import { PLAYER_TALKS, moraleLabel } from '../game/season.js'
 import { personality, personalityText } from '../game/speech.js'
 import TalkRoom from './TalkRoom.jsx'
-import { situationOf } from '../game/aiTalk.js'
+import { applyDeal, situationOf } from '../game/aiTalk.js'
 import { eur, yearsLeft } from '../game/finance.js'
 import { useGame } from '../store.jsx'
 
 export default function PlayerSheet({ player, onClose, inLineup, onToggle }) {
-  const { status, save, talkTo, myTeam, teams, finishTalk, totalRounds, contractOf, renewalAsk, renew, releaseCost, release, forceSell } = useGame()
+  const { status, save, talkTo, myTeam, teams, finishTalk, totalRounds, contractOf, renewalAsk, renew, releaseCost, release, forceSell, addPromise } = useGame()
+  const [nego, setNego] = useState(null) // 연봉 협상 대화 (재계약)
+  const [negoMsg, setNegoMsg] = useState('')
   const [battle, setBattle] = useState(false)
   const [deal, setDeal] = useState(null)
   const [reply, setReply] = useState('')
@@ -75,8 +77,21 @@ export default function PlayerSheet({ player, onClose, inLineup, onToggle }) {
               </button>
             )}
             <ContractBox player={player} save={save} contractOf={contractOf} renewalAsk={renewalAsk} renew={renew} releaseCost={releaseCost}
+              onNego={(ask) => { setNegoMsg(''); setNego(ask) }} negoMsg={negoMsg}
               onRelease={() => { if (confirm(`${player.name}을(를) 방출할까요? 위약금 ${eur(releaseCost(player))}`)) { release(player); onClose() } }}
               onSell={() => { if (confirm(`${player.name}을(를) 감독·선수 의사와 상관없이 즉시 팔까요? (가치의 60~120%)`)) { setDeal(forceSell(player)) } }} />
+            {nego && (
+              <TalkRoom player={player} team={myTeam} status={st} topic="contract" totalRounds={totalRounds} wage={contractOf(player).wage}
+                deal={{ kind: 'renew', ask: nego.wage, current: contractOf(player).wage, maxYears: nego.maxYears }}
+                reason="재계약 조건을 이야기하러 왔음"
+                situation={situationOf(player, myTeam, st, { contractYears: yearsLeft(save, contractOf(player)), inLineup, round: save.round, apps: save.pstats?.[player.id]?.apps ?? 0 })}
+                onClose={() => setNego(null)}
+                onFinish={(r) => {
+                  finishTalk(player.id, r)
+                  if (r.deal) { const x = applyDeal({ player, deal: r.deal, renew, addPromise, round: save.round }); setNegoMsg(x.ok ? `✍️ 재계약 합의: 연봉 €${r.deal.wage}M × ${r.deal.years}년${r.deal.raise ? ' · 활약 시 인상 약속' : ''}` : `⚠️ ${x.reason}`) }
+                  setNego(null)
+                }} />
+            )}
             {deal && <p className="notice ok">💸 {deal.buyer}에 {eur(deal.fee)}에 팔았습니다. <button className="linkish" onClick={onClose}>닫기</button></p>}
             <h4>개별 면담 <span className="muted small">{talked ? '이번 라운드 면담 완료' : '라운드당 1회 · 최근 폼에 맞는 말을 해야 효과가 있습니다'}</span></h4>
             <div className="options">
@@ -106,7 +121,7 @@ export default function PlayerSheet({ player, onClose, inLineup, onToggle }) {
 // 위키백과 프로필: 사진·한글 이름·소개·키·생년월일·출생지·실제 포지션
 
 // 계약: 남은 기간·연봉, 재계약 제안, 방출, 강제 매각
-function ContractBox({ player, save, contractOf, renewalAsk, renew, onRelease, onSell, releaseCost }) {
+function ContractBox({ player, save, contractOf, renewalAsk, renew, onRelease, onSell, releaseCost, onNego, negoMsg }) {
   const c = contractOf(player)
   const left = yearsLeft(save, c)
   const ask = renewalAsk(player)
@@ -131,6 +146,8 @@ function ContractBox({ player, save, contractOf, renewalAsk, renew, onRelease, o
         </div>
       ) : <p className="small good-text">✍️ 재계약 완료</p>}
       {err && <p className="small bad-text">{err}</p>}
+      {!ask.refuse && <button className="btn small talk-start" onClick={() => onNego?.(ask)}>🗣️ 대화로 연봉 협상 (금액·기간·인상 약속)</button>}
+      {negoMsg && <p className="small notice">{negoMsg}</p>}
       <div className="row">
         <button className="btn ghost small" onClick={onRelease}>🚪 방출</button>
         <button className="btn ghost small" onClick={onSell}>💸 강제 매각</button>

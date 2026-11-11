@@ -5,7 +5,7 @@
 
 const ALLOWED = ['https://meongkune.github.io', 'http://localhost:5173', 'http://localhost:4173', 'http://127.0.0.1:5173']
 const MODELS = ['gemini-flash-lite-latest', 'gemini-flash-latest'] // 빠른 경량 모델 먼저, 한도·지연·오류면 다음 모델로
-const OUTCOMES = ['none', 'resolved', 'promise_start', 'promise_role', 'promise_contract', 'promise_transfer', 'accepted_role', 'rejected', 'transfer_request', 'sulk', 'press_leak', 'loyal']
+const OUTCOMES = ['none', 'resolved', 'promise_start', 'promise_role', 'promise_contract', 'promise_transfer', 'accepted_role', 'rejected', 'transfer_request', 'sulk', 'press_leak', 'loyal', 'sign', 'counter', 'refuse_deal']
 
 const cors = (origin) => ({
   'Access-Control-Allow-Origin': ALLOWED.includes(origin) ? origin : ALLOWED[0],
@@ -16,6 +16,19 @@ const cors = (origin) => ({
 const json = (body, status, origin) => new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json; charset=utf-8', ...cors(origin) } })
 const clip = (s, n) => String(s ?? '').slice(0, n)
 
+// 연봉 협상 모드: 선수가 원하는 조건과 감독이 이번에 내민 조건
+function dealPrompt(d) {
+  const o = d.offer
+  return `[연봉 협상] ${d.kind === 'sign' ? '이 팀으로 이적하는 개인 조건 협상' : '재계약 협상'}. 네가 원하는 조건: 연봉 €${d.ask}M/년, 계약 최대 ${d.maxYears}년. 지금 연봉 €${d.current ?? '?'}M/년.
+${o ? `[감독의 이번 제안] 연봉 €${o.wage}M/년 · ${o.years}년${o.raise ? ' · 약속: 이번 시즌 활약하면(평균 평점 6.9 이상) 다음 시즌 연봉 25% 인상' : ''} (원하는 연봉의 ${Math.round((o.wage / d.ask) * 100)}%)` : '[감독의 이번 제안] 없음 — 대화만 하는 중'}
+연봉 협상 규칙:
+- 원하는 연봉의 95% 이상이면 대체로 수락(outcome "sign").
+- 85~95%면: '활약 시 인상' 약속이 있고 감독 신뢰가 50 이상이면 수락할 수 있다. 아니면 역제안(outcome "counter").
+- 85% 미만이면 역제안. 70% 미만이면 무시당했다고 느낀다(trustDelta 음수). 몇 번이나 터무니없으면 협상 결렬(outcome "refuse_deal").
+- 역제안(counter)일 때 counterWage(원하는 연봉과 제안 사이의 금액, €M)와 counterYears를 꼭 채운다.
+- 제안이 없는 일반 대화면 outcome은 "none". 금액을 지어내지 말고 위 숫자만 쓴다.`
+}
+
 function systemPrompt(p) {
   const pers = p.personality || {}
   return `너는 축구 감독 게임 속 프로 축구 선수 "${clip(p.name, 40)}"이다. 감독(=사용자)과 1:1 면담 중이다. 현실의 프로 선수처럼 행동하라.
@@ -25,6 +38,7 @@ function systemPrompt(p) {
 [감독과의 관계] ${clip(p.memory, 400) || '특별한 기록 없음'}
 [면담 주제] ${clip(p.topic, 30) || '개별 면담'} — 선수가 원하는 것: ${clip(p.demand, 80) || '없음'}
 ${p.reason ? `[면담 이유] ${clip(p.reason, 200)}` : ''}
+${p.deal ? dealPrompt(p.deal) : ''}
 
 현실성 규칙 (반드시 지켜라):
 1. 한국어로, 성격에 맞는 말투로 1~3문장. 게임·AI라는 말 금지.
@@ -64,6 +78,8 @@ async function askGemini(env, body) {
           trustDelta: { type: 'INTEGER' },
           outcome: { type: 'STRING', enum: OUTCOMES },
           end: { type: 'BOOLEAN' },
+          counterWage: { type: 'NUMBER' },
+          counterYears: { type: 'INTEGER' },
         },
         required: ['reply', 'mood', 'trustDelta', 'outcome', 'end'],
       },
@@ -91,6 +107,8 @@ async function askGemini(env, body) {
       trustDelta: Math.max(-20, Math.min(12, Math.round(out.trustDelta || 0))),
       outcome: OUTCOMES.includes(out.outcome) ? out.outcome : 'none',
       end: !!out.end,
+      ...(out.counterWage > 0 ? { counterWage: Math.round(out.counterWage * 10) / 10 } : {}),
+      ...(out.counterYears > 0 ? { counterYears: Math.max(1, Math.min(5, out.counterYears)) } : {}),
       model,
     }
   }

@@ -86,17 +86,18 @@ export function makePromise(kind, round, totalRounds) {
  * 라운드가 끝날 때 약속 판정. sum = 이 선수의 경기 기록(없으면 결장), fitOk = 본 포지션(적합도 0.9 이상)으로 뛰었는지
  * 반환: 바뀐 상태와 편지함 소식
  */
-export function checkPromises(p, s, { round, sum, fitOk, renewed, sold }) {
+export function checkPromises(p, s, { round, sum, fitOk, renewed, sold, wage = null }) {
   const items = []
   const keep = []
   for (const pr of s.promises || []) {
     // 재계약·이적 순간에 부르면 그 약속만 판정한다
     if ((renewed || sold) && !((renewed && pr.kind === 'contract') || (sold && pr.kind === 'transfer'))) { keep.push(pr); continue }
+    if (pr.kind === 'raise') { keep.push(pr); continue } // 활약 시 인상 약속: 시즌이 끝날 때 판정 (career.js)
     let state = null
     if (pr.kind === 'start' && sum?.start) pr.got = (pr.got || 0) + 1
     if (pr.kind === 'role' && sum?.start && fitOk) pr.got = 1
     if ((pr.kind === 'start' || pr.kind === 'role') && pr.got >= pr.need) state = 'kept'
-    else if (pr.kind === 'contract' && renewed) state = 'kept'
+    else if (pr.kind === 'contract' && renewed) state = pr.minWage && (wage ?? 0) < pr.minWage ? 'broken' : 'kept'
     else if (pr.kind === 'transfer' && sold) state = 'kept'
     else if (round >= pr.until) state = 'broken'
     if (!state) { keep.push(pr); continue }

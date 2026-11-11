@@ -1,4 +1,5 @@
 // 이적 시장: 이적료로 영입(상대 구단 AI와 협상) · 판매 목록 등록(제안은 메시지함으로) · FA
+import TalkRoom from '../components/TalkRoom.jsx'
 import Avatar from '../components/Avatar.jsx'
 import Stars, { abilityStars, potentialStarsOf, starText } from '../components/Stars.jsx'
 import { useMemo, useState } from 'react'
@@ -201,7 +202,7 @@ export default function Transfer() {
 
 /** 영입 협상: 이적료 제시 → 상대 구단 답 → 수락되면 계약 기간 정하고 확정 */
 function BidSheet({ p, t, lid, onClose }) {
-  const { bidFor, signTransfer, wageFor, askWage, transferWindow, valueFor, save, myTeam, data } = useGame()
+  const { bidFor, signTransfer, wageFor, askWage, transferWindow, valueFor, save, myTeam, data, totalRounds, addPromise } = useGame()
   const cash = save.finance?.cash ?? 0
   const room = Math.max(0, wageBudget(save.finance || {}) - wageBill(save, myTeam, data.leagueId))
   const v = valueFor(p)
@@ -213,6 +214,7 @@ function BidSheet({ p, t, lid, onClose }) {
   const ref = { lid, id: t.id }
   const offer = () => { setDone(null); setReply(bidFor(ref, p.id, fee)) }
   const sign = () => setDone(signTransfer(ref, p.id, reply.verdict === 'counter' ? reply.ask : fee, years))
+  const [nego, setNego] = useState(false)
   return (
     <div className="sheet-wrap" onClick={onClose}>
       <div className="sheet" onClick={(e) => e.stopPropagation()}>
@@ -250,9 +252,24 @@ function BidSheet({ p, t, lid, onClose }) {
           <div className={`deal-reply ${reply.verdict}`}>
             <strong>{t.name}{reply.tries ? <span className="muted small"> · 협상 {reply.tries}/{PATIENCE}</span> : null}</strong>
             <p>{reply.reason}</p>
-            {reply.verdict === 'accept' && !done?.ok && <button className="btn wide" onClick={sign}>✍️ {money(fee)}에 계약 확정</button>}
-            {reply.verdict === 'counter' && !done?.ok && <button className="btn wide" onClick={sign}>✍️ {money(reply.ask)}에 맞춰 계약 확정</button>}
+            {reply.verdict === 'accept' && !done?.ok && <button className="btn wide" onClick={sign}>✍️ {money(fee)}에 계약 확정 (요구 연봉 {eur(wage)} 그대로)</button>}
+            {reply.verdict === 'counter' && !done?.ok && <button className="btn wide" onClick={sign}>✍️ {money(reply.ask)}에 맞춰 계약 확정 (요구 연봉 {eur(wage)} 그대로)</button>}
+            {(reply.verdict === 'accept' || reply.verdict === 'counter') && !done?.ok && <button className="btn wide ghost talk-start" onClick={() => setNego(true)}>🗣️ 선수와 연봉 협상 후 계약</button>}
           </div>
+        )}
+        {nego && (
+          <TalkRoom player={p} team={t} status={{}} topic="contract" totalRounds={totalRounds}
+            deal={{ kind: 'sign', ask: wage, current: null, maxYears: p.age >= 31 ? 2 : 5 }}
+            reason={`${myTeam.name}로 이적하는 개인 조건을 이야기하러 왔음 (구단 간 이적료는 합의됨)`}
+            situation="이적 협상 중 — 두 구단이 이적료에 합의했고, 이제 연봉·계약 기간을 정하면 이적이 확정된다"
+            onClose={() => setNego(false)}
+            onFinish={(r) => {
+              setNego(false)
+              if (!r.deal) return
+              const x = signTransfer(ref, p.id, reply.verdict === 'counter' ? reply.ask : fee, r.deal.years, r.deal.wage)
+              if (x?.ok && r.deal.raise) addPromise(p.id, { kind: 'raise', cond: 6.9, minApps: 10, target: Math.round(r.deal.wage * 1.25 * 10) / 10, made: save.round, text: `이번 시즌 활약(평균 평점 6.9·10경기 이상)하면 다음 시즌 €${Math.round(r.deal.wage * 1.25 * 10) / 10}M으로 인상` })
+              setDone(x)
+            }} />
         )}
         {done && <p className={`notice ${done.ok ? 'ok' : 'bad'}`}>{done.ok ? `✍️ 영입 완료! 연봉 ${eur(done.wage)}/년 · ${years}년 계약` : done.reason}</p>}
       </div>

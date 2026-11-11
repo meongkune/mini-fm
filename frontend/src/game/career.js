@@ -160,12 +160,32 @@ export function nextSeason(save, { teams, baseTeams, standings, country, baseSea
 
   // 상태: 컨디션·부상·징계 초기화, 사기는 평균 쪽으로
   const status = {}
-  for (const [id, s] of Object.entries(save.status || {})) status[id] = { morale: Math.round((s.morale ?? 60) * 0.5 + 30), form: 6.6, fr: [], cond: 100, inj: 0, susp: 0, benched: 0 }
+  const promiseNews = []
+  const nameOf = (id) => teams.flatMap((t) => t.players).find((p) => p.id === id)?.name || '선수'
+  for (const [id, s] of Object.entries(save.status || {})) {
+    // 감독과의 관계(신뢰·지킨/어긴 약속·면담 기록)는 시즌이 바뀌어도 이어진다
+    const keep = { trust: s.trust, kept: s.kept, broken: s.broken, talks: s.talks }
+    const promises = []
+    for (const pr of s.promises || []) {
+      if (pr.kind !== 'raise') continue
+      // '활약하면 다음 시즌 연봉 인상' 약속: 평균 평점·출전 수 조건을 봤다
+      const ps = save.pstats?.[id]
+      const avg = ps?.apps ? ps.rsum / ps.apps : 0
+      if ((ps?.apps || 0) >= pr.minApps && avg >= pr.cond) {
+        promises.push({ kind: 'contract', made: 0, until: 5, minWage: pr.target, text: `약속한 연봉 인상 재계약 (€${pr.target}M 이상, 5라운드 안)` })
+        promiseNews.push(news(0, 'promise', `💶 ${nameOf(id)}: 활약 조건 달성`, `지난 시즌 평균 평점 ${avg.toFixed(2)}·${ps.apps}경기로 약속한 조건을 채웠습니다. 5라운드 안에 연봉 €${pr.target}M 이상으로 재계약해야 약속을 지킨 것이 됩니다.`, { playerId: id }))
+      } else {
+        promiseNews.push(news(0, 'promise', `${nameOf(id)}: 인상 조건 미달`, `지난 시즌 평균 평점 ${avg ? avg.toFixed(2) : '-'}·${ps?.apps || 0}경기로 '활약 시 연봉 인상' 조건(평점 ${pr.cond}·${pr.minApps}경기)을 채우지 못했습니다. 선수도 받아들였습니다.`, { playerId: id, read: true }))
+      }
+    }
+    status[id] = { morale: Math.round((s.morale ?? 60) * 0.5 + 30), form: 6.6, fr: [], cond: 100, inj: 0, susp: 0, benched: 0, ...Object.fromEntries(Object.entries(keep).filter(([, v]) => v !== undefined)), ...(promises.length ? { promises } : {}) }
+  }
 
   const conf = clamp((save.board?.confidence ?? 60) + (review.success ? 15 : -20), 0, 100)
   const next = no + 1
   const inbox = [
     news(0, 'season', `${seasonLabel(baseSeason, next)} 시즌 시작`, `지난 시즌 ${review.pos}위 (${review.target.label} ${review.success ? '달성 ✓' : '실패 ✗'}). ${retired.filter((r) => r.team === save.teamId).length ? `은퇴: ${retired.filter((r) => r.team === save.teamId).map((r) => r.p.name).join(', ')}. ` : ''}${expired.length ? `계약 만료: ${expired.map((p) => p.name).join(', ')}. ` : ''}${growth.length ? `성장 상위: ${[...growth].sort((a, b) => b.d - a.d).slice(0, 3).map((g) => `${g.p.name} ${g.d > 0 ? '+' : ''}${g.d}`).join(', ')}.` : ''}`),
+    ...promiseNews,
     ...newcomers.map((p) => news(0, 'youth', `유스 입단: ${p.name}`, `${p.age}세 ${p.pos} ${p.name} 선수가 1군에 합류했습니다. 스카우트는 성장 가능성을 눈여겨보고 있습니다.`, { playerId: p.id })),
   ]
   const fresh = {

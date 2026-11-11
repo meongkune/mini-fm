@@ -3,7 +3,7 @@ import { useGame } from '../store.jsx'
 import { TALK_ACTIONS } from '../game/season.js'
 import NeedTeam from './NeedTeam.jsx'
 import TalkRoom from '../components/TalkRoom.jsx'
-import { situationOf } from '../game/aiTalk.js'
+import { applyDeal, situationOf } from '../game/aiTalk.js'
 import TalkLog, { talkOf } from '../components/TalkLog.jsx'
 
 const NL = String.fromCharCode(10)
@@ -22,7 +22,7 @@ export const needsAnswer = (m) => !m.resolved && (m.type === 'talk' || !!m.actio
 export const preview = (m, n = 70) => { const t = (m.type === 'talk-log' ? (m.body || '').split(NL)[0] : m.body || '').replace(/\s+/g, ' '); return t.length > n ? `${t.slice(0, n)}…` : t }
 
 export default function Inbox() {
-  const { myTeam, save, readInbox, answerTalk, answerOffer, finishTalk, ignoreTalk, status, totalRounds, contractOf } = useGame()
+  const { myTeam, save, readInbox, answerTalk, answerOffer, finishTalk, ignoreTalk, status, totalRounds, contractOf, renewalAsk, renew, addPromise } = useGame()
   const [battle, setBattle] = useState(null) // 면담 요청 메일
   const [log, setLog] = useState(null) // 다시 볼 면담 기록
   const [filter, setFilter] = useState('all')
@@ -133,7 +133,8 @@ export default function Inbox() {
             wage={contractOf(p).wage} totalRounds={totalRounds}
             situation={situationOf(p, myTeam, status[p.id] || {}, { inLineup: save.lineup.includes(p.id), round: save.round, apps: save.pstats?.[p.id]?.apps ?? 0 })}
             onClose={() => setBattle(null)}
-            onFinish={(r) => { finishTalk(p.id, r, battle.id); setBattle(null) }} />
+            deal={['contract', 'wage'].includes(battle.topic) && !renewalAsk(p).refuse ? { kind: 'renew', ask: renewalAsk(p).wage, current: contractOf(p).wage, maxYears: renewalAsk(p).maxYears } : null}
+            onFinish={(r) => { finishTalk(p.id, r, battle.id); if (r.deal) applyDeal({ player: p, deal: r.deal, renew, addPromise, round: save.round }); setBattle(null) }} />
         )
       })()}
       {log && <TalkLog talk={log} onClose={() => setLog(null)} />}
