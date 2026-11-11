@@ -1,7 +1,8 @@
 // 홈구장 이름·수용 인원: football-data(구단 영문 이름·구장 이름) + TheSportsDB(구장 수용 인원)
 // 실행: FOOTBALL_DATA_TOKEN=... node tools/stadiums.mjs → frontend/public/data/stadiums.json
 //   { 리그ID: { 구단ID: { name: 구장 이름, cap: 수용 인원 } } }
-//   TheSportsDB 무료 키는 분당 30회 → 구단마다 검색·구단·구장 3회, 2.1초 간격 (176개 구단 약 20분)
+//   TheSportsDB 무료 키는 분당 30회 → 구단마다 검색·구장 2회, 2.1초 간격
+//   ONLY=premier-league,bundesliga 처럼 리그를 골라 돌릴 수 있고, 결과는 기존 파일에 합쳐 리그마다 바로 저장한다
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -26,8 +27,11 @@ async function ts(p) {
 }
 
 const index = JSON.parse(fs.readFileSync(path.join(DATA, 'index.json'), 'utf8'))
-const out = {}
+const FILE = path.join(DATA, 'stadiums.json')
+const out = fs.existsSync(FILE) ? JSON.parse(fs.readFileSync(FILE, 'utf8')) : {}
+const only = (process.env.ONLY || '').split(',').map((x) => x.trim()).filter(Boolean)
 for (const [code, lid] of Object.entries(LEAGUES)) {
+  if (only.length && !only.includes(lid)) continue
   const season = JSON.parse(fs.readFileSync(path.join(DATA, index.leagues.find((l) => l.id === lid).seasons[0].file), 'utf8'))
   const fd = await fetch(`https://api.football-data.org/v4/competitions/${code}/teams?season=2025`, { headers: { 'X-Auth-Token': FD } }).then((r) => r.json())
   const byExt = Object.fromEntries((fd.teams || []).map((t) => [t.id, t]))
@@ -42,16 +46,16 @@ for (const [code, lid] of Object.entries(LEAGUES)) {
     const key = fold(en.shortName || en.name)
     const team = (q?.teams || []).find((x) => x.strSport === 'Soccer' && (fold(x.strTeam) === key || fold(x.strTeam).includes(key) || key.includes(fold(x.strTeam))))
     if (team) {
-      const full = (await ts(`/lookupteam.php?id=${team.idTeam}`))?.teams?.[0]
-      if (full?.idVenue) {
-        const v = (await ts(`/lookupvenue.php?id=${full.idVenue}`))?.venues?.[0]
+      // 검색 결과에 구장 ID가 들어 있어 구단 조회는 건너뛴다
+      if (team.idVenue) {
+        const v = (await ts(`/lookupvenue.php?id=${team.idVenue}`))?.venues?.[0]
         if (v) { rec.name = v.strVenue || rec.name; rec.cap = Number(v.intCapacity) || null }
       }
-      if (!rec.name) rec.name = full?.strStadium || team.strStadium || null
+      if (!rec.name) rec.name = team.strStadium || null
     }
     if (rec.name) { out[lid][t.id] = rec; if (rec.cap) found++ }
   }
   console.log(`✔ ${lid}: 구장 ${Object.keys(out[lid]).length}/${season.teams.length} · 수용 인원 ${found}`)
+  fs.writeFileSync(FILE, JSON.stringify(out) + '\n') // 리그마다 저장 (중간에 끊겨도 앞 리그는 남는다)
 }
-fs.writeFileSync(path.join(DATA, 'stadiums.json'), JSON.stringify(out) + '\n')
 console.log(`TheSportsDB 요청 ${calls}회`)

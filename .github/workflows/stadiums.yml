@@ -3,6 +3,11 @@ name: Stadiums
 
 on:
   workflow_dispatch:
+    inputs:
+      leagues:
+        description: '리그 (쉼표로 구분, 비우면 전체)'
+        required: false
+        default: ''
 
 permissions:
   contents: write
@@ -20,6 +25,9 @@ jobs:
       - name: 구장 정보 받기
         env:
           FOOTBALL_DATA_TOKEN: ${{ secrets.FOOTBALL_DATA_TOKEN }}
+          ONLY: ${{ inputs.leagues }}
+        timeout-minutes: 30
+        continue-on-error: true
         shell: bash
         run: set -o pipefail; node tools/stadiums.mjs | tee -a "$GITHUB_STEP_SUMMARY"
       - name: 데이터 검사 (이상하면 커밋하지 않음)
@@ -34,7 +42,7 @@ jobs:
           if git diff --cached --quiet; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
           else
-            git commit -m "data: 홈구장 이름·수용 인원"
+            git commit -m "data: 홈구장 이름·수용 인원 (${{ inputs.leagues || '전체' }})"
             git pull --rebase origin main
             git push
             echo "changed=true" >> "$GITHUB_OUTPUT"
