@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import { api, loadSeasonFile, loadStadiums } from './api.js'
-import { playerOvrOf } from './engine/engine.js'
+import { playerOvrOf, roundRobin } from './engine/engine.js'
 import { available } from './engine/match.js'
 import { assignSlots, buildSlots, fitOf, setCustomLayout, shapeNeeds } from './engine/formation.js'
 import { applyCupMatch, applyRound, customTalk, engineStatus, news, playerTalk, resolveTalk } from './game/season.js'
@@ -14,6 +14,7 @@ import { FX_DEFAULT, FIN_MODEL, boardBudgets, payFee, takeFee, toFinanceV5, tran
 import { afterMatchOwner, decide } from './game/owner.js'
 import { valueOf } from './game/trade.js'
 import { inDeficit, runMarket, strengthOf } from './game/market.js'
+import { LOW, PAIR, RELEGATION_REVENUE, TOP, promoteRelegate, simulateDivision } from './game/promotion.js'
 // 받침에 따라 '로/으로'
 const ro = (w) => { const c = w.charCodeAt(w.length - 1) - 0xac00; return w + (c < 0 || c > 11171 ? '(으)로' : c % 28 === 0 || c % 28 === 8 ? '로' : '으로') }
 
@@ -220,6 +221,12 @@ export function GameProvider({ children }) {
     })()
   }, [])
 
+  // 승격·강등으로 바뀐 다른 리그 구성 (내 리그의 짝 리그만 해당 — 나머지는 파일 그대로)
+  const divisionOf = (lid, raw) => {
+    const ids = save.divisions?.[lid]
+    if (!ids?.length || !data?.pool) return raw
+    return ids.map((id) => data.pool[id]).filter(Boolean)
+  }
   // 리그·시즌이 바뀔 때마다 해당 시즌 데이터를 불러온다
   useEffect(() => {
     let alive = true
@@ -227,7 +234,23 @@ export function GameProvider({ children }) {
     setError(null)
     ;(async () => {
       const sel = await api.selectSeason(save.league, save.season)
-      const [t, s, index] = await Promise.all([api.teams(), api.schedule(), api.index()])
+      const [t0, s0, index] = await Promise.all([api.teams(), api.schedule(), api.index()])
+      // 승격·강등: 프리미어리그·챔피언십은 두 파일의 팀을 함께 들고, 세이브에 기록된 리그 구성대로 팀 목록·일정을 다시 만든다
+      let t = t0
+      let s = s0
+      let pool = null
+      if (PAIR[sel.leagueId]) {
+        const ol = index.leagues.find((l) => l.id === PAIR[sel.leagueId])
+        const os = ol && (ol.seasons.find((x) => x.id === sel.seasonId) || ol.seasons[0])
+        const od = os ? await loadSeasonFile(os.file).catch(() => null) : null
+        pool = Object.fromEntries([...(od?.teams || []), ...t0.teams].map((x) => [x.id, x]))
+        const ids = save.divisions?.[sel.leagueId]
+        if (ids?.length) {
+          const list = ids.map((id) => pool[id]).filter(Boolean)
+          t = { ...t0, teams: list }
+          s = { rounds: roundRobin(list.map((x) => x.id)) }
+        }
+      }
       // 시즌 데이터를 다시 가져와 선수 ID가 바뀌었으면 선발을 자동으로 다시 고른다
       const team = effectiveTeams(t.teams, save).find((x) => x.id === save.teamId)
       // 선발: 없는 선수가 있거나 예전(자리 순서가 아닌) 형식이면 고른 선수를 유지한 채 자리에 맞춰 다시 배치
@@ -241,7 +264,7 @@ export function GameProvider({ children }) {
           })()
         : null
       if (!alive) return
-      setData({ ...t, schedule: s.rounds, index, leagueId: sel.leagueId, seasonId: sel.seasonId })
+      setData({ ...t, schedule: s.rounds, index, leagueId: sel.leagueId, seasonId: sel.seasonId, pool })
       setSave((cur) => {
         // 저장된 팀이 이 시즌에 없으면(시즌 파일 교체 등) 팀 선택부터 다시
         const teamMissing = cur.teamId && !t.teams.some((x) => x.id === cur.teamId)
@@ -252,11 +275,11 @@ export function GameProvider({ children }) {
       })
     })().catch((e) => alive && setError(e.message))
     return () => { alive = false }
-  }, [save.league, save.season])
+  }, [save.league, save.season, (save.divisions?.[save.league] || []).join()])
 
   // 예전 저장(보드 목표 없음)이면 지금 전력으로 목표를 정한다
   useEffect(() => {
-    if (data && save.teamId && !save.board) setSave((s) => ({ ...s, board: newBoard(effectiveTeams(data.teams, s), s.teamId) }))
+    if (data && save.teamId && !save.board) setSave((s) => ({ ...s, board: newBoard(effectiveTeams(data.teams, s), s.teamId, null, data.leagueId) }))
   }, [data, save.teamId, save.board])
 
   // 재정 5판으로 옮기기: 매출 고정 · 운영비 · 이사회 예산(이적 자금/임금 예산) · 이적료 분할
@@ -402,17 +425,17 @@ export function GameProvider({ children }) {
       for (const l of data.index.leagues) {
         if (l.id === data.leagueId) continue
         const s = l.seasons.find((x) => x.id === data.seasonId) || l.seasons[0]
-        try { out[l.id] = { name: l.name, teams: (await loadSeasonFile(s.file)).teams } } catch { /* 그 리그만 건너뜀 */ }
+        try { out[l.id] = { name: l.name, teams: divisionOf(l.id, (await loadSeasonFile(s.file)).teams) } } catch { /* 그 리그만 건너뜀 */ }
       }
       if (alive) setWorld(out)
     })()
     return () => { alive = false }
-  }, [data?.leagueId, data?.seasonId])
+  }, [data?.leagueId, data?.seasonId, data?.pool])
 
   // 대항전(챔스·유로파·컨퍼런스): 시즌마다 참가팀을 뽑고(다른 리그 파일을 읽어서) 대진을 만든다
   const seasonNo = save.seasonNo || 1
   useEffect(() => {
-    if (!data || !save.teamId) return
+    if (!data || !save.teamId || data.leagueId !== save.league) return // 리그가 막 바뀌어(승격·강등) 데이터가 아직 예전 리그면 기다린다
     let alive = true
     ;(async () => {
       const euro = CUP_LEAGUES.includes(data.leagueId)
@@ -422,21 +445,21 @@ export function GameProvider({ children }) {
       for (const l of leagues) {
         const s = l.seasons.find((x) => x.id === data.seasonId)
         if (!s) continue
-        if (l.id === data.leagueId) loaded.push({ leagueId: l.id, teams: effectiveTeams(data.teams, save), order: seasonNo > 1 ? save.lastOrder : null })
-        else loaded.push({ leagueId: l.id, teams: (await loadSeasonFile(s.file)).teams })
+        if (l.id === data.leagueId) loaded.push({ leagueId: l.id, teams: effectiveTeams(data.teams, save), order: seasonNo > 1 ? (save.lastOrders?.[l.id] || ((save.lastOrderLeague ?? l.id) === l.id ? save.lastOrder : null)) : null }) // 승격 팀은 지난 시즌 1부 순위에 없어서 유럽 대항전에 뽑히지 않는다
+        else loaded.push({ leagueId: l.id, teams: divisionOf(l.id, (await loadSeasonFile(s.file)).teams) })
       }
       if (!alive) return
       const map = {}
       for (const l of loaded) for (const t of l.teams) map[cupKey(l.leagueId, t.id)] = t
       setCupTeams(map)
-      if (!save.cups || save.cupSeason !== seasonNo) {
+      if (!save.cups || save.cupSeason !== seasonNo || (save.cupLeague && save.cupLeague !== data.leagueId) || (!euro && save.cups.some((c) => c.kind !== 'league'))) {
         const cups = euro ? buildCups(loaded.filter((l) => CUP_LEAGUES.includes(l.leagueId)), { seed: seasonNo * 101 + (save.teamId || '').length, totalRounds: data.schedule.length }) : []
         // 리그컵: 유럽 대항전에 나가는 팀은 부전승을 먼저 받는다
         const euroKeys = new Set(cups.flatMap((c) => c.teams.map((t) => t.key)))
         const lcTeams = loaded.filter((l) => lcIds.includes(l.leagueId)).flatMap((l) => l.teams.map((t) => ({ key: cupKey(l.leagueId, t.id), id: t.id, leagueId: l.leagueId, name: t.name, short: t.short, color: t.color, ext: t.ext, t })))
         const lc = buildLeagueCup(lcTeams, { name: lcName(data.leagueId), seed: seasonNo * 977 + 3, totalRounds: data.schedule.length, euroKeys })
         if (lc) cups.push(lc)
-        setSave((cur) => { const { cup: _old, ...rest } = cur; return { ...rest, cups, cupSeason: seasonNo } })
+        setSave((cur) => { const { cup: _old, ...rest } = cur; return { ...rest, cups, cupSeason: seasonNo, cupLeague: data.leagueId } })
       } else if (!save.cups.some((c) => c.kind === 'league')) {
         // 리그컵이 생기기 전의 세이브: 이번 시즌 리그컵만 새로 만든다
         const euroKeys = new Set(save.cups.flatMap((c) => c.teams.map((t) => t.key)))
@@ -446,7 +469,7 @@ export function GameProvider({ children }) {
       }
     })().catch((e) => console.warn('대항전 준비 실패', e))
     return () => { alive = false }
-  }, [data, save.teamId, seasonNo, save.cupSeason])
+  }, [data, save.teamId, save.league, seasonNo, save.cupSeason, save.cupLeague])
 
   // 내 팀 경기가 없는 대회 매치데이(미참가·탈락·다른 조)는 자동으로 진행
   useEffect(() => {
@@ -533,7 +556,7 @@ export function GameProvider({ children }) {
 
     /** 이 경기의 구장·관중: 홈 구단 구장, 내 홈경기는 티켓 가격·민심으로 정한 관중률, 다른 경기는 82~99% */
     const venueOf = (homeId, lid = data?.leagueId, seed = '') => {
-      const st0 = stadiums[lid]?.[homeId]
+      const st0 = stadiums[lid]?.[homeId] ?? (PAIR[lid] ? stadiums[PAIR[lid]]?.[homeId] : null) // 승격·강등된 팀은 원래 리그 기준으로 저장돼 있다
       // 명명권을 팔았으면 내 구장 이름이 바뀐다
       const nm = homeId === save.teamId && save.owner?.naming && save.owner.naming.until >= (save.seasonNo || 1) ? save.owner.naming.name : null
       const st = nm ? { ...(st0 || {}), name: nm } : st0
@@ -556,7 +579,7 @@ export function GameProvider({ children }) {
       chooseTeam(teamId) {
         const lineup = autoSlots(teamsById[teamId], '4-4-2', {})
         const base = effectiveTeams(data.teams, EMPTY_SAVE)
-        setSave((s) => ({ ...EMPTY_SAVE, league: s.league, season: s.season, teamId, lineup, slotLineup: true, board: newBoard(base, teamId) }))
+        setSave((s) => ({ ...EMPTY_SAVE, league: s.league, season: s.season, teamId, lineup, slotLineup: true, board: newBoard(base, teamId, null, data.leagueId) }))
       },
       seasonText: data ? `${data.leagueInfo.name} ${seasonLabel(data.season, save.seasonNo)}` : '',
       review: data && save.teamId && save.round >= data.schedule.length ? seasonReview(save, computeStandings(teams, save.results, penaltyOf(save))) : null,
@@ -632,7 +655,61 @@ export function GameProvider({ children }) {
           const keep = Object.fromEntries(r.save.lineup.map((id, i) => [i, id]).filter(([, id]) => id && mine.players.some((p) => p.id === id)))
           const lineup = autoSlots(mine, s.formation, {}, keep)
           const pointsPenalty = ffp.penalty?.points ? { seasonNo: (s.seasonNo || 1) + 1, teamId: s.teamId, points: ffp.penalty.points } : null
-          return { ...r.save, pointsPenalty, lineup, lastOrder: standingsNow.map((x) => x.id), board: newBoard(nextTeams, s.teamId, { confidence: r.conf, fails: r.review.fails }) }
+          // ── 승격·강등 (프리미어리그 ↔ 챔피언십) ──
+          const other = PAIR[data.leagueId]
+          let league = data.leagueId
+          let boardTeams = nextTeams
+          let extra = {}
+          if (other && world[other]?.teams?.length && data.pool) {
+            const no = s.seasonNo || 1
+            const myOrder = standingsNow.map((x) => x.id)
+            const otherTable = simulateDivision(world[other].teams, no, other) // 내가 안 뛰는 쪽 리그는 빠른 모델로 한 시즌 계산
+            const otherOrder = otherTable.map((x) => x.id)
+            const topOrder = data.leagueId === TOP ? myOrder : otherOrder
+            const lowOrder = data.leagueId === LOW ? myOrder : otherOrder
+            const pr = promoteRelegate(topOrder, lowOrder, data.pool, no)
+            const divisions = { [TOP]: [...topOrder.filter((id) => !pr.down.includes(id)), ...pr.up], [LOW]: [...lowOrder.filter((id) => !pr.up.includes(id)), ...pr.down] }
+            const nm = (id) => data.pool[id]?.name || id
+            const relegated = data.leagueId === TOP && pr.down.includes(s.teamId)
+            const promoted = data.leagueId === LOW && pr.up.includes(s.teamId)
+            league = relegated ? LOW : promoted ? TOP : data.leagueId
+            const po = pr.playoff
+            const promoNews = news(0, 'season', '🔁 승격·강등', `강등(프리미어리그 → 챔피언십): ${pr.down.map(nm).join(', ')}. 승격(챔피언십 → 프리미어리그): ${pr.up.slice(0, 2).map(nm).join(', ')}(자동)${po ? `, ${nm(po.winner)}(플레이오프 — 4강 ${po.sf.map((m) => `${nm(m.home)} ${m.score[0]}:${m.score[1]} ${nm(m.away)}${m.pens ? ' 승부차기' : ''}`).join(' / ')} · 결승 ${nm(po.final.home)} ${po.final.score[0]}:${po.final.score[1]} ${nm(po.final.away)}${po.final.pens ? ' 승부차기' : ''})` : ''}. ${other === LOW ? '챔피언십' : '프리미어리그'} 우승: ${otherTable[0]?.name} (승점 ${otherTable[0]?.pts}).`)
+            let fin = r.save.finance
+            let contracts = r.save.contracts
+            let status = r.save.status
+            let fans = r.save.fans ?? 60
+            const myNews = []
+            if (relegated) {
+              // 강등: 중계권이 크게 줄고 낙하산 지원금이 2시즌 나온다. 대부분의 계약에 있는 '강등 시 연봉 삭감' 조항으로 연봉이 35% 줄고, 스타는 떠나고 싶어 한다
+              const preBase = Math.max(fin.preBase || 0, fin.base || 40)
+              const base = Math.round(preBase * RELEGATION_REVENUE[0] * 10) / 10
+              contracts = Object.fromEntries(Object.entries(contracts || {}).map(([id, c]) => (rosters[s.teamId].includes(id) ? [id, { ...c, wage: Math.max(0.1, Math.round(c.wage * 0.65 * 10) / 10), relCut: true }] : [id, c])))
+              const bill = rosters[s.teamId].reduce((a, id) => a + (contracts[id]?.wage || 0), 0)
+              fin = { ...fin, preBase, relSeason: no + 1, base, wb: Math.round(Math.max(base * 1.15 * 0.7, bill * 1.03) * 10) / 10, tb: Math.round((fin.tb || 0) * 0.5 * 10) / 10, shift: 0 }
+              const stars = (mine?.players || []).filter((p) => playerOvr(p) >= 79).sort((a, b) => playerOvr(b) - playerOvr(a)).slice(0, 3)
+              status = { ...status }
+              for (const p of stars) status[p.id] = { ...(status[p.id] || {}), wantsOut: true, morale: Math.max(0, (status[p.id]?.morale ?? 60) - 10) }
+              fans = Math.max(0, fans - 15)
+              myNews.push(news(0, 'season', '🔻 챔피언십으로 강등', `${standingsNow.findIndex((x) => x.id === s.teamId) + 1}위로 시즌을 마쳐 챔피언십으로 강등됐습니다. 중계권 수입이 크게 줄어 예상 매출이 ${eur(Math.round(preBase * 1.15 * 10) / 10)} → ${eur(Math.round(base * 1.15 * 10) / 10)}이 됩니다(낙하산 지원금 포함, 2시즌 동안 단계적으로 줄어듦). 계약서의 강등 조항으로 선수 연봉이 35% 깎였고, 이적 자금도 절반이 됐습니다.${stars.length ? ` ${stars.map((p) => p.name).join('·')} 선수가 1부 구단으로 이적을 원합니다.` : ''} (민심 -15)`))
+            } else if (promoted) {
+              // 승격: 프리미어리그 중계권으로 매출이 크게 오른다
+              const base = Math.round(Math.max((fin.base || 40) * 2.2, (fin.preBase || 0) * 0.95, 80) * 10) / 10
+              const bill = rosters[s.teamId].reduce((a, id) => a + (contracts?.[id]?.wage || 0), 0)
+              fin = { ...fin, base, preBase: undefined, relSeason: undefined, wb: Math.round(Math.max(base * 1.15 * 0.7, bill) * 10) / 10, tb: Math.round(((fin.tb || 0) + base * 0.15) * 10) / 10, shift: 0 }
+              fans = Math.min(100, fans + 15)
+              myNews.push(news(0, 'season', '🔺 프리미어리그 승격!', `챔피언십에서 승격했습니다! 프리미어리그 중계권으로 예상 매출이 ${eur(Math.round(base * 1.15 * 10) / 10)}까지 크게 오르고, 이사회가 이적 자금을 늘려 줬습니다. 1부에서 살아남으려면 선수단 보강이 필요합니다. (민심 +15)`))
+            } else if (league === LOW && fin.preBase) {
+              // 강등된 뒤 2부에 남아 있으면 낙하산 지원금이 해마다 줄어든다
+              const yrs = no + 1 - (fin.relSeason || no + 1)
+              fin = { ...fin, base: Math.round(fin.preBase * RELEGATION_REVENUE[Math.min(2, yrs)] * 10) / 10 }
+            }
+            boardTeams = effectiveTeams(divisions[league].map((id) => data.pool[id]).filter(Boolean), r.save)
+            const budgetNews = (relegated || promoted) && fin.fm >= FIN_MODEL ? [news(0, 'finance', '🏛️ 이사회 예산 (새 리그 기준)', `새 시즌 이적 자금 ${eur(transferFunds(fin))} · 임금 예산 ${eur(fin.wb)}/년 (예상 매출 ${eur(Math.round(fin.base * 1.15 * 10) / 10)}).`)] : []
+            const oldInbox = (relegated || promoted) ? (r.save.inbox || []).filter((x) => x.title !== '🏛️ 이사회 예산') : (r.save.inbox || [])
+            extra = { league, divisions, lastOrders: { [TOP]: topOrder, [LOW]: lowOrder }, finance: fin, contracts, status, fans, inbox: [...myNews, ...budgetNews, promoNews, ...oldInbox].slice(0, 80) }
+          }
+          return { ...r.save, ...extra, pointsPenalty, lineup, lastOrder: standingsNow.map((x) => x.id), lastOrderLeague: data.leagueId, board: newBoard(boardTeams, s.teamId, { confidence: r.conf, fails: r.review.fails }, league) }
         })
       },
       readInbox(id) {

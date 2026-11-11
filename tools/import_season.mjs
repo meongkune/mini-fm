@@ -152,8 +152,12 @@ export function transform({ competition, seasonYear, teamsResp, prevStandingsRes
   const lastRank = Math.max(2, ...Object.values(prevRank)) // 순위표 크기(최하위 순위)
 
   const dataWarnings = []
+  const usedTla = new Set()
   const teams = (teamsResp.teams || []).map((t) => {
-    const tla = (t.tla || t.shortName || t.name).replace(/[^A-Z0-9]/gi, '').slice(0, 3).toUpperCase()
+    let tla = (t.tla || t.shortName || t.name).replace(/[^A-Z0-9]/gi, '').slice(0, 3).toUpperCase()
+    // 같은 리그에서 약자가 겹치면(셰필드 유나이티드·웬즈데이 = SHE) 두 번째 팀은 이름 글자로 바꾼다 — 팀 ID가 겹치면 순위·대회에서 두 팀이 섞인다
+    if (usedTla.has(tla)) { const w = (t.shortName || t.name).replace(/[^A-Z]/gi, '').toUpperCase(); tla = [`${tla.slice(0, 2)}${w.at(-1)}`, `${tla.slice(0, 2)}W`, `${tla}2`].find((x) => !usedTla.has(x)) }
+    usedTla.add(tla)
     const known = competition === 'PL' ? KNOWN_TEAMS[tla] : null
     const [color, alt] = known ? [known[2], known[3]] : colorsFrom(t.clubColors)
     const rank = prevRank[t.id]

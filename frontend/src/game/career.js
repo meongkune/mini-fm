@@ -22,9 +22,16 @@ export function seasonLabel(base, seasonNo = 1) {
 }
 
 /** 전력 순위로 보드 목표를 정한다 */
-export function boardTarget(teams, myTeamId) {
+export function boardTarget(teams, myTeamId, leagueId = null) {
   const n = teams.length
   const rank = [...teams].sort((a, b) => teamStrength(b) - teamStrength(a)).findIndex((t) => t.id === myTeamId) + 1
+  // 2부(챔피언십): 목표는 승격·플레이오프·잔류
+  if (leagueId === 'championship') {
+    if (rank <= 3) return { pos: 2, label: '자동 승격 (2위 이내)' }
+    if (rank <= 8) return { pos: 6, label: '승격 플레이오프 (6위 이내)' }
+    if (rank <= 16) return { pos: 12, label: '중위권 (12위 이내)' }
+    return { pos: n - 3, label: `2부 잔류 (${n - 3}위 이내)` }
+  }
   if (rank <= 2) return { pos: 2, label: '우승 경쟁 (2위 이내)' }
   if (rank <= 4) return { pos: 4, label: '챔피언스리그 진출 (4위 이내)' }
   if (rank <= 7) return { pos: 7, label: '대항전 진출 (7위 이내)' }
@@ -32,8 +39,8 @@ export function boardTarget(teams, myTeamId) {
   return { pos: n - 3, label: `1부 잔류 (${n - 3}위 이내)` }
 }
 
-export function newBoard(teams, myTeamId, prev) {
-  return { ...boardTarget(teams, myTeamId), confidence: prev?.confidence ?? 60, fails: prev?.fails ?? 0, warned: false }
+export function newBoard(teams, myTeamId, prev, leagueId = null) {
+  return { ...boardTarget(teams, myTeamId, leagueId), confidence: prev?.confidence ?? 60, fails: prev?.fails ?? 0, warned: false }
 }
 
 /** 시즌 중반 점검: 목표보다 많이 뒤처지면 경고 (라운드 결과 반영 직후 호출) */
