@@ -37,7 +37,11 @@ const K_CRE = 450
 const OPEN_Q = 0.22
 // 중거리 슈팅: 찬스 없이 끝난 공격 중 먼 거리에서 때리는 비율 · 그 슈팅의 질
 //   (예전 0.158 · 0.09는 경기당 슛이 30개로 실제 25~27개보다 많았다 → 수를 줄이고 그만큼 질을 올려 중거리 골 수는 그대로)
-export const SHOT_W = { open: { FW: 2.45, MF: 1.45, DF: 0.5 }, long: { FW: 1.2, MF: 1.8, DF: 0.4 }, st: 1.4, pow: 3.5 }
+//   rel: 공격력을 '같은 포지션 동료 평균'에 얼마나 맞춰 비교할지 (1 = 포지션 안에서만 비교, 0 = 절대값). 지금은 0
+//        리그마다 공격수 득점 비율이 다른 것(50~65%)을 줄이려고 0.7을 시험했지만 3~4%p만 줄었다 — 주된 원인은 데이터의 포지션 표기 차이다
+//   mark: 그 경기에서 이미 골을 넣은 선수는 집중 마크를 받는다 (골 하나마다 슈팅 기회 ×mark) — 한 경기 몰아넣기를 줄인다
+//   (한 선수의 슈팅 비중에 상한을 두는 것도 시험했지만 압도적인 팀 주포는 39 → 35골로만 줄고 프리미어리그 득점왕이 24 → 22골로 떨어져서 넣지 않았다)
+export const SHOT_W = { open: { FW: 2.45, MF: 1.45, DF: 0.5 }, long: { FW: 1.2, MF: 1.8, DF: 0.4 }, st: 1.4, pow: 3.5, rel: 0, mark: 0.85 }
 const LONG_SHARE = 0.115
 const LONG_Q = 0.122
 // 개인 매치업: 통로별 유불리(adv, 능력치 차)가 통로 선택(MU_PICK)과 찬스의 질(K_MU)에 미치는 정도
@@ -580,7 +584,7 @@ export function step(match, ctx, { withEvents = true } = {}) {
         match.ps[shooter.id].g++
         if (assister) match.ps[assister.id].a++
         for (const id of match.sides[dfn].onPitch) if (match.ps[id]) match.ps[id].conceded++
-        match.scorers.push({ minute, team: atk, playerId: shooter.id, name: shooter.name, assistId: assister?.id ?? null, assistName: assister?.name ?? null, how })
+        match.scorers.push({ minute, team: atk, playerId: shooter.id, name: shooter.name, assistId: assister?.id ?? null, assistName: assister?.name ?? null, how, ...(tick.ch ? { lane: tick.ch } : {}) })
         return 'goal'
       }
       S[dfn].saves++
@@ -680,16 +684,19 @@ export function step(match, ctx, { withEvents = true } = {}) {
     // 개인 매치업: 찬스가 어느 통로(왼쪽·오른쪽·중앙·공중볼)에서 났는가 — 전술이 그 통로를 쓰는 비중 × 그 통로의 유불리
     const ch = !long && lanes.length ? rng.weighted(lanes, lanes.map((c) => c.w * Math.exp(c.adv / MU_PICK))) : null
     const wide = ch && (ch.key === 'left' || ch.key === 'right') ? ch.a.id : null // 그 측면을 뚫은 선수
-    const shooter = rng.weighted(shooters, shooters.map((p) => w[p.pos] * (!long && p.slot === 'ST' ? SHOT_W.st : 1) * (p.att / 70) ** SHOT_W.pow))
+    const teamAtt = avg(shooters.map((p) => p.att), 70)
+    const posAtt = Object.fromEntries(['DF', 'MF', 'FW'].map((k) => [k, avg(shooters.filter((p) => p.pos === k).map((p) => p.att), teamAtt)]))
+    const refOf = (p) => SHOT_W.rel * posAtt[p.pos] + (1 - SHOT_W.rel) * teamAtt
+    const shooter = rng.weighted(shooters, shooters.map((p) => w[p.pos] * (!long && p.slot === 'ST' ? SHOT_W.st : 1) * (p.att / refOf(p)) ** SHOT_W.pow * SHOT_W.mark ** (match.ps[p.id]?.g || 0)))
     const helpers = shooters.filter((p) => p.id !== shooter.id)
     const assister = helpers.length && rng.random() < (long ? 0.35 : 0.78) ? rng.weighted(helpers, helpers.map((p) => ({ MF: 2.2, FW: 1.6, DF: 0.7 })[p.pos] * p.att * (p.id === wide ? 3 : 1))) : null
-    if (ch) tick.ch = ch.key
+    if (ch) { tick.ch = ch.key; tick.w = ch.a.id } // 화면: 어느 통로에서, 누가 만든 찬스인가
     const quality = long ? LONG_Q : OPEN_Q + flow.q + (ch ? clamp(ch.adv, -MU_CAP, MU_CAP) / K_MU : 0) + ((shooter.A?.['공격'] ?? shooter.att) - keeper) / K_FINISH + (a - d) / K_QUAL + tEdge / K_TQUAL + r[atk].quality
     const pOn = long ? 0.28 : clamp(0.45 + (shooter.att - 60) / 200, 0.25, 0.75)
     const pGoal = clamp(quality, long ? 0.04 : 0.08, 0.55)
     const res = resolve({ shooter, assister, pOn, pGoal, how: long ? 'long' : 'open' })
     if (res === 'goal') {
-      goalEvent(long ? `⚽ 골!! ${shooter.name}(${names[atk]})의 먼 거리 슈팅이 그대로 들어갑니다!` : line(GOAL_LINES, shooter.id)(shooter.name, names[atk]), shooter, assister)
+      goalEvent(long ? `⚽ 골!! ${shooter.name}(${names[atk]})의 먼 거리 슈팅이 그대로 들어갑니다!` : line(GOAL_LINES, shooter.id)(shooter.name, names[atk]) + (ch ? ` [${CHANNEL_LABEL[ch.key]}]` : ''), shooter, assister)
     } else if (res === 'save') {
       if (withEvents && !long) say({ type: 'save', text: line(SAVE_LINES, shooter.id)(shooter.name, names[atk]) })
       if (rng.random() < 0.3) aerialPlay('corner') // 골키퍼가 쳐내 코너킥

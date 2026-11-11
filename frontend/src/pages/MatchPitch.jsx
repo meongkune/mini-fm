@@ -61,6 +61,8 @@ function passChain(mine, tick, base) {
     chain.push(cands[Math.floor(rand(tick.m * 131 + i * 17 + tick.t) * cands.length)].id)
   }
   if (end) chain[chain.length - 1] = end.id
+  // 개인 매치업: 그 통로를 연 선수(측면이면 윙어·풀백, 중앙·공중볼이면 공격수)가 마무리 직전에 공을 잡는다
+  if (end && tick.w && tick.w !== end.id && chain.length >= 2 && field.some((p) => p.id === tick.w)) chain[chain.length - 2] = tick.w
   return chain
 }
 
@@ -91,7 +93,9 @@ function computeFrame(lineups, tick, sub, shotStage) {
   const holder = chain[Math.min(sub, chain.length - 1)]
   const prog = chain.length > 1 ? Math.min(1, sub / (chain.length - 1)) : 1 // 공격 진행도 0(빌드업)~1(마무리)
   // 이번 공격이 어느 측면으로 가는지 — 풀백 오버래핑에 쓴다
-  const flank = rand(tick.m * 53 + atk) < 0.5 ? -1 : 1
+  //   매치업 통로가 측면이면 그 선수가 서 있는 쪽으로 간다
+  const laneSide = (tick.ch === 'left' || tick.ch === 'right') && base[tick.w] ? Math.sign(base[tick.w].y - H / 2) * dir : 0
+  const flank = laneSide || (rand(tick.m * 53 + atk) < 0.5 ? -1 : 1)
 
   const pos = {}
   for (const p of all) {
@@ -272,6 +276,9 @@ function toScreen(x, y, myIdx) {
   return { left: `${side * 100}%`, top: `${up * 100}%` }
 }
 
+// 찬스가 난 통로 (개인 매치업) — 경기장 위 공격 표시에 쓴다
+const LANE_LABEL = { left: '왼쪽 측면 공격', right: '오른쪽 측면 공격', center: '중앙 돌파', air: '공중볼 공격' }
+
 export default function MatchPitch({ home, away, lineups, tick, duration = 300, scorerName, idleLabel = '킥오프 대기', myIdx = 0, caption = null }) {
   // 한 분(tick) 안에서 패스 몇 번(sub)을 차례로 보여주고, 슈팅이면 마지막에 공이 골문으로 날아간다
   const [sub, setSub] = useState(0)
@@ -302,7 +309,7 @@ export default function MatchPitch({ home, away, lineups, tick, duration = 300, 
   const fly = Math.max(160, Math.min(650, duration * 0.4))
   const teams = [home, away]
   const goalFlash = tick?.k === 'goal' && stage === 1
-  const attackLabel = tick ? `${clockText(tick.m, tick.plus)}' ${short(teams[tick.t])} ${tick.sp ? SP_LABEL[tick.sp] : '공격'}` : idleLabel
+  const attackLabel = tick ? `${clockText(tick.m, tick.plus)}' ${short(teams[tick.t])} ${tick.sp ? SP_LABEL[tick.sp] : tick.ch ? LANE_LABEL[tick.ch] : '공격'}` : idleLabel
   const mine = teams[myIdx]
   const theirs = teams[1 - myIdx]
 
