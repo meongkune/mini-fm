@@ -11,7 +11,7 @@ const POS = ['전체', 'GK', 'DF', 'MF', 'FW']
 const stars = (n) => '★'.repeat(n) + '☆'.repeat(5 - n)
 
 export default function FreeAgents() {
-  const { myTeam, save, teams, wageFor, offerFA, faPreview } = useGame()
+  const { myTeam, save, teams, wageFor, offerFA, faPreview, transferFunds } = useGame()
   const [pos, setPos] = useState('전체')
   const [q, setQ] = useState('')
   const [pick, setPick] = useState(null)
@@ -59,7 +59,7 @@ export default function FreeAgents() {
           </ul>
         </div>
       )}
-      {pick && <OfferSheet player={pick} ask={wageFor(pick) * 1.1} onClose={() => setPick(null)} offerFA={offerFA} preview={faPreview} cash={save.finance?.cash ?? 0} />}
+      {pick && <OfferSheet player={pick} ask={wageFor(pick) * 1.1} onClose={() => setPick(null)} offerFA={offerFA} preview={faPreview} cash={transferFunds} />}
     </>
   )
 }

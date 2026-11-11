@@ -1611,3 +1611,14 @@ a.dt-chip { color: inherit; text-decoration: none; }
 .dr-input { display: flex; gap: 6px; }
 .dr-input input { flex: 1; background: var(--panel); color: inherit; border: 1px solid rgba(255,255,255,.15); border-radius: 8px; padding: 6px 8px; font: inherit; font-size: .82rem; }
 .dr-attach { display: flex; align-items: center; gap: 5px; }
+
+/* 이사회 예산: 이적 자금 ↔ 임금 예산 */
+.bud-two { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+.bud-two > div { display: grid; gap: 2px; padding: 9px 11px; border-radius: 11px; background: var(--panel-2); }
+.bud-two span { font-size: .72rem; color: var(--muted); font-weight: 700; }
+.bud-two b { font-size: 1.05rem; } .bud-two b em { font-style: normal; font-size: .7rem; color: var(--muted); }
+.bud-two small { font-size: .66rem; color: var(--muted); }
+
+.market-log ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 5px; }
+.market-log li { font-size: .78rem; padding: 6px 9px; border-radius: 9px; background: var(--panel-2); }
+.market-log li em { font-style: normal; float: right; color: #86efac; font-weight: 700; }

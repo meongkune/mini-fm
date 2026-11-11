@@ -12,7 +12,7 @@ export function effectiveTeams(baseTeams, save) {
   // 세이브에 명단이 저장된 뒤 데이터에 새로 들어온 선수(명단 갱신으로 추가된 선수)는 원래 구단에 붙인다
   //   단, 이미 어느 명단에 있거나 · 방출(FA) · 해외로 판 선수는 제외
   const placed = save.rosters ? new Set(Object.values(save.rosters).flat()) : null
-  const away = new Set([...(save.released || []).map((p) => p.id), ...Object.keys(save.abroad || {}), ...Object.keys(save.gone || {})])
+  const away = new Set([...(save.released || []).map((p) => p.id), ...Object.keys(save.abroad || {}), ...Object.keys(save.gone || {}), ...Object.keys(save.left || {})]) // left: 은퇴·리그를 떠난 선수
   return baseTeams.map((t) => {
     const ids = save.rosters?.[t.id]
     const fresh = ids ? t.players.filter((p) => !placed.has(p.id) && !away.has(p.id)).map((p) => p.id) : []

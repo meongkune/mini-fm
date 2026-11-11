@@ -14,8 +14,9 @@ export function potentialOf(p) {
   if (p.pa) return p.pa // 유스 선수·지난 시즌에 고정된 값
   const ovr = playerOvrOf(p)
   const r = (hash(`pa-${p.id}`) % 1000) / 1000
-  const [lo, hi] = p.age <= 19 ? [6, 20] : p.age <= 21 ? [4, 14] : p.age <= 23 ? [2, 9] : p.age <= 26 ? [0, 4] : [0, 0]
-  return Math.min(95, ovr + Math.round(lo + (hi - lo) * r))
+  // 대부분은 조금만 크고, 소수만 크게 큰다 (r^1.7 분포) — 모두가 잠재력을 다 채우면 리그 전체 수준이 해마다 부풀어 오른다
+  const [lo, hi] = p.age <= 19 ? [4, 18] : p.age <= 21 ? [3, 13] : p.age <= 23 ? [1, 8] : p.age <= 26 ? [0, 3] : [0, 0]
+  return Math.min(95, ovr + Math.round(lo + (hi - lo) * r ** 1.7))
 }
 
 /** 스카우트 평가: 잠재력을 별 1~5개로 (정확한 값은 숨김) */

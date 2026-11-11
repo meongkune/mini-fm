@@ -47,6 +47,10 @@ jobs:
         shell: bash
         run: set -o pipefail; node tools/check_engine.mjs | tee -a "$GITHUB_STEP_SUMMARY"
 
+      - name: 시즌 밸런스 검사 (5시즌을 돌려 전력·나이·명단·이적 시장이 무너지지 않는지)
+        shell: bash
+        run: set -o pipefail; node tools/sim_seasons.mjs premier-league BRE 5 --check | tee -a "$GITHUB_STEP_SUMMARY"
+
       - name: 빌드 (레포 이름을 base 경로로)
         working-directory: frontend
         env:

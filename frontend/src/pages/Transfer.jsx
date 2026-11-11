@@ -9,7 +9,7 @@ import { Crest, Flag } from '../components/Badges.jsx'
 import NeedTeam from './NeedTeam.jsx'
 import { CondBar } from '../components/Rating.jsx'
 import { PATIENCE, money, potentialStars, valueOf } from '../game/trade.js'
-import { eur, wageBill, wageBudget, yearsLeft } from '../game/finance.js'
+import { eur, transferFunds, wageBill, wageBudget, yearsLeft } from '../game/finance.js'
 import { sayToClub } from '../game/aiTalk.js'
 import { playerOvr, short, useGame } from '../store.jsx'
 import { keyAttrs20 } from '../game/attributes.js'
@@ -51,7 +51,7 @@ export default function Transfer() {
   const sorter = { ovr: (a, b) => playerOvr(b.p) - playerOvr(a.p), value: (a, b) => b.v - a.v, pot: (a, b) => b.pot - a.pot || a.p.age - b.p.age, age: (a, b) => a.p.age - b.p.age }[sort]
   const f0 = save.finance || {}
   const room0 = Math.max(0, wageBudget(f0) - wageBill(save, myTeam, data.leagueId))
-  const canPay = (p, v) => v <= (f0.cash ?? 0) // 이적료를 현금으로 낼 수 있나
+  const canPay = (p, v) => v <= transferFunds(f0) // 이적료를 이적 자금으로 낼 수 있나
   const wageOk = (p) => wageFor(p) * 1.15 <= room0 // 연봉이 임금 예산 여유 안인가
   const canBuy = (p, v) => canPay(p, v) && wageOk(p)
   const filtered = market
@@ -77,7 +77,7 @@ export default function Transfer() {
       </div>
       <CurrencyToggle />
       <div className="budget-strip">
-        <div><span>현금(이적 자금)</span><b className={(f.cash ?? 0) < 0 ? 'bad-text' : ''}>{eur(f.cash ?? 0)}</b></div>
+        <div><span>이적 자금</span><b className={transferFunds(f) <= 0 ? 'bad-text' : ''}>{eur(transferFunds(f))}</b></div>
         <div><span>임금 예산 여유</span><b className={room <= 0 ? 'bad-text' : ''}>{eur(room)}/년</b></div>
         <div><span>판매 목록</span><b>{(save.forSale || []).length}명</b></div>
       </div>
@@ -113,7 +113,7 @@ export default function Transfer() {
             ['★ 파란 별', '잠재력 — 앞으로 클 수 있는 최대치'],
             ['숫자 3개', '그 포지션의 핵심 능력치 (1~20, 16 이상이면 정상급)'],
             ['초록 금액', '선수 가치(이적료 기준). 아래 작은 글씨는 요구 연봉'],
-            ['✔ 영입 가능', '이적료를 현금으로 낼 수 있고 연봉도 임금 예산 안'],
+            ['✔ 영입 가능', '이적료를 이적 자금으로 낼 수 있는 선수 (이적 자금·임금 예산은 구단 운영에서 맞바꿀 수 있다)'],
             ['➕ 선수 끼워 넣기', '우리 선수를 얹으면 상대가 매긴 값어치만큼 현금을 덜 낸다. 그 포지션이 부족한 구단일수록 비싸게 쳐준다'],
             ['🔁 임대', '시즌 끝까지 빌려 온다. 임대료 + 연봉 일부 부담. 핵심·주전 선수는 빌려주지 않는다. 내 선수 임대 보내기는 선수 상세 → 계약'],
             ['🗣️ 단장과 협상', '상대 단장(AI)에게 근거를 들어 말하면 다음 제안 때 금액을 조금(최대 8%) 낮춰 준다'],
@@ -201,6 +201,16 @@ export default function Transfer() {
         </div>
       )}
       <p className="muted small">잠재력 ★은 스카우트 평가입니다 · 총 {totalRounds}라운드 중 초반 4라운드·중반 4라운드에 이적 시장이 열립니다.</p>
+      {(save.marketLog || []).length > 0 && (
+        <div className="card market-log">
+          <h3>📰 다른 구단 이적 소식 <span className="muted small">최근 {Math.min(12, save.marketLog.length)}건</span></h3>
+          <ul>
+            {save.marketLog.slice(0, 12).map((d, i) => (
+              <li key={i}><b>{d.name}</b> <span className="muted">{d.pos} · {d.age}세</span> {d.from} → <b>{d.to}</b>{d.league ? <span className="muted"> ({d.league})</span> : null} <em>{money(d.fee)}</em></li>
+            ))}
+          </ul>
+        </div>
+      )}
       {pick && <BidSheet p={pick.p} t={pick.t} lid={pick.lid} onClose={() => setPick(null)} />}
     </section>
   )
@@ -212,7 +222,7 @@ const ROLE_TXT = (rank) => (rank < 3 ? '핵심 선수' : rank < 11 ? '주전' : 
 
 function BidSheet({ p, t, lid, onClose }) {
   const { bidFor, loanBid, loanIn, loanWage, swapPreview, signTransfer, askWage, transferWindow, valueFor, save, myTeam, data, totalRounds, addPromise, isLoanIn, contractOf } = useGame()
-  const cash = save.finance?.cash ?? 0
+  const cash = transferFunds(save.finance || {})
   const room = Math.max(0, wageBudget(save.finance || {}) - wageBill(save, myTeam, data.leagueId))
   const v = valueFor(p)
   const [mode, setMode] = useState('buy') // buy: 완전 이적 · loan: 임대
@@ -257,7 +267,7 @@ function BidSheet({ p, t, lid, onClose }) {
             <div><span>잠재력</span><b><Stars value={potentialStarsOf(p)} tone="pot" /></b></div>
             <div><span>선수 가치</span><b className="good-text">{money(v)}</b></div>
             <div><span>{mode === 'loan' ? '지금 연봉' : '요구 연봉'}</span><b>{eur(mode === 'loan' ? fullWage : wage)}<small>/년</small></b></div>
-            <div><span>우리 현금</span><b className={cash < (mode === 'loan' ? loanFee : fee) ? 'bad-text' : ''}>{eur(cash)}</b></div>
+            <div><span>이적 자금</span><b className={cash < (mode === 'loan' ? loanFee : fee) ? 'bad-text' : ''}>{eur(cash)}</b></div>
             <div><span>임금 예산 여유</span><b className={room < (mode === 'loan' ? fullWage * share : wage) ? 'bad-text' : ''}>{eur(room)}<small>/년</small></b></div>
           </div>
           <div className="bi-keys">{keyAttrs20(p).map(([k, x]) => <span key={k} className={x >= 16 ? 'hi' : x >= 12 ? 'mid' : 'lo'}><b>{x}</b>{k}</span>)}</div>

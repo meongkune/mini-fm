@@ -2,7 +2,7 @@
 import Stars, { abilityStars } from '../components/Stars.jsx'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ROSTER_MAX, eur, ffpStatus, gateModel, ticketPct, wageBill, wageBudget, yearsLeft } from '../game/finance.js'
+import { ROSTER_MAX, eur, ffpStatus, gateModel, ticketPct, wageBill, wageBudget, yearsLeft, transferFunds, shiftRange, revenueOf } from '../game/finance.js'
 import { DECISIONS, decisionReady, fanLabel } from '../game/owner.js'
 import { playerOvr, useGame } from '../store.jsx'
 import PlayerSheet from '../components/PlayerSheet.jsx'
@@ -10,7 +10,7 @@ import CurrencyToggle from '../components/CurrencyToggle.jsx'
 import NeedTeam from './NeedTeam.jsx'
 
 export default function Club() {
-  const { myTeam, save, data, ownerDecide, setTicket, setWageRatio, contractOf, totalRounds } = useGame()
+  const { myTeam, save, data, ownerDecide, setTicket, setWageRatio, setBudgetShift, contractOf, totalRounds } = useGame()
   const [last, setLast] = useState(null)
   const [detail, setDetail] = useState(null)
   if (!myTeam) return <NeedTeam />
@@ -35,7 +35,8 @@ export default function Club() {
 
       <div className="owner-top">
         <div className={`card own-cash ${f.cash < 0 ? 'neg' : ''}`}>
-          <span>현금</span><strong>{eur(f.cash)}</strong>
+          <span>현금 (통장 잔고)</span><strong>{eur(f.cash)}</strong>
+          {f.fm >= 5 && <small>그중 이적 자금 <b>{eur(transferFunds(f))}</b> · 임금 예산 {eur(wageBudget(f))}/년</small>}
           <small>연봉 총액 {eur(bill)}/년{save.owner?.wageCut ? ' (15% 삭감 중)' : ''}{save.owner?.debt ? ` · 사채 ${eur(save.owner.debt)}` : ''}</small>
           {f.warn > 0 && <em className="bad-text">💸 재정 위기 {f.warn}/5라운드</em>}
         </div>
@@ -67,7 +68,7 @@ export default function Club() {
         </div>
       )}
 
-      <FinancePanel f={f} bill={bill} save={save} setTicket={setTicket} setWageRatio={setWageRatio} fans={fans} totalRounds={totalRounds} />
+      <FinancePanel f={f} bill={bill} save={save} setTicket={setTicket} setWageRatio={setWageRatio} setBudgetShift={setBudgetShift} fans={fans} totalRounds={totalRounds} />
 
       <div className="card">
         <h3>구단주 결정</h3>
@@ -119,7 +120,38 @@ export default function Club() {
 }
 
 /** 재정 패널: 한눈에 보는 재정 상태(신호등·할 일) · 핵심 지표 · FFP 게이지 · 항목별 수입/지출 · 임금 예산 · 티켓 가격 */
-function FinancePanel({ f, bill, save, setTicket, setWageRatio, fans, totalRounds }) {
+/**
+ * 이사회 예산: 이적 자금(이적료·임대료·계약금에 쓰는 돈)과 임금 예산(1년 연봉 총액 한도)
+ * 막대로 둘을 맞바꾼다 — 임금 예산 €1M/년을 늘리면 이적 자금이 €2M 줄고, 반대도 된다. 공짜로 늘어나는 돈은 없다.
+ */
+function BudgetCard({ f, bill, setBudgetShift }) {
+  const { min, max } = shiftRange(f, bill)
+  const shift = Math.max(min, Math.min(max, f.shift || 0))
+  const wb = wageBudget(f)
+  const tf = transferFunds(f)
+  const room = Math.round((wb - bill) * 10) / 10
+  return (
+    <div className="card budget-card">
+      <h3>이사회 예산 <span className="muted small">시즌마다 이사회가 정해 줍니다 · 예상 매출 {eur(revenueOf(f))}/년</span></h3>
+      <div className="bud-two">
+        <div><span>💰 이적 자금</span><b>{eur(tf)}</b><small>이적료·임대료·계약금에 쓰는 돈 (한 번 쓰면 줄어듦)</small></div>
+        <div><span>🧾 임금 예산</span><b className={room < 0 ? 'bad-text' : ''}>{eur(wb)}<em>/년</em></b><small>지금 연봉 총액 {eur(bill)} · {room >= 0 ? `여유 ${eur(room)}` : `초과 ${eur(-room)} — 영입·인상 재계약 불가`}</small></div>
+      </div>
+      <label className="tp-slider">
+        <span className="tp-row"><b>맞바꾸기</b><em>{shift === 0 ? '이사회가 준 그대로' : shift > 0 ? `이적 자금 ${eur(shift * 2)} → 임금 예산 +${eur(shift)}/년` : `임금 예산 ${eur(-shift)}/년 → 이적 자금 +${eur(-shift * 2)}`}</em></span>
+        <input type="range" min={min} max={max} step={0.5} value={shift} disabled={min === max} onChange={(e) => setBudgetShift(Number(e.target.value))} />
+        <span className="tp-ends"><small>← 이적 자금 늘리기</small><small>임금 예산 늘리기 →</small></span>
+      </label>
+      <div className="ratio-bar"><i style={{ width: `${Math.min(100, (bill / Math.max(1, wb)) * 100)}%` }} className={bill > wb ? 'lo' : bill > wb * 0.92 ? 'mid' : 'hi'} /></div>
+      <p className="small muted" style={{ marginBottom: 0 }}>
+        현금(통장)과 예산은 다릅니다. 통장에 돈이 있어도 이사회가 허락한 이적 자금까지만 선수 영입에 쓸 수 있고, 연봉 총액은 임금 예산을 넘을 수 없습니다.
+        선수를 팔면 받은 돈의 80%가 이적 자금으로 돌아옵니다. 이적료는 통장에서는 바로 나가지만 FFP 손익에는 계약 기간으로 나눠 잡힙니다.
+      </p>
+    </div>
+  )
+}
+
+function FinancePanel({ f, bill, save, setTicket, setWageRatio, setBudgetShift, fans, totalRounds }) {
   const pct = ticketPct(f)
   const g = gateModel(f, fans, save, pct)
   const perGame = ((f.base || 40) * 0.3) / (totalRounds / 2) * g.revenueK
@@ -192,6 +224,7 @@ function FinancePanel({ f, bill, save, setTicket, setWageRatio, fans, totalRound
         </div>
       </div>
 
+      {f.fm >= 5 ? <BudgetCard f={f} bill={bill} setBudgetShift={setBudgetShift} /> : (
       <div className="card">
         <h3>임금 예산 <span className="muted small">연봉 총액 {eur(bill)} / 예산 {eur(budget)}</span></h3>
         <label className="tp-slider">
@@ -202,6 +235,7 @@ function FinancePanel({ f, bill, save, setTicket, setWageRatio, fans, totalRound
         <div className="ratio-bar"><i style={{ width: `${Math.min(100, (bill / Math.max(1, budget)) * 100)}%` }} className={bill > budget ? 'lo' : bill > budget * 0.9 ? 'mid' : 'hi'} /></div>
         <p className="small muted" style={{ marginBottom: 0 }}>예산을 넘는 영입·재계약은 막힙니다. 예산을 늘리면 FFP 위험이 커집니다.</p>
       </div>
+      )}
 
       <div className="card">
         <h3>티켓 가격 <span className="muted small">기준 대비 {pct > 0 ? '+' : ''}{pct}%</span></h3>

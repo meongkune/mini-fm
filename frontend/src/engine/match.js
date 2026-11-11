@@ -16,7 +16,11 @@ const AI_SHAPES = ['4-4-2', '4-3-3', '4-2-3-1', '4-1-4-1', '3-5-2', '4-4-1-1', '
 export const aiFormation = (teamId) => AI_SHAPES[[...String(teamId)].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7) % AI_SHAPES.length]
 export const MAX_SUBS = 5
 // 전력 차가 결과에 미치는 정도 (클수록 이변이 잦다)
-const HOME_ADV = 4
+const HOME_ADV = 5
+// 그날 컨디션(팀 전체 운)의 폭: 표준편차 약 2% (예전 3.5%는 팀 간 전력 차만큼 커서, 강팀 승률이 낮고 3골 차 대승이 실제의 1.7배였다)
+const DAY_SPREAD = 0.035
+// 유효슛 비율: 슛 중 골문 안으로 가는 비율을 실제(약 1/3)에 맞추고, 그만큼 유효슛이 골이 될 확률을 올린다 (득점 수는 그대로)
+const ON_TARGET_K = 0.78
 // 전술 효과 계수 (선수 능력 계수보다 작을수록 = 더 크게 반영)
 const K_TMID = 120
 const K_TCHANCE = 200
@@ -35,7 +39,7 @@ const P_PEN = 0.015
 const P_FK = 0.05
 const P_FKX = 0.09
 // 크로스·돌파가 수비 맞고 나가 코너킥이 되는 확률 (분당)
-const P_CROSS_CORNER = 0.07
+const P_CROSS_CORNER = 0.06
 
 // ── 난수: 상태에 정수 하나만 저장 (mulberry32) ──
 function rngOf(match) {
@@ -70,9 +74,13 @@ export function pickLineup(team, formation = '4-4-2', status = {}, { useConditio
 }
 
 export function createMatch({ home, away, homeCfg = {}, awayCfg = {}, seed, status = {}, myIdx = null }) {
+  // 리그 수준 보정: 엔진의 여러 기준(AI 전술 성향·상성 문턱)이 프리미어리그 수준의 절대값에 맞춰져 있어서, 수준이 낮은 리그는
+  //   거의 모든 팀이 '약팀'으로 분류돼 수비적으로 나오고 골이 덜 나왔다 (에레디비시 2.2골 — 실제는 3골대).
+  //   두 팀의 평균 수준이 기준(81)보다 낮으면 양 팀을 똑같이 올려서 본다 → 두 팀의 차이는 그대로
+  const lift = Math.max(0, LEVEL_REF - (levelOf(home) + levelOf(away)) / 2)
   const sideState = (team, cfg) => {
     // 상대(AI)는 구단 고유 전형 + 전력에 맞는 스타일 (강팀: 점유·압박, 약팀: 역습·수비)
-    const strength = [...team.players].map(playerOvrOf).sort((a, b) => b - a).slice(0, 11).reduce((s, v) => s + v, 0) / 11
+    const strength = levelOf(team) + lift
     const tactics = cfg.tactics ? { ...DEFAULT_TACTICS, ...cfg.tactics } : { ...DEFAULT_TACTICS, ...aiTactics(team, strength), formation: aiFormation(team.id) }
     if (!cfg.tactics?.formation && !cfg.lineup) tactics.formation = aiFormation(team.id)
     const byId = Object.fromEntries(team.players.map((p) => [p.id, p]))
@@ -100,6 +108,7 @@ export function createMatch({ home, away, homeCfg = {}, awayCfg = {}, seed, stat
     talk: [0, 0], // 하프타임 지시 효과 (경기력 배수 보정)
     // 그날의 컨디션(운): 같은 전력이라도 경기마다 ±4% 안팎으로 달라진다 → 약팀이 이기는 날도 있다
     day: [dayForm(s, 1), dayForm(s, 2)],
+    lift,
     scorers: [],
     events: [],
     timeline: [],
@@ -109,11 +118,14 @@ export function createMatch({ home, away, homeCfg = {}, awayCfg = {}, seed, stat
   return match
 }
 
+const LEVEL_REF = 81
+const levelOf = (team) => { const o = team.players.map(playerOvrOf).sort((a, b) => b - a).slice(0, 11); return o.length ? o.reduce((a, b) => a + b, 0) / o.length : LEVEL_REF }
+
 // 경기마다 고정되는 '그날 컨디션' (정규분포 근사, 표준편차 약 3.5%)
 function dayForm(seed, k) {
   let u = 0
   for (let i = 0; i < 4; i++) u += hash(`day-${seed}-${k}-${i}`)
-  return 1 + (u - 2) * 0.06
+  return 1 + (u - 2) * DAY_SPREAD
 }
 
 // 그 분의 선수 실효 능력치: 체력·사기(±8%)·폼(±5%)·하프타임 지시·태업·그날 컨디션
@@ -138,10 +150,11 @@ function xiOf(match, ctx, idx) {
     const fit = fitOf(p, sd.slots[i])
     const k = effFactor(match, ctx, idx, p) * fit
     // 세부 능력치(공격·기술·전술·수비·창의성 / 골키퍼: 선방·예측·빌드업·공중볼)도 같은 배수로
+    const lift = match.lift || 0
     const A = {}
     const am = attrsOf(p).map
-    for (const key in am) A[key] = am[key] * k
-    xi.push({ ...p, att: p.att * k, def: p.def * k, A, pos: ROLE_POS[sd.slots[i]], realPos: p.pos, slot: sd.slots[i] })
+    for (const key in am) A[key] = am[key] * k + lift
+    xi.push({ ...p, att: p.att * k + lift, def: p.def * k + lift, A, pos: ROLE_POS[sd.slots[i]], realPos: p.pos, slot: sd.slots[i] })
   })
   const g = Object.fromEntries(['GK', 'DF', 'MF', 'FW'].map((pos) => [pos, xi.filter((p) => p.pos === pos)]))
   return { xi, g, fwAtt: avg(g.FW.map((p) => p.att), 60), mfAtt: avg(g.MF.map((p) => p.att), 60), dfDef: avg(g.DF.map((p) => p.def), 60) }
@@ -167,10 +180,11 @@ function sideRatings(match, ctx, idx) {
   // 경기 상황: 후반 55분 이후 지는 팀은 라인을 올려 몰아붙이고, 이기는 팀은 지키는 쪽으로 기운다
   const diff = match.score[idx] - match.score[1 - idx]
   const late = match.minute > 55 ? Math.min(1, (match.minute - 55) / 20) : 0
-  const chase = late * (diff < 0 ? Math.min(2, -diff) : 0)
+  const chase = late * (diff < 0 ? (diff <= -3 ? 0.6 : Math.min(2, -diff)) : 0) // 3골 넘게 지면 체념 — 무리하게 올라가지 않는다
   const hold = late * (diff > 0 ? 1 : 0)
-  const gsAtt = chase * 3 - hold * 2
-  const gsDef = -chase * 2.5 + hold * 2
+  const ease = match.minute > 30 && diff >= 2 ? Math.min(2, diff - 1) : 0 // 2골 넘게 앞서면 힘을 뺀다 (대승이 지나치게 많지 않게)
+  const gsAtt = chase * 3 - hold * 2 - ease * 4
+  const gsDef = -chase * 1.8 + hold * 2 + ease * 1.5
   // 세부 능력치를 장면별로 쓴다 (FM처럼): 데이터가 없으면 공격·수비로 추정한 값
   const at = (p, k) => p.A?.[k] ?? (k === '수비' || k === '전술' ? p.def : p.att)
   const fwAtt = g.FW.map((p) => at(p, '공격'))
@@ -366,6 +380,7 @@ export function step(match, ctx, { withEvents = true } = {}) {
 
   // 슈팅 판정 (오픈 플레이·세트피스 공통): 'goal' | 'save' | 'miss'
   const resolve = ({ shooter, assister, pOn, pGoal, how }) => {
+    if (how !== 'pen') { const g = pOn * pGoal; pOn *= ON_TARGET_K; pGoal = Math.min(0.75, g / pOn) }
     S[atk].shots++
     match.ps[shooter.id].sh++
     const xg = pOn * pGoal
@@ -412,7 +427,7 @@ export function step(match, ctx, { withEvents = true } = {}) {
     const aAir = avg(top(targets, 4), 60)
     const dAir = avg(top(xd, 5), 60)
     const airDiff = (aAir - dAir) * (mark === 'man' ? 1.3 : mark === 'zonal' ? 0.75 : 1) - ((gkAttr?.['공중볼'] ?? 60) - 70) * 0.3
-    let pShot = (sp === 'corner' ? 0.3 : 0.24) + (kickOf(taker) - 72) / 250 + airDiff / 120 + (CORNER_EDGE[routine]?.[mark] ?? 0)
+    let pShot = (sp === 'corner' ? 0.33 : 0.24) + (kickOf(taker) - 72) / 250 + airDiff / 120 + (CORNER_EDGE[routine]?.[mark] ?? 0)
     if (routine === 'short') pShot -= 0.1
     if (rng.random() >= clamp(pShot, 0.1, 0.5)) {
       if (hash(`c-${match.seed}-${minute}-${match.plus}`) < 0.25 && withEvents) say({ type: 'chance', text: `${sp === 'corner' ? '🚩 코너킥' : '🎯 프리킥 크로스'}, ${names[dfn]} 수비가 걷어냅니다.` })
@@ -473,7 +488,7 @@ export function step(match, ctx, { withEvents = true } = {}) {
   const shoot = (long) => {
     const shooters = field(atk)
     if (!shooters.length) return
-    const w = long ? { FW: 1.2, MF: 1.7, DF: 0.6 } : { FW: 3.0, MF: 1.15, DF: 0.55 }
+    const w = long ? { FW: 1.2, MF: 1.8, DF: 0.4 } : { FW: 3.0, MF: 1.3, DF: 0.35 }
     const shooter = rng.weighted(shooters, shooters.map((p) => w[p.pos] * p.att * p.att / 70)) // 공격력이 높은 선수일수록 슈팅 기회가 많다
     const helpers = shooters.filter((p) => p.id !== shooter.id)
     const assister = helpers.length && rng.random() < (long ? 0.35 : 0.78) ? rng.weighted(helpers, helpers.map((p) => ({ MF: 2.2, FW: 1.6, DF: 0.7 })[p.pos] * p.att)) : null
@@ -494,7 +509,7 @@ export function step(match, ctx, { withEvents = true } = {}) {
     }
   }
 
-  if (rng.random() > CHANCE + r[atk].chance + (a - d) / K_CHANCE + (r[atk].create - r[dfn].organise) / K_CRE + tEdge / K_TCHANCE) {
+  if (rng.random() > CHANCE * (0.84 + 0.32 * Math.min(1, minute / 90)) + r[atk].chance + (a - d) / K_CHANCE + (r[atk].create - r[dfn].organise) / K_CRE + tEdge / K_TCHANCE) {
     // 결정적 찬스 없이 끝난 공격: 파울(→ 프리킥·페널티킥), 오프사이드, 중거리 슈팅, 태클, 크로스 → 코너킥
     const x = rng.random()
     const defenders = field(dfn)
@@ -506,7 +521,7 @@ export function step(match, ctx, { withEvents = true } = {}) {
       const zone = z < P_PEN ? 'pen' : z < P_PEN + P_FK ? 'fk' : z < P_PEN + P_FK + P_FKX ? 'fkx' : 'mid'
       const c = rng.random()
       const sd = match.sides[dfn]
-      const yellowAt = zone === 'pen' ? 0.35 : 0.16
+      const yellowAt = zone === 'pen' ? 0.4 : 0.195
       if (c < 0.0015 || (c < 0.035 && sd.yellows[fouler.id])) { // 경고 받은 선수는 조심하므로 두 번째 경고 확률이 낮다
         const second = c >= 0.0015
         S[dfn].red++
@@ -530,7 +545,7 @@ export function step(match, ctx, { withEvents = true } = {}) {
       else if (zone === 'fk') directFk()
       else if (zone === 'fkx') aerialPlay('fkx')
       else tick.r = 'fk'
-    } else if (x < 0.24 * r[dfn].foul + 0.05 * r[dfn].offside) {
+    } else if (x < 0.24 * r[dfn].foul + 0.032 * r[dfn].offside) {
       S[atk].offsides++ // 수비 라인이 높을수록 상대가 오프사이드에 자주 걸린다
       tick.r = 'offside'
     } else if (x < 0.43) {
@@ -765,4 +780,10 @@ export function predict(home, away, { homeCfg = {}, awayCfg = {}, status = {}, n
     else if (a === b) d++
   }
   return { win: w / n, draw: d / n, loss: (n - w - d) / n, gf: gh / n, ga: ga / n }
+}
+
+/** 진단용: 그 팀의 장면별 전력 (tools/diag_engine.mjs) */
+export function sideView(match, ctx, idx) {
+  const r = sideRatings(match, ctx, idx)
+  return { attack: r.attack, defense: r.defense, midfield: r.midfield, create: r.create, organise: r.organise, keeper: r.keeper, passTech: r.passTech, fwAtt: r.xi.filter((p) => p.pos === 'FW').reduce((a, p) => a + p.att, 0) / Math.max(1, r.xi.filter((p) => p.pos === 'FW').length) }
 }

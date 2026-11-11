@@ -139,15 +139,79 @@ export function initialCash(team, leagueId) {
   return Math.round(40 * moneyOf(leagueId).cash * Math.pow(1.08, s - 75))
 }
 
+// ── 재정 5판: 현실 구단·FM처럼 ──
+//   매출은 구단 규모로 정해지고(게임 시작 때 한 번), 그 뒤로는 연봉을 올리거나 내려도 매출이 따라 움직이지 않는다 (성적에 따라서만 조금 변한다)
+//   매출 100 중 연봉이 약 62, 운영비(직원·구장·유스·원정)가 약 31 → 평소에는 조금 남는다
+//   이사회가 시즌마다 '이적 자금'과 '임금 예산'을 정해 주고, 감독은 둘을 맞바꿀 수만 있다
+//   이적료는 현금으로는 바로 나가지만, FFP 손익에는 계약 기간에 나눠 잡힌다 (5년 계약 €50M → 해마다 €10M)
+export const FIN_MODEL = 5
+export const WAGE_SHARE = 0.62 // 시작 시점: 매출 중 연봉 비중
+export const OPEX = 0.31 // 매출 중 운영비
+export const REV_K = 1.15 // 예상 매출 = base × 1.15 (중계·스폰서·관중·상품 + 평균적인 상금)
+export const WB_SHARE = 0.7 // 이사회가 허락하는 임금 예산: 매출의 70%
+export const SHIFT_K = 2 // 맞바꾸기: 임금 예산 €1M/년 ↔ 이적 자금 €2M
+const r2 = (v) => Math.round(v * 100) / 100
+const v5 = (f) => (f?.fm || 0) >= FIN_MODEL
+/** 한 시즌 예상 매출 */
+export const revenueOf = (f = {}) => r1((f.base || 40) * (v5(f) ? REV_K : 1.1))
+
 /**
- * 재정 시작: 구단 규모(시작 시점 연봉 총액)로 시즌 수입 기준(base)을 정한다
- * 수입 = 연봉 × 1.15 (중계·스폰서 70%, 관중 30%) → 연봉을 늘리면 적자, 줄이면 흑자
+ * 재정 시작: 구단 규모(게임을 시작할 때의 선수단 연봉)로 매출을 정한다 — 이후에는 연봉과 상관없이 고정
  */
 export function newFinance(team, leagueId) {
   const k = clubKOf(team, leagueId)
   const wages = team.players.reduce((s, p) => s + wageFor(p, leagueId, k), 0)
-  const base = r1(Math.max(8, wages * 1.15))
-  return { cash: r1(base * 0.15), base, ticket: 'normal', last: null, ledger: [], warn: 0, wageModel: 4, clubK: k } // 시작 자금은 빠듯하게 (시즌 수입의 15%)
+  const rev = Math.max(10, wages / WAGE_SHARE)
+  const base = r1(rev / REV_K)
+  return {
+    cash: r1(rev * 0.14), base, ticket: 'normal', last: null, ledger: [], warn: 0, wageModel: 4, clubK: k,
+    fm: FIN_MODEL, tb: r1(rev * 0.12), wb: r1(Math.max(rev * WB_SHARE, wages * 1.06)), shift: 0, amort: [],
+  }
+}
+
+/** 예전 재정(4판 이하)을 5판으로: 매출을 '연봉 62%' 기준으로 다시 잡고, 지금 현금·연봉에 맞춰 예산을 준다 */
+export function toFinanceV5(f, bill) {
+  const base = r1((f.base || 40) / (1.15 * WAGE_SHARE * REV_K)) // 예전 base = 시작 연봉 × 1.15
+  const rev = base * REV_K
+  const nf = { ...f, base, fm: FIN_MODEL, tb: r1(Math.max(0, (f.cash || 0) * 0.7)), wb: r1(Math.max(rev * WB_SHARE, bill * 1.06)), shift: 0, amort: [] }
+  delete nf.wageRatio
+  return nf
+}
+
+/** 새 시즌 이사회 예산: 성적이 좋으면 매출이 조금 늘고, 이사회 신뢰가 높을수록 이적 자금을 더 준다 */
+export function boardBudgets(f, { success = true, confidence = 60, bill = 0 } = {}) {
+  if (!v5(f)) return f
+  const base = r1((f.base || 40) * (success ? 1.04 : 0.98))
+  const rev = base * REV_K
+  const cash = f.cash || 0
+  const tb = r1(Math.max(0, Math.min(cash, Math.max(rev * 0.03, cash * 0.65) * (0.75 + confidence / 200))))
+  return { ...f, base, tb, wb: r1(Math.max(rev * WB_SHARE, bill)), shift: 0 }
+}
+
+/** 이적 자금: 이사회가 준 한도에서 임금 쪽으로 넘긴 만큼 빼고, 통장 현금보다 많이는 못 쓴다 */
+export const transferFunds = (f = {}) => (v5(f) ? r1(Math.max(0, Math.min(f.cash || 0, (f.tb || 0) - (f.shift || 0) * SHIFT_K))) : f.cash || 0)
+
+/** 맞바꾸기 범위(€M/년): 음수 = 임금 예산을 줄여 이적 자금으로, 양수 = 이적 자금을 줄여 임금 예산으로 */
+export function shiftRange(f = {}, bill = 0) {
+  // 임금 예산은 지금 연봉 총액 밑으로 못 줄이고, 이적 자금은 통장 현금보다 많아질 수 없으니 그 이상 넘겨도 소용없다
+  const min = -Math.max(0, Math.floor(Math.min((f.wb || 0) - bill, Math.max(0, (f.cash || 0) - (f.tb || 0)) / SHIFT_K) * 2) / 2)
+  const max = Math.max(0, Math.floor((Math.min(f.tb || 0, f.cash || 0) / SHIFT_K) * 2) / 2)
+  return { min, max }
+}
+
+/** 이적료·임대료·계약금 지출: 현금·이적 자금은 바로 줄고, FFP 손익에는 계약 기간에 나눠 잡는다 */
+export function payFee(f, fee, years = 1, cat = '이적료 지출') {
+  if (!v5(f)) return book(f, -fee, cat)
+  const y = clamp(Math.round(years) || 1, 1, 5)
+  const per = r2(fee / y)
+  const b = book(f, -per, cat) // 올해 몫만 손익에
+  return { ...b, cash: r1((f.cash || 0) - fee), tb: r1(Math.max(0, (f.tb || 0) - fee)), amort: y > 1 ? [...(f.amort || []), { per, left: y - 1 }] : f.amort || [] }
+}
+
+/** 이적료 수입: 현금으로 들어오고, 그 80%는 다시 이적 자금으로 쓸 수 있다 */
+export function takeFee(f, fee, cat = '이적료 수입') {
+  const b = book(f, fee, cat)
+  return v5(f) ? { ...b, tb: r1((f.tb || 0) + fee * 0.8) } : b
 }
 
 /** 주급 총액 (€M/년) */
@@ -174,6 +238,8 @@ export function settleMatch(save, { team, leagueId, home, result, totalRounds, c
     items.push(['상품 판매', r1(((base * 0.06) / (totalRounds / 2)) * (0.5 + fans / 100))])
   }
   if (cupStage) items.push(['대회 수당', r1(base * 0.012 * cupPay * (result > 0 ? 1.6 : 1))])
+  // 운영비: 직원·구장·유스·원정 (매출의 31%, 리그 라운드마다)
+  if (!cupStage && v5(f)) items.push(['운영비', -r2((base * REV_K * OPEX) / totalRounds)])
   const wages = cupStage ? 0 : r1(wageBill(save, team, leagueId) / totalRounds)
   if (wages) items.push(['주급', -wages])
   const net = r1(items.reduce((s, [, v]) => s + v, 0))
@@ -278,7 +344,7 @@ export function ffpStatus(f = {}, bill = 0) {
   const cur = f.season ? r1(f.season.rev - f.season.exp) : 0
   const past = (f.history || []).slice(-2).map((x) => x.net)
   const total = r1([...past, cur].reduce((a, b) => a + b, 0))
-  const revenue = Math.max(1, base * 1.1) // 한 시즌 예상 매출 (중계·스폰서·관중·상품)
+  const revenue = Math.max(1, revenueOf(f)) // 한 시즌 예상 매출 (중계·스폰서·관중·상품)
   const ratio = bill / revenue
   const level = total < -allowance || ratio > 1 ? 'breach' : total < -allowance * 0.6 || ratio > 0.85 ? 'warn' : 'ok'
   return { allowance, cur, total, ratio, revenue: r1(revenue), level, label: { ok: '준수', warn: '주의', breach: '위반' }[level] }
@@ -288,7 +354,10 @@ export function ffpStatus(f = {}, bill = 0) {
 export function ffpReview(f = {}, bill = 0, seasonNo = 1) {
   const st = ffpStatus(f, bill)
   const history = [...(f.history || []), { seasonNo, net: st.cur, rev: f.season?.rev || 0, exp: f.season?.exp || 0 }].slice(-5)
-  const nf = { ...f, history, season: { rev: 0, exp: 0, wages: 0 } }
+  // 지난 영입의 이적료 중 올해 몫(분할)은 새 시즌 손익에 미리 잡아 둔다
+  const due = r1((f.amort || []).reduce((a, x) => a + x.per, 0))
+  const amort = (f.amort || []).map((x) => ({ ...x, left: x.left - 1 })).filter((x) => x.left > 0)
+  const nf = { ...f, history, amort, season: due ? { rev: 0, exp: due, wages: 0, cats: { '이적료 분할(지난 영입)': -due } } : { rev: 0, exp: 0, wages: 0 } }
   if (st.level !== 'breach') return { finance: nf, penalty: null, st }
   const breaches = (f.breaches || 0) + 1
   const fine = r1(Math.max(0, -(st.total + st.allowance)) * 0.3 + (f.base || 40) * 0.03)
@@ -309,5 +378,5 @@ export function book(f, amount, cat = amount >= 0 ? '기타 수입' : '기타 �
   return { ...f, cash: r1((f.cash || 0) + amount), season: ss }
 }
 
-/** 임금 예산 (구단주가 정함, 기본: 예상 매출의 85%) */
-export const wageBudget = (f = {}) => r1((f.base || 40) * 1.1 * (f.wageRatio ?? 0.85))
+/** 임금 예산: 이사회가 정한 한도 + 감독이 이적 자금에서 넘겨 온 만큼 (5판 전 세이브는 예전 방식) */
+export const wageBudget = (f = {}) => (v5(f) ? r1((f.wb ?? revenueOf(f) * WB_SHARE) + (f.shift || 0)) : r1((f.base || 40) * 1.1 * (f.wageRatio ?? 0.85)))

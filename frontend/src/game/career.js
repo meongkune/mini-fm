@@ -87,6 +87,7 @@ export function nextSeason(save, { teams, baseTeams, standings, country, baseSea
   for (const p of save.youth || []) base[p.id] = p
   const retired = []
   const growth = []
+  const tStr = Object.fromEntries(teams.map((t) => [t.id, teamStrength(t)]))
   const roundsPlayed = Math.max(1, save.round)
   for (const t of teams) {
     for (const p of t.players) {
@@ -103,6 +104,8 @@ export function nextSeason(save, { teams, baseTeams, standings, country, baseSea
       else if (p.age <= 30) d = Math.round(-2.2 + rnd(k) * 2)
       else if (p.age <= 32) d = Math.round(-4.5 + rnd(k) * 3)
       else d = Math.round(-6.5 + rnd(k) * 4)
+      // 소속 팀 수준을 크게 넘어선 선수는 그 리그에서 더 배울 게 적다 → 성장이 더뎌진다 (더 큰 구단으로 가야 큰다)
+      if (d > 1 && ovr >= tStr[t.id] + 4) d = 1
       const ds = p.age <= 24 ? 1 : p.age >= 30 ? -2 : 0
       mods[p.id] = { ...m, pa, age, att: clamp(p.att + d, 35, 97), def: clamp(p.def + d, 35, 97), sta: clamp(p.sta + ds, 35, 97) }
       if (t.id === save.teamId && d !== 0) growth.push({ p, d })
@@ -114,7 +117,7 @@ export function nextSeason(save, { teams, baseTeams, standings, country, baseSea
   for (const t of teams) if (!rosters[t.id]) rosters[t.id] = t.players.map((p) => p.id)
   for (const r of retired) rosters[r.team] = rosters[r.team].filter((id) => id !== r.p.id)
   const [firsts, lasts] = NAMES[country] || NAMES['잉글랜드']
-  const makeYouth = (teamId, i, lvl, age) => {
+  const makeYouth = (teamId, i, lvl, age, { paBase = 12, paSpan = 18, paPow = 1 } = {}) => {
     const k = `y-${teamId}-${no}-${i}`
     const pos = ['DF', 'MF', 'FW', 'MF', 'DF', 'GK'][hash(k) % (i % 4 === 3 ? 6 : 4)]
     const bias = { GK: [-30, 2], DF: [-10, 6], MF: [0, 0], FW: [8, -18] }[pos]
@@ -122,17 +125,43 @@ export function nextSeason(save, { teams, baseTeams, standings, country, baseSea
       id: `${teamId}-Y${no}${i}`,
       name: `${firsts[hash(k + 'f') % firsts.length]} ${lasts[hash(k + 'n') % lasts.length]}`,
       pos, age, att: clamp(lvl + bias[0], 35, 90), def: clamp(lvl + bias[1], 35, 90), sta: clamp(lvl + 4, 35, 90),
-      pa: clamp(lvl + 12 + Math.round(rnd(k + 'p') * 18), 60, 94), youth: true,
+      pa: clamp(lvl + paBase + Math.round(rnd(k + 'p') ** paPow * paSpan), 55, 94), youth: true,
     }
   }
   const youthPool = [...(save.youth || [])]
-  // AI 구단: 은퇴로 25명 아래가 되면 자체 유스·영입 선수로 채운다 (팀 평균보다 조금 낮은 수준)
+  // AI 구단 선수단 정리 (실제 구단처럼 해마다 물갈이): 주전 경쟁에서 밀린 노장과 넘치는 인원을 내보내고 유스로 채운다
+  //   - 31세 이상인데 팀 내 16위 밖 → 계약 만료로 떠난다
+  //   - 26명을 넘으면 24세 이상 중 능력이 낮은 선수부터 내보낸다
+  //   - 떠난 선수 중 쓸 만한 선수는 FA 시장에 나온다 (나머지는 하부 리그로 간 것으로 본다)
+  const aiReleased = []
+  // 리그를 떠난 선수(은퇴·하부 리그행): 원본 데이터에 남아 있어도 다시 원래 구단 명단에 붙지 않게 기록해 둔다
+  const left = { ...(save.left || {}) }
+  for (const r of retired) left[r.p.id] = 1
+  // 구단의 '원래 규모'(시작 데이터 기준 전력): 유스 수준을 지금 전력이 아니라 여기에 맞춘다 — 지금 전력에 맞추면 해마다 조금씩 부풀어 오른다
+  const baseLvl = Object.fromEntries(baseTeams.map((t) => [t.id, teamStrength(t)]))
+  const retiredIds = new Set(retired.map((r) => r.p.id))
   for (const t of teams) {
     if (t.id === save.teamId) continue
-    const lvl = Math.round(teamStrength(t)) - 7
+    const ranked = t.players.filter((p) => rosters[t.id].includes(p.id) && !retiredIds.has(p.id) && !save.loans?.[p.id]).sort((a, b) => playerOvrOf(b) - playerOvrOf(a))
+    const out = new Set(ranked.filter((p, i) => p.age + 1 >= 31 && i >= 16).map((p) => p.id))
+    const extra = ranked.length - out.size - 26
+    if (extra > 0) for (const p of [...ranked].reverse().filter((p) => !out.has(p.id) && p.age + 1 >= 24).slice(0, extra)) out.add(p.id)
+    if (!out.size) continue
+    rosters[t.id] = rosters[t.id].filter((id) => !out.has(id))
+    const lvl = teamStrength(t)
+    for (const p of ranked) {
+      if (!out.has(p.id)) continue
+      if (playerOvrOf(p) >= lvl - 9 && p.age + 1 <= 33) aiReleased.push({ ...p, ...(mods[p.id] || {}), from: t.id })
+      else left[p.id] = 1
+    }
+  }
+  // AI 구단: 25명 아래가 되면 자체 유스·영입 선수로 채운다 (팀 평균보다 조금 낮은 수준)
+  for (const t of teams) {
+    if (t.id === save.teamId) continue
+    const lvl = Math.round(baseLvl[t.id] ?? teamStrength(t)) - 9
     let i = 0
     while (rosters[t.id].length < 25) {
-      const p = { ...makeYouth(t.id, i, lvl + Math.round(rnd(`${t.id}${no}${i}`) * 4), 18 + (i % 3)), number: 40 + i }
+      const p = { ...makeYouth(t.id, i, lvl + Math.round(rnd(`${t.id}${no}${i}`) * 4), 18 + (i % 3), { paBase: 3, paSpan: 15, paPow: 2 }), number: 40 + i }
       youthPool.push(p); rosters[t.id] = [...rosters[t.id], p.id]; i++
     }
   }
@@ -188,10 +217,15 @@ export function nextSeason(save, { teams, baseTeams, standings, country, baseSea
     ...promiseNews,
     ...newcomers.map((p) => news(0, 'youth', `유스 입단: ${p.name}`, `${p.age}세 ${p.pos} ${p.name} 선수가 1군에 합류했습니다. 스카우트는 성장 가능성을 눈여겨보고 있습니다.`, { playerId: p.id })),
   ]
+  const allReleased = [...aiReleased, ...(save.released || [])]
+  for (const p of allReleased.slice(120)) left[p.id] = 1
   const fresh = {
     ...save,
     seasonNo: next, round: 0, results: [], pstats: {}, status, mods, rosters, youth, history,
     tradeLog: [], bidTalks: {}, inbox: [...inbox, ...(save.inbox || [])].slice(0, 80),
+    // FA 시장: 새로 풀린 선수를 앞에 두고 120명까지만 (오래된 FA는 은퇴·하부 리그행으로 사라진다)
+    released: allReleased.slice(0, 120),
+    left,
     lineup: save.lineup.map((id) => (id && rosters[save.teamId].includes(id) ? id : null)),
   }
   return { save: fresh, review, conf, next }
