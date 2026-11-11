@@ -1,3 +1,4 @@
+import { formationLabel } from '../engine/formation.js'
 import { Guide } from './Transfer.jsx'
 import Stars, { abilityStars } from '../components/Stars.jsx'
 import { useState } from 'react'
@@ -53,7 +54,7 @@ export default function Squad() {
 
   const auto = () => {
     update({ lineup: autoPick(save.formation) })
-    setMsg(`${save.formation}에 맞춰 컨디션까지 고려한 베스트 11을 골랐습니다.`)
+    setMsg(`${formationLabel(save.formation)}에 맞춰 컨디션까지 고려한 베스트 11을 골랐습니다.`)
   }
 
   return (
@@ -61,7 +62,7 @@ export default function Squad() {
       <div className="section-head">
         <div>
           <h1>스쿼드</h1>
-          <p className="muted">{view === 'card' ? '카드를 눌러 선발에 넣거나 뺍니다' : '선수를 누르면 상세 정보와 면담'} · {save.formation}</p>
+          <p className="muted">{view === 'card' ? '카드를 눌러 선발에 넣거나 뺍니다' : '선수를 누르면 상세 정보와 면담'} · <span className="form-tag" title="지금 전형 (전술 탭에서 바꾸기)">📋 {formationLabel(save.formation)}</span></p>
         </div>
         <button className="btn" onClick={auto}>⚡ 자동 선발</button>
       </div>

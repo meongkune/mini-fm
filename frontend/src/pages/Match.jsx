@@ -1,3 +1,4 @@
+import { formationLabel } from '../engine/formation.js'
 import { crowdBoost } from '../game/finance.js'
 import { abilityStars, starText } from '../components/Stars.jsx'
 import { useEffect, useMemo, useRef, useState } from 'react'
@@ -326,7 +327,7 @@ export default function Match() {
             <Odds ctx={ctx} isHome={isHome} save={save} status={status} xi={mySide.onPitch} preFit={preFit} />
             <p className="small muted">상대 핵심: {[...opp.players].sort((a, b) => playerOvr(b) - playerOvr(a)).slice(0, 3).map((p) => `${p.name.split(' ').at(-1)} ${starText(abilityStars(p))}`).join(' · ')}</p>
             <div className="matchup">
-              <div><span className="muted small">내 전술</span><strong>{save.formation} · {styleName(mySide.tactics)}</strong></div>
+              <div><span className="muted small">내 전술</span><strong>{formationLabel(save.formation)} · {styleName(mySide.tactics)}</strong></div>
               <div><span className="muted small">상대 전술</span><strong>{match.sides[1 - myIdx].tactics.formation} · {styleName(match.sides[1 - myIdx].tactics)}</strong></div>
             </div>
             <p className="small muted">🧠 상대 감독 성향: <b>{AI_STYLE[aiStyle(opp.id)][0]}</b> — {AI_STYLE[aiStyle(opp.id)][1]}</p>

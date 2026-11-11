@@ -462,8 +462,13 @@ function injure(match, ctx, idx, rng, withEvents) {
   if (!cands.length) return null
   const p = rng.weighted(cands, cands.map((x) => (x.pos === 'GK' ? 0.3 : 1) * (1.4 - (sd.energy[x.id] ?? 100) / 100)))
   sd.injured.push(p.id)
-  const games = rng.weighted([1, 2, 3, 4, 6, 10], [30, 25, 18, 12, 10, 5])
-  const kinds = games <= 1 ? ['타박상', '가벼운 발목 염좌', '근육 경련'] : games <= 3 ? ['햄스트링 부상', '종아리 근육 부상', '발목 염좌'] : games <= 6 ? ['허벅지 근육 파열', '무릎 인대 부상', '사타구니 부상'] : ['무릎 인대 파열', '발 골절']
+  // 지친 선수(체력 45 미만)는 근육·과부하 부상이 많고 길다. 아주 지친 선수(30 미만)는 드물게 피로 골절까지
+  const e = sd.energy[p.id] ?? 100
+  const tired = e < 45
+  const games = tired ? rng.weighted([1, 2, 3, 4, 6, 10], [15, 22, 22, 18, 15, 8]) : rng.weighted([1, 2, 3, 4, 6, 10], [30, 25, 18, 12, 10, 5])
+  const kinds = tired
+    ? (games <= 2 ? ['근육 경련', '근육 피로 누적'] : games <= 4 ? ['햄스트링 과부하', '종아리 근육 부상'] : e < 30 ? ['피로 골절', '허벅지 근육 파열'] : ['허벅지 근육 파열', '사타구니 부상'])
+    : games <= 1 ? ['타박상', '가벼운 발목 염좌', '근육 경련'] : games <= 3 ? ['햄스트링 부상', '종아리 근육 부상', '발목 염좌'] : games <= 6 ? ['허벅지 근육 파열', '무릎 인대 부상', '사타구니 부상'] : ['무릎 인대 파열', '발 골절']
   const kind = rng.pick(kinds)
   match.injuries = [...(match.injuries || []), { id: p.id, team: idx, games, minute: match.minute, kind }]
   if (withEvents) match.events.push({ minute: match.minute, type: 'injury', team: idx, player: p.name, text: `🚑 ${p.name}(${sd.name}) 부상! 더 뛰기 어려워 보입니다.` })
@@ -753,7 +758,12 @@ export function step(match, ctx, { withEvents = true } = {}) {
   for (const idx of [0, 1]) {
     // 상대가 거칠게 태클하면 부상이 30% 늘고, 부드럽게 하면 20% 준다 (팀당 경기마다 평균 약 0.3명)
     const rough = { hard: 1.3, soft: 0.8 }[match.sides[1 - idx].tactics.tackling] ?? 1
-    if (rng.random() < 0.0034 * rough) {
+    // 체력: 출전 선수들이 지칠수록 부상이 잦다 (기운이 넘치면 0.75배 ~ 평균 체력 45 이하면 1.5배). 경기 전 컨디션이 낮으면 처음부터 지친 상태로 시작한다
+    const sdI = match.sides[idx]
+    const es = sdI.onPitch.map((id) => sdI.energy[id] ?? 100)
+    const avgE = es.length ? es.reduce((a, b) => a + b, 0) / es.length : 100
+    const tiredK = 0.75 + 0.75 * clamp((90 - avgE) / 45, 0, 1)
+    if (rng.random() < 0.0034 * rough * tiredK) {
       const p = injure(match, ctx, idx, rng, withEvents)
       if (p) {
         match.stop += 1

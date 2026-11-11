@@ -1,4 +1,5 @@
 // FM식 면담실: 왼쪽(또는 위) 선수 프로필 · 관계 기록, 가운데 대화 기록, 아래 답변 선택지와 직접 입력
+import MoneyInput from './MoneyInput.jsx'
 import { abilityStars, starText } from './Stars.jsx'
 import { useEffect, useRef, useState } from 'react'
 import { Kit, Flag } from './Badges.jsx'
@@ -126,7 +127,7 @@ export default function TalkRoom({ player, team, status, reason, situation, topi
                       <span className="dp-ask">선수 희망 <b>€{deal.ask}M</b>/년 · 최대 {deal.maxYears}년{deal.current ? <> · 지금 €{deal.current}M</> : null}</span>
                     </div>
                     <div className="dp-row">
-                      <label>연봉 <input type="number" min={0.1} step={0.1} value={offer.wage} onChange={(e) => setOffer({ ...offer, wage: Math.max(0.1, Number(e.target.value)) })} /> €M/년 <em>({Math.round((offer.wage / deal.ask) * 100)}%)</em></label>
+                      <label>연봉 <MoneyInput value={offer.wage} min={0.1} onChange={(w) => setOffer({ ...offer, wage: w })} /> /년 <em>({Math.round((offer.wage / deal.ask) * 100)}%)</em></label>
                       <label>기간 <select value={offer.years} onChange={(e) => setOffer({ ...offer, years: Number(e.target.value) })}>{Array.from({ length: deal.maxYears }, (_, i) => i + 1).map((y) => <option key={y} value={y}>{y}년</option>)}</select></label>
                       <label className="dp-check"><input type="checkbox" checked={offer.raise} onChange={(e) => setOffer({ ...offer, raise: e.target.checked })} /> 활약하면 다음 시즌 25% 인상 약속</label>
                     </div>

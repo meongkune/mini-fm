@@ -1,4 +1,5 @@
 // 이적 시장: 이적료로 영입(상대 구단 AI와 협상) · 판매 목록 등록(제안은 메시지함으로) · FA
+import MoneyInput from '../components/MoneyInput.jsx'
 import TalkRoom from '../components/TalkRoom.jsx'
 import Avatar from '../components/Avatar.jsx'
 import Stars, { abilityStars, potentialStarsOf, starText } from '../components/Stars.jsx'
@@ -24,13 +25,10 @@ const SORTS = [['ovr', '능력'], ['value', '가치'], ['pot', '잠재력'], ['a
 const AGES = [['all', '전 연령'], ['u21', '21세 이하'], ['prime', '22~29세'], ['vet', '30세 이상']]
 /** 희망 가격 직접 입력 (€M): 입력 중에는 글자를 그대로 두고, 올바른 숫자일 때만 저장한다 */
 function AskInput({ value, base, onChange }) {
-  const [text, setText] = useState(String(value))
-  useEffect(() => { if (Number(text) !== value) setText(String(value)) }, [value]) // 밖에서 값이 바뀌면(판매 등록 등) 따라간다
-  const commit = (t) => { const n = Math.round(Number(t) * 10) / 10; if (n > 0 && n !== value) onChange(n) }
   return (
     <label className="ask-price" title="희망 가격 — 원하는 금액을 직접 입력 (€M, 100만 유로 단위)">
       <b>희망 가격</b>
-      <span className="ask-in"><i>€</i><input type="number" inputMode="decimal" min="0.1" step="0.1" value={text} onChange={(e) => { setText(e.target.value); commit(e.target.value) }} onBlur={() => setText(String(value))} /><i>M</i></span>
+      <MoneyInput value={value} min={0.1} onChange={(n) => n !== value && onChange(n)} />
       <small className={value > base * 1.35 ? 'warn-text' : 'muted'}>몸값의 {Math.round((value / base) * 100)}%{value > base * 1.35 ? ' · 비싸서 제안이 낮게 옴' : ''}</small>
       <span className="ask-quick">{[0.8, 1, 1.2, 1.5].map((k) => <button key={k} type="button" onClick={() => onChange(Math.round(base * k * 10) / 10)}>{Math.round(k * 100)}%</button>)}</span>
     </label>

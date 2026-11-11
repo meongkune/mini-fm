@@ -1582,8 +1582,10 @@ a.dt-chip { color: inherit; text-decoration: none; }
 .bc-cond { width: 80%; height: 4px; border-radius: 2px; background: rgba(255,255,255,.1); overflow: hidden; }
 .bc-cond i { display: block; height: 100%; }
 .bc-cond.hi i { background: #22c55e; } .bc-cond.mid i { background: #eab308; } .bc-cond.lo i { background: #ef4444; }
-.bench-card.out { opacity: .75; background: rgba(239,68,68,.1); border-color: rgba(239,68,68,.4); }
-.bench-card .bc-out { position: absolute; inset: auto 0 22px 0; font-style: normal; font-size: .58rem; font-weight: 800; color: #fca5a5; }
+.bench-card.out { background: rgba(239,68,68,.1); border-color: rgba(239,68,68,.45); }
+.bench-card.out > :not(.bc-out) { opacity: .55; }
+.bench-card .bc-out { display: block; width: 100%; text-align: center; margin-top: 2px; font-style: normal; font-size: .6rem; font-weight: 900; color: #fff; background: #dc2626; padding: 2px 4px; border-radius: 6px; box-shadow: 0 1px 4px rgba(0,0,0,.4); white-space: nowrap; }
+.bench-card.out.susp .bc-out { background: #b45309; }
 
 /* 연봉 협상 패널 */
 .deal-panel { display: grid; gap: 6px; padding: 9px 11px; border-radius: 10px; background: rgba(124,92,255,.1); border: 1px solid rgba(167,139,250,.35); margin-bottom: 8px; }
@@ -1679,3 +1681,13 @@ a.dt-chip { color: inherit; text-decoration: none; }
 .mu-list .mu-tag { font-weight: 600; white-space: nowrap; }
 .mu-list .mu-note { grid-column: 2 / -1; font-size: .68rem; opacity: .7; }
 .mu-tip { margin: 6px 0 0; }
+
+/* 금액 입력칸: 유로·원화 환산 함께 */
+.money-input { display: inline-flex; flex-direction: column; gap: 2px; vertical-align: middle; }
+.mi-box { display: inline-flex; align-items: center; gap: 3px; background: var(--panel); border: 1px solid rgba(255,255,255,.18); border-radius: 8px; padding: 3px 7px; }
+.mi-box:focus-within { border-color: #a78bfa; }
+.mi-box i { font-style: normal; font-size: .75rem; color: var(--muted); }
+.mi-box input { width: 64px; background: transparent; border: 0; color: inherit; font: inherit; font-weight: 700; outline: none; text-align: right; }
+.mi-conv { font-size: .64rem; color: #c4b5fd; white-space: nowrap; }
+
+.form-tag { display: inline-block; padding: 1px 8px; border-radius: 999px; background: rgba(124,92,255,.22); color: #ddd6fe; font-weight: 800; font-size: .82rem; }

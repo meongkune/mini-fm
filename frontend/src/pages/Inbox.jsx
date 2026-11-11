@@ -1,3 +1,4 @@
+import MoneyInput, { bothText } from '../components/MoneyInput.jsx'
 import { useEffect, useState } from 'react'
 import { useGame } from '../store.jsx'
 import { TALK_ACTIONS } from '../game/season.js'
@@ -148,10 +149,9 @@ function AskBox({ offer, onAsk }) {
   return (
     <div className="ask-box">
       <span className="small">💬 직접 금액 요구</span>
-      <input type="number" min={0} step={0.5} value={v} onChange={(e) => setV(Number(e.target.value))} />
-      <span className="small muted">€M</span>
+      <MoneyInput value={v} onChange={setV} min={0.1} />
       <button className="btn small" disabled={!(v > 0)} onClick={() => onAsk(v)}>이 금액 요구</button>
-      <small className="muted">제안 {offer.fee}M · 너무 높게 부르면 협상이 깨질 수 있습니다</small>
+      <small className="muted">지금 제안 {bothText(offer.fee)} · 너무 높게 부르면 협상이 깨질 수 있습니다</small>
     </div>
   )
 }

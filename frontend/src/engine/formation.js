@@ -49,6 +49,8 @@ const fill = (table, n, fallback) => table[n] || Array.from({ length: n }, () =>
 const CUSTOM = new Map()
 export const isCustom = (name) => String(name).endsWith('*')
 export const baseOf = (name) => String(name).replace(/\*$/, '')
+/** 화면 표시용 전형 이름: 직접 조정한 전형(이름 끝 *)은 '4-1-4-1 · 직접 조정'으로 */
+export const formationLabel = (name) => (isCustom(name) ? `${baseOf(name)} · 직접 조정` : String(name))
 export function setCustomLayout(name, pos) { if (name && Array.isArray(pos)) CUSTOM.set(name, pos) }
 
 /**
