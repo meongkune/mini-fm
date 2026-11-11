@@ -455,7 +455,8 @@ function aiManage(match, ctx, idx, withEvents) {
 function injure(match, ctx, idx, rng, withEvents) {
   const sd = match.sides[idx]
   const team = ctx.teams[idx]
-  const cands = sd.onPitch.map((id) => team.players.find((p) => p.id === id)).filter(Boolean)
+  // 이미 다친 선수는 다시 고르지 않는다 (교체하기 전까지 경기장에 남아 있어도 같은 선수가 또 다치는 일이 없게)
+  const cands = sd.onPitch.map((id) => team.players.find((p) => p.id === id)).filter((p) => p && !sd.injured.includes(p.id))
   if (!cands.length) return null
   const p = rng.weighted(cands, cands.map((x) => (x.pos === 'GK' ? 0.3 : 1) * (1.4 - (sd.energy[x.id] ?? 100) / 100)))
   sd.injured.push(p.id)
@@ -743,7 +744,9 @@ export function step(match, ctx, { withEvents = true } = {}) {
 
   // 부상 (팀당 경기마다 약 0.3명)
   for (const idx of [0, 1]) {
-    if (rng.random() < 0.0034) {
+    // 상대가 거칠게 태클하면 부상이 30% 늘고, 부드럽게 하면 20% 준다 (팀당 경기마다 평균 약 0.3명)
+    const rough = { hard: 1.3, soft: 0.8 }[match.sides[1 - idx].tactics.tackling] ?? 1
+    if (rng.random() < 0.0034 * rough) {
       const p = injure(match, ctx, idx, rng, withEvents)
       if (p) {
         match.stop += 1
