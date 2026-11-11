@@ -78,7 +78,7 @@ const stamps = {} // 리그별 시즌 파일 갱신일 (명단이 새로 만들�
 for (const l of index.leagues) {
   if (!TOURNAMENTS[l.id]) continue
   const season = JSON.parse(fs.readFileSync(path.join(DATA, l.seasons[0].file), 'utf8'))
-  ours[l.id] = season.teams.flatMap((t) => t.players.map((p) => ({ ...p, lid: l.id })))
+  ours[l.id] = season.teams.flatMap((t) => t.players.map((p) => ({ ...p, lid: l.id, tid: t.id })))
   stamps[l.id] = season.updatedAt || null
 }
 // 이적·강등으로 리그가 바뀐 선수도 찾도록 전체 리그에서 매칭한다
@@ -94,6 +94,8 @@ const writeRatings = (lid, r) => fs.writeFileSync(path.join(OUT, `${lid}.json`),
  * 1) 이름이 같고 나이 차 1 이하  2) 성·이름 첫 글자가 같고 나이 차 1 이하
  * 3) 우리 데이터가 한 단어 이름(예: Martinelli, Rodri)이면 그 단어가 상대 이름에 있고 나이 차 1 이하 — 후보가 하나일 때만
  */
+// 띄어쓰기·하이픈 무시 비교용 (Hee-chan = Heechan)
+const flat = (s = '') => norm(s.replace(/[-'’.]/g, '')).replace(/ /g, '')
 function matchPlayer(list, sp) {
   const full = norm(sp.name)
   const age = ageOf(sp.dateOfBirthTimestamp)
@@ -101,8 +103,24 @@ function matchPlayer(list, sp) {
   const one = (c) => (c.length === 1 ? c[0] : null)
   const parts = full.split(' ')
   return one(list.filter((p) => norm(p.name) === full && near(p)))
+    || one(list.filter((p) => flat(p.name) === flat(sp.name) && near(p)))
     || one(list.filter((p) => { const q = norm(p.name).split(' '); return q.length > 1 && q.at(-1) === parts.at(-1) && q[0][0] === parts[0][0] && near(p) }))
     || one(list.filter((p) => { const q = norm(p.name).split(' '); return q.length === 1 && parts.includes(q[0]) && near(p) }))
+}
+/**
+ * 같은 구단 안에서만 느슨하게 맞추기 (전체 리그에서는 'Silva'·'Martínez' 같은 흔한 이름이 겹쳐 못 찾던 선수)
+ *  성이 같음 → 이름 단어(4글자 이상)가 하나라도 겹침 → SportsAPI 짧은 이름(I. Thiago)의 성 — 나이 차 1 이하, 후보가 하나일 때만
+ */
+function matchInTeam(team, sp) {
+  const age = ageOf(sp.dateOfBirthTimestamp)
+  const near = (p) => age === null || p.age == null || Math.abs(p.age - age) <= 1
+  const one = (c) => (c.length === 1 ? c[0] : null)
+  const names = [sp.name, sp.shortName, [sp.firstName, sp.lastName].filter(Boolean).join(' ')].filter(Boolean).map(norm)
+  const words = new Set(names.flatMap((n) => n.split(' ')).filter((w) => w.length >= 4))
+  const lasts = new Set(names.map((n) => n.split(' ').at(-1)))
+  return one(team.filter((p) => lasts.has(norm(p.name).split(' ').at(-1)) && near(p)))
+    || one(team.filter((p) => norm(p.name).split(' ').some((w) => words.has(w)) && near(p)))
+    || one(team.filter((p) => names.some((n) => flat(n) === flat(p.name))))
 }
 
 let matched = 0
@@ -132,8 +150,17 @@ try {
     for (const [tid, t] of Object.entries(L.teams)) {
       if (t.done && (Date.parse(today) - Date.parse(t.done)) / 864e5 < 60) continue // 60일 지나면 다시 받아 이적·부상 반영
       const d = await tryGet(`/api/teams/${tid}/players`)
-      for (const { player: sp } of d?.players || []) {
-        const p = matchPlayer(everyone, sp)
+      const spList = (d?.players || []).map((x) => x.player)
+      // 1차로 맞춘 선수들이 가장 많이 속한 우리 구단 = 이 SportsAPI 구단 → 못 맞춘 선수는 그 구단 안에서 다시 찾는다
+      const first = new Map(spList.map((sp) => [sp.id, matchPlayer(everyone, sp)]))
+      const votes = {}
+      for (const p of first.values()) if (p) votes[`${p.lid}/${p.tid}`] = (votes[`${p.lid}/${p.tid}`] || 0) + 1
+      const best = Object.entries(votes).sort((a, b) => b[1] - a[1])[0]
+      const ourTeam = best && best[1] >= 5 ? everyone.filter((p) => `${p.lid}/${p.tid}` === best[0]) : []
+      const taken = new Set([...first.values()].filter(Boolean).map((p) => p.id))
+      for (const sp of spList) {
+        let p = first.get(sp.id)
+        if (!p && ourTeam.length) { p = matchInTeam(ourTeam.filter((x) => !taken.has(x.id)), sp); if (p) taken.add(p.id) }
         const mv = sp.proposedMarketValueRaw?.value ?? sp.proposedMarketValue
         if (!p || !mv) continue
         const role = ROLE[sp.positionsDetailed?.[0]]
