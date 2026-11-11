@@ -1,3 +1,4 @@
+import { crowdBoost } from '../game/finance.js'
 import { abilityStars, starText } from '../components/Stars.jsx'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
@@ -72,6 +73,7 @@ export default function Match() {
     matchRef.current = createMatch({ home: ctx.teams[0], away: ctx.teams[1], homeCfg: isHome ? myCfg : oppCfg, awayCfg: isHome ? oppCfg : myCfg, status, myIdx, seed })
     matchRef.current.key = fixtureKey
     if ((save.owner?.campUntil ?? -1) >= save.round) matchRef.current.talk[myIdx] += 0.025 // 구단주 지옥 훈련 효과
+    if (isHome) matchRef.current.talk[myIdx] += crowdBoost(save.owner?.freeGate ? 100 : save.fans ?? 60) // 홈 관중: 민심이 높으면 응원, 낮으면 야유
     setPhase('pre'); setTalk(null); setInterrupt(null); setPaused(false); setShown(-1)
     rerender()
   }, [fixtureKey, save.lineup.join(), save.formation])

@@ -199,7 +199,7 @@ export function runMarket(save, { teams, myTeamId, leagueId, round, totalRounds,
   if (my && !s.aiDeals?.[wkey]?.poach && rnd(`poach-${wkey}-${round}`) < 0.3) {
     const myStr = strengthOf(my)
     const bigger = ai.filter((t) => strengthOf(t) >= myStr + 1 && (cash[t.id] || 0) > 5)
-    const targets = [...my.players].sort((a, b) => playerOvrOf(b) - playerOvrOf(a)).slice(0, 8).filter((p) => !(s.forSale || []).includes(p.id) && !s.status?.[p.id]?.wantsOut && !s.loans?.[p.id] && p.age <= 29)
+    const targets = [...my.players].sort((a, b) => playerOvrOf(b) - playerOvrOf(a)).slice(0, 8).filter((p) => !(s.forSale || []).includes(p.id) && s.notForSale?.[p.id] !== season && !s.status?.[p.id]?.wantsOut && !s.loans?.[p.id] && p.age <= 29)
     const p = targets[hash(`pt-${wkey}`) % Math.max(1, targets.length)]
     if (p && (bigger.length || foreign.length)) {
       inbox.push(...aiBidFor(s, liveTeams, myTeamId, p.id, round, leagueId, world).slice(0, 1).map((m) => ({ ...m, title: m.title.replace('영입 제안', '먼저 온 영입 제안') })))

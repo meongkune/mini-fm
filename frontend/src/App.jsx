@@ -131,7 +131,7 @@ function DesktopApp() {
             <>
               <span className="dt-round">{seasonOver ? '시즌 종료' : `${save.round + 1} / ${totalRounds} 라운드`}</span>
               {save.finance && <Link to="/club" className="dt-chip" title="구단이 지금 가진 현금 (이적료를 낼 수 있는 돈)"><small>구단 현금</small> {eur(save.finance.cash)}</Link>}
-              <Link to="/club" className="dt-chip" title="팬 민심 (0~100) — 성적·티켓 가격에 따라 변합니다"><small>팬 민심</small> {save.fans ?? 60}/100</Link>
+              <Link to="/club" className="dt-chip" title="팬 민심 (0~100) — 성적·티켓 가격에 따라 변합니다"><small>팬 민심</small> {Math.round(save.fans ?? 60)}/100</Link>
               <span className="grow" />
               {opp && !seasonOver && <span className="dt-next"><Crest team={opp} size={20} /> 다음: {nextFixture.cup ? `${nextFixture.comp?.icon || '🏆'} ` : ''}{opp.name} ({nextFixture.isHome ? '홈' : '원정'})</span>}
               <Link className="btn dt-go" to={seasonOver ? '/' : '/match'}>{seasonOver ? '시즌 마감 ▶' : '경기 진행 ▶'}</Link>

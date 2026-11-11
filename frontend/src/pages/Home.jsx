@@ -291,7 +291,7 @@ function OwnerCard({ finance, fans }) {
   return (
     <Link to="/club" className="card owner-card">
       <div><span>현금</span><strong className={finance.cash < 0 ? 'bad-text' : ''}>{eur(finance.cash)}</strong></div>
-      <div><span>팬 민심</span><strong>{face} {fans}</strong><small>{label}</small></div>
+      <div><span>팬 민심</span><strong>{face} {Math.round(fans)}</strong><small>{label}</small></div>
       <div><span>지난 경기</span><strong className={(finance.last?.net ?? 0) >= 0 ? 'good-text' : 'bad-text'}>{finance.last ? `${finance.last.net >= 0 ? '+' : ''}${eur(finance.last.net)}` : '-'}</strong></div>
       <em>🏛️ 구단 운영 →</em>
     </Link>

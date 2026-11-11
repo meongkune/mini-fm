@@ -223,7 +223,7 @@ export function wageBill(save, team, leagueId) {
  * 라운드(경기) 정산: 수입(중계·스폰서·관중) - 주급. 팬 민심은 홈경기 티켓 가격·결과로 변한다
  * extra: { cup: true } 이면 대회 경기 (상금 포함)
  */
-export function settleMatch(save, { team, leagueId, home, result, totalRounds, cupStage = null, cupPay = 1 }) {
+export function settleMatch(save, { team, leagueId, home, result, totalRounds, cupStage = null, cupPay = 1, oppGap = 0 }) {
   const f = { ...(save.finance || newFinance(team, leagueId)) }
   const fans = save.fans ?? 60
   const tk = gateModel(f, fans, save) // 티켓 가격(%)·민심·최근 성적 → 관중
@@ -231,10 +231,15 @@ export function settleMatch(save, { team, leagueId, home, result, totalRounds, c
   const base = f.base || 40
   if (!cupStage) {
     items.push(['중계권', r1((base * 0.45) / totalRounds)])
-    items.push(['스폰서', r1(((base * 0.25) / totalRounds) * (1 + (save.owner?.sponsorBoost || 0)))])
+    // 스폰서: 민심이 높을수록 더 낸다 (0.85~1.15배)
+    items.push(['스폰서', r1(((base * 0.25) / totalRounds) * (1 + (save.owner?.sponsorBoost || 0)) * fanMoneyK(fans))])
+    const nm = save.owner?.naming
+    if (nm && nm.until >= (save.seasonNo || 1)) items.push(['명명권', r2(nm.per / totalRounds)])
   }
+  // 무료 입장의 날: 그 홈경기 입장 수입은 없고 관중석은 꽉 찬다
+  const free = home && !cupStage && save.owner?.freeGate
   if (home) {
-    items.push(['관중 수입', r1(((base * 0.3) / (totalRounds / 2)) * tk.revenueK * (cupStage ? 0.8 + 0.6 * cupPay : 1))])
+    items.push(['관중 수입', free ? 0 : r1(((base * 0.3) / (totalRounds / 2)) * tk.revenueK * (cupStage ? 0.8 + 0.6 * cupPay : 1))])
     items.push(['상품 판매', r1(((base * 0.06) / (totalRounds / 2)) * (0.5 + fans / 100))])
   }
   if (cupStage) items.push(['대회 수당', r1(base * 0.012 * cupPay * (result > 0 ? 1.6 : 1))])
@@ -244,7 +249,7 @@ export function settleMatch(save, { team, leagueId, home, result, totalRounds, c
   if (wages) items.push(['주급', -wages])
   const net = r1(items.reduce((s, [, v]) => s + v, 0))
   f.cash = r1(f.cash + net)
-  f.last = { items, net, ...(home ? { att: tk.att, pct: tk.pct } : {}) }
+  f.last = { items, net, ...(home ? { att: free ? 1 : tk.att, pct: free ? -100 : tk.pct } : {}) }
   f.ledger = [...(f.ledger || []), { r: save.round, net }].slice(-40)
   // 시즌 손익 누적 (FFP 판단용)
   const ss = { rev: 0, exp: 0, wages: 0, ...(f.season || {}) }
@@ -252,9 +257,23 @@ export function settleMatch(save, { team, leagueId, home, result, totalRounds, c
   for (const [k, v] of items) { cats[k] = r1((cats[k] || 0) + v); if (v >= 0) ss.rev = r1(ss.rev + v); else { ss.exp = r1(ss.exp - v); if (k === '주급') ss.wages = r1(ss.wages - v) } }
   ss.cats = cats
   f.season = ss
-  const dFans = (result > 0 ? 2 : result < 0 ? -2 : 0) + (home ? tk.dFans : 0)
-  return { finance: f, fans: clamp(Math.round(fans + dFans), 0, 100) }
+  const dFans = fanDelta(fans, result, oppGap) + (home ? (free ? 8 : tk.dFans) : 0)
+  return { finance: f, fans: clamp(r1(fans + dFans), 0, 100) }
 }
+
+// ── 팬 민심 ──
+//   경기 결과는 '기대 대비'로 움직인다: 강한 상대를 이기면 크게 오르고, 약한 상대에게 지면 크게 깎인다
+//   아무 일이 없으면 조금씩 중간(55)으로 돌아온다 (바닥·꼭대기에 영영 갇히지 않게)
+//   oppGap = 상대 전력 - 우리 전력 (주전 11명 평균)
+export function fanDelta(fans, result, oppGap = 0) {
+  const e = clamp(oppGap / 4, -1, 1) // 상대가 4 이상 강하면 1, 4 이상 약하면 -1
+  const res = result > 0 ? clamp(2 + 2 * e, 1, 4) : result < 0 ? clamp(-2 + 2 * e, -4, -0.5) : 1.5 * e
+  return res + (55 - fans) * 0.03
+}
+/** 민심이 스폰서·상품 수입에 주는 배수: 민심 0 → 0.85, 50 → 1.0, 100 → 1.15 */
+export const fanMoneyK = (fans = 60) => 0.85 + 0.3 * clamp(fans, 0, 100) / 100
+/** 홈 관중 응원: 경기력 배수 보정 (민심 100 → +1.2%, 0 → -1.2% 야유) */
+export const crowdBoost = (fans = 60) => ((clamp(fans, 0, 100) - 50) / 50) * 0.012
 
 /** 재정 위기·파산 판단: 현금 -€30M 이하 경고, 위기 상태로 4라운드 이상 지나거나 -€80M 아래면 파산 */
 export function checkBankruptcy(save, leagueId) {
@@ -367,15 +386,15 @@ export function ffpReview(f = {}, bill = 0, seasonNo = 1) {
 }
 
 /** 현금만 움직이는 돈 (FFP 손익에 넣지 않는다): 사채 대출·상환 같은 빌리고 갚는 돈 */
-export const cashOnly = (f, amount) => ({ ...f, cash: r1((f.cash || 0) + amount) })
+export const cashOnly = (f, amount) => ({ ...f, cash: r2((f.cash || 0) + amount) }) // 0.01 단위 (경기마다 나눠 갚는 작은 금액이 반올림으로 사라지지 않게)
 
 /** 장부 기록 (영입·방출·매각 등 경기 밖의 돈) */
 export function book(f, amount, cat = amount >= 0 ? '기타 수입' : '기타 지출') {
   const ss = { rev: 0, exp: 0, wages: 0, ...(f.season || {}) }
-  ss.cats = { ...(ss.cats || {}), [cat]: r1((ss.cats?.[cat] || 0) + amount) }
-  if (amount >= 0) ss.rev = r1(ss.rev + amount)
-  else ss.exp = r1(ss.exp - amount)
-  return { ...f, cash: r1((f.cash || 0) + amount), season: ss }
+  ss.cats = { ...(ss.cats || {}), [cat]: r2((ss.cats?.[cat] || 0) + amount) }
+  if (amount >= 0) ss.rev = r2(ss.rev + amount)
+  else ss.exp = r2(ss.exp - amount)
+  return { ...f, cash: r2((f.cash || 0) + amount), season: ss }
 }
 
 /** 임금 예산: 이사회가 정한 한도 + 감독이 이적 자금에서 넘겨 온 만큼 (5판 전 세이브는 예전 방식) */

@@ -225,7 +225,7 @@ export function aiBidFor(save, teams, myTeamId, playerId, round, leagueId = save
     const fee = Math.round(open * 10) / 10
     out.push(news(round, 'offer', `💰 ${team.name}${pick.league ? ` (${pick.league})` : ''}의 영입 제안: ${p.name}`, `${team.name}이(가) ${p.name}(${p.pos}, OVR ${playerOvrOf(p)}, ${p.age}세)에게 ${money(fee)}을 제시했습니다. (희망 가격 ${money(ask)} · 선수 가치 ${money(v)})`, {
       offer: { teamId: team.id, lid: pick.lid, playerId: p.id, fee, cap, ask, tries: 0 },
-      actions: [['accept', '✅ 수락', `${money(fee)}에 판매합니다`], ['counter', '↗️ 더 달라고 하기', `희망 가격 ${money(ask)}에 맞춰 달라고 요구합니다`], ['decline', '❌ 거절', '제안을 거절합니다']],
+      actions: [['accept', '✅ 수락', `${money(fee)}에 판매합니다`], ['counter', '↗️ 더 달라고 하기', `희망 가격 ${money(ask)}에 맞춰 달라고 요구합니다`], ['decline', '❌ 거절', '제안을 거절합니다'], ['nfs', '🔒 판매 불가', '이번 시즌에는 어떤 제안도 받지 않습니다 (다른 제안도 모두 거절)']],
     }))
   }
   return out

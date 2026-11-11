@@ -1622,3 +1622,8 @@ a.dt-chip { color: inherit; text-decoration: none; }
 .market-log ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 5px; }
 .market-log li { font-size: .78rem; padding: 6px 9px; border-radius: 9px; background: var(--panel-2); }
 .market-log li em { font-style: normal; float: right; color: #86efac; font-weight: 700; }
+
+/* 구단주: 걸려 있는 효과 · 민심 효과 */
+.owner-fx { list-style: none; margin: 0 0 10px; padding: 0; display: grid; gap: 4px; }
+.owner-fx li { display: flex; gap: 7px; align-items: center; font-size: .78rem; padding: 6px 9px; border-radius: 9px; background: rgba(124,92,255,.1); border: 1px solid rgba(167,139,250,.25); }
+.fan-fx { display: block; margin-top: 4px; font-size: .66rem; color: var(--muted); }

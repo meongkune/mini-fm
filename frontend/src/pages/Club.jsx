@@ -3,7 +3,7 @@ import Stars, { abilityStars } from '../components/Stars.jsx'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ROSTER_MAX, eur, ffpStatus, gateModel, ticketPct, wageBill, wageBudget, yearsLeft, transferFunds, shiftRange, revenueOf } from '../game/finance.js'
-import { DECISIONS, decisionReady, fanLabel } from '../game/owner.js'
+import { DECISIONS, activeEffects, crowdBoost, decisionReady, fanLabel, fanMoneyK } from '../game/owner.js'
 import { playerOvr, useGame } from '../store.jsx'
 import PlayerSheet from '../components/PlayerSheet.jsx'
 import CurrencyToggle from '../components/CurrencyToggle.jsx'
@@ -41,9 +41,10 @@ export default function Club() {
           {f.warn > 0 && <em className="bad-text">💸 재정 위기 {f.warn}/5라운드</em>}
         </div>
         <div className={`card own-fans ${tone}`}>
-          <span>팬 민심</span><strong>{face} {fans}</strong>
+          <span>팬 민심</span><strong>{face} {Math.round(fans)}</strong>
           <small>{fanText}</small>
           <div className="conf-bar"><i style={{ width: `${fans}%` }} className={fans >= 60 ? 'hi' : fans >= 35 ? 'mid' : 'lo'} /></div>
+          <small className="fan-fx">스폰서·상품 ×{fanMoneyK(fans).toFixed(2)} · 홈 응원 {crowdBoost(fans) >= 0 ? '+' : ''}{(crowdBoost(fans) * 100).toFixed(1)}%{fans < 20 ? ' · 시위 중 (이사회 신뢰 하락)' : fans >= 85 ? ' · 이사회 신뢰 상승' : ''}</small>
         </div>
       </div>
 
@@ -72,7 +73,12 @@ export default function Club() {
 
       <div className="card">
         <h3>구단주 결정</h3>
-        <p className="small muted" style={{ marginTop: 0 }}>결과는 운에 따라 달라집니다. 대박이 날 수도, 쫄딱 망할 수도 있습니다.</p>
+        <p className="small muted" style={{ marginTop: 0 }}>모든 결정에는 대가가 있고, 결과는 운에 따라 달라질 수 있습니다. 결정에 쓰고 번 돈은 장부(항목별 수입·지출, FFP)에 그대로 기록됩니다.</p>
+        {activeEffects(save).length > 0 && (
+          <ul className="owner-fx">
+            {activeEffects(save).map(([icon, t], i) => <li key={i}><span>{icon}</span>{t}</li>)}
+          </ul>
+        )}
         <div className="decisions">
           {DECISIONS.map(([k, label, desc, , risk]) => {
             const ready = decisionReady(save, k)

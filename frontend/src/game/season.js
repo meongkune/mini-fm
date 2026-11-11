@@ -166,7 +166,8 @@ export function applyRound(save, { teamsById, schedule, myTeamId, mine, buyers =
       for (const p of my.players) {
         const s = st[p.id]
         const listed = (save.forSale || []).includes(p.id)
-        if ((listed || s?.wantsOut) && (round + hash(p.id)) % (listed ? 1 : 2) === 0) {
+        const nfs = save.notForSale?.[p.id] === (save.seasonNo || 1) // 판매 불가 선언 (이번 시즌)
+        if (!nfs && (listed || s?.wantsOut) && (round + hash(p.id)) % (listed ? 1 : 2) === 0) {
           inbox.push(...aiBidFor({ ...save, status: st }, teams, myTeamId, p.id, round, save.league, buyers))
         }
       }

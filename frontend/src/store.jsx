@@ -13,7 +13,7 @@ import { COMPS, CUP_LEAGUES, buildCups, cupKey, cupStatus, dueMatchday, myCupFix
 import { FX_DEFAULT, FIN_MODEL, boardBudgets, payFee, takeFee, toFinanceV5, transferFunds, shiftRange, cashOnly, gateModel, clubKOf, legacyWageV3, setClubK, setFx, wageInfo, ROSTER_MAX, book, checkBankruptcy, contractOf, eur, faDecision, ffpReview, newFinance, prizeMoney, releaseCost, renewalAsk, settleMatch, wageBill, wageBudget, wageFor, wageShock } from './game/finance.js'
 import { afterMatchOwner, decide } from './game/owner.js'
 import { valueOf } from './game/trade.js'
-import { runMarket } from './game/market.js'
+import { runMarket, strengthOf } from './game/market.js'
 // 받침에 따라 '로/으로'
 const ro = (w) => { const c = w.charCodeAt(w.length - 1) - 0xac00; return w + (c < 0 || c > 11171 ? '(으)로' : c % 28 === 0 || c % 28 === 8 ? '로' : '으로') }
 
@@ -514,7 +514,10 @@ export function GameProvider({ children }) {
 
     /** 이 경기의 구장·관중: 홈 구단 구장, 내 홈경기는 티켓 가격·민심으로 정한 관중률, 다른 경기는 82~99% */
     const venueOf = (homeId, lid = data?.leagueId, seed = '') => {
-      const st = stadiums[lid]?.[homeId]
+      const st0 = stadiums[lid]?.[homeId]
+      // 명명권을 팔았으면 내 구장 이름이 바뀐다
+      const nm = homeId === save.teamId && save.owner?.naming && save.owner.naming.until >= (save.seasonNo || 1) ? save.owner.naming.name : null
+      const st = nm ? { ...(st0 || {}), name: nm } : st0
       if (!st) return null
       let rate = 0.82 + ((([...String(`${homeId}-${seed}`)].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7)) % 1000) / 1000) * 0.17
       if (homeId === save.teamId && save.finance) rate = gateModel(save.finance, save.fans ?? 60, save).att
@@ -556,7 +559,7 @@ export function GameProvider({ children }) {
           const settled = cashOnly(book(r.save.finance || {}, prize, '리그 상금'), -repay)
           const ffp = ffpReview(settled, wageBill(s, myTeam, data.leagueId), s.seasonNo || 1)
           const finance = boardBudgets({ ...ffp.finance, ...(ffp.penalty ? { ban: (s.seasonNo || 1) + 1 } : {}) }, { success: r.review.success, confidence: r.conf, bill: wageBill(s, myTeam, data.leagueId) })
-          const owner = { ...(r.save.owner || {}), debt: Math.round(((s.owner?.debt || 0) - repay) * 10) / 10, used: {}, youthBoost: false, sponsorBoost: 0 }
+          const owner = { ...(r.save.owner || {}), debt: Math.round(((s.owner?.debt || 0) - repay) * 10) / 10, used: {}, youthBoost: false, sponsorBoost: 0, wageCut: 0, freeGate: false, winBonus: null } // 주급 삭감·도박 스폰서는 그 시즌까지만
           // 임대 복귀: 빌려 온 선수는 원래 구단으로, 빌려 준 선수는 우리 팀으로
           if (s.loans && Object.keys(s.loans).length) {
             const rs = { ...r.save.rosters }
@@ -704,9 +707,25 @@ export function GameProvider({ children }) {
       /** 판매 목록 등록·해제 (이적 시장이 열려 있으면 다른 구단 제안이 들어온다) */
       /** 판매 희망 가격 */
       setAskPrice(playerId, fee) { setSave((s) => ({ ...s, askPrice: { ...(s.askPrice || {}), [playerId]: fee } })) },
+      /** 판매 불가 선언 해제 (선수 상세에서) */
+      clearNotForSale(playerId) { setSave((s) => { const n = { ...(s.notForSale || {}) }; delete n[playerId]; return { ...s, notForSale: n } }) },
       toggleSale(playerId) {
         if (isLoanIn(playerId)) return
-        setSave((s) => ({ ...s, forSale: (s.forSale || []).includes(playerId) ? s.forSale.filter((x) => x !== playerId) : [...(s.forSale || []), playerId] }))
+        setSave((s) => {
+          const on = (s.forSale || []).includes(playerId)
+          const n = { ...(s.notForSale || {}) }
+          // 판매 불가라고 해 놓고 같은 시즌에 판매 목록에 올리면: 선수는 배신감을 느끼고, 스타라면 팬도 실망한다
+          const betray = !on && n[playerId] === (s.seasonNo || 1)
+          if (!on) delete n[playerId] // 판매 목록에 올리면 판매 불가 선언은 풀린다
+          const next = { ...s, notForSale: n, forSale: on ? s.forSale.filter((x) => x !== playerId) : [...(s.forSale || []), playerId] }
+          if (!betray) return next
+          const p = myTeam.players.find((x) => x.id === playerId)
+          const star = [...myTeam.players].sort((a, b) => playerOvr(b) - playerOvr(a)).slice(0, 3).some((x) => x.id === playerId)
+          const st0 = s.status?.[playerId] || {}
+          const st1 = { ...st0, morale: Math.max(0, (st0.morale ?? 60) - 8), trust: Math.max(0, (st0.trust ?? 52) - 10) }
+          const note = news(s.round, 'trade', `💔 ${p?.name || '선수'}: "남으라고 할 때는 언제고"`, `판매 불가를 선언했던 선수를 같은 시즌에 판매 목록에 올렸습니다. 선수가 배신감을 느낍니다 (사기 -8, 신뢰 -10).${star ? ' 팀의 핵심 선수라 팬들도 실망했습니다 (민심 -3).' : ''}`, { playerId })
+          return { ...next, status: { ...s.status, [playerId]: st1 }, fans: Math.max(0, (s.fans ?? 60) - (star ? 3 : 0)), inbox: [note, ...(s.inbox || [])].slice(0, 80) }
+        })
       },
       /** 편지함의 다른 구단 이적료 제안에 답 */
       answerOffer(id, action, amount = null) {
@@ -715,6 +734,21 @@ export function GameProvider({ children }) {
           if (!item?.offer || item.resolved) return s
           const mark = (sv, reply) => ({ ...sv, inbox: sv.inbox.map((x) => (x.id === id ? { ...x, resolved: action, reply, read: true } : x)) })
           if (action === 'decline') return mark(s, '제안을 거절했습니다.')
+          if (action === 'nfs') {
+            // 판매 불가 선언: 이번 시즌 이 선수에게 오는 제안을 모두 막는다 (판매 목록에서도 내린다)
+            //   선수 반응 — 남고 싶은 선수는 '구단이 나를 믿는다'며 사기·신뢰가 오르고, 떠나고 싶던 선수는 크게 실망한다
+            const pid = item.offer.playerId
+            const p = teamsById[s.teamId]?.players.find((x) => x.id === pid)
+            const st0 = s.status?.[pid] || {}
+            const out = !!st0.wantsOut
+            const st1 = { ...st0, morale: Math.max(0, Math.min(100, (st0.morale ?? 60) + (out ? -10 : 5))), trust: Math.max(0, Math.min(100, (st0.trust ?? 52) + (out ? -8 : 4))) }
+            const club = teamsById[item.offer.teamId]?.name || '상대 구단'
+            const note = news(s.round, 'trade', `🔒 ${p?.name || '선수'} 판매 불가 선언`, out
+              ? `${club}의 제안을 거절하고 '판매 불가'를 선언했습니다. 이적을 원하던 ${p?.name || '선수'}는 크게 실망했습니다 (사기 -10). 면담으로 달래 주세요.`
+              : `${club}의 제안을 거절하고 '판매 불가'를 선언했습니다. 이번 시즌에는 이 선수에게 오는 제안을 받지 않습니다. 선수는 구단의 믿음에 고마워합니다 (사기 +5).`, { read: true, playerId: pid })
+            const marked = mark({ ...s, notForSale: { ...(s.notForSale || {}), [pid]: s.seasonNo || 1 }, forSale: (s.forSale || []).filter((x) => x !== pid), status: { ...s.status, [pid]: st1 } }, '판매 불가를 선언했습니다.')
+            return { ...marked, inbox: [note, ...marked.inbox.map((x) => (x.id !== id && x.offer?.playerId === pid && !x.resolved ? { ...x, resolved: 'nfs', reply: '판매 불가 선언으로 거절했습니다.', read: true } : x))] }
+          }
           if (action === 'counter') {
             // 더 달라고 하기: 상대 최대 금액 안이면 희망 가격에 합의, 넘으면 한 번은 중간 금액으로 '최종 제안', 그 뒤엔 협상 결렬
             const o = item.offer
@@ -722,7 +756,7 @@ export function GameProvider({ children }) {
             const want = amount ? Math.round(amount * 10) / 10 : Math.max(o.ask ?? o.fee * 1.15, Math.round(o.fee * 1.1 * 10) / 10)
             const club = teamsById[o.teamId]?.name || '상대 구단'
             const pName = teamsById[s.teamId]?.players.find((x) => x.id === o.playerId)?.name || '선수'
-            const acts = (fee, last) => [['accept', '✅ 수락', `${eur(fee)}에 판매합니다`], ...(last ? [] : [['counter', '↗️ 한 번 더 요구', '더 올려 달라고 합니다']]), ['decline', '❌ 거절', '제안을 거절합니다']]
+            const acts = (fee, last) => [['accept', '✅ 수락', `${eur(fee)}에 판매합니다`], ...(last ? [] : [['counter', '↗️ 한 번 더 요구', '더 올려 달라고 합니다']]), ['decline', '❌ 거절', '제안을 거절합니다'], ['nfs', '🔒 판매 불가', '이번 시즌에는 어떤 제안도 받지 않습니다 (다른 제안도 모두 거절)']]
             let follow
             if (want <= o.fee) follow = news(s.round, 'offer', `🤝 ${club}: ${pName} ${eur(o.fee)}에 합의`, `요구한 금액이 이미 제안보다 낮아, 제안 금액 ${eur(o.fee)} 그대로 판매할 수 있습니다.`, { offer: { ...o, tries: (o.tries || 0) + 1 }, actions: acts(o.fee, true) })
             else if (want <= o.cap) follow = news(s.round, 'offer', `🤝 ${club}: ${pName} ${eur(want)}에 합의`, `${club}이(가) 요구를 받아들였습니다. ${eur(want)}에 판매할 수 있습니다.`, { offer: { ...o, fee: want, tries: (o.tries || 0) + 1 }, actions: acts(want, true) })
@@ -753,7 +787,7 @@ export function GameProvider({ children }) {
       },
       /** 구단주 결정 실행 → { title, text, good } */
       ownerDecide(key) {
-        const r = decide(save, key, { team: myTeam, leagueId: data.leagueId })
+        const r = decide(save, key, { team: myTeam, leagueId: data.leagueId, totalRounds: data.schedule.length })
         setSave(r.save)
         return r
       },
@@ -944,8 +978,9 @@ export function GameProvider({ children }) {
             const opp = mineIdx === 0 ? nextFixture.awayTeam : nextFixture.homeTeam
             const after = applyCupMatch({ ...s, cups: s.cups.map((c, i) => (i === cupIdx ? r.cup : c)) }, { myTeam, mineIdx, summary: mine.summary, label: `${cup.name} ${md.label}`, oppName: opp.name })
             const [gf, ga] = mineIdx === 0 ? mine.summary.score : [...mine.summary.score].reverse()
-            const money = settleMatch(after, { team: myTeam, leagueId: data.leagueId, home: nextFixture.isHome, result: Math.sign(gf - ga), totalRounds: data.schedule.length, cupStage: md.stage, cupPay: comp.pay })
-            return done(afterMatchOwner({ ...after, ...money }, Math.sign(gf - ga)))
+            const oppGap = strengthOf(opp) - strengthOf(myTeam)
+            const money = settleMatch(after, { team: myTeam, leagueId: data.leagueId, home: nextFixture.isHome, result: Math.sign(gf - ga), totalRounds: data.schedule.length, cupStage: md.stage, cupPay: comp.pay, oppGap })
+            return done(afterMatchOwner({ ...after, ...money }, Math.sign(gf - ga), { home: nextFixture.isHome, cup: true, oppGap }))
           })
           return
         }
@@ -956,8 +991,10 @@ export function GameProvider({ children }) {
           const next = runMarket(played, { teams: effectiveTeams(data.teams, played), myTeamId: s.teamId, leagueId: data.leagueId, round: s.round, totalRounds: data.schedule.length, world: worldTeams })
           const mineIdx = mine.home === s.teamId ? 0 : 1
           const [gf, ga] = mineIdx === 0 ? mine.summary.score : [...mine.summary.score].reverse()
-          const money = settleMatch(next, { team: myTeam, leagueId: data.leagueId, home: mineIdx === 0, result: Math.sign(gf - ga), totalRounds: data.schedule.length })
-          const owned = afterMatchOwner({ ...next, ...money }, Math.sign(gf - ga))
+          const oppT = teamsById[mineIdx === 0 ? mine.away : mine.home]
+          const oppGap = oppT ? strengthOf(oppT) - strengthOf(myTeam) : 0 // 상대가 강할수록 이겼을 때 민심이 더 오른다
+          const money = settleMatch(next, { team: myTeam, leagueId: data.leagueId, home: mineIdx === 0, result: Math.sign(gf - ga), totalRounds: data.schedule.length, oppGap })
+          const owned = afterMatchOwner({ ...next, ...money }, Math.sign(gf - ga), { home: mineIdx === 0, cup: false, oppGap })
           const b = checkBankruptcy(owned, data.leagueId)
           if (b.bankrupt) return { ...EMPTY_SAVE, league: s.league, season: s.season, sacked: { team: s.teamId, history: s.history, bankrupt: true, cash: b.save.finance.cash } }
           return done(b.save)

@@ -14,7 +14,7 @@ import { eur, yearsLeft } from '../game/finance.js'
 import { useGame } from '../store.jsx'
 
 export default function PlayerSheet({ player, onClose, inLineup, onToggle }) {
-  const { status, save, talkTo, myTeam, teams, finishTalk, totalRounds, contractOf, renewalAsk, renew, releaseCost, release, forceSell, addPromise, isLoanIn, loanOptions, loanOut, transferWindow } = useGame()
+  const { status, save, talkTo, myTeam, teams, finishTalk, totalRounds, contractOf, renewalAsk, renew, releaseCost, release, forceSell, addPromise, isLoanIn, loanOptions, loanOut, transferWindow, clearNotForSale } = useGame()
   const [nego, setNego] = useState(null) // 연봉 협상 대화 (재계약)
   const [negoMsg, setNegoMsg] = useState('')
   const [battle, setBattle] = useState(false)
@@ -87,6 +87,9 @@ export default function PlayerSheet({ player, onClose, inLineup, onToggle }) {
                   onNego={(ask) => { setNegoMsg(''); setNego(ask) }} negoMsg={negoMsg}
                   onRelease={() => { if (confirm(`${player.name}을(를) 방출할까요? 위약금 ${eur(releaseCost(player))}`)) { release(player); onClose() } }}
                   onSell={() => { if (confirm(`${player.name}을(를) 감독·선수 의사와 상관없이 즉시 팔까요? (가치의 60~120%)`)) { setDeal(forceSell(player)) } }} />
+                {save.notForSale?.[player.id] === (save.seasonNo || 1) && (
+                  <p className="small notice">🔒 판매 불가 선언 중 — 이번 시즌 이 선수에게 오는 이적 제안을 모두 거절합니다. <button className="linkish" onClick={() => clearNotForSale(player.id)}>해제</button></p>
+                )}
                 <LoanOutBox player={player} open={transferWindow.open} options={loanOptions} onLoan={(o) => { const r = loanOut(player, o); if (r.ok) onClose(); else alert(r.reason) }} />
               </>
             )}
