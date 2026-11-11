@@ -128,7 +128,7 @@ export default function Transfer() {
             ['숫자 3개', '그 포지션의 핵심 능력치 (1~20, 16 이상이면 정상급)'],
             ['초록 금액', '선수 가치(이적료 기준). 아래 작은 글씨는 요구 연봉'],
             ['✔ 영입 가능', '이적료를 이적 자금으로 낼 수 있는 선수 (이적 자금·임금 예산은 구단 운영에서 맞바꿀 수 있다)'],
-            ['➕ 선수 끼워 넣기', '우리 선수를 얹으면 상대가 매긴 값어치만큼 현금을 덜 낸다. 그 포지션이 부족한 구단일수록 비싸게 쳐준다'],
+            ['🔄 스왑딜', '우리 선수를 거래에 포함하면 상대가 매긴 평가액만큼 현금을 덜 낸다. 그 포지션이 부족한 구단일수록 높게 평가한다 (협상 창에서 선택)'],
             ['🔁 임대', '시즌 끝까지 빌려 온다. 임대료 + 연봉 일부 부담. 핵심·주전 선수는 빌려주지 않는다. 내 선수 임대 보내기는 선수 상세 → 계약'],
             ['🗣️ 단장과 협상', '상대 단장(AI)에게 근거를 들어 말하면 다음 제안 때 금액을 조금(최대 8%) 낮춰 준다'],
           ]} />
@@ -245,6 +245,7 @@ function BidSheet({ p, t, lid, onClose }) {
   const [loanFee, setLoanFee] = useState(r1(v * 0.06))
   const [share, setShare] = useState(1)
   const [swapId, setSwapId] = useState('')
+  const [swapOn, setSwapOn] = useState(false) // 스왑딜(선수 포함 거래)을 쓸지 — 기본은 현금만
   const [years, setYears] = useState(p.age >= 31 ? 2 : 4)
   const [reply, setReply] = useState(null)
   const [done, setDone] = useState(null)
@@ -305,18 +306,21 @@ function BidSheet({ p, t, lid, onClose }) {
                   <input type="range" min={0} max={Math.round(v * 25) / 10} step={0.1} value={fee} onChange={(e) => { setFee(Number(e.target.value)); reset() }} />
                   <span className="tp-ends"><small>0</small><small>가치의 250%</small></span>
                 </label>
-                <div className="swap-pick">
-                  <span className="small">➕ 우리 선수 끼워 넣기</span>
-                  <select value={swapId} onChange={(e) => { setSwapId(e.target.value); reset() }}>
-                    <option value="">없음 (현금만)</option>
-                    {swapList.map((x) => <option key={x.id} value={x.id}>{x.pos} {x.name} · {x.age}세 · {starText(abilityStars(x))}</option>)}
-                  </select>
-                  {swap && <p className="small">{t.name} 평가: <b className="good-text">{money(swap.credit)}</b> — {swap.note}. 현금 {money(fee)} + {swap.player.name} = 총 {money(r1(fee + swap.credit))}</p>}
-                </div>
+                <label className="small clause-opt"><input type="checkbox" checked={swapOn} onChange={(e) => { setSwapOn(e.target.checked); if (!e.target.checked) setSwapId(''); reset() }} /> 🔄 스왑딜 (선수 포함 거래) — 우리 선수 한 명을 거래에 포함하고, 상대가 매긴 평가액만큼 현금을 덜 냅니다</label>
+                {swapOn && (
+                  <div className="swap-pick">
+                    <span className="small">거래에 포함할 선수</span>
+                    <select value={swapId} onChange={(e) => { setSwapId(e.target.value); reset() }}>
+                      <option value="">선수를 고르세요</option>
+                      {swapList.map((x) => <option key={x.id} value={x.id}>{x.pos} {x.name} · {x.age}세 · {starText(abilityStars(x))}</option>)}
+                    </select>
+                    {swap && <p className="small">{t.name}의 평가액: <b className="good-text">{money(swap.credit)}</b> — {swap.note}. 현금 {money(fee)} + {swap.player.name} = 제안 총액 {money(r1(fee + swap.credit))}</p>}
+                  </div>
+                )}
                 <label className="small clause-opt"><input type="checkbox" checked={sellOn} onChange={(e) => { setSellOn(e.target.checked); reset() }} /> 📎 셀온 {SELL_ON}% 주기 — 상대가 원하는 금액을 7% 깎아 주는 대신, 이 선수를 나중에 팔 때 이적료의 {SELL_ON}%를 {t.name}에 줍니다</label>
                 {clause && (
-                  <p className="small clause-note">🔓 바이아웃 조항 <b>{money(clause)}</b> — 현금으로 이 금액을 내면 구단이 거절할 수 없습니다 (선수 끼워 넣기 없이).
-                    {' '}<button type="button" className="linkish" onClick={() => { setFee(clause); setSwapId(''); reset() }}>이 금액으로 맞추기</button></p>
+                  <p className="small clause-note">🔓 바이아웃 조항 <b>{money(clause)}</b> — 현금으로 이 금액을 내면 구단이 거절할 수 없습니다 (스왑딜 없이 현금만).
+                    {' '}<button type="button" className="linkish" onClick={() => { setFee(clause); setSwapId(''); setSwapOn(false); reset() }}>이 금액으로 맞추기</button></p>
                 )}
                 <div className="row">
                   <span className="small">계약 기간</span>
@@ -377,7 +381,7 @@ function BidSheet({ p, t, lid, onClose }) {
 
 /**
  * 상대 구단 단장과 대화 (AI): 수락·역제안·거절은 게임이 정하고, 단장은 그 결정을 자기 말로 전한다.
- * 설득력 있는 근거(후보 선수·계약 만료 임박·필요한 포지션 선수를 끼워 줌)를 대면 다음 제안 때 원하는 금액을 조금(최대 8%) 낮춰 준다.
+ * 설득력 있는 근거(후보 선수·계약 만료 임박·필요한 포지션 선수를 거래에 포함)를 대면 다음 제안 때 원하는 금액을 조금(최대 8%) 낮춰 준다.
  */
 function DirectorTalk({ t, facts, ask, onReply, onCut }) {
   const [open, setOpen] = useState(false)

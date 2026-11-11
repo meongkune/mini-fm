@@ -733,7 +733,7 @@ export function GameProvider({ children }) {
         // 연봉 협상(대화)으로 합의했으면 그 금액, 아니면 요구 연봉
         const wage = agreedWage ?? Math.round(Math.max(wageFor(player, data.leagueId), wageFor(player, fromLid, clubKOf(theirs, fromLid))) * 1.15 * 10) / 10
         const swap = swapId ? myTeam.players.find((x) => x.id === swapId && !isLoanIn(x.id)) : null
-        if (swapId && !swap) return { ok: false, reason: '끼워 넣기로 한 선수가 이미 팀에 없습니다.' }
+        if (swapId && !swap) return { ok: false, reason: '거래에 포함하기로 한 선수가 이미 팀에 없습니다.' }
         if (!swap && myTeam.players.length >= ROSTER_MAX) return { ok: false, reason: `로스터가 가득 찼습니다 (${ROSTER_MAX}명).` }
         if (transferFunds(save.finance) < fee) return { ok: false, reason: `이적 자금이 부족합니다 (이적 자금 ${eur(transferFunds(save.finance))} < 이적료 ${eur(fee)}). 구단 운영에서 임금 예산을 줄여 이적 자금으로 돌릴 수 있습니다.` }
         // 끼워 넣는 선수의 연봉은 빠진다

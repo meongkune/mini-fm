@@ -116,23 +116,26 @@ export function evaluateBid({ theirs, player, fee, status = {}, value = null, tr
   // talk: 단장과의 대화로 얻어 낸 양보(0~0.08) — 협상 횟수 양보와 합쳐도 가치의 80% 밑으로는 안 내려간다
   const need = Math.round(v * Math.max(0.8, Math.max(0.85, role * age - tries * 0.04) - talk) * 10) / 10
   const why = core ? ' 우리 팀 핵심 선수입니다.' : rank >= 18 ? ' 출전 기회가 적은 선수라 조건만 맞으면 보내겠습니다.' : ''
-  // 선수를 끼워 넣으면: 그 선수 값어치(상대 눈으로 본)만큼 현금을 덜 내도 된다
+  // 스왑딜(선수 포함 거래): 포함한 선수의 평가액(상대 눈으로 본 값어치)만큼 현금을 덜 내도 된다
   const credit = swap?.credit || 0
   const total = fee + credit
-  const plus = swap?.player ? ` (${swap.player.name} 포함 — 우리 쪽 평가 ${money(credit)}: ${swap.note})` : ''
-  if (total >= need) return { verdict: 'accept', reason: `"좋습니다. 현금 ${money(fee)}${plus}이면 보내드리죠."`, need, credit }
+  // 답변 문구: 제안 총액(현금 + 스왑 선수 평가액)을 먼저 말하고, 거절할 때는 협상이 시작되는 최소 금액을 알려 준다
+  const sw = swap?.player
+  const offer = sw ? `제안 총액 ${money(Math.round(total * 10) / 10)}(현금 ${money(fee)} + ${sw.name} 평가액 ${money(credit)})` : `제안 ${money(fee)}`
+  if (total >= need) return { verdict: 'accept', reason: `"좋습니다. ${offer}이면 보내드리죠."`, need, credit }
   if (total >= need * 0.65) {
     const ask = Math.round(Math.max(need * 0.97, (total + need) / 2) * 10) / 10
     const cash = Math.max(0, Math.round((ask - credit) * 10) / 10)
-    return { verdict: 'counter', ask: cash, reason: `"현금 ${money(cash)}${plus}이면 생각해 보겠습니다.${why}"`, need, credit }
+    return { verdict: 'counter', ask: cash, reason: `"${offer}으로는 부족합니다. ${sw ? `${sw.name}을(를) 포함한다면 현금 ${money(cash)}(총액 ${money(ask)})` : `${money(cash)}`}이면 합의하겠습니다.${why}"`, need, credit }
   }
-  return { verdict: 'reject', reason: `"현금 ${money(fee)}${plus}은 너무 낮습니다.${core ? ' 핵심 선수는 쉽게 내주지 않습니다.' : ''}"`, need, credit }
+  const floor = Math.round(need * 0.65 * 10) / 10
+  return { verdict: 'reject', reason: `"${offer}은 너무 낮아 협상할 수 없습니다. 총액이 적어도 ${money(floor)}은 돼야 이야기를 시작할 수 있습니다.${core ? ' 우리 팀 핵심 선수라 몸값보다 높게 받아야 합니다.' : ''}"`, need, credit }
 }
 
 const POS_NAME = { GK: '골키퍼', DF: '수비수', MF: '미드필더', FW: '공격수' }
 const POS_NEED = { GK: 3, DF: 8, MF: 8, FW: 5 }
 /**
- * 선수+현금 거래: 내가 끼워 넣는 선수를 상대 구단이 얼마로 쳐주는지
+ * 스왑딜(선수 + 현금): 내가 거래에 포함하는 선수를 상대 구단이 얼마로 평가하는지
  *   그 포지션이 모자라면 가치의 90%, 적당하면 75%, 넘치면 60%
  *   상대 주전(상위 11명) 수준이면 +10%p, 한참 못 미치면(8 이상 낮음) 절반, 31세 이상은 15% 덜
  */
