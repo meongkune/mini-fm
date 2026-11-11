@@ -12,14 +12,15 @@ const FD = process.env.FOOTBALL_DATA_TOKEN
 const UA = { 'User-Agent': 'MiniFM-squad-audit/1.0 (https://github.com/meongkune/mini-fm)' }
 const LEAGUES = { PL: 'premier-league', BL1: 'bundesliga', PD: 'la-liga', SA: 'serie-a', FL1: 'ligue-1', DED: 'eredivisie', PPL: 'primeira-liga', ELC: 'championship', BSA: 'brasileirao' }
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
-const fold = (s = '') => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z ]/g, ' ').replace(/\s+/g, ' ').trim()
+// 이름 정리: '(footballer, born 1992)' 같은 위키 제목 꼬리 제거, 악센트·기호 제거 (하이픈은 붙여 씀: Hee-chan = Heechan)
+const fold = (s = '') => s.replace(/\s*\([^)]*\)/g, '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[-'’.]/g, '').replace(/[^a-z ]/g, ' ').replace(/\s+/g, ' ').trim()
 const wiki = async (params) => { await sleep(1000); return fetch(`https://en.wikipedia.org/w/api.php?format=json&formatversion=2&${params}`, { headers: UA }).then((r) => r.json()) }
 
 // 같은 선수인가: 성 + 이름 첫 글자 (한 단어 이름은 그 단어)
 function same(a, b) {
   const x = fold(a).split(' ')
   const y = fold(b).split(' ')
-  if (x.join(' ') === y.join(' ')) return true
+  if (x.join(' ') === y.join(' ') || x.join('') === y.join('')) return true
   if (x.length === 1 || y.length === 1) return x.some((w) => y.includes(w) && w.length > 3)
   return x.at(-1) === y.at(-1) && x[0][0] === y[0][0]
 }
@@ -33,7 +34,14 @@ function parseSquad(wt) {
   const end = rest.search(new RegExp(`\\n={2,${level}}[^=]`))
   const sec = end >= 0 ? rest.slice(0, end) : rest
   const out = []
-  const linkName = (s) => { const k = s.match(/\[\[([^|\]]+)(?:\|([^\]]+))?\]\]/); return k ? (k[2] || k[1]).trim() : null }
+  const linkName = (s) => {
+    const sn = s.match(/\{\{\s*sortname\s*\|([^|}]+)\|([^|}]+)/i) // {{sortname|이름|성|…}}
+    if (sn) return `${sn[1].trim()} ${sn[2].trim()}`
+    const k = s.match(/\[\[([^|\]]+)(?:\|([^\]]+))?\]\]/)
+    return k ? (k[2] || k[1]).replace(/\s*\([^)]*\)/g, '').trim() : null
+  }
+  // 선수 칸이 아닌 것: 국기·포지션 약어·유스·구단 링크(F.C. 등)·포지션 문서
+  const notPlayer = (c) => /flagicon|\{\{\s*abbr|\(association football\)|Academy|Youth|F\.C\.|A\.F\.C\.|C\.F\.|S\.C\.|FC|Albion|United|City|Town|Rovers|Wanderers|Athletic|Villarreal|Monaco|Lyon|Barcelona|Fire/i.test(c)
   // ① 틀: {{Fs player|...|name=[[X]]}} · {{football squad player|...}}
   for (const t of sec.matchAll(/\{\{\s*(?:[Ff]s player|[Ff]ootball squad player)([^}]*)\}\}/g)) {
     const nm = t[1].match(/name\s*=\s*([^|]+)/)
@@ -46,7 +54,7 @@ function parseSquad(wt) {
       const cells = row.split('\n').filter((l) => /^[|!]/.test(l)).map((l) => l.replace(/^[|!]\s*/, ''))
       const ni = cells.findIndex((c) => /^\d{1,2}\s*$/.test(c))
       if (ni < 0) continue
-      const pc = cells.slice(ni + 1).find((c) => /\[\[/.test(c) && !/flagicon|\(association football\)/.test(c))
+      const pc = cells.slice(ni + 1).find((c) => /\[\[|sortname/i.test(c) && !notPlayer(c))
       const n = pc && linkName(pc)
       if (n) out.push({ name: n, loan: /loan(ed)? (to|out)/i.test(row) })
     }
