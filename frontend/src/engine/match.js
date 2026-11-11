@@ -5,6 +5,7 @@
 import { MENTALITY, PRESSING, playerOvrOf } from './engine.js'
 import { ROLE_POS, assignSlots, buildSlots, fitOf, shapeMods } from './formation.js'
 import { aiTactics, edges, tacOf } from './tactics.js'
+import { CHANNEL_LABEL, aerialOf, channels } from './matchups.js'
 import { attrsOf } from '../game/attributes.js'
 
 const DEFAULT_TACTICS = { formation: '4-4-2', mentality: 'balanced', pressing: 'normal', line: 'normal', tempo: 'normal' }
@@ -39,6 +40,11 @@ const OPEN_Q = 0.22
 export const SHOT_W = { open: { FW: 2.45, MF: 1.45, DF: 0.5 }, long: { FW: 1.2, MF: 1.8, DF: 0.4 }, st: 1.4, pow: 3.5 }
 const LONG_SHARE = 0.115
 const LONG_Q = 0.122
+// 개인 매치업: 통로별 유불리(adv, 능력치 차)가 통로 선택(MU_PICK)과 찬스의 질(K_MU)에 미치는 정도
+//   adv 10(1~20 척도로 3점쯤)이면 그 통로를 2배 넘게 자주 쓰고, 결정력이 +0.045(기본 0.22의 20%) 오른다
+const MU_PICK = 12
+const K_MU = 220
+const MU_CAP = 14
 // 홈 팀이 만드는 찬스 배수 (관중·익숙한 구장) — 점유(HOME_ADV)만으로는 홈 승률이 낮았다
 export const HOME = { ch: 1.18 }
 // 반칙 위치 비율: 박스 안(페널티킥) · 직접 프리킥 거리 · 측면 크로스 프리킥
@@ -188,7 +194,7 @@ export const FLOW = {
   trailLate: 0.14,
   counter: 0.025, // 앞선 팀 역습의 질 (상대가 1~2골 뒤져 올라올 때, 후반으로 갈수록)
   levelLate: 0, // 동점으로 막판(75분 이후)에 들어갔을 때 양쪽이 몸을 사리는 정도 — 무승부가 이미 충분해 지금은 끈다
-  base: 0.975, // 위 효과로 줄어든 전체 득점을 되돌리는 보정
+  base: 0.94, // 위 효과로 줄어든 전체 득점을 되돌리는 보정
 }
 function flowOf(match, idx) {
   const diff = match.score[idx] - match.score[1 - idx]
@@ -291,20 +297,158 @@ export function benchOf(match, ctx, idx) {
   return ctx.teams[idx].players.filter((p) => !match.ps[p.id] && available(ctx.status, p.id) && !sd.injured.includes(p.id))
 }
 
-// AI 교체: 부상자는 바로, 60·70·80분에 지친 선수를 같은 포지션으로
-function aiSubs(match, ctx, idx) {
+// ── AI 감독: 경기 중 판단 ──
+// 구단마다 감독 성향을 해시로 고정한다 (같은 구단은 늘 같은 성향)
+export const aiStyle = (teamId) => ['attacking', 'balanced', 'pragmatic'][Math.floor(hash(`style-${teamId}`) * 3)]
+export const AI_STYLE = {
+  attacking: ['공격적', '지고 있으면 일찍 올라오고, 앞서도 늦게까지 잠그지 않는다'],
+  balanced: ['균형', '점수와 시간에 맞춰 무난하게 운영한다'],
+  pragmatic: ['실리적', '앞서면 일찍 내려앉아 지키고, 무리하게 올라오지 않는다'],
+}
+// 판단 시점 (퇴장 대응은 그 즉시)
+const AI_MINUTES = [46, 55, 62, 70, 78, 85]
+const STANCE_TEXT = { 2: '총공세에 나섭니다', 1: '라인을 올리고 공격 숫자를 늘립니다', 0: '원래 전술로 돌아갑니다', '-1': '내려앉아 지키는 쪽으로 바꿉니다', '-2': '전원 수비로 잠급니다' }
+
+// 점수·시간·성향·전력 차 → 운영 단계 (-2 잠그기 ~ +2 총공세)
+function aiStance(match, ctx, idx, style) {
+  const m = match.minute
+  const diff = match.score[idx] - match.score[1 - idx]
+  let s = 0
+  if (diff < 0) {
+    if (diff > -3) s = m >= 78 ? 2 : m >= (style === 'attacking' ? 46 : style === 'balanced' ? 55 : 62) ? 1 : 0 // 3골 넘게 지면 체념
+  } else if (diff > 0) {
+    const hold = style === 'pragmatic' ? 55 : style === 'balanced' ? 70 : 80
+    if (m >= hold) s = m >= 85 || (style === 'pragmatic' && m >= 78) ? -2 : -1
+    if (diff >= 3) s = Math.max(s, -1)
+  } else if (m >= 70) {
+    // 동점: 전력이 앞서면 이기러 가고, 밀리면 승점 1을 지킨다
+    const gap = levelOf(ctx.teams[idx]) - levelOf(ctx.teams[1 - idx])
+    s = gap >= 3 ? 1 : gap <= -3 ? (style === 'attacking' ? 0 : -1) : style === 'attacking' ? 1 : 0
+  }
+  // 한 명 부족하면 한 단계 내려서 운영한다 (막판에 지고 있을 때만 그대로 올라간다)
+  if (match.sides[idx].sentOff.length && !(diff < 0 && m >= 78)) s -= 1
+  return clamp(s, -2, 2)
+}
+
+// 상대 전술에 맞춘 대응: 지시 하나를 바꿔 봤을 때 상성(내 공격−상대 수비, 상대 공격−내 수비, 중원)이 가장 좋아지는 것을 고른다
+const AI_TWEAKS = [
+  ['line', 32, '라인을 내려 뒷공간을 지웁니다'], ['line', 72, '라인을 올려 상대를 가둡니다'],
+  ['pressing', 78, '전방 압박을 강화합니다'], ['pressing', 38, '압박을 풀고 자리를 지킵니다'],
+  ['passing', 78, '길게 넘겨 압박을 건너뜁니다'], ['passing', 28, '짧게 풀어 나옵니다'],
+  ['width', 80, '측면을 넓게 씁니다'], ['width', 40, '중앙으로 좁혀 들어갑니다'],
+]
+function aiAdapt(match, ctx, idx, ai, withEvents) {
   const sd = match.sides[idx]
-  if (sd.subsLeft <= 0) return
+  const od = match.sides[1 - idx]
+  const me = xiOf(match, ctx, idx)
+  const op = xiOf(match, ctx, 1 - idx)
+  const score = (tac) => {
+    const A = { tac, formation: sd.tactics.formation, ...me }
+    const B = { tac: od.tactics, formation: od.tactics.formation, ...op }
+    const x = edges(A, B)
+    const y = edges(B, A)
+    return (x.att - y.def) - (y.att - x.def) + (x.mid - y.mid) * 0.6 + (x.chance - y.chance) * 150 + (x.quality - y.quality) * 100
+  }
+  const now = score(ai.base)
+  let best = null
+  for (const [key, v, text] of AI_TWEAKS) {
+    const cur = tacOf(ai.base)[key === 'pressing' ? 'press' : key]
+    if (Math.abs(cur - v) < 15) continue
+    // 압박을 올리면 체력이 빨리 닳는다 (상성 점수에는 안 잡히는 비용)
+    const gain = score({ ...ai.base, [key]: v }) - now - (key === 'pressing' && v > cur ? 1.5 : 0)
+    if (gain >= 4 && (!best || gain > best.gain)) best = { key, v, text, gain }
+  }
+  if (!best) return
+  ai.base = { ...ai.base, [best.key]: best.v }
+  if (withEvents) match.events.push({ minute: match.minute, type: 'info', team: idx, text: `🧠 ${sd.name} 벤치: 상대 전술에 맞춰 ${best.text}.` })
+}
+
+function aiManage(match, ctx, idx, withEvents) {
+  const sd = match.sides[idx]
   const team = ctx.teams[idx]
   const byId = Object.fromEntries(team.players.map((p) => [p.id, p]))
+  const style = aiStyle(team.id)
+  const ai = (sd.ai ??= { base: { ...sd.tactics }, stance: 0, reds: 0, flags: {} })
+  const say = (text) => { if (withEvents) match.events.push({ minute: match.minute, type: 'info', team: idx, text: `🧠 ${sd.name} 벤치: ${text}` }) }
   const bench = () => benchOf(match, ctx, idx)
-  const bestFor = (role) => bench().filter((p) => p.pos !== 'GK' || role === 'GK').sort((a, c) => playerOvrOf(c) * fitOf(c, role) - playerOvrOf(a) * fitOf(a, role))[0]
-  if ([60, 70, 80].includes(match.minute)) {
-    const tired = sd.onPitch.map((id) => byId[id]).filter((p) => p && p.pos !== 'GK').sort((a, b) => sd.energy[a.id] - sd.energy[b.id])[0]
-    if (tired && sd.energy[tired.id] < 82) {
-      const sub = bestFor(sd.slots[sd.onPitch.indexOf(tired.id)])
-      if (sub) substitute(match, ctx, idx, tired.id, sub.id, { auto: true })
+  const value = (p, role) => playerOvrOf(p) * fitOf(p, role)
+  const bestFor = (role) => bench().filter((p) => (p.pos === 'GK') === (role === 'GK')).sort((a, c) => value(c, role) - value(a, role))[0]
+  const roleAtIdx = (i) => sd.slots[i]
+  const pitch = () => sd.onPitch.map((id, i) => ({ p: byId[id], i, role: roleAtIdx(i) })).filter((x) => x.p)
+  // 교체하면서 그 자리의 역할도 바꾼다 (공격수 자리를 수비형 미드 자리로 등)
+  const swapIn = (out, sub, role) => {
+    const i = sd.onPitch.indexOf(out.id)
+    if (!substitute(match, ctx, idx, out.id, sub.id, { auto: true })) return false
+    if (role) sd.slots = sd.slots.map((r, j) => (j === i ? role : r))
+    return true
+  }
+  // 뺄 공격 자원: 투톱 중 한 명 → 공격형 미드 → 윙어 → 측면 미드 (원톱은 남긴다)
+  const spareAttacker = () => {
+    const on = pitch()
+    const sts = on.filter((x) => x.role === 'ST')
+    for (const group of [sts.length >= 2 ? sts : [], on.filter((x) => x.role === 'AM'), on.filter((x) => x.role === 'LW' || x.role === 'RW'), on.filter((x) => x.role === 'LM' || x.role === 'RM')]) {
+      if (group.length) return [...group].sort((a, b) => playerOvrOf(a.p) * (0.8 + 0.2 * sd.energy[a.p.id] / 100) - playerOvrOf(b.p) * (0.8 + 0.2 * sd.energy[b.p.id] / 100))[0]
     }
+    return null
+  }
+
+  // 1) 퇴장 대응 (그 즉시): 수비수·미드필더·골키퍼가 나갔으면 공격 자원을 빼고 그 자리를 메운다
+  while (ai.reds < sd.sentOff.length) {
+    const role = sd.lostRoles?.[ai.reds]
+    ai.reds++
+    if (!role || ROLE_POS[role] === 'FW' || role === 'AM') continue
+    const out = role === 'GK' ? (spareAttacker() || pitch().filter((x) => x.role !== 'GK').sort((a, b) => playerOvrOf(a.p) - playerOvrOf(b.p))[0]) : spareAttacker()
+    if (!out) continue
+    const sub = sd.subsLeft > 0 ? bestFor(role) : null
+    if (sub && swapIn(out.p, sub, role)) say(`퇴장에 대응해 ${out.p.name}을(를) 빼고 ${sub.name}(으)로 빈 자리를 메웁니다.`)
+    else if (ROLE_POS[role] === 'MF') { sd.slots = sd.slots.map((r, j) => (j === out.i ? role : r)); say(`퇴장에 대응해 ${out.p.name}을(를) 중원으로 내립니다.`) }
+  }
+
+  if (match.plus || !AI_MINUTES.includes(match.minute)) return
+  const m = match.minute
+  // 2) 상대 전술 대응: 하프타임과 70분에 한 번씩 다시 본다
+  if (m === 46 || m === 70) aiAdapt(match, ctx, idx, ai, withEvents)
+  // 3) 점수·시간에 따른 운영: 기본 전술(base)에서 단계만큼 옮긴다
+  const s = aiStance(match, ctx, idx, style)
+  const b = tacOf(ai.base)
+  sd.tactics = {
+    ...sd.tactics, ...ai.base, formation: sd.tactics.formation,
+    mentality: clamp(b.mentality + s * 14, 5, 95), line: clamp(b.line + s * 10, 10, 90),
+    pressing: clamp(b.press + s * (s > 0 ? 10 : 8), 10, 95), tempo: clamp(b.tempo + s * (s > 0 ? 8 : 10), 10, 90),
+  }
+  if (s !== ai.stance) { say(`${STANCE_TEXT[s]}.`); ai.stance = s }
+
+  // 4) 교체
+  if (m < 55 || sd.subsLeft <= 0) return
+  // 경고 받은 수비수·수비형 미드: 퇴장 위험을 줄인다 (대체 선수가 크게 떨어지지 않을 때, 경기당 한 번)
+  //   지고 있을 때는 교체 카드를 공격에 쓴다. 실리적인 감독은 일찍, 나머지는 70분 이후에만
+  if (!ai.flags.yc && m <= 78 && match.score[idx] >= match.score[1 - idx] && (style === 'pragmatic' || m >= 70)) {
+    const risky = pitch().filter((x) => sd.yellows[x.p.id] && (ROLE_POS[x.role] === 'DF' || x.role === 'DM')).sort((a, c) => sd.energy[a.p.id] - sd.energy[c.p.id])[0]
+    const sub = risky && bestFor(risky.role)
+    if (sub && value(sub, risky.role) >= value(risky.p, risky.role) * (style === 'pragmatic' ? 0.9 : 0.94) && swapIn(risky.p, sub)) { ai.flags.yc = 1; say(`경고가 있는 ${risky.p.name}을(를) 미리 뺍니다.`) }
+  }
+  // 승부수: 지고 있으면 수비 자원을 빼고 공격수를, 앞서면 공격 자원을 빼고 수비형 미드를 넣는다 (각각 경기당 한 번)
+  if (s >= 1 && m >= 62 && !ai.flags.chase && sd.subsLeft > 0) {
+    const on = pitch()
+    const cbs = on.filter((x) => x.role === 'CB')
+    const dms = on.filter((x) => x.role === 'DM')
+    const cms = on.filter((x) => x.role === 'CM')
+    const group = dms.length ? dms : cbs.length >= 3 ? cbs : cms.length >= 3 ? cms : []
+    const out = [...group].sort((a, c) => playerOvrOf(a.p) - playerOvrOf(c.p))[0]
+    const sub = out && bench().filter((p) => p.pos === 'FW').sort((a, c) => c.att - a.att)[0]
+    if (sub && swapIn(out.p, sub, 'ST')) { ai.flags.chase = 1; say(`${out.p.name}을(를) 빼고 공격수 ${sub.name}을(를) 투입합니다.`) }
+  }
+  if (s <= -1 && m >= 70 && !ai.flags.hold && sd.subsLeft > 0) {
+    const out = spareAttacker()
+    const sub = out && bench().filter((p) => p.pos !== 'GK' && p.pos !== 'FW').sort((a, c) => value(c, 'DM') * c.def - value(a, 'DM') * a.def)[0]
+    if (sub && swapIn(out.p, sub, 'DM')) { ai.flags.hold = 1; say(`${out.p.name}을(를) 빼고 ${sub.name}(으)로 중원을 두껍게 합니다.`) }
+  }
+  // 지친 선수: 같은 자리로 (70분 이후에는 한 번에 두 명까지)
+  for (let k = 0; k < (m >= 70 ? 2 : 1) && sd.subsLeft > 0; k++) {
+    const tired = pitch().filter((x) => x.role !== 'GK').sort((a, c) => sd.energy[a.p.id] - sd.energy[c.p.id])[0]
+    if (!tired || sd.energy[tired.p.id] >= (m >= 70 ? 84 : 80)) break
+    const sub = bestFor(tired.role)
+    if (!sub || !swapIn(tired.p, sub)) break
   }
 }
 
@@ -324,9 +468,7 @@ function injure(match, ctx, idx, rng, withEvents) {
 }
 
 // ── 세트피스 ──
-// 공중볼: 수비력·공격력·체력 + 자리(센터백·스트라이커가 강하고 윙어·공격형 미드가 약하다)
-const AERIAL_ROLE = { CB: 8, ST: 5, DM: 2, CM: 0, LB: -3, RB: -3, LWB: -3, RWB: -3, LM: -4, RM: -4, AM: -5, LW: -7, RW: -7 }
-const aerialOf = (p) => p.def * 0.45 + p.att * 0.35 + (p.sta ?? 70) * 0.2 + (AERIAL_ROLE[p.slot] ?? 0)
+// 공중볼(aerialOf)은 matchups.js
 // 킥 능력(코너·프리킥): 기술·창의성 / 페널티: 결정력(공격)·기술
 const kickOf = (p) => { const a = p.A || attrsOf(p).map; return ((a['기술'] ?? p.att) + (a['창의성'] ?? p.att)) / 2 }
 const penOf = (p) => p.att * 0.6 + kickOf(p) * 0.4
@@ -406,6 +548,7 @@ export function step(match, ctx, { withEvents = true } = {}) {
   const d = r[dfn].defense
   const tEdge = r[atk].tAtt - r[dfn].tDef // 전술 상성 (공격 쪽 전술 - 수비 쪽 전술)
   const flow = flowOf(match, atk) // 점수 차에 따른 경기 흐름 (이 분이 시작될 때의 점수 기준)
+  const lanes = channels(r[atk].xi, r[dfn].xi, tacOf(match.sides[atk].tactics)) // 개인 매치업 (공격 팀 → 수비 팀)
   const keeper = r[dfn].keeper
   const gkAttr = r[dfn].gk ? r[dfn].gk.A || attrsOf(r[dfn].gk).map : null
 
@@ -521,10 +664,14 @@ export function step(match, ctx, { withEvents = true } = {}) {
     if (!shooters.length) return
     const w = long ? SHOT_W.long : SHOT_W.open
     // 공격력이 높은 선수일수록 슈팅 기회가 많다. 박스 안 찬스는 중앙 공격수(ST)에게 더 몰린다 → 득점왕이 실제처럼 25~30골
+    // 개인 매치업: 찬스가 어느 통로(왼쪽·오른쪽·중앙·공중볼)에서 났는가 — 전술이 그 통로를 쓰는 비중 × 그 통로의 유불리
+    const ch = !long && lanes.length ? rng.weighted(lanes, lanes.map((c) => c.w * Math.exp(c.adv / MU_PICK))) : null
+    const wide = ch && (ch.key === 'left' || ch.key === 'right') ? ch.a.id : null // 그 측면을 뚫은 선수
     const shooter = rng.weighted(shooters, shooters.map((p) => w[p.pos] * (!long && p.slot === 'ST' ? SHOT_W.st : 1) * (p.att / 70) ** SHOT_W.pow))
     const helpers = shooters.filter((p) => p.id !== shooter.id)
-    const assister = helpers.length && rng.random() < (long ? 0.35 : 0.78) ? rng.weighted(helpers, helpers.map((p) => ({ MF: 2.2, FW: 1.6, DF: 0.7 })[p.pos] * p.att)) : null
-    const quality = long ? LONG_Q : OPEN_Q + flow.q +((shooter.A?.['공격'] ?? shooter.att) - keeper) / K_FINISH + (a - d) / K_QUAL + tEdge / K_TQUAL + r[atk].quality
+    const assister = helpers.length && rng.random() < (long ? 0.35 : 0.78) ? rng.weighted(helpers, helpers.map((p) => ({ MF: 2.2, FW: 1.6, DF: 0.7 })[p.pos] * p.att * (p.id === wide ? 3 : 1))) : null
+    if (ch) tick.ch = ch.key
+    const quality = long ? LONG_Q : OPEN_Q + flow.q + (ch ? clamp(ch.adv, -MU_CAP, MU_CAP) / K_MU : 0) + ((shooter.A?.['공격'] ?? shooter.att) - keeper) / K_FINISH + (a - d) / K_QUAL + tEdge / K_TQUAL + r[atk].quality
     const pOn = long ? 0.28 : clamp(0.45 + (shooter.att - 60) / 200, 0.25, 0.75)
     const pGoal = clamp(quality, long ? 0.04 : 0.08, 0.55)
     const res = resolve({ shooter, assister, pOn, pGoal, how: long ? 'long' : 'open' })
@@ -561,6 +708,7 @@ export function step(match, ctx, { withEvents = true } = {}) {
         match.ps[fouler.id].rc++
         if (second) match.ps[fouler.id].yc++
         sd.sentOff.push(fouler.id)
+        sd.lostRoles = [...(sd.lostRoles || []), sd.slots[sd.onPitch.indexOf(fouler.id)]] // AI 감독이 빈 자리를 메울 때 쓴다
         removeFromPitch(match, dfn, fouler.id, minute)
         match.stop += 0.5
         Object.assign(tick, { k: 'card', p: fouler.id })
@@ -621,7 +769,7 @@ export function step(match, ctx, { withEvents = true } = {}) {
       const gk = p.pos === 'GK' ? 0.35 : 1
       sd.energy[id] = Math.max(0, sd.energy[id] - 0.4 * r[idx].drain * gk * (1.35 - p.sta / 100))
     }
-    if (idx !== match.myIdx) aiSubs(match, ctx, idx)
+    if (idx !== match.myIdx) aiManage(match, ctx, idx, withEvents)
   }
 
   // 추가시간: 그 하프에 골·교체·부상·카드가 많을수록 길다 (45·90분이 끝날 때 정한다)
@@ -812,6 +960,23 @@ export function predict(home, away, { homeCfg = {}, awayCfg = {}, status = {}, n
     else if (a === b) d++
   }
   return { win: w / n, draw: d / n, loss: (n - w - d) / n, gf: gh / n, ga: ga / n }
+}
+
+/**
+ * 개인 매치업 (화면 표시용): 그 팀이 공격할 때(attack)·수비할 때(defend)의 통로별 비교
+ *  rel = 이 경기 전체 통로 평균 대비 유불리 (공격 능력치와 수비 능력치의 척도 차이를 지운 값) — 화면은 이 값으로 유리/불리를 가린다
+ *  neutral: 경기 전 화면용 — '그날 컨디션'(경기마다 정해지는 운)을 빼고 본다 (킥오프 전에 그날 운을 미리 보여 주지 않는다)
+ */
+export function matchupsOf(match, ctx, idx, { neutral = false } = {}) {
+  if (neutral) match = { ...match, day: [1, 1] }
+  const me = xiOf(match, ctx, idx).xi
+  const op = xiOf(match, ctx, 1 - idx).xi
+  const attack = channels(me, op, tacOf(match.sides[idx].tactics))
+  const defend = channels(op, me, tacOf(match.sides[1 - idx].tactics))
+  const all = [...attack, ...defend]
+  const mean = all.length ? all.reduce((s, c) => s + c.diff, 0) / all.length : 0
+  for (const c of all) { c.rel = c.diff - mean; c.label = CHANNEL_LABEL[c.key] }
+  return { attack, defend }
 }
 
 /** 진단용: 그 팀의 장면별 전력 (tools/diag_engine.mjs) */

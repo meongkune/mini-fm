@@ -1,7 +1,10 @@
 import Avatar from '../components/Avatar.jsx'
 import Stars, { abilityStars } from '../components/Stars.jsx'
 import { baseOf, isCustom, layoutShift, roleAt } from '../engine/formation.js'
-import { useRef, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
+import Matchups from '../components/Matchups.jsx'
+import { AI_STYLE, aiStyle, createMatch } from '../engine/match.js'
+import { styleName } from '../engine/tactics.js'
 import { Kit, Flag } from '../components/Badges.jsx'
 import { CondBar } from '../components/Rating.jsx'
 import { PRESETS, ROLE_LABEL, buildSlots, fitOf, fitTone, parseShape, roleOf } from '../engine/formation.js'
@@ -238,7 +241,15 @@ export function placeInSlot(lineup, index, playerId) {
 }
 
 export default function Tactics() {
-  const { myTeam, save, update, status } = useGame()
+  const { myTeam, save, update, status, nextFixture } = useGame()
+  // 다음 상대와의 개인 매치업: 지금 선발·전술로 경기 상태를 미리 만들어 본다 (선발이나 지시를 바꾸면 바로 다시 계산)
+  const preview = useMemo(() => {
+    if (!myTeam || !nextFixture?.homeTeam || !nextFixture?.awayTeam) return null
+    const myCfg = { lineup: save.lineup, tactics: myTactics(save) }
+    const isHome = nextFixture.isHome
+    const match = createMatch({ home: nextFixture.homeTeam, away: nextFixture.awayTeam, homeCfg: isHome ? myCfg : {}, awayCfg: isHome ? {} : myCfg, status, myIdx: isHome ? 0 : 1, seed: 1 })
+    return { match, ctx: { teams: [nextFixture.homeTeam, nextFixture.awayTeam], status }, myIdx: isHome ? 0 : 1, opp: isHome ? nextFixture.awayTeam : nextFixture.homeTeam }
+  }, [myTeam, nextFixture, save, status])
   const [slot, setSlot] = useState(null)
   const [edit, setEdit] = useState(false) // 자리 조정 모드: 자리 표시를 끌어 위치를 바꾼다
   const lineupNow = () => Array.from({ length: buildSlots(save.formation).length }, (_, i) => save.lineup[i] ?? null)
@@ -334,6 +345,14 @@ export default function Tactics() {
           })}
         </div>
       </div>
+
+      {preview && (
+        <div className="card tac-matchups">
+          <h3>다음 상대 매치업 <span className="muted small">{preview.opp.name} · {preview.match.sides[1 - preview.myIdx].tactics.formation} · {styleName(preview.match.sides[1 - preview.myIdx].tactics)}</span></h3>
+          <p className="small muted">🧠 상대 감독 성향: <b>{AI_STYLE[aiStyle(preview.opp.id)][0]}</b> — {AI_STYLE[aiStyle(preview.opp.id)][1]}</p>
+          <Matchups match={preview.match} ctx={preview.ctx} myIdx={preview.myIdx} neutral />
+        </div>
+      )}
 
       <div className="card tac-orders">
         <h3>팀 지시</h3>

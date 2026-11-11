@@ -1247,9 +1247,9 @@ html.desktop .home-dash > .dash-col { display: block; min-width: 0; }
 html.desktop .card-grid { grid-template-columns: repeat(auto-fill, minmax(128px, 148px)); }
 html.desktop .scroll-row { flex-wrap: wrap; overflow: visible; }
 /* 전술: PC에서는 경기장(왼쪽) · 포메이션·벤치·팀 지시(오른쪽) */
-html.desktop .tac-layout { display: grid; grid-template-columns: 460px minmax(0, 1fr); grid-template-areas: "pitch sets" "pitch form" "pitch bench" "pitch orders"; gap: 0 16px; align-items: start; }
+html.desktop .tac-layout { display: grid; grid-template-columns: 460px minmax(0, 1fr); grid-template-areas: "pitch sets" "pitch form" "pitch bench" "pitch matchups" "pitch orders"; gap: 0 16px; align-items: start; }
 html.desktop .tac-pitch { grid-area: pitch; position: sticky; top: 0; }
-html.desktop .tac-sets { grid-area: sets; } html.desktop .tac-form { grid-area: form; } html.desktop .tac-bench { grid-area: bench; } html.desktop .tac-orders { grid-area: orders; }
+html.desktop .tac-sets { grid-area: sets; } html.desktop .tac-form { grid-area: form; } html.desktop .tac-bench { grid-area: bench; } html.desktop .tac-matchups { grid-area: matchups; } html.desktop .tac-orders { grid-area: orders; }
 /* 경기: PC에서는 경기장(왼쪽) · 조작·기록·중계(오른쪽) */
 html.desktop .match-layout { display: grid; grid-template-columns: minmax(380px, 520px) minmax(0, 1fr); gap: 16px; align-items: start; }
 html.desktop .ml-pitch { position: sticky; top: 0; }
@@ -1649,3 +1649,19 @@ a.dt-chip { color: inherit; text-decoration: none; }
 .ts-slot.on { border-color: #a78bfa; background: rgba(124,92,255,.14); }
 .ts-slot b { font-size: 1rem; } .ts-slot small { font-size: .66rem; color: var(--muted); }
 .ts-slot span { display: flex; gap: 4px; flex-wrap: wrap; justify-content: center; }
+
+/* 개인 매치업 표 */
+.mu h4 { margin: 8px 0 4px; font-size: .78rem; }
+.mu-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 3px; font-size: .74rem; }
+.mu-list li { display: grid; grid-template-columns: 5.6em 1fr auto; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 7px; background: rgba(148, 163, 184, .08); }
+.mu-list li.good { background: rgba(34, 197, 94, .12); }
+.mu-list li.bad { background: rgba(239, 68, 68, .12); }
+.mu-list .mu-lane { color: var(--muted, #94a3b8); }
+.mu-list .mu-duel { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mu-list .mu-duel i { font-style: normal; opacity: .75; }
+.mu-list .mu-duel em { font-style: normal; opacity: .5; margin: 0 4px; }
+.mu-list .good .mu-tag { color: #86efac; }
+.mu-list .bad .mu-tag { color: #fca5a5; }
+.mu-list .mu-tag { font-weight: 600; white-space: nowrap; }
+.mu-list .mu-note { grid-column: 2 / -1; font-size: .68rem; opacity: .7; }
+.mu-tip { margin: 6px 0 0; }

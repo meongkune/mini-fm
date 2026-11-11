@@ -3,13 +3,14 @@ import { abilityStars, starText } from '../components/Stars.jsx'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { buildSlots, fitOf, fitTone } from '../engine/formation.js'
-import { CORNER_EDGE, MAX_SUBS, advance, benchOf, clockText, createMatch, halfOver, dropInjured, fillVacant, moveToVacant, predict, ratings, reshape, step, substitute, summarize, swapPositions, tacticalEdges } from '../engine/match.js'
+import { AI_STYLE, aiStyle, CORNER_EDGE, MAX_SUBS, advance, benchOf, clockText, createMatch, halfOver, dropInjured, fillVacant, moveToVacant, predict, ratings, reshape, step, substitute, summarize, swapPositions, tacticalEdges } from '../engine/match.js'
 import { styleName, tacOf } from '../engine/tactics.js'
 import { TEAM_TALKS, teamTalkEffect, unavailable as outReason } from '../game/season.js'
 import Rating, { CondBar } from '../components/Rating.jsx'
 import { Crest, Flag, Kit } from '../components/Badges.jsx'
 import { ink, kitColors, lineupOvr, myTactics, onDark, playerOvr, short, teamOvr, useGame } from '../store.jsx'
 import TacticsPanel, { CORNER_DEF_OPTS, CORNER_OPTS } from '../components/TacticsPanel.jsx'
+import Matchups from '../components/Matchups.jsx'
 import MatchPitch from './MatchPitch.jsx'
 import NeedTeam from './NeedTeam.jsx'
 import { FormationPicker, LINE_OPTS, MENTALITY, OptionGroup, PRESSING, TEMPO_OPTS } from './Tactics.jsx'
@@ -328,7 +329,9 @@ export default function Match() {
               <div><span className="muted small">내 전술</span><strong>{save.formation} · {styleName(mySide.tactics)}</strong></div>
               <div><span className="muted small">상대 전술</span><strong>{match.sides[1 - myIdx].tactics.formation} · {styleName(match.sides[1 - myIdx].tactics)}</strong></div>
             </div>
+            <p className="small muted">🧠 상대 감독 성향: <b>{AI_STYLE[aiStyle(opp.id)][0]}</b> — {AI_STYLE[aiStyle(opp.id)][1]}</p>
             <MatchupNotes match={match} ctx={ctx} myIdx={myIdx} />
+            <Matchups match={match} ctx={ctx} myIdx={myIdx} neutral />
             <SetPieceNote mine={mySide.tactics} theirs={match.sides[1 - myIdx].tactics} />
             {(save.inbox || []).some((m) => m.type === 'talk' && !m.resolved) && (
               <p className="small notice">💬 답하지 않은 면담 요청 {(save.inbox || []).filter((m) => m.type === 'talk' && !m.resolved).length}건 — 이 경기를 치르면 넘긴 것으로 처리됩니다 (사기 −4). <Link className="link" to="/inbox">메시지함 →</Link></p>
@@ -453,6 +456,9 @@ export default function Match() {
             <h4>포메이션 <span className="muted small">(뛰고 있는 선수들이 새 자리로 재배치됩니다)</span></h4>
             <FormationPicker value={mySide.tactics.formation} onChange={(formation) => setTactics({ formation })} />
             <TacticsPanel value={mySide.tactics} onChange={setTactics} compact players={mySide.onPitch.map((id) => byId[id])} />
+            <h3>지금 매치업 <span className="muted small">체력·교체가 반영된 현재 상태</span></h3>
+            <MatchupNotes match={match} ctx={ctx} myIdx={myIdx} />
+            <Matchups match={match} ctx={ctx} myIdx={myIdx} />
           </div>
         </div>
       )}
