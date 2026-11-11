@@ -21,6 +21,9 @@ jobs:
         env:
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
         run: node tools/import_kleague.mjs | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: 데이터 검사 (이상하면 커밋하지 않음)
+        shell: bash
+        run: set -o pipefail; node tools/check_data.mjs --base HEAD --allow-squad-change | tee -a "$GITHUB_STEP_SUMMARY"
       - name: 변경 사항 커밋
         id: commit
         run: |

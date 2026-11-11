@@ -58,10 +58,11 @@ for (const [lid, tier] of [[292, 1], [293, 2]]) {
 
 const teams = []
 let matched = 0
+const seen = new Set() // 이적 중인 선수가 두 구단 명단에 모두 나오는 경우가 있다 → 처음 나온 구단에만
 for (const [tid, { team, tier }] of leagueTeams) {
   const sq = (await get(`/players/squads?team=${tid}`))[0]?.players || []
   const short = (KO[team.name] || team.name).replace(/\s*FC$/, '').trim()
-  const players = sq.filter((p) => POS[p.position] && p.age >= 17 && p.age <= 38).map((p) => {
+  const players = sq.filter((p) => POS[p.position] && p.age >= 17 && p.age <= 38 && !seen.has(p.id) && seen.add(p.id)).map((p) => {
     const pos = POS[p.position]
     const ko = koName.get(norm(p.name))
     if (ko) matched++

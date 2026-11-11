@@ -37,6 +37,9 @@ jobs:
           PRIORITY_LEAGUES: ${{ vars.PRIORITY_LEAGUES || 'premier-league,bundesliga,serie-a,la-liga,ligue-1,brasileirao,primeira-liga,eredivisie,championship' }}   # 이 순서대로 한 리그를 다 채운 뒤 다음 리그 (저장소 Variables에서 바꿀 수 있음)
         run: node tools/sportsapi_ratings.mjs | tee -a "$GITHUB_STEP_SUMMARY"
 
+      - name: 데이터 검사 (이상하면 커밋하지 않음)
+        shell: bash
+        run: set -o pipefail; node tools/check_data.mjs --base HEAD | tee -a "$GITHUB_STEP_SUMMARY"
       - name: 변경 사항 커밋
         id: commit
         run: |

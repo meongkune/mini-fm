@@ -38,6 +38,9 @@ jobs:
       - name: 사진 통일
         shell: bash
         run: set -o pipefail; python tools/player_faces.py --teams "${{ inputs.teams }}" --leagues "${{ inputs.leagues }}" --limit ${{ inputs.limit }} | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: 데이터 검사 (이상하면 커밋하지 않음)
+        shell: bash
+        run: set -o pipefail; node tools/check_data.mjs --base HEAD | tee -a "$GITHUB_STEP_SUMMARY"
       - name: 변경 사항 커밋
         id: commit
         run: |

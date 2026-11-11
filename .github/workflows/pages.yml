@@ -24,6 +24,8 @@ jobs:
     steps:
       - name: 소스 체크아웃
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 2 # 직전 커밋과 데이터 비교
 
       - name: Node.js 설정
         uses: actions/setup-node@v4
@@ -35,6 +37,15 @@ jobs:
       - name: 의존성 설치
         working-directory: frontend
         run: npm ci --no-audit --no-fund
+
+      # ── CI: 검사를 통과해야 배포 (실패하면 사이트는 이전 상태 그대로, 저장소 주인에게 실패 메일) ──
+      - name: 데이터 검사
+        shell: bash
+        run: set -o pipefail; node tools/check_data.mjs --base HEAD~1 --allow-squad-change | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - name: 경기 엔진 검사
+        shell: bash
+        run: set -o pipefail; node tools/check_engine.mjs | tee -a "$GITHUB_STEP_SUMMARY"
 
       - name: 빌드 (레포 이름을 base 경로로)
         working-directory: frontend
