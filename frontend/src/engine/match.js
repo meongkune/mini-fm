@@ -39,9 +39,13 @@ const OPEN_Q = 0.22
 //   (예전 0.158 · 0.09는 경기당 슛이 30개로 실제 25~27개보다 많았다 → 수를 줄이고 그만큼 질을 올려 중거리 골 수는 그대로)
 //   rel: 공격력을 '같은 포지션 동료 평균'에 얼마나 맞춰 비교할지 (1 = 포지션 안에서만 비교, 0 = 절대값). 지금은 0
 //        리그마다 공격수 득점 비율이 다른 것(50~65%)을 줄이려고 0.7을 시험했지만 3~4%p만 줄었다 — 주된 원인은 데이터의 포지션 표기 차이다
+//   easePow·easeSt: 2골 넘게 앞서면 주포에게 몰아주지 않고 여러 선수가 슈팅한다 (공격력 지수 3.5 → easePow, 중앙 공격수 배수 1.4 → easeSt)
+//        득점 집중의 원인이 '압도적인 팀이 넣는 골 수'라서, 이미 승부가 기운 경기의 골을 퍼뜨린다 — 팽팽한 리그의 득점왕은 거의 줄지 않는다
 //   mark: 그 경기에서 이미 골을 넣은 선수는 집중 마크를 받는다 (골 하나마다 슈팅 기회 ×mark) — 한 경기 몰아넣기를 줄인다
 //   (한 선수의 슈팅 비중에 상한을 두는 것도 시험했지만 압도적인 팀 주포는 39 → 35골로만 줄고 프리미어리그 득점왕이 24 → 22골로 떨어져서 넣지 않았다)
-export const SHOT_W = { open: { FW: 2.45, MF: 1.45, DF: 0.5 }, long: { FW: 1.2, MF: 1.8, DF: 0.4 }, st: 1.4, pow: 3.5, rel: 0, mark: 0.85 }
+export const SHOT_W = { open: { FW: 2.45, MF: 1.45, DF: 0.5 }, long: { FW: 1.2, MF: 1.8, DF: 0.4 }, st: 1.4, pow: 3.5, rel: 0, mark: 0.85, easePow: 1.5, easeSt: 1.1 }
+// 직접 프리킥을 두 번째 키커가 차는 비율
+const FK_SECOND = 0.35
 const LONG_SHARE = 0.115
 const LONG_Q = 0.122
 // 개인 매치업: 통로별 유불리(adv, 능력치 차)가 통로 선택(MU_PICK)과 찬스의 질(K_MU)에 미치는 정도
@@ -52,7 +56,7 @@ const MU_CAP = 14
 // 홈 팀이 만드는 찬스 배수 (관중·익숙한 구장) — 점유(HOME_ADV)만으로는 홈 승률이 낮았다
 export const HOME = { ch: 1.18 }
 // 반칙 위치 비율: 박스 안(페널티킥) · 직접 프리킥 거리 · 측면 크로스 프리킥
-const P_PEN = 0.015
+const P_PEN = 0.0125 // 페널티 골이 전체의 9.4%로 실제(약 7%)보다 많아 낮췄다
 const P_FK = 0.05
 const P_FKX = 0.09
 // 크로스·돌파가 수비 맞고 나가 코너킥이 되는 확률 (분당)
@@ -200,7 +204,7 @@ export const FLOW = {
   trailLate: 0.14,
   counter: 0.025, // 앞선 팀 역습의 질 (상대가 1~2골 뒤져 올라올 때, 후반으로 갈수록)
   levelLate: 0, // 동점으로 막판(75분 이후)에 들어갔을 때 양쪽이 몸을 사리는 정도 — 무승부가 이미 충분해 지금은 끈다
-  base: 0.94, // 위 효과로 줄어든 전체 득점을 되돌리는 보정
+  base: 0.955, // 위 효과로 줄어든 전체 득점을 되돌리는 보정
 }
 function flowOf(match, idx) {
   const diff = match.score[idx] - match.score[1 - idx]
@@ -433,6 +437,12 @@ function aiManage(match, ctx, idx, withEvents) {
     const sub = risky && bestFor(risky.role)
     if (sub && value(sub, risky.role) >= value(risky.p, risky.role) * (style === 'pragmatic' ? 0.9 : 0.94) && swapIn(risky.p, sub)) { ai.flags.yc = 1; say(`경고가 있는 ${risky.p.name}을(를) 미리 뺍니다.`) }
   }
+  // 주포 휴식: 2골 넘게 앞선 채 62분을 넘기면 가장 위협적인 공격 자원을 빼서 아낀다 (경기당 한 번, 같은 자리 선수로)
+  if (!ai.flags.rest && m >= 62 && match.score[idx] - match.score[1 - idx] >= 2 && sd.subsLeft > 0) {
+    const star = pitch().filter((x) => ROLE_POS[x.role] === 'FW' || x.role === 'AM').sort((a, c) => c.p.att - a.p.att)[0]
+    const sub = star && bestFor(star.role)
+    if (sub && swapIn(star.p, sub)) { ai.flags.rest = 1; say(`여유 있게 앞서자 ${star.p.name}을(를) 쉬게 합니다.`) }
+  }
   // 승부수: 지고 있으면 수비 자원을 빼고 공격수를, 앞서면 공격 자원을 빼고 수비형 미드를 넣는다 (각각 경기당 한 번)
   if (s >= 1 && m >= 62 && !ai.flags.chase && sd.subsLeft > 0) {
     const on = pitch()
@@ -501,7 +511,15 @@ export function autoTaker(players, kind = 'sp') {
 }
 function takerOf(match, idx, xi, kind) {
   const want = kind === 'pen' ? match.sides[idx].tactics.penTaker : match.sides[idx].tactics.spTaker
-  return xi.find((p) => p.id === want && p.pos !== 'GK') || autoTaker(xi, kind)
+  const set = xi.find((p) => p.id === want && p.pos !== 'GK')
+  if (set) return set
+  // 직접 프리킥: 키커를 정해 두지 않았으면 킥이 좋은 두 명이 나눠 찬다 (거리·각도에 따라 — 셋 중 한 번은 두 번째 키커)
+  //   한 명이 페널티·프리킥·오픈 플레이를 모두 가져가 득점이 지나치게 몰리던 것을 줄인다
+  if (kind === 'fk') {
+    const top = xi.filter((p) => p.pos !== 'GK').sort((a, b) => kickOf(b) - kickOf(a))
+    return (top[1] && hash(`fk-${match.seed}-${match.minute}-${match.plus}-${idx}`) < FK_SECOND ? top[1] : top[0]) || null
+  }
+  return autoTaker(xi, kind)
 }
 
 /** 전반(1)·후반(2)이 추가시간까지 끝났는가 */
@@ -648,7 +666,7 @@ export function step(match, ctx, { withEvents = true } = {}) {
 
   // 직접 프리킥: 키커의 킥 vs 골키퍼
   const directFk = () => {
-    const taker = takerOf(match, atk, r[atk].xi, 'sp')
+    const taker = takerOf(match, atk, r[atk].xi, 'fk')
     if (!taker) return
     scene({ k: 'miss', sp: 'fk', p: taker.id, kt: taker.id, side: rng.random() < 0.5 ? -1 : 1 })
     const kick = kickOf(taker)
@@ -687,7 +705,10 @@ export function step(match, ctx, { withEvents = true } = {}) {
     const teamAtt = avg(shooters.map((p) => p.att), 70)
     const posAtt = Object.fromEntries(['DF', 'MF', 'FW'].map((k) => [k, avg(shooters.filter((p) => p.pos === k).map((p) => p.att), teamAtt)]))
     const refOf = (p) => SHOT_W.rel * posAtt[p.pos] + (1 - SHOT_W.rel) * teamAtt
-    const shooter = rng.weighted(shooters, shooters.map((p) => w[p.pos] * (!long && p.slot === 'ST' ? SHOT_W.st : 1) * (p.att / refOf(p)) ** SHOT_W.pow * SHOT_W.mark ** (match.ps[p.id]?.g || 0)))
+    const easing = match.score[atk] - match.score[dfn] >= 2 // 이 분이 시작될 때 2골 넘게 앞서 있었나
+    const shotPow = easing ? SHOT_W.easePow : SHOT_W.pow
+    const stK = easing ? SHOT_W.easeSt : SHOT_W.st
+    const shooter = rng.weighted(shooters, shooters.map((p) => w[p.pos] * (!long && p.slot === 'ST' ? stK : 1) * (p.att / refOf(p)) ** shotPow * SHOT_W.mark ** (match.ps[p.id]?.g || 0)))
     const helpers = shooters.filter((p) => p.id !== shooter.id)
     const assister = helpers.length && rng.random() < (long ? 0.35 : 0.78) ? rng.weighted(helpers, helpers.map((p) => ({ MF: 2.2, FW: 1.6, DF: 0.7 })[p.pos] * p.att * (p.id === wide ? 3 : 1))) : null
     if (ch) { tick.ch = ch.key; tick.w = ch.a.id } // 화면: 어느 통로에서, 누가 만든 찬스인가
