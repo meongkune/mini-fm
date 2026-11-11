@@ -29,6 +29,25 @@ ${o ? `[감독의 이번 제안] 연봉 €${o.wage}M/년 · ${o.years}년${o.ra
 - 제안이 없는 일반 대화면 outcome은 "none". 금액을 지어내지 말고 위 숫자만 쓴다.`
 }
 
+// 이적 협상: 상대 구단 단장 역할. 수락·역제안·거절은 게임이 이미 정했고, 단장은 그 결정을 자기 말로 전한다.
+// 감독의 논리가 그럴듯하면(후보 선수·계약 만료 임박·선수 본인이 떠나길 원함·필요한 포지션 선수를 끼워 줌) 다음 제안에 쓸 양보(concession 0~5 %)를 준다.
+function clubPrompt(c) {
+  const o = c.offer
+  return `너는 축구 감독 게임 속 프로 축구 구단 "${clip(c.club, 40)}"의 단장(디렉터)이다. 상대 구단 감독(=사용자)이 우리 선수 영입을 협상하러 왔다. 현실의 노련한 단장처럼 말하라.
+[협상 대상] ${clip(c.player, 60)} (${c.age}세, ${clip(c.pos, 8)}, 능력 OVR ${c.ovr}, 우리 팀 내 ${clip(c.role, 20)}, 계약 ${c.years ?? '?'}년 남음${c.wantsOut ? ', 선수 본인이 이적을 원함' : ''})
+[우리가 보는 선수 가치] €${c.value}M · 협상 ${c.tries}/${c.patience}회째
+[거래 방식] ${c.loan ? `임대 (시즌 끝까지, 임대료 + 상대가 연봉 ${Math.round((o?.share ?? 1) * 100)}% 부담)` : '완전 이적'}
+${o ? `[감독의 이번 제안] ${c.loan ? `임대료 €${o.fee}M` : `현금 €${o.fee}M`}${o.swap ? ` + 상대 선수 ${clip(o.swap, 40)} (우리 평가 €${o.swapCredit}M: ${clip(o.swapNote, 60)})` : ''}` : '[감독의 이번 제안] 없음 — 말로만 이야기하는 중'}
+${c.verdict ? `[우리 구단의 결정 — 반드시 이대로 전하라] ${c.verdict === 'accept' ? '수락' : c.verdict === 'counter' ? `역제안: ${c.loan ? '임대료' : '현금'} €${c.ask}M` : `거절${c.reason ? ` (${clip(c.reason, 80)})` : ''}`}` : ''}
+규칙:
+1. 한국어, 1~3문장. 단장답게 정중하지만 실리적으로. 게임·AI라는 말 금지.
+2. [우리 구단의 결정]이 있으면 그 결정과 금액을 그대로 전한다(바꾸지 마라). 결정이 없으면 금액을 새로 지어내지 말고 조건을 묻거나 원칙을 말한다.
+3. 위 숫자 말고 다른 금액·선수·사실을 지어내지 마라. 우리가 받을 수 있는 최저 금액은 절대 말하지 마라.
+4. concession: 감독의 이번 말이 설득력 있으면 0~5 (정수, 다음 제안에서 원하는 금액을 그만큼 % 낮춰 줌). 근거 없는 압박·빈말·무례면 0. 선수가 후보이거나 떠나길 원하거나 계약이 1년 남았다는 지적, 필요한 포지션 선수를 끼워 주는 것은 좋은 근거다.
+5. walk: 감독이 무례하거나 터무니없는 말을 반복하면 true (협상을 접는다).
+6. mood: 지금 기분 한국어 한 단어 (예: 신중, 흥미, 불쾌, 만족, 단호).`
+}
+
 function systemPrompt(p) {
   const pers = p.personality || {}
   return `너는 축구 감독 게임 속 프로 축구 선수 "${clip(p.name, 40)}"이다. 감독(=사용자)과 1:1 면담 중이다. 현실의 프로 선수처럼 행동하라.
@@ -58,19 +77,26 @@ ${p.deal ? dealPrompt(p.deal) : ''}
 9. mood: 지금 감정을 한국어 한 단어로 (예: 분노, 서운함, 의심, 담담, 기대, 감동). 영어 금지.`
 }
 
+const CLUB_SCHEMA = {
+  type: 'OBJECT',
+  properties: { reply: { type: 'STRING' }, mood: { type: 'STRING' }, concession: { type: 'INTEGER' }, walk: { type: 'BOOLEAN' } },
+  required: ['reply', 'mood', 'concession', 'walk'],
+}
+
 async function askGemini(env, body) {
+  const club = body.mode === 'club'
   const history = (Array.isArray(body.history) ? body.history : []).slice(-12).map((h) => ({
-    role: h.role === 'player' ? 'model' : 'user',
+    role: h.role === 'manager' ? 'user' : 'model',
     parts: [{ text: clip(h.text, 400) }],
   }))
   const payload = {
-    systemInstruction: { parts: [{ text: systemPrompt(body.player || {}) }] },
+    systemInstruction: { parts: [{ text: club ? clubPrompt(body.club || {}) : systemPrompt(body.player || {}) }] },
     contents: [...history, { role: 'user', parts: [{ text: `감독: ${clip(body.message, 300)}` }] }],
     generationConfig: {
       temperature: 0.9,
       maxOutputTokens: 300,
       responseMimeType: 'application/json',
-      responseSchema: {
+      responseSchema: club ? CLUB_SCHEMA : {
         type: 'OBJECT',
         properties: {
           reply: { type: 'STRING' },
@@ -101,6 +127,7 @@ async function askGemini(env, body) {
     const data = await res.json()
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text
     const out = JSON.parse(text)
+    if (club) return { reply: clip(out.reply, 400), mood: clip(out.mood, 12), concession: Math.max(0, Math.min(5, Math.round(out.concession || 0))), walk: !!out.walk, model }
     return {
       reply: clip(out.reply, 400),
       mood: clip(out.mood, 12),

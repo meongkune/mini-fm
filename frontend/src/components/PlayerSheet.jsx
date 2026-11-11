@@ -14,7 +14,7 @@ import { eur, yearsLeft } from '../game/finance.js'
 import { useGame } from '../store.jsx'
 
 export default function PlayerSheet({ player, onClose, inLineup, onToggle }) {
-  const { status, save, talkTo, myTeam, teams, finishTalk, totalRounds, contractOf, renewalAsk, renew, releaseCost, release, forceSell, addPromise } = useGame()
+  const { status, save, talkTo, myTeam, teams, finishTalk, totalRounds, contractOf, renewalAsk, renew, releaseCost, release, forceSell, addPromise, isLoanIn, loanOptions, loanOut, transferWindow } = useGame()
   const [nego, setNego] = useState(null) // 연봉 협상 대화 (재계약)
   const [negoMsg, setNegoMsg] = useState('')
   const [battle, setBattle] = useState(false)
@@ -76,10 +76,20 @@ export default function PlayerSheet({ player, onClose, inLineup, onToggle }) {
                 {inLineup ? '선발에서 빼기' : st.inj > 0 || st.susp > 0 ? '출전 불가' : '선발에 넣기'}
               </button>
             )}
-            <ContractBox player={player} save={save} contractOf={contractOf} renewalAsk={renewalAsk} renew={renew} releaseCost={releaseCost}
-              onNego={(ask) => { setNegoMsg(''); setNego(ask) }} negoMsg={negoMsg}
-              onRelease={() => { if (confirm(`${player.name}을(를) 방출할까요? 위약금 ${eur(releaseCost(player))}`)) { release(player); onClose() } }}
-              onSell={() => { if (confirm(`${player.name}을(를) 감독·선수 의사와 상관없이 즉시 팔까요? (가치의 60~120%)`)) { setDeal(forceSell(player)) } }} />
+            {isLoanIn(player.id) ? (
+              <div className="contract-box">
+                <h4>임대 선수</h4>
+                <p className="small">🔁 {save.loans[player.id].club}에서 시즌 끝까지 임대 왔습니다. 연봉 {Math.round((save.loans[player.id].share ?? 1) * 100)}% 부담 ({eur(contractOf(player).wage)}/년). 시즌이 끝나면 돌아가며, 재계약·판매·방출은 할 수 없습니다.</p>
+              </div>
+            ) : (
+              <>
+                <ContractBox player={player} save={save} contractOf={contractOf} renewalAsk={renewalAsk} renew={renew} releaseCost={releaseCost}
+                  onNego={(ask) => { setNegoMsg(''); setNego(ask) }} negoMsg={negoMsg}
+                  onRelease={() => { if (confirm(`${player.name}을(를) 방출할까요? 위약금 ${eur(releaseCost(player))}`)) { release(player); onClose() } }}
+                  onSell={() => { if (confirm(`${player.name}을(를) 감독·선수 의사와 상관없이 즉시 팔까요? (가치의 60~120%)`)) { setDeal(forceSell(player)) } }} />
+                <LoanOutBox player={player} open={transferWindow.open} options={loanOptions} onLoan={(o) => { const r = loanOut(player, o); if (r.ok) onClose(); else alert(r.reason) }} />
+              </>
+            )}
             {nego && (
               <TalkRoom player={player} team={myTeam} status={st} topic="contract" totalRounds={totalRounds} wage={contractOf(player).wage}
                 deal={{ kind: 'renew', ask: nego.wage, current: contractOf(player).wage, maxYears: nego.maxYears }}
@@ -121,6 +131,27 @@ export default function PlayerSheet({ player, onClose, inLineup, onToggle }) {
 // 위키백과 프로필: 사진·한글 이름·소개·키·생년월일·출생지·실제 포지션
 
 // 계약: 남은 기간·연봉, 재계약 제안, 방출, 강제 매각
+/** 임대 보내기: 출전 기회가 있는 구단 후보 (상대가 연봉 전부 부담, 시즌 끝나면 복귀) */
+function LoanOutBox({ player, open, options, onLoan }) {
+  const [show, setShow] = useState(false)
+  if (!show) return <button className="btn ghost small wide" onClick={() => setShow(true)}>🔁 임대 보내기</button>
+  const list = options(player)
+  return (
+    <div className="contract-box">
+      <h4>임대 보내기 <span className="muted small">시즌 끝까지 · 상대가 연봉 전부 부담</span></h4>
+      {!open ? <p className="small bad-text">이적 시장이 닫혀 있습니다.</p>
+        : !list.length ? <p className="small muted">이 선수에게 출전 기회를 줄 구단이 리그 안에 없습니다.</p>
+          : list.map((o) => (
+            <div key={o.team.id} className="row loan-opt">
+              <span className="small"><b>{o.team.name}</b> · {o.role} · 임대료 {eur(o.fee)}</span>
+              <button className="btn small" onClick={() => { if (confirm(`${player.name}을(를) ${o.team.name}에 시즌 끝까지 임대 보낼까요? (임대료 ${eur(o.fee)})`)) onLoan(o) }}>보내기</button>
+            </div>
+          ))}
+      <p className="small muted">어린 선수·후보 선수는 출전 기회가 생겨 반기지만, 주전급 베테랑은 서운해합니다.</p>
+    </div>
+  )
+}
+
 function ContractBox({ player, save, contractOf, renewalAsk, renew, onRelease, onSell, releaseCost, onNego, negoMsg }) {
   const c = contractOf(player)
   const left = yearsLeft(save, c)

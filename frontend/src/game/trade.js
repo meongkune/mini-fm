@@ -84,8 +84,8 @@ const isCore = (team, id) => [...team.players].sort((a, b) => playerOvrOf(b) - p
  *   협상 1회마다 4%씩 내려준다 (단 가치의 85% 밑으로는 안 내려감)
  *   제시액이 원하는 금액의 65% 이상이면 역제안 (원하는 금액과 제시액 사이), 그 밑이면 거절
  */
-export function evaluateBid({ theirs, player, fee, status = {}, value = null, tries = 0 }) {
-  const after = theirs.players.filter((p) => p.id !== player.id)
+export function evaluateBid({ theirs, player, fee, status = {}, value = null, tries = 0, swap = null, talk = 0 }) {
+  const after = [...theirs.players.filter((p) => p.id !== player.id), ...(swap?.player ? [swap.player] : [])]
   const prob = squadProblem(after, { minOnly: true }) // 파는 쪽은 최소 인원만 본다 (K리그처럼 명단이 40명 넘는 구단도 있다)
   if (prob) return { verdict: 'reject', reason: `"그 선수를 팔면 우리 팀 ${prob}. 팔 수 없습니다."` }
   const v = value ?? valueOf(player, status[player.id])
@@ -93,14 +93,86 @@ export function evaluateBid({ theirs, player, fee, status = {}, value = null, tr
   const rank = [...theirs.players].sort((a, b) => playerOvrOf(b) - playerOvrOf(a)).findIndex((p) => p.id === player.id)
   const role = core ? 1.3 : rank < 18 ? 1.05 : 0.9
   const age = player.age >= 30 ? 0.9 : 1
-  const need = Math.round(v * Math.max(0.85, role * age - tries * 0.04) * 10) / 10
+  // talk: 단장과의 대화로 얻어 낸 양보(0~0.08) — 협상 횟수 양보와 합쳐도 가치의 80% 밑으로는 안 내려간다
+  const need = Math.round(v * Math.max(0.8, Math.max(0.85, role * age - tries * 0.04) - talk) * 10) / 10
   const why = core ? ' 우리 팀 핵심 선수입니다.' : rank >= 18 ? ' 출전 기회가 적은 선수라 조건만 맞으면 보내겠습니다.' : ''
-  if (fee >= need) return { verdict: 'accept', reason: `"좋습니다. ${money(fee)}이면 보내드리죠."`, need }
-  if (fee >= need * 0.65) {
-    const ask = Math.round(Math.max(need * 0.97, (fee + need) / 2) * 10) / 10
-    return { verdict: 'counter', ask, reason: `"${money(ask)}이면 생각해 보겠습니다.${why}"`, need }
+  // 선수를 끼워 넣으면: 그 선수 값어치(상대 눈으로 본)만큼 현금을 덜 내도 된다
+  const credit = swap?.credit || 0
+  const total = fee + credit
+  const plus = swap?.player ? ` (${swap.player.name} 포함 — 우리 쪽 평가 ${money(credit)}: ${swap.note})` : ''
+  if (total >= need) return { verdict: 'accept', reason: `"좋습니다. 현금 ${money(fee)}${plus}이면 보내드리죠."`, need, credit }
+  if (total >= need * 0.65) {
+    const ask = Math.round(Math.max(need * 0.97, (total + need) / 2) * 10) / 10
+    const cash = Math.max(0, Math.round((ask - credit) * 10) / 10)
+    return { verdict: 'counter', ask: cash, reason: `"현금 ${money(cash)}${plus}이면 생각해 보겠습니다.${why}"`, need, credit }
   }
-  return { verdict: 'reject', reason: `"${money(fee)}은 너무 낮습니다.${core ? ' 핵심 선수는 쉽게 내주지 않습니다.' : ''}"`, need }
+  return { verdict: 'reject', reason: `"현금 ${money(fee)}${plus}은 너무 낮습니다.${core ? ' 핵심 선수는 쉽게 내주지 않습니다.' : ''}"`, need, credit }
+}
+
+const POS_NAME = { GK: '골키퍼', DF: '수비수', MF: '미드필더', FW: '공격수' }
+const POS_NEED = { GK: 3, DF: 8, MF: 8, FW: 5 }
+/**
+ * 선수+현금 거래: 내가 끼워 넣는 선수를 상대 구단이 얼마로 쳐주는지
+ *   그 포지션이 모자라면 가치의 90%, 적당하면 75%, 넘치면 60%
+ *   상대 주전(상위 11명) 수준이면 +10%p, 한참 못 미치면(8 이상 낮음) 절반, 31세 이상은 15% 덜
+ */
+export function swapCredit(theirs, mine, value) {
+  if (!mine) return null
+  const same = theirs.players.filter((p) => p.pos === mine.pos).length
+  const need = POS_NEED[mine.pos] || 6
+  let k = same < need ? 0.9 : same <= need + 1 ? 0.75 : 0.6
+  const ovrs = theirs.players.map(playerOvrOf).sort((a, b) => b - a)
+  const line = ovrs[Math.min(10, ovrs.length - 1)] ?? 70 // 주전 11번째 선수 능력
+  const gap = playerOvrOf(mine) - line
+  let note = same < need ? `${POS_NAME[mine.pos]}가 부족해 쓸모가 있습니다` : same <= need + 1 ? `${POS_NAME[mine.pos]} 자리는 쓸 만큼은 있습니다` : `${POS_NAME[mine.pos]}는 이미 넘칩니다`
+  if (gap >= 0) { k += 0.1; note += ' · 바로 주전급' }
+  else if (gap < -8) { k *= 0.5; note += ' · 우리 주전 수준에 못 미칩니다' }
+  if (mine.age >= 31) { k *= 0.85; note += ' · 나이가 많습니다' }
+  return { player: mine, credit: Math.round(value * k * 10) / 10, note }
+}
+
+/**
+ * 임대 영입 제안에 대한 상대 구단 판단
+ *   핵심(상위 3명)·주전(상위 11명, 24세 이상)은 임대 불가 → 완전 이적만
+ *   임대료 기준: 가치의 8% × (어린 선수 0.6 · 후보 0.8 · 주전 경계 1.2) × 연봉 부담이 적을수록 더 요구 (share: 우리가 내는 연봉 비율 0.5~1)
+ */
+export function evaluateLoan({ theirs, player, fee, share = 1, value, tries = 0 }) {
+  const after = theirs.players.filter((p) => p.id !== player.id)
+  const prob = squadProblem(after, { minOnly: true })
+  if (prob) return { verdict: 'reject', reason: `"그 선수를 보내면 우리 팀 ${prob}. 임대도 어렵습니다."` }
+  const rank = [...theirs.players].sort((a, b) => playerOvrOf(b) - playerOvrOf(a)).findIndex((p) => p.id === player.id)
+  if (rank < 3) return { verdict: 'reject', reason: '"핵심 선수는 임대 보내지 않습니다."' }
+  if (rank < 11 && player.age >= 24) return { verdict: 'reject', reason: '"주전 선수라 임대는 안 됩니다. 완전 이적이라면 이야기해 보죠."' }
+  const young = player.age <= 22
+  const k = (young ? 0.6 : 1) * (rank >= 18 ? 0.8 : 1.2) * (1 + (1 - share) * 2.5)
+  const need = Math.round(Math.max(0.1, value * 0.08 * k * Math.max(0.8, 1 - tries * 0.05)) * 10) / 10
+  const why = young ? ' 꾸준히 뛰게 해 주는 게 조건입니다.' : rank >= 18 ? ' 우리 팀에서는 기회가 적으니 보내 줄 수 있습니다.' : ''
+  if (fee >= need) return { verdict: 'accept', reason: `"좋습니다. 임대료 ${money(fee)}, 연봉 ${Math.round(share * 100)}% 부담이면 시즌 끝까지 보내 드리죠.${why}"`, need }
+  if (fee >= need * 0.6) {
+    const ask = Math.round(Math.max(need * 0.97, (fee + need) / 2) * 10) / 10
+    return { verdict: 'counter', ask, reason: `"연봉 ${Math.round(share * 100)}% 부담이면 임대료 ${money(ask)}은 받아야 합니다.${why}"`, need }
+  }
+  return { verdict: 'reject', reason: `"임대료 ${money(fee)}은 너무 적습니다.${share < 1 ? ' 연봉을 더 부담해 주시면 임대료를 낮출 수 있습니다.' : ''}"`, need }
+}
+
+/**
+ * 내 선수 임대 보내기: 이 선수를 원하는 구단 후보 (출전 기회가 있는 곳 위주)
+ *   상대가 연봉 100%를 내고, 임대료는 가치의 3~6%
+ */
+export function loanTargets(teams, myTeamId, p, value) {
+  const ovr = playerOvrOf(p)
+  // 같은 세부 포지션(RB·CB·ST…)끼리 비교한다. 그 자리 주전 수만큼 앞에 더 나은 선수가 없으면 '주전 예상'
+  const ROLE_SLOT = { GK: 1, CB: 2, LB: 1, RB: 1, LWB: 1, RWB: 1, DM: 1, CDM: 1, CM: 2, AM: 1, CAM: 1, LM: 1, RM: 1, LW: 1, RW: 1, ST: 1, CF: 1 }
+  const byRole = !!(p.role && ROLE_SLOT[p.role])
+  const avg = (t) => t.players.map(playerOvrOf).sort((a, b) => b - a).slice(0, 14).reduce((x, y) => x + y, 0) / 14
+  return teams.filter((t) => t.id !== myTeamId).map((t) => {
+    const same = t.players.filter((x) => (byRole ? (x.role || x.pos) === p.role : x.pos === p.pos))
+    const slot = byRole ? ROLE_SLOT[p.role] : { GK: 1, DF: 4, MF: 3, FW: 2 }[p.pos] || 3
+    const better = same.filter((x) => playerOvrOf(x) > ovr).length
+    const role = better < slot ? '주전 예상' : better < slot * 2 ? '로테이션' : '후보'
+    const fit = (better < slot ? 3 : better < slot * 2 ? 2 : 0) + (t.players.filter((x) => x.pos === p.pos).length < (POS_NEED[p.pos] || 6) ? 1 : 0)
+    return { team: t, role, fit, str: avg(t), fee: Math.round(value * (p.age <= 22 ? 0.03 : 0.06) * 10) / 10 }
+  }).filter((x) => x.fit >= 2).sort((a, b) => b.fit - a.fit || a.str - b.str).slice(0, 4) // 같은 조건이면 작은 구단부터 (현실에서도 출전 기회 찾아 아래로 간다)
 }
 
 /** 이적 실행: fromId 구단의 선수를 toId 구단으로 (save.rosters에 기록). contract는 내 팀으로 올 때만 */

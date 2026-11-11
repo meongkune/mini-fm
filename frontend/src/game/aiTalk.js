@@ -204,3 +204,20 @@ export function applyDeal({ player, deal, renew, addPromise, round }) {
   }
   return { ok: true }
 }
+
+/** 이적 협상: 상대 구단 단장(AI)에게 말하기. 서버가 안 되면 게임 판단 문구를 그대로 쓴다 */
+export async function sayToClub({ message, history, club, fallback = null }) {
+  try {
+    const res = await fetch(TALK_API, {
+      method: 'POST',
+      signal: AbortSignal.timeout(20000),
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mode: 'club', message, history, club }),
+    })
+    const data = await res.json()
+    if (!res.ok || data.fallback || !data.reply) throw new Error(data.error || `HTTP ${res.status}`)
+    return { ...data, ai: true }
+  } catch {
+    return { reply: fallback || '"구체적인 조건을 말씀해 주시죠."', mood: '신중', concession: 0, walk: false, ai: false }
+  }
+}

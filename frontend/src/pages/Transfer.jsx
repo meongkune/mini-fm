@@ -9,11 +9,14 @@ import { Crest, Flag } from '../components/Badges.jsx'
 import NeedTeam from './NeedTeam.jsx'
 import { CondBar } from '../components/Rating.jsx'
 import { PATIENCE, money, potentialStars, valueOf } from '../game/trade.js'
-import { eur, wageBill, wageBudget } from '../game/finance.js'
+import { eur, wageBill, wageBudget, yearsLeft } from '../game/finance.js'
+import { sayToClub } from '../game/aiTalk.js'
 import { playerOvr, short, useGame } from '../store.jsx'
 import { keyAttrs20 } from '../game/attributes.js'
 import { roleOf } from '../engine/formation.js'
 import CurrencyToggle from '../components/CurrencyToggle.jsx'
+// 받침에 따라 '로/으로'
+const ro = (w) => { const c = w.charCodeAt(w.length - 1) - 0xac00; return w + (c < 0 || c > 11171 ? '(으)로' : c % 28 === 0 || c % 28 === 8 ? '로' : '으로') }
 
 const POS = ['전체', 'GK', 'DF', 'MF', 'FW']
 const SORTS = [['ovr', '능력'], ['value', '가치'], ['pot', '잠재력'], ['age', '나이']]
@@ -111,6 +114,9 @@ export default function Transfer() {
             ['숫자 3개', '그 포지션의 핵심 능력치 (1~20, 16 이상이면 정상급)'],
             ['초록 금액', '선수 가치(이적료 기준). 아래 작은 글씨는 요구 연봉'],
             ['✔ 영입 가능', '이적료를 현금으로 낼 수 있고 연봉도 임금 예산 안'],
+            ['➕ 선수 끼워 넣기', '우리 선수를 얹으면 상대가 매긴 값어치만큼 현금을 덜 낸다. 그 포지션이 부족한 구단일수록 비싸게 쳐준다'],
+            ['🔁 임대', '시즌 끝까지 빌려 온다. 임대료 + 연봉 일부 부담. 핵심·주전 선수는 빌려주지 않는다. 내 선수 임대 보내기는 선수 상세 → 계약'],
+            ['🗣️ 단장과 협상', '상대 단장(AI)에게 근거를 들어 말하면 다음 제안 때 금액을 조금(최대 8%) 낮춰 준다'],
           ]} />
           <div className="mk-filters">
             <div className="chips-scroll">
@@ -201,20 +207,42 @@ export default function Transfer() {
 }
 
 /** 영입 협상: 이적료 제시 → 상대 구단 답 → 수락되면 계약 기간 정하고 확정 */
+const r1 = (x) => Math.round(x * 10) / 10
+const ROLE_TXT = (rank) => (rank < 3 ? '핵심 선수' : rank < 11 ? '주전' : rank < 18 ? '로테이션' : '후보')
+
 function BidSheet({ p, t, lid, onClose }) {
-  const { bidFor, signTransfer, wageFor, askWage, transferWindow, valueFor, save, myTeam, data, totalRounds, addPromise } = useGame()
+  const { bidFor, loanBid, loanIn, loanWage, swapPreview, signTransfer, askWage, transferWindow, valueFor, save, myTeam, data, totalRounds, addPromise, isLoanIn, contractOf } = useGame()
   const cash = save.finance?.cash ?? 0
   const room = Math.max(0, wageBudget(save.finance || {}) - wageBill(save, myTeam, data.leagueId))
   const v = valueFor(p)
-  const [fee, setFee] = useState(Math.round(v * 10) / 10)
+  const [mode, setMode] = useState('buy') // buy: 완전 이적 · loan: 임대
+  const [fee, setFee] = useState(r1(v))
+  const [loanFee, setLoanFee] = useState(r1(v * 0.06))
+  const [share, setShare] = useState(1)
+  const [swapId, setSwapId] = useState('')
   const [years, setYears] = useState(p.age >= 31 ? 2 : 4)
   const [reply, setReply] = useState(null)
   const [done, setDone] = useState(null)
-  const wage = askWage(p, t, lid)
-  const ref = { lid, id: t.id }
-  const offer = () => { setDone(null); setReply(bidFor(ref, p.id, fee)) }
-  const sign = () => setDone(signTransfer(ref, p.id, reply.verdict === 'counter' ? reply.ask : fee, years))
   const [nego, setNego] = useState(false)
+  const [talkCut, setTalkCut] = useState(0) // 단장과의 대화로 얻어 낸 양보 (0~8%)
+  const wage = askWage(p, t, lid)
+  const fullWage = loanWage(p, t, lid)
+  const ref = { lid, id: t.id }
+  const swap = mode === 'buy' && swapId ? swapPreview(ref, swapId) : null
+  const swapList = [...myTeam.players].filter((x) => !isLoanIn(x.id)).sort((a, b) => playerOvr(b) - playerOvr(a))
+  const rank = [...t.players].sort((a, b) => playerOvr(b) - playerOvr(a)).findIndex((x) => x.id === p.id)
+  const reset = () => { setReply(null); setDone(null) }
+  const ask = () => (mode === 'loan' ? { ...loanBid(ref, p.id, loanFee, share), mode } : { ...bidFor(ref, p.id, fee, { swapId: swapId || null, talk: talkCut }), mode })
+  const offer = () => { setDone(null); setReply(ask()) }
+  const cashFee = reply ? (reply.verdict === 'counter' ? reply.ask : reply.mode === 'loan' ? loanFee : fee) : 0
+  const sign = () => setDone(reply.mode === 'loan' ? { ...loanIn(ref, p.id, cashFee, share), loan: true } : signTransfer(ref, p.id, cashFee, years, null, { swapId: reply.swapId }))
+  const ok = reply && (reply.verdict === 'accept' || reply.verdict === 'counter') && !done?.ok
+  // 단장에게 넘길 사실 (게임이 정한 결정 포함)
+  const facts = (r) => ({
+    club: t.name, player: p.name, age: p.age, pos: p.role || p.pos, ovr: playerOvr(p), role: ROLE_TXT(rank), years: yearsLeft(save, contractOf(p)),
+    wantsOut: !!save.status?.[p.id]?.wantsOut, value: r1(v), tries: r?.tries ?? 0, patience: PATIENCE, loan: mode === 'loan',
+    ...(r ? { offer: { fee: mode === 'loan' ? loanFee : fee, share, ...(swap ? { swap: swap.player.name, swapCredit: swap.credit, swapNote: swap.note } : {}) }, verdict: r.verdict, ask: r.ask, reason: r.verdict === 'reject' ? r.reason : '' } : {}),
+  })
   return (
     <div className="sheet-wrap" onClick={onClose}>
       <div className="sheet" onClick={(e) => e.stopPropagation()}>
@@ -222,41 +250,73 @@ function BidSheet({ p, t, lid, onClose }) {
         <div className="bid-info">
           <div className="bi-who">
             <Avatar player={p} color={t.color} size={52} number={false} />
-            <span><strong>{p.name}</strong><small>{t.name} · {p.role || p.pos} · {p.age}세</small></span>
+            <span><strong>{p.name}</strong><small>{t.name} · {p.role || p.pos} · {p.age}세 · 팀 내 {ROLE_TXT(rank)}</small></span>
           </div>
           <div className="bi-grid">
             <div><span>현재 능력</span><b><Stars value={abilityStars(p)} /></b></div>
             <div><span>잠재력</span><b><Stars value={potentialStarsOf(p)} tone="pot" /></b></div>
             <div><span>선수 가치</span><b className="good-text">{money(v)}</b></div>
-            <div><span>요구 연봉</span><b>{eur(wage)}<small>/년</small></b></div>
-            <div><span>우리 현금</span><b className={cash < fee ? 'bad-text' : ''}>{eur(cash)}</b></div>
-            <div><span>임금 예산 여유</span><b className={room < wage ? 'bad-text' : ''}>{eur(room)}<small>/년</small></b></div>
+            <div><span>{mode === 'loan' ? '지금 연봉' : '요구 연봉'}</span><b>{eur(mode === 'loan' ? fullWage : wage)}<small>/년</small></b></div>
+            <div><span>우리 현금</span><b className={cash < (mode === 'loan' ? loanFee : fee) ? 'bad-text' : ''}>{eur(cash)}</b></div>
+            <div><span>임금 예산 여유</span><b className={room < (mode === 'loan' ? fullWage * share : wage) ? 'bad-text' : ''}>{eur(room)}<small>/년</small></b></div>
           </div>
           <div className="bi-keys">{keyAttrs20(p).map(([k, x]) => <span key={k} className={x >= 16 ? 'hi' : x >= 12 ? 'mid' : 'lo'}><b>{x}</b>{k}</span>)}</div>
         </div>
         {!done?.ok && (
           <>
-            <label className="tp-slider">
-              <span className="tp-row"><b>제시 이적료</b><em>{money(fee)} ({Math.round((fee / v) * 100)}%)</em></span>
-              <input type="range" min={Math.round(v * 5) / 10} max={Math.round(v * 25) / 10} step={0.1} value={fee} onChange={(e) => { setFee(Number(e.target.value)); setReply(null) }} />
-              <span className="tp-ends"><small>가치의 50%</small><small>250%</small></span>
-            </label>
-            <div className="row">
-              <span className="small">계약 기간</span>
-              <select value={years} onChange={(e) => setYears(Number(e.target.value))}>{[1, 2, 3, 4, 5].map((y) => <option key={y} value={y}>{y}년</option>)}</select>
-              <button className="btn" disabled={!transferWindow.open || reply?.verdict === 'accept'} onClick={offer}>제안하기</button>
+            <div className="seg deal-mode">
+              <button className={mode === 'buy' ? 'on' : ''} onClick={() => { setMode('buy'); reset() }}>✍️ 완전 이적</button>
+              <button className={mode === 'loan' ? 'on' : ''} onClick={() => { setMode('loan'); reset() }}>🔁 임대 (시즌 끝까지)</button>
             </div>
+            {mode === 'buy' ? (
+              <>
+                <label className="tp-slider">
+                  <span className="tp-row"><b>현금</b><em>{money(fee)} ({Math.round((fee / v) * 100)}%)</em></span>
+                  <input type="range" min={0} max={Math.round(v * 25) / 10} step={0.1} value={fee} onChange={(e) => { setFee(Number(e.target.value)); reset() }} />
+                  <span className="tp-ends"><small>0</small><small>가치의 250%</small></span>
+                </label>
+                <div className="swap-pick">
+                  <span className="small">➕ 우리 선수 끼워 넣기</span>
+                  <select value={swapId} onChange={(e) => { setSwapId(e.target.value); reset() }}>
+                    <option value="">없음 (현금만)</option>
+                    {swapList.map((x) => <option key={x.id} value={x.id}>{x.pos} {x.name} · {x.age}세 · {starText(abilityStars(x))}</option>)}
+                  </select>
+                  {swap && <p className="small">{t.name} 평가: <b className="good-text">{money(swap.credit)}</b> — {swap.note}. 현금 {money(fee)} + {swap.player.name} = 총 {money(r1(fee + swap.credit))}</p>}
+                </div>
+                <div className="row">
+                  <span className="small">계약 기간</span>
+                  <select value={years} onChange={(e) => setYears(Number(e.target.value))}>{[1, 2, 3, 4, 5].map((y) => <option key={y} value={y}>{y}년</option>)}</select>
+                  {talkCut > 0 && <span className="small good-text">단장 양보 −{Math.round(talkCut * 100)}%</span>}
+                  <button className="btn" disabled={!transferWindow.open || reply?.verdict === 'accept'} onClick={offer}>제안하기</button>
+                </div>
+              </>
+            ) : (
+              <>
+                <label className="tp-slider">
+                  <span className="tp-row"><b>임대료</b><em>{money(loanFee)}</em></span>
+                  <input type="range" min={0} max={Math.max(1, Math.round(v * 3) / 10)} step={0.1} value={loanFee} onChange={(e) => { setLoanFee(Number(e.target.value)); reset() }} />
+                  <span className="tp-ends"><small>0</small><small>가치의 30%</small></span>
+                </label>
+                <div className="row">
+                  <span className="small">연봉 부담</span>
+                  <select value={share} onChange={(e) => { setShare(Number(e.target.value)); reset() }}>{[1, 0.75, 0.5].map((x) => <option key={x} value={x}>{Math.round(x * 100)}% ({eur(r1(fullWage * x))}/년)</option>)}</select>
+                  <button className="btn" disabled={!transferWindow.open || reply?.verdict === 'accept'} onClick={offer}>제안하기</button>
+                </div>
+                <p className="small muted">임대 선수는 시즌이 끝나면 원래 구단으로 돌아갑니다. 연봉을 적게 부담할수록 임대료를 더 요구합니다. 핵심·주전 선수는 임대해 주지 않습니다.</p>
+              </>
+            )}
           </>
         )}
         {reply && (
           <div className={`deal-reply ${reply.verdict}`}>
             <strong>{t.name}{reply.tries ? <span className="muted small"> · 협상 {reply.tries}/{PATIENCE}</span> : null}</strong>
             <p>{reply.reason}</p>
-            {reply.verdict === 'accept' && !done?.ok && <button className="btn wide" onClick={sign}>✍️ {money(fee)}에 계약 확정 (요구 연봉 {eur(wage)} 그대로)</button>}
-            {reply.verdict === 'counter' && !done?.ok && <button className="btn wide" onClick={sign}>✍️ {money(reply.ask)}에 맞춰 계약 확정 (요구 연봉 {eur(wage)} 그대로)</button>}
-            {(reply.verdict === 'accept' || reply.verdict === 'counter') && !done?.ok && <button className="btn wide ghost talk-start" onClick={() => setNego(true)}>🗣️ 선수와 연봉 협상 후 계약</button>}
+            {ok && reply.mode === 'loan' && <button className="btn wide" onClick={sign}>🔁 임대료 {money(cashFee)} · 연봉 {Math.round(share * 100)}% 부담으로 임대 확정</button>}
+            {ok && reply.mode === 'buy' && <button className="btn wide" onClick={sign}>✍️ 현금 {money(cashFee)}{reply.swapId ? ' + 선수' : ''}에 계약 확정 (요구 연봉 {eur(wage)} 그대로)</button>}
+            {ok && reply.mode === 'buy' && <button className="btn wide ghost talk-start" onClick={() => setNego(true)}>🗣️ 선수와 연봉 협상 후 계약</button>}
           </div>
         )}
+        {!done?.ok && transferWindow.open && <DirectorTalk t={t} facts={facts} ask={ask} onReply={setReply} onCut={(c) => setTalkCut((x) => Math.min(0.08, x + c))} />}
         {nego && (
           <TalkRoom player={p} team={t} status={{}} topic="contract" totalRounds={totalRounds}
             deal={{ kind: 'sign', ask: wage, current: null, maxYears: p.age >= 31 ? 2 : 5 }}
@@ -266,13 +326,64 @@ function BidSheet({ p, t, lid, onClose }) {
             onFinish={(r) => {
               setNego(false)
               if (!r.deal) return
-              const x = signTransfer(ref, p.id, reply.verdict === 'counter' ? reply.ask : fee, r.deal.years, r.deal.wage)
-              if (x?.ok && r.deal.raise) addPromise(p.id, { kind: 'raise', cond: 6.9, minApps: 10, target: Math.round(r.deal.wage * 1.25 * 10) / 10, made: save.round, text: `이번 시즌 활약(평균 평점 6.9·10경기 이상)하면 다음 시즌 €${Math.round(r.deal.wage * 1.25 * 10) / 10}M으로 인상` })
+              const x = signTransfer(ref, p.id, cashFee, r.deal.years, r.deal.wage, { swapId: reply.swapId })
+              if (x?.ok && r.deal.raise) addPromise(p.id, { kind: 'raise', cond: 6.9, minApps: 10, target: r1(r.deal.wage * 1.25), made: save.round, text: `이번 시즌 활약(평균 평점 6.9·10경기 이상)하면 다음 시즌 €${r1(r.deal.wage * 1.25)}M으로 인상` })
               setDone(x)
             }} />
         )}
-        {done && <p className={`notice ${done.ok ? 'ok' : 'bad'}`}>{done.ok ? `✍️ 영입 완료! 연봉 ${eur(done.wage)}/년 · ${years}년 계약` : done.reason}</p>}
+        {done && <p className={`notice ${done.ok ? 'ok' : 'bad'}`}>{!done.ok ? done.reason : done.loan ? `🔁 임대 완료! 연봉 부담 ${eur(done.wage)}/년 · 시즌이 끝나면 ${ro(t.name)} 돌아갑니다` : `✍️ 영입 완료! 연봉 ${eur(done.wage)}/년 · ${years}년 계약`}</p>}
       </div>
+    </div>
+  )
+}
+
+/**
+ * 상대 구단 단장과 대화 (AI): 수락·역제안·거절은 게임이 정하고, 단장은 그 결정을 자기 말로 전한다.
+ * 설득력 있는 근거(후보 선수·계약 만료 임박·필요한 포지션 선수를 끼워 줌)를 대면 다음 제안 때 원하는 금액을 조금(최대 8%) 낮춰 준다.
+ */
+function DirectorTalk({ t, facts, ask, onReply, onCut }) {
+  const [open, setOpen] = useState(false)
+  const [lines, setLines] = useState([]) // { role: 'manager'|'club', text, mood?, cut? }
+  const [input, setInput] = useState('')
+  const [attach, setAttach] = useState(true)
+  const [busy, setBusy] = useState(false)
+  const [walked, setWalked] = useState(false)
+  const turns = lines.filter((l) => l.role === 'manager').length
+  const MAX = 8
+  async function send() {
+    const message = input.trim()
+    if (!message || busy || walked || turns >= MAX) return
+    setBusy(true); setInput('')
+    const before = lines
+    setLines([...before, { role: 'manager', text: message }])
+    const r = attach ? ask() : null // 조건을 함께 내밀면 협상 1회로 센다
+    if (r) onReply(r)
+    const res = await sayToClub({ message, history: before.map(({ role, text }) => ({ role, text })), club: facts(r), fallback: r?.reason })
+    if (res.concession > 0) onCut(res.concession / 100)
+    if (res.walk) setWalked(true)
+    setLines((ls) => [...ls, { role: 'club', text: res.reply, mood: res.mood, cut: res.concession, ai: res.ai }])
+    setBusy(false)
+  }
+  if (!open) return <button className="btn wide ghost talk-start" onClick={() => setOpen(true)}>🗣️ {t.name} 단장과 직접 협상 (AI)</button>
+  return (
+    <div className="director">
+      <div className="dr-head"><Crest team={t} size={18} /> <b>{t.name} 단장</b><span className="muted small"> · {turns}/{MAX}</span></div>
+      <div className="dr-log">
+        {!lines.length && <p className="small muted">근거를 들어 설득해 보세요. 예: "이 선수는 계약이 1년 남았고 후보잖아요", "미드필더가 부족하시죠? 우리 선수를 얹을게요". 설득력 있으면 다음 제안 때 금액을 낮춰 줍니다.</p>}
+        {lines.map((l, i) => (
+          <p key={i} className={`dr-line ${l.role}`}>
+            {l.role === 'club' && <em>{l.mood}</em>}{l.text}
+            {l.cut > 0 && <span className="dr-cut">양보 −{l.cut}%</span>}
+          </p>
+        ))}
+        {busy && <p className="dr-line club muted">…</p>}
+        {walked && <p className="small bad-text">단장이 대화를 접었습니다.</p>}
+      </div>
+      <div className="dr-input">
+        <input value={input} maxLength={250} placeholder="단장에게 할 말" disabled={walked || turns >= MAX} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && send()} />
+        <button className="btn small" disabled={busy || walked || !input.trim() || turns >= MAX} onClick={send}>보내기</button>
+      </div>
+      <label className="small dr-attach"><input type="checkbox" checked={attach} onChange={(e) => setAttach(e.target.checked)} /> 지금 화면의 조건도 함께 제안 (협상 횟수 1회 사용)</label>
     </div>
   )
 }
