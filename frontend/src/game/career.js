@@ -2,6 +2,7 @@
 import { playerOvrOf } from '../engine/engine.js'
 import { news } from './season.js'
 import { potentialOf } from './trade.js'
+import { aiUntil } from './finance.js'
 
 const hash = (s) => { let h = 2166136261; for (const c of String(s)) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return h >>> 0 }
 const rnd = (key) => (hash(key) % 10000) / 10000
@@ -97,7 +98,8 @@ export function nextSeason(save, { teams, baseTeams, standings, country, baseSea
       if ((age >= 37 || (age >= 35 && rnd(`ret-${p.id}-${no}`) < 0.6)) && !p.youth) { retired.push({ p, team: t.id }); continue }
       const ovr = playerOvrOf(p)
       const k = `g-${p.id}-${no}`
-      const played = t.id === save.teamId ? clamp((ps[p.id]?.min || 0) / (roundsPlayed * 90) * 1.2 + 0.3, 0.3, 1.2) : 0.7
+      // 다른 구단 선수는 평균적인 출전(0.7)으로 보고, 임대 간 유망주는 주전으로 뛴 만큼 더 큰다
+      const played = t.id === save.teamId ? clamp((ps[p.id]?.min || 0) / (roundsPlayed * 90) * 1.2 + 0.3, 0.3, 1.2) : save.aiLoans?.[p.id] ? 1 : 0.7
       let d
       if (p.age <= 23) d = Math.min(pa - ovr, Math.round((1.5 + rnd(k) * 4) * played))
       else if (p.age <= 27) d = Math.min(pa - ovr, Math.round(-1.2 + rnd(k) * 2.6))
@@ -116,6 +118,12 @@ export function nextSeason(save, { teams, baseTeams, standings, country, baseSea
   const rosters = { ...(save.rosters || Object.fromEntries(teams.map((t) => [t.id, t.players.map((p) => p.id)]))) }
   for (const t of teams) if (!rosters[t.id]) rosters[t.id] = t.players.map((p) => p.id)
   for (const r of retired) rosters[r.team] = rosters[r.team].filter((id) => id !== r.p.id)
+  // 다른 구단끼리의 임대: 시즌이 끝나면 원래 구단으로 돌아간다 (그 사이 다른 데로 옮겨진 선수는 그대로 둔다)
+  for (const [id, L] of Object.entries(save.aiLoans || {})) {
+    if (!rosters[L.to]?.includes(id) || !rosters[L.from]) continue
+    rosters[L.to] = rosters[L.to].filter((x) => x !== id)
+    rosters[L.from] = [...rosters[L.from], id]
+  }
   const [firsts, lasts] = NAMES[country] || NAMES['잉글랜드']
   const makeYouth = (teamId, i, lvl, age, { paBase = 12, paSpan = 18, paPow = 1 } = {}) => {
     const k = `y-${teamId}-${no}-${i}`
@@ -134,6 +142,9 @@ export function nextSeason(save, { teams, baseTeams, standings, country, baseSea
   //   - 26명을 넘으면 24세 이상 중 능력이 낮은 선수부터 내보낸다
   //   - 떠난 선수 중 쓸 만한 선수는 FA 시장에 나온다 (나머지는 하부 리그로 간 것으로 본다)
   const aiReleased = []
+  const aiStat = { expired: 0, renewed: 0, fa: 0 } // 계약 만료 · 재계약 · FA 시장에 나온 선수 수
+  // 새로 맺은 계약만 적어 둔다 (지난 계약은 지운다 — 세이브가 커지지 않게)
+  const aiCt = Object.fromEntries(Object.entries(save.aiCt || {}).filter(([, u]) => u > no))
   // 리그를 떠난 선수(은퇴·하부 리그행): 원본 데이터에 남아 있어도 다시 원래 구단 명단에 붙지 않게 기록해 둔다
   const left = { ...(save.left || {}) }
   for (const r of retired) left[r.p.id] = 1
@@ -144,6 +155,17 @@ export function nextSeason(save, { teams, baseTeams, standings, country, baseSea
     if (t.id === save.teamId) continue
     const ranked = t.players.filter((p) => rosters[t.id].includes(p.id) && !retiredIds.has(p.id) && !save.loans?.[p.id]).sort((a, b) => playerOvrOf(b) - playerOvrOf(a))
     const out = new Set(ranked.filter((p, i) => p.age + 1 >= 31 && i >= 16).map((p) => p.id))
+    // 계약 만료: 이번 시즌으로 계약이 끝나는 선수는 재계약하거나 FA로 풀린다
+    //   주전일수록 붙잡고(11위 안 90% · 18위 안 75% · 그 밖은 어린 선수 70%, 나머지 40%), 재정난 구단은 덜 붙잡는다
+    //   → 가끔 주전급도 재계약에 실패해 FA 시장에 나온다
+    const poor = (save.aiCash?.[t.id] ?? 0) < 0
+    ranked.forEach((p, i) => {
+      if (aiUntil(save, p) > no) return
+      aiStat.expired++
+      if (out.has(p.id)) return
+      const keep = (i < 11 ? 0.9 : i < 18 ? 0.75 : p.age <= 23 ? 0.7 : 0.4) - (poor ? 0.15 : 0)
+      if (rnd(`renew-${p.id}-${no}`) < keep) { aiCt[p.id] = no + 2 + (hash(`rn-${p.id}-${no}`) % 4); aiStat.renewed++ } else out.add(p.id)
+    })
     const extra = ranked.length - out.size - 26
     if (extra > 0) for (const p of [...ranked].reverse().filter((p) => !out.has(p.id) && p.age + 1 >= 24).slice(0, extra)) out.add(p.id)
     if (!out.size) continue
@@ -151,7 +173,8 @@ export function nextSeason(save, { teams, baseTeams, standings, country, baseSea
     const lvl = teamStrength(t)
     for (const p of ranked) {
       if (!out.has(p.id)) continue
-      if (playerOvrOf(p) >= lvl - 9 && p.age + 1 <= 33) aiReleased.push({ ...p, ...(mods[p.id] || {}), from: t.id })
+      delete aiCt[p.id]
+      if (playerOvrOf(p) >= lvl - 9 && p.age + 1 <= 33) { aiReleased.push({ ...p, ...(mods[p.id] || {}), from: t.id }); aiStat.fa++ }
       else left[p.id] = 1
     }
   }
@@ -215,6 +238,7 @@ export function nextSeason(save, { teams, baseTeams, standings, country, baseSea
   const inbox = [
     news(0, 'season', `${seasonLabel(baseSeason, next)} 시즌 시작`, `지난 시즌 ${review.pos}위 (${review.target.label} ${review.success ? '달성 ✓' : '실패 ✗'}). ${retired.filter((r) => r.team === save.teamId).length ? `은퇴: ${retired.filter((r) => r.team === save.teamId).map((r) => r.p.name).join(', ')}. ` : ''}${expired.length ? `계약 만료: ${expired.map((p) => p.name).join(', ')}. ` : ''}${growth.length ? `성장 상위: ${[...growth].sort((a, b) => b.d - a.d).slice(0, 3).map((g) => `${g.p.name} ${g.d > 0 ? '+' : ''}${g.d}`).join(', ')}.` : ''}`),
     ...promiseNews,
+    ...(aiStat.expired ? [news(0, 'trade', `📄 다른 구단 계약 만료 ${aiStat.expired}명`, `${aiStat.renewed}명은 재계약했고, 팀을 떠난 선수 중 ${aiStat.fa}명이 FA 시장에 나왔습니다.${aiReleased.length ? ` 눈에 띄는 FA: ${[...aiReleased].sort((a, b) => playerOvrOf(b) - playerOvrOf(a)).slice(0, 4).map((p) => `${p.name}(${p.pos}, ${p.age}세)`).join(', ')}.` : ''}`, { read: true })] : []),
     ...newcomers.map((p) => news(0, 'youth', `유스 입단: ${p.name}`, `${p.age}세 ${p.pos} ${p.name} 선수가 1군에 합류했습니다. 스카우트는 성장 가능성을 눈여겨보고 있습니다.`, { playerId: p.id })),
   ]
   const allReleased = [...aiReleased, ...(save.released || [])]
@@ -226,6 +250,8 @@ export function nextSeason(save, { teams, baseTeams, standings, country, baseSea
     // FA 시장: 새로 풀린 선수를 앞에 두고 120명까지만 (오래된 FA는 은퇴·하부 리그행으로 사라진다)
     released: allReleased.slice(0, 120),
     left,
+    aiCt, aiLoans: {}, aiStat,
+    lastTable: standings.map((x) => x.id), // 지난 시즌 순위 (다른 구단 매출 계산에 쓴다)
     lineup: save.lineup.map((id) => (id && rosters[save.teamId].includes(id) ? id : null)),
   }
   return { save: fresh, review, conf, next }

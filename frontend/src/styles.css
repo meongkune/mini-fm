@@ -1289,6 +1289,16 @@ html.desktop .tabs-line { position: static; margin: 0 0 12px; padding: 0; backgr
 .ar-list b { text-align: right; font-variant-numeric: tabular-nums; }
 .ar-est { grid-column: 1 / -1; margin: 0; }
 .screen .attr-radar { grid-template-columns: 130px 1fr; }
+.ask-price { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; padding: 6px 10px 8px; font-size: .7rem; background: rgba(124, 92, 255, .08); border-bottom: 1px solid var(--line); }
+.ask-in { display: inline-flex; align-items: center; gap: 3px; padding: 2px 6px; border-radius: 7px; border: 1px solid var(--line); background: var(--panel-2); }
+.ask-in i { font-style: normal; opacity: .6; font-size: .72rem; }
+.ask-in input { width: 4.6em; border: 0; background: transparent; color: var(--text); font: inherit; font-size: .82rem; font-weight: 800; text-align: right; outline: none; -moz-appearance: textfield; }
+.ask-in input::-webkit-outer-spin-button, .ask-in input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.ask-quick { display: inline-flex; gap: 3px; }
+.ask-quick button { padding: 1px 5px; border-radius: 6px; border: 1px solid var(--line); background: transparent; color: var(--muted, #94a3b8); font: inherit; font-size: .64rem; cursor: pointer; }
+.mkc-tag { font-weight: 700; font-size: .66rem; white-space: nowrap; }
+.mkc-tag.warn { color: #fcd34d; }
+.mkc-tag.bad { color: #fca5a5; }
 .ask-price select { max-width: 120px; padding: 4px; border-radius: 7px; border: 1px solid var(--line); background: var(--panel-2); color: var(--text); font: inherit; font-size: .72rem; }
 
 /* 세트피스 지시 */

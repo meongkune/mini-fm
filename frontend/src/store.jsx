@@ -13,7 +13,7 @@ import { COMPS, CUP_LEAGUES, buildCups, cupKey, cupStatus, dueMatchday, myCupFix
 import { FX_DEFAULT, FIN_MODEL, boardBudgets, payFee, takeFee, toFinanceV5, transferFunds, shiftRange, cashOnly, gateModel, clubKOf, legacyWageV3, setClubK, setFx, wageInfo, ROSTER_MAX, book, checkBankruptcy, contractOf, eur, faDecision, ffpReview, newFinance, prizeMoney, releaseCost, renewalAsk, settleMatch, wageBill, wageBudget, wageFor, wageShock } from './game/finance.js'
 import { afterMatchOwner, decide } from './game/owner.js'
 import { valueOf } from './game/trade.js'
-import { runMarket, strengthOf } from './game/market.js'
+import { inDeficit, runMarket, strengthOf } from './game/market.js'
 // 받침에 따라 '로/으로'
 const ro = (w) => { const c = w.charCodeAt(w.length - 1) - 0xac00; return w + (c < 0 || c > 11171 ? '(으)로' : c % 28 === 0 || c % 28 === 8 ? '로' : '으로') }
 
@@ -615,7 +615,10 @@ export function GameProvider({ children }) {
         if (tries >= PATIENCE) return { verdict: 'reject', reason: '"더 이상 이야기하지 않겠습니다." (이번 이적 시장 협상 횟수 소진)' }
         const theirs = findTeam(ref)
         const player = theirs.players.find((p) => p.id === playerId)
-        const r = evaluateBid({ theirs, player, fee, status, tries, talk, swap: swapOf(theirs, swapId), value: valueOf(player, status[player.id], valueCtx(save, player, data.leagueId)) })
+        if (save.aiLoans?.[playerId]) return { verdict: 'reject', reason: '"임대 중인 선수입니다. 시즌이 끝나고 원래 구단으로 돌아간 뒤에 이야기합시다."' }
+        // 재정난 구단은 원하는 금액을 10% 깎아 준다 (다른 구단끼리 거래할 때와 같은 기준)
+        const broke = theirs && teams.some((t) => t.id === theirs.id) && inDeficit(save, theirs.id) ? 0.1 : 0
+        const r = evaluateBid({ theirs, player, fee, status, tries, talk: talk + broke, swap: swapOf(theirs, swapId), value: valueOf(player, status[player.id], valueCtx(save, player, data.leagueId)) })
         setSave((s) => ({ ...s, bidTalks: { ...(s.bidTalks || {}), [key]: tries + 1 } }))
         return { ...r, tries: tries + 1, swapId }
       },
@@ -630,6 +633,7 @@ export function GameProvider({ children }) {
         if (tries >= PATIENCE) return { verdict: 'reject', reason: '"더 이상 이야기하지 않겠습니다." (이번 이적 시장 협상 횟수 소진)' }
         const theirs = findTeam(ref)
         const player = theirs.players.find((p) => p.id === playerId)
+        if (save.aiLoans?.[playerId]) return { verdict: 'reject', reason: '"이미 다른 구단에 임대 보낸 선수입니다."' }
         const r = evaluateLoan({ theirs, player, fee, share, tries, value: valueOf(player, status[player.id], valueCtx(save, player, data.leagueId)) })
         setSave((s) => ({ ...s, bidTalks: { ...(s.bidTalks || {}), [key]: tries + 1 } }))
         return { ...r, tries: tries + 1 }

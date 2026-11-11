@@ -48,7 +48,7 @@ export default function FreeAgents() {
               <li key={p.id}>
                 <button className="mk-row" onClick={() => setPick(p)}>
                   <span className="lu-pos">{p.role || p.pos}</span>
-                  <span className="mk-name"><strong><Flag nation={p.nation} size={14} /> {p.name}</strong><small>{p.age}세 · {p.lastClub || (p.from ? `전 소속 ${p.from}` : 'FA')}{p.posGuess ? ' · 포지션 추정' : ''}</small></span>
+                  <span className="mk-name"><strong><Flag nation={p.nation} size={14} /> {p.name}</strong><small>{p.age}세 · {p.lastClub || (p.from ? `전 소속 ${teams.find((t) => t.id === p.from)?.name || p.from}` : 'FA')}{p.posGuess ? ' · 포지션 추정' : ''}</small></span>
                   <span className="mk-pot">{stars(potentialStars(p))}</span>
                   <span className="mk-ovr"><Stars value={abilityStars(p)} compact /></span>
                   <span className="mk-val">{eur(wageFor(p) * 1.1)}/년</span>

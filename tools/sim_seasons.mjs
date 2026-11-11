@@ -77,6 +77,10 @@ for (let sn = 1; sn <= SEASONS; sn++) {
   const ages = teams.flatMap((t) => t.players.map((p) => p.age))
   const goals = save.results.reduce((a, r) => a + r.score[0] + r.score[1], 0) / save.results.length
   const deals = (save.marketLog || []).filter((d) => d.season === sn)
+  const tally = save.aiTally?.season === sn ? save.aiTally : { deals: 0, fa: 0, loans: 0 }
+  // 다른 구단 재정: 시즌 끝 이적 예산의 분포 (마이너스 = 재정난)
+  const cashes = teams.filter((t) => t.id !== MY).map((t) => save.aiCash?.[t.id] ?? 0).sort((a, b) => a - b)
+  const faPool = (save.released || []).length
   const my = teams.find((t) => t.id === MY)
   const pos = st.findIndex((x) => x.id === MY) + 1
   const bill = F.wageBill(save, my, LID)
@@ -84,13 +88,17 @@ for (let sn = 1; sn <= SEASONS; sn++) {
   const ffp = F.ffpReview(F.book(save.finance, prize, '리그 상금'), bill, sn)
   rows.push({
     sn, champ: st[0].name, pts: `${st[0].pts}/${st.at(-1).pts}`, goals, top3: avg(str.slice(0, 3)), mid: avg(str), bot3: avg(str.slice(-3)),
-    age: avg(ages), size: avg(teams.map((t) => t.players.length)), deals: deals.length, maxFee: Math.max(0, ...deals.map((d) => d.fee)), inOut: `${deals.filter((d) => d.league && !d.out).length}/${deals.filter((d) => d.out).length}`,
+    age: avg(ages), size: avg(teams.map((t) => t.players.length)), deals: tally.deals, faIn: tally.fa, loans: tally.loans, faPool,
+    cashMin: cashes[0], cashMed: cashes[Math.floor(cashes.length / 2)], cashMax: cashes.at(-1), broke: cashes.filter((c) => c < 0).length, clubs: cashes.length, maxFee: Math.max(0, ...deals.map((d) => d.fee)), inOut: `${deals.filter((d) => d.league && !d.out).length}/${deals.filter((d) => d.out).length}`,
     pos, bill, net: ffp.st.cur, cash: ffp.finance.cash, ffp: ffp.st.label, ratio: ffp.st.ratio, myStr: strengthOf(my),
   })
   const r = nextSeason(save, { teams, baseTeams: data.teams, standings: st, country: data.league?.country || '잉글랜드', baseSeason: data.season })
   const finance = F.boardBudgets(ffp.finance, { success: r.review.success, confidence: r.conf, bill })
+  Object.assign(rows.at(-1), { expired: r.save.aiStat?.expired ?? 0, renewed: r.save.aiStat?.renewed ?? 0, toFa: r.save.aiStat?.fa ?? 0, bytes: JSON.stringify({ aiCt: r.save.aiCt, aiFin: r.save.aiFin, aiCash: r.save.aiCash, aiLoans: r.save.aiLoans }).length })
   save = { ...r.save, finance, inbox: [], board: newBoard(effectiveTeams(data.teams, r.save), MY, { confidence: r.conf, fails: r.review.fails }) }
 }
+console.log(`\n다른 구단 운영 — 시즌 | 계약 만료 → 재계약 / FA 시장행 | FA 풀 | FA 영입 | 임대 | 이적 예산 최소·중앙·최대 | 재정난 구단 | 저장 크기`)
+for (const x of rows) console.log(`${String(x.sn).padStart(3)}  | ${String(x.expired).padStart(3)}명 → ${x.renewed} / ${x.toFa} | ${String(x.faPool).padStart(3)}명 | ${x.faIn}건 | ${x.loans}건 | €${f1(x.cashMin)}M · €${f1(x.cashMed)}M · €${f1(x.cashMax)}M | ${x.broke}/${x.clubs} | ${(x.bytes / 1024).toFixed(1)}KB`)
 console.log(`\n시즌 | 우승 | 1위/꼴찌 승점 | 골/경기 | 상위3·평균·하위3 전력 | 평균나이 | 명단 | 이적(최고액, 해외 영입/방출) || 내 순위 | 내 전력 | 연봉 | 시즌손익 | 현금 | 연봉/매출 | FFP`)
 for (const x of rows) {
   console.log(`${String(x.sn).padStart(3)}  | ${x.champ.padEnd(10)} | ${x.pts.padEnd(6)} | ${x.goals.toFixed(2)} | ${f1(x.top3)} · ${f1(x.mid)} · ${f1(x.bot3)} | ${f1(x.age)} | ${f1(x.size)} | ${String(x.deals).padStart(2)}건 (€${f1(x.maxFee)}M, ${x.inOut}) || ${String(x.pos).padStart(2)}위 | ${f1(x.myStr)} | €${f1(x.bill)}M | ${x.net >= 0 ? '+' : ''}${f1(x.net)} | €${f1(x.cash)}M | ${Math.round(x.ratio * 100)}% | ${x.ffp}`)
@@ -108,6 +116,15 @@ if (CHECK) {
     ['평균 나이 변화', z.age - a.age, -2, 2],
     ['시즌당 AI 이적 건수(평균)', avg(rows.map((x) => x.deals)), 4, 40],
     ['평균 명단 크기(마지막)', z.size, 22, 32],
+    // 다른 구단 운영: 계약이 실제로 만료되고(구단당 한 해 2~10명), 그중 상당수는 재계약하며, FA 시장이 비지도 넘치지도 않고, 재정난 구단이 리그의 절반을 넘지 않는다
+    ['구단당 계약 만료 수(시즌 평균)', avg(rows.map((x) => x.expired / x.clubs)), 2, 10],
+    ['재계약 비율(시즌 평균)', avg(rows.map((x) => x.renewed / Math.max(1, x.expired))), 0.4, 0.9],
+    ['FA 풀 크기(마지막 시즌 끝)', z.faPool, 5, 120],
+    ['시즌당 다른 구단 FA 영입(평균)', avg(rows.map((x) => x.faIn)), 1, 30],
+    ['시즌당 다른 구단 임대(평균)', avg(rows.map((x) => x.loans)), 1, 20],
+    ['재정난 구단 비율(최대)', Math.max(...rows.map((x) => x.broke / x.clubs)), 0, 0.5],
+    ['이적 예산 중앙값(마지막, €M)', z.cashMed, 0, 400],
+    ['다른 구단 운영 저장 크기(KB, 최대)', Math.max(...rows.map((x) => x.bytes)) / 1024, 0, 12],
   ]
   let bad = 0
   for (const [name, v, lo, hi] of checks) { const ok = v >= lo && v <= hi; if (!ok) bad++; console.log(`${ok ? '✔' : '✖'} ${name}: ${v.toFixed(2)} (정상 ${lo}~${hi})`) }

@@ -2,7 +2,8 @@
 import TalkRoom from '../components/TalkRoom.jsx'
 import Avatar from '../components/Avatar.jsx'
 import Stars, { abilityStars, potentialStarsOf, starText } from '../components/Stars.jsx'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { inDeficit } from '../game/market.js'
 import { useSearchParams } from 'react-router-dom'
 import FreeAgents from './FreeAgents.jsx'
 import { Crest, Flag } from '../components/Badges.jsx'
@@ -21,11 +22,26 @@ const ro = (w) => { const c = w.charCodeAt(w.length - 1) - 0xac00; return w + (c
 const POS = ['전체', 'GK', 'DF', 'MF', 'FW']
 const SORTS = [['ovr', '능력'], ['value', '가치'], ['pot', '잠재력'], ['age', '나이']]
 const AGES = [['all', '전 연령'], ['u21', '21세 이하'], ['prime', '22~29세'], ['vet', '30세 이상']]
+/** 희망 가격 직접 입력 (€M): 입력 중에는 글자를 그대로 두고, 올바른 숫자일 때만 저장한다 */
+function AskInput({ value, base, onChange }) {
+  const [text, setText] = useState(String(value))
+  useEffect(() => { if (Number(text) !== value) setText(String(value)) }, [value]) // 밖에서 값이 바뀌면(판매 등록 등) 따라간다
+  const commit = (t) => { const n = Math.round(Number(t) * 10) / 10; if (n > 0 && n !== value) onChange(n) }
+  return (
+    <label className="ask-price" title="희망 가격 — 원하는 금액을 직접 입력 (€M, 100만 유로 단위)">
+      <b>희망 가격</b>
+      <span className="ask-in"><i>€</i><input type="number" inputMode="decimal" min="0.1" step="0.1" value={text} onChange={(e) => { setText(e.target.value); commit(e.target.value) }} onBlur={() => setText(String(value))} /><i>M</i></span>
+      <small className={value > base * 1.35 ? 'warn-text' : 'muted'}>몸값의 {Math.round((value / base) * 100)}%{value > base * 1.35 ? ' · 비싸서 제안이 낮게 옴' : ''}</small>
+      <span className="ask-quick">{[0.8, 1, 1.2, 1.5].map((k) => <button key={k} type="button" onClick={() => onChange(Math.round(base * k * 10) / 10)}>{Math.round(k * 100)}%</button>)}</span>
+    </label>
+  )
+}
 const ageOk = (a, k) => k === 'all' || (k === 'u21' ? a <= 21 : k === 'prime' ? a >= 22 && a <= 29 : a >= 30)
 const LINE = { GK: 'gk', DF: 'df', MF: 'mf', FW: 'fw' }
 
 export default function Transfer() {
-  const { myTeam, teams, teamsById, status, save, data, transferWindow, totalRounds, toggleSale, valueFor, setAskPrice, worldTeams, wageFor } = useGame()
+  const { myTeam, teams, teamsById, status, save, data, transferWindow, totalRounds, toggleSale, valueFor, setAskPrice, worldTeams, wageFor, contractOf } = useGame()
+  const [expiring, setExpiring] = useState(false) // 계약이 1년 남은 선수만
   const [params] = useSearchParams()
   const [tab, setTab] = useState(params.get('tab') || 'buy')
   const [pos, setPos] = useState('전체')
@@ -55,7 +71,7 @@ export default function Transfer() {
   const wageOk = (p) => wageFor(p) * 1.15 <= room0 // 연봉이 임금 예산 여유 안인가
   const canBuy = (p, v) => canPay(p, v) && wageOk(p)
   const filtered = market
-    .filter(({ p, t, lid, v }) => (leagueFilter === 'all' || (leagueFilter === 'mine' ? lid === data.leagueId : lid === leagueFilter)) && (pos === '전체' || p.pos === pos) && ageOk(p.age, age) && (!afford || canPay(p, v)) && (teamFilter === 'all' || `${lid}/${t.id}` === teamFilter) && (!q || `${p.name} ${p.nameEn || ''}`.toLowerCase().includes(q.toLowerCase())))
+    .filter(({ p, t, lid, v }) => (leagueFilter === 'all' || (leagueFilter === 'mine' ? lid === data.leagueId : lid === leagueFilter)) && (pos === '전체' || p.pos === pos) && ageOk(p.age, age) && (!afford || canPay(p, v)) && (!expiring || yearsLeft(save, contractOf(p)) <= 1) && (teamFilter === 'all' || `${lid}/${t.id}` === teamFilter) && (!q || `${p.name} ${p.nameEn || ''}`.toLowerCase().includes(q.toLowerCase())))
     .sort((a, b) => (desc ? sorter(a, b) : -sorter(a, b)))
   const list = filtered.slice(0, shown)
   const mineList = [...myTeam.players].map((p) => ({ p, v: valueFor(p), pot: potentialStars(p) })).sort((a, b) => playerOvr(b.p) - playerOvr(a.p))
@@ -129,6 +145,7 @@ export default function Transfer() {
               {SORTS.map(([k, l]) => <button key={k} className={`chip ${sort === k ? 'on' : ''}`} onClick={() => { if (sort === k) setDesc(!desc); else { setSort(k); setDesc(true) } }}>{l}순{sort === k ? (desc === (k !== 'age') ? ' ▼' : ' ▲') : ''}</button>)}
               <span className="chip-sep" />
               <button className={`chip ${afford ? 'on' : ''}`} onClick={() => { setAfford(!afford); setShown(40) }}>💰 이적료 낼 수 있는 선수만</button>
+              <button className={`chip ${expiring ? 'on' : ''}`} title="계약이 1년 남은 선수는 몸값이 25% 싸고, 시즌이 끝나면 FA로 풀릴 수 있습니다" onClick={() => { setExpiring(!expiring); setShown(40) }}>⏳ 계약 1년 남음</button>
             </div>
             <p className="small muted mk-count">{filtered.length.toLocaleString()}명 중 {list.length}명 · 줄을 누르면 영입 제안</p>
             {room0 <= 0.05 && <p className="notice bad small">💼 임금 예산 여유가 없습니다 (연봉 총액이 예산을 꽉 채움). 이적료를 낼 수 있어도 새 연봉 때문에 영입이 막힙니다 → 구단 운영에서 임금 예산을 올리거나, 연봉 높은 선수를 판 뒤 영입하세요.</p>}
@@ -142,7 +159,7 @@ export default function Transfer() {
                   <span className="mkc-pos"><Avatar player={p} color={t.color} size={34} number={false} /><em>{roleOf(p)}</em></span>
                   <span className="mkc-main">
                     <strong><Flag nation={p.nation} size={14} /> {p.name}{status[p.id]?.inj > 0 ? ' 🚑' : ''}</strong>
-                    <small><Crest team={t} size={14} /> {short(t)}{lid !== data.leagueId ? ` · ${league}` : ''} · {p.age}세</small>
+                    <small><Crest team={t} size={14} /> {short(t)}{lid !== data.leagueId ? ` · ${league}` : ''} · {p.age}세{yearsLeft(save, contractOf(p)) <= 1 ? <b className="mkc-tag warn" title="계약이 1년 남아 몸값이 싸다"> ⏳계약 1년</b> : null}{lid === data.leagueId && inDeficit(save, t.id) ? <b className="mkc-tag bad" title="재정난 구단 — 원하는 금액을 10% 깎아 준다"> 💸재정난</b> : null}{save.aiLoans?.[p.id] ? <b className="mkc-tag" title="다른 구단에 임대 중 — 시즌이 끝날 때까지 영입할 수 없다"> 🔁임대 중</b> : null}</small>
                     <span className="mkc-attrs">{keyAttrs20(p).map(([k, x]) => <span key={k} className={x >= 16 ? 'hi' : x >= 12 ? 'mid' : 'lo'}><b>{x}</b>{k}</span>)}</span>
                   </span>
                   <span className="mkc-side">
@@ -161,7 +178,7 @@ export default function Transfer() {
 
       {tab === 'sell' && (
         <>
-          <p className="small muted">판매 목록에 올리고 희망 가격을 정하면, 이적 시장 기간에 다른 구단 제안이 메시지함으로 옵니다. 제안이 낮으면 '더 달라고 하기'로 협상하세요. 너무 높게 부르면 결렬될 수 있습니다. 급하게 팔려면 선수 상세의 "강제 매각"(몸값의 75~100%)을 쓰세요.</p>
+          <p className="small muted">판매 목록에 올리고 <b>희망 가격을 직접 입력</b>하세요(€M). 제안은 <b>경기를 치를 때마다</b>(라운드가 넘어갈 때) 이적 시장이 열려 있는 동안 메시지함으로 옵니다 — 판매 등록한 선수는 매 라운드 1건(능력 78 이상은 2건), 어느 구단이 얼마를 부를지만 달라집니다. 사는 쪽이 낼 수 있는 상한은 몸값의 약 110~140%라서, 그보다 높게 부르면 제안이 상한에 맞춰 낮게 옵니다. 급하게 팔려면 선수 상세의 "강제 매각"(몸값의 75~100%)을 쓰세요.</p>
           <div className="card flush">
             <ul className="mk">
               {mineList.map(({ p, v, pot }) => {
@@ -173,15 +190,9 @@ export default function Transfer() {
                       <span className="mk-name"><strong><Flag nation={p.nation} size={14} /> {p.name}{status[p.id]?.wantsOut ? ' ✈️' : ''}</strong><small>{p.age}세 · 출전 {save.pstats?.[p.id]?.apps ?? 0}경기 <CondBar value={status[p.id]?.cond} /></small></span>
                       <span className="mk-ovr"><Stars value={abilityStars(p)} compact /></span>
                       <span className="mk-val">{money(v)}</span>
-                      {listed && (
-                        <label className="ask-price" title="희망 가격 (몸값 대비)">
-                          <select value={Math.round(((save.askPrice?.[p.id] ?? v * 1.2) / v) * 10) / 10} onChange={(e) => setAskPrice(p.id, Math.round(v * Number(e.target.value) * 10) / 10)}>
-                            {[0.8, 0.9, 1, 1.1, 1.2, 1.3, 1.5, 1.8, 2].map((k) => <option key={k} value={k}>{money(Math.round(v * k * 10) / 10)} ({Math.round(k * 100)}%)</option>)}
-                          </select>
-                        </label>
-                      )}
                       <button className={`btn small ${listed ? '' : 'ghost'}`} onClick={() => { if (!listed && !save.askPrice?.[p.id]) setAskPrice(p.id, Math.round(v * 1.2 * 10) / 10); toggleSale(p.id) }}>{listed ? '판매 중' : '판매 등록'}</button>
                     </div>
+                    {listed && <AskInput value={save.askPrice?.[p.id] ?? Math.round(v * 1.2 * 10) / 10} base={v} onChange={(n) => setAskPrice(p.id, n)} />}
                   </li>
                 )
               })}
@@ -206,7 +217,7 @@ export default function Transfer() {
           <h3>📰 다른 구단 이적 소식 <span className="muted small">최근 {Math.min(12, save.marketLog.length)}건</span></h3>
           <ul>
             {save.marketLog.slice(0, 12).map((d, i) => (
-              <li key={i}><b>{d.name}</b> <span className="muted">{d.pos} · {d.age}세</span> {d.from} → <b>{d.to}</b>{d.league ? <span className="muted"> ({d.league})</span> : null} <em>{money(d.fee)}</em></li>
+              <li key={i}><b>{d.name}</b> <span className="muted">{d.pos} · {d.age}세</span> {d.from} → <b>{d.to}</b>{d.league ? <span className="muted"> ({d.league})</span> : null} <em>{d.fa ? 'FA 영입' : d.loan ? '임대' : money(d.fee)}</em></li>
             ))}
           </ul>
         </div>

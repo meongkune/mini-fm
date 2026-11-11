@@ -122,14 +122,29 @@ export function legacyWageV3(p, leagueId, oldK = 1) {
   return r1(Math.max(M[leagueId] ?? 0.1, 0.47 * Math.pow(worth, 0.653) * star * (L[leagueId] ?? 0.8) * (oldK || 1) * ageK))
 }
 
-/** 계약: 저장된 게 없으면 선수 ID로 고정 생성 (1~5년) */
+/**
+ * 다른 구단 선수의 계약 만료 시즌. 선수마다 저장하지 않는다 (세이브 크기):
+ *   - 처음 계약은 선수 ID로 고정 (1시즌 기준 1~5년) → 시즌이 지나면 실제로 줄어든다 (예전에는 해마다 다시 계산해 영영 만료되지 않았다)
+ *   - 재계약·이적으로 새로 맺은 계약만 save.aiCt[선수ID] = 만료 시즌 으로 적어 둔다
+ *   - 적힌 게 없는데 이미 지난 계약(다른 리그 선수·옛 세이브)은 3년마다 재계약한 것으로 본다
+ */
+export function aiUntil(save, p) {
+  const no = save.seasonNo || 1
+  const set = save.aiCt?.[p.id]
+  if (set >= no) return set
+  let u = 1 + (hash(`ct-${p.id}`) % 5)
+  while (u < no) u += 3
+  return u
+}
+/** 계약: 내 선수는 저장된 계약, 다른 구단 선수는 aiUntil로 정해지는 계약 */
 export function contractOf(save, p, leagueId) {
   const c = save.contracts?.[p.id]
   if (c) return c
-  const years = 1 + (hash(`ct-${p.id}`) % 5)
   const w = wageInfo(p, leagueId)
-  return { until: (save.seasonNo || 1) + years - 1, wage: w.wage, ...(w.real ? { real: true } : {}) }
+  return { until: aiUntil(save, p), wage: w.wage, ...(w.real ? { real: true } : {}) }
 }
+/** 선수단 연봉 가중치 합 (구단 단가를 곱하면 연봉 총액) — 다른 구단 재정 계산용 */
+export const squadWeight = (team) => (team?.players || []).reduce((a, p) => a + weightOf(p), 0)
 export const yearsLeft = (save, c) => c.until - (save.seasonNo || 1) + 1
 
 /** 시작 자금: 리그 규모 × 전력 */
