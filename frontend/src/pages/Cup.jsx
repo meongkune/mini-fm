@@ -2,7 +2,8 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Crest } from '../components/Badges.jsx'
-import { COMPS, STAGE_LABEL, cupStatus, dueMatchday, fixturesOf, groupTable } from '../game/cup.js'
+import { PRIZE, STAGE_LABEL, compOf, cupStatus, dueMatchday, fixturesOf, groupTable } from '../game/cup.js'
+import { eur } from '../game/finance.js'
 import { short, useGame } from '../store.jsx'
 
 export default function CupView() {
@@ -10,14 +11,17 @@ export default function CupView() {
   const [view, setView] = useState('groups')
   const [pick, setPick] = useState(null)
   if (!save.cups) return <div className="card muted">대항전을 준비하는 중입니다…</div>
-  if (!cups.length) return <div className="card muted">이 리그는 대항전(챔피언스·유로파·컨퍼런스리그) 대상이 아닙니다. 1부 리그 8곳(EPL·라리가·분데스·세리에·리그1·에레디비시·포르투갈·브라질)의 팀만 나갑니다.</div>
+  if (!cups.length) return <div className="card muted">대회를 준비하는 중입니다. 유럽 대항전(챔피언스·유로파·컨퍼런스리그)은 1부 리그 8곳만 나갑니다. 1부 리그 8곳(EPL·라리가·분데스·세리에·리그1·에레디비시·포르투갈·브라질)의 팀만 나갑니다.</div>
   const sel = pick ?? (cupIdx >= 0 ? cupIdx : 0)
   const cup = cups[sel]
-  const comp = COMPS[cup.tier]
+  const comp = compOf(cup)
+  const isLc = cup.kind === 'league'
+  const shown = isLc && view === 'groups' ? 'ko' : view
   const cupState = cupStatus(cup, myKey)
   const T = (k) => allTeams[k] || cup.teams.find((t) => t.key === k)
   const nextMd = dueMatchday(cup, Infinity)
-  const ko = ['R16', 'QF', 'SF', 'F'].filter((s) => cup.fixtures.some((f) => f.stage === s))
+  const ko = ['PR', 'R32', 'R16', 'QF', 'SF', 'F'].filter((s) => cup.fixtures.some((f) => f.stage === s))
+  const P = PRIZE[isLc ? 'lc' : cup.id]
   const goals = {}
   for (const f of cup.fixtures) for (const s of f.scorers || []) {
     const k = `${s.team}|${s.name}`
@@ -31,7 +35,7 @@ export default function CupView() {
       <div className="seg cup-tabs">
         {cups.map((c, i) => (
           <button key={c.id} className={sel === i ? 'on' : ''} onClick={() => setPick(i)}>
-            {COMPS[c.tier].icon} {COMPS[c.tier].name}{i === cupIdx && <i className="dot" />}
+            {compOf(c).icon} {c.kind === 'league' ? c.name : compOf(c).name}{i === cupIdx && <i className="dot" />}
           </button>
         ))}
       </div>
@@ -39,7 +43,8 @@ export default function CupView() {
         <span className="cup-trophy">{comp.icon}</span>
         <div className="grow">
           <strong>{cup.name}</strong>
-          <span className="muted small">{cup.size}개 팀 · 조별리그 → {cup.size === 32 ? '16강' : '8강'} 토너먼트(단판)</span>
+          <span className="muted small">{isLc ? `${cup.teams.length}개 팀 · 단판 토너먼트 (${cup.byes.length}팀 부전승, ${cup.teams.length - cup.byes.length}팀은 예비 라운드부터)` : `${cup.size}개 팀 · 조별리그 → ${cup.size === 32 ? '16강' : '8강'} 토너먼트(단판)`}</span>
+          {P && <span className="muted small cup-prize">💶 {P.join ? `참가 ${eur(P.join)} · ` : ''}{P.win ? `조별 승리 ${eur(P.win)} · 무 ${eur(P.draw)} · ` : ''}{['R32', 'R16', 'QF', 'SF', 'F'].filter((k) => P[k]).map((k) => `${STAGE_LABEL[k]} 진출 ${eur(P[k])}`).join(' · ')} · 우승 +{eur(P.champion)}</span>}
           <span className={`cup-me ${cupState?.out ? 'bad' : ''}`}>{cupState?.text}</span>
         </div>
         {cup.winner && <span className="cup-winner"><Crest team={T(cup.winner)} size={30} />우승</span>}
@@ -47,12 +52,12 @@ export default function CupView() {
       {nextMd && <p className="small muted">다음 매치데이: <b>{nextMd.label}</b> — 리그 {nextMd.after}라운드를 마친 뒤 · {save.round >= nextMd.after ? <Link to="/match" className="link">지금 진행</Link> : `${nextMd.after - save.round}라운드 남음`}</p>}
 
       <div className="chips-scroll">
-        {[['groups', '조별리그'], ['ko', '토너먼트'], ['fixtures', '일정·결과'], ['scorers', '득점 순위']].map(([k, l]) => (
-          <button key={k} className={`chip ${view === k ? 'on' : ''}`} onClick={() => setView(k)}>{l}</button>
+        {[...(isLc ? [] : [['groups', '조별리그']]), ['ko', '토너먼트'], ['fixtures', '일정·결과'], ['scorers', '득점 순위']].map(([k, l]) => (
+          <button key={k} className={`chip ${shown === k ? 'on' : ''}`} onClick={() => setView(k)}>{l}</button>
         ))}
       </div>
 
-      {view === 'groups' && (
+      {shown === 'groups' && (
         <div className="cup-groups">
           {cup.groups.map((g, gi) => (
             <div key={gi} className="card flush">
@@ -72,8 +77,8 @@ export default function CupView() {
         </div>
       )}
 
-      {view === 'ko' && (
-        ko.length === 0 ? <div className="card muted">조별리그가 끝나면 토너먼트 대진이 나옵니다. 각 조 1·2위가 진출합니다.</div> : (
+      {shown === 'ko' && (
+        ko.length === 0 ? <div className="card muted">{isLc ? '대진을 준비하는 중입니다.' : '조별리그가 끝나면 토너먼트 대진이 나옵니다. 각 조 1·2위가 진출합니다.'}</div> : (
           <div className="bracket">
             {ko.map((s) => (
               <div key={s} className="br-col">
@@ -93,7 +98,7 @@ export default function CupView() {
         )
       )}
 
-      {view === 'fixtures' && cup.matchdays.map((md) => {
+      {shown === 'fixtures' && cup.matchdays.map((md) => {
         const list = fixturesOf(cup, md)
         if (!list.length) return null
         return (
@@ -110,7 +115,7 @@ export default function CupView() {
         )
       })}
 
-      {view === 'scorers' && (
+      {shown === 'scorers' && (
         scorers.length === 0 ? <div className="card muted">아직 골이 없습니다.</div> : (
           <div className="card flush">
             <table className="pr">

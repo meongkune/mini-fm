@@ -257,7 +257,7 @@ export function settleMatch(save, { team, leagueId, home, result, totalRounds, c
     items.push(['관중 수입', free ? 0 : r1(((base * 0.3) / (totalRounds / 2)) * tk.revenueK * (cupStage ? 0.8 + 0.6 * cupPay : 1))])
     items.push(['상품 판매', r1(((base * 0.06) / (totalRounds / 2)) * (0.5 + fans / 100))])
   }
-  if (cupStage) items.push(['대회 수당', r1(base * 0.012 * cupPay * (result > 0 ? 1.6 : 1))])
+  // 대회 수당·상금은 대회 쪽(cup.js cupPrizes)에서 장부에 넣는다. 여기서는 홈경기 관중 수입만
   // 운영비: 직원·구장·유스·원정 (매출의 31%, 리그 라운드마다)
   if (!cupStage && v5(f)) items.push(['운영비', -r2((base * REV_K * OPEX) / totalRounds)])
   const wages = cupStage ? 0 : r1(wageBill(save, team, leagueId) / totalRounds)

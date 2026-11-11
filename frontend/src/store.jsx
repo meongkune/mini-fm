@@ -9,7 +9,7 @@ import { applyTalkResult } from './game/aiTalk.js'
 import { checkPromises } from './game/relations.js'
 import { PATIENCE, SELL_ON, SELL_ON_CUT, SELL_ON_NOW, buyoutOf, evaluateBid, evaluateLoan, executeTransfer, loanTargets, optionFee, swapCredit, valueCtx, windowState } from './game/trade.js'
 import { boardMidCheck, newBoard, nextSeason, seasonLabel, seasonReview } from './game/career.js'
-import { COMPS, CUP_LEAGUES, buildCups, cupKey, cupStatus, dueMatchday, myCupFixture, playMatchday } from './game/cup.js'
+import { COMPS, CUP_LEAGUES, LC_LEAGUES, buildCups, buildLeagueCup, compOf, cupKey, cupPrizes, cupStatus, dueMatchday, lcName, myCupFixture, playMatchday } from './game/cup.js'
 import { FX_DEFAULT, FIN_MODEL, boardBudgets, payFee, takeFee, toFinanceV5, transferFunds, shiftRange, cashOnly, gateModel, clubKOf, legacyWageV3, setClubK, setFx, wageInfo, ROSTER_MAX, book, checkBankruptcy, contractOf, eur, faDecision, ffpReview, newFinance, prizeMoney, releaseCost, renewalAsk, settleMatch, wageBill, wageBudget, wageFor, wageShock } from './game/finance.js'
 import { afterMatchOwner, decide } from './game/owner.js'
 import { valueOf } from './game/trade.js'
@@ -412,10 +412,12 @@ export function GameProvider({ children }) {
   // 대항전(챔스·유로파·컨퍼런스): 시즌마다 참가팀을 뽑고(다른 리그 파일을 읽어서) 대진을 만든다
   const seasonNo = save.seasonNo || 1
   useEffect(() => {
-    if (!data || !save.teamId || !CUP_LEAGUES.includes(data.leagueId)) return
+    if (!data || !save.teamId) return
     let alive = true
     ;(async () => {
-      const leagues = data.index.leagues.filter((l) => CUP_LEAGUES.includes(l.id))
+      const euro = CUP_LEAGUES.includes(data.leagueId)
+      const lcIds = LC_LEAGUES[data.leagueId] || [data.leagueId]
+      const leagues = data.index.leagues.filter((l) => (euro && CUP_LEAGUES.includes(l.id)) || lcIds.includes(l.id))
       const loaded = []
       for (const l of leagues) {
         const s = l.seasons.find((x) => x.id === data.seasonId)
@@ -428,8 +430,19 @@ export function GameProvider({ children }) {
       for (const l of loaded) for (const t of l.teams) map[cupKey(l.leagueId, t.id)] = t
       setCupTeams(map)
       if (!save.cups || save.cupSeason !== seasonNo) {
-        const cups = buildCups(loaded, { seed: seasonNo * 101 + (save.teamId || '').length, totalRounds: data.schedule.length })
+        const cups = euro ? buildCups(loaded.filter((l) => CUP_LEAGUES.includes(l.leagueId)), { seed: seasonNo * 101 + (save.teamId || '').length, totalRounds: data.schedule.length }) : []
+        // 리그컵: 유럽 대항전에 나가는 팀은 부전승을 먼저 받는다
+        const euroKeys = new Set(cups.flatMap((c) => c.teams.map((t) => t.key)))
+        const lcTeams = loaded.filter((l) => lcIds.includes(l.leagueId)).flatMap((l) => l.teams.map((t) => ({ key: cupKey(l.leagueId, t.id), id: t.id, leagueId: l.leagueId, name: t.name, short: t.short, color: t.color, ext: t.ext, t })))
+        const lc = buildLeagueCup(lcTeams, { name: lcName(data.leagueId), seed: seasonNo * 977 + 3, totalRounds: data.schedule.length, euroKeys })
+        if (lc) cups.push(lc)
         setSave((cur) => { const { cup: _old, ...rest } = cur; return { ...rest, cups, cupSeason: seasonNo } })
+      } else if (!save.cups.some((c) => c.kind === 'league')) {
+        // 리그컵이 생기기 전의 세이브: 이번 시즌 리그컵만 새로 만든다
+        const euroKeys = new Set(save.cups.flatMap((c) => c.teams.map((t) => t.key)))
+        const lcTeams = loaded.filter((l) => lcIds.includes(l.leagueId)).flatMap((l) => l.teams.map((t) => ({ key: cupKey(l.leagueId, t.id), id: t.id, leagueId: l.leagueId, name: t.name, short: t.short, color: t.color, ext: t.ext, t })))
+        const lc = buildLeagueCup(lcTeams, { name: lcName(data.leagueId), seed: seasonNo * 977 + 3, totalRounds: data.schedule.length, euroKeys })
+        if (lc) setSave((cur) => (cur.cups?.some((c) => c.kind === 'league') ? cur : { ...cur, cups: [...(cur.cups || []), lc] }))
       }
     })().catch((e) => console.warn('대항전 준비 실패', e))
     return () => { alive = false }
@@ -492,12 +505,20 @@ export function GameProvider({ children }) {
       return mine ? swapCredit(theirs, mine, valueOf(mine, status[mine.id], valueCtx(save, mine, data.leagueId))) : null
     }
     const cups = save.cups || []
-    const cupIdx = cups.findIndex((c) => c.teams.some((t) => t.key === myKey))
+    // 내가 나가는 대회 중 지금 치러야 할 내 경기가 있는 대회 (유럽 대항전과 리그컵에 동시에 나갈 수 있다 — 먼저 잡힌 경기부터)
+    const mine = cups.map((c, i) => ({ c, i })).filter(({ c }) => c.teams.some((t) => t.key === myKey))
+    const live = mine.map(({ c, i }) => {
+      const ready = c.teams.every((t) => allTeams[t.key])
+      const md = ready ? dueMatchday(c, save.round) : null
+      const fx = md ? myCupFixture(c, md, myKey) : null
+      return fx ? { i, md, fx } : null
+    }).filter(Boolean).sort((a, b) => a.md.after - b.md.after)[0]
+    const euroIdx = mine.find(({ c }) => c.kind !== 'league')?.i ?? mine[0]?.i ?? -1
+    const cupIdx = live ? live.i : euroIdx
     const cup = cupIdx >= 0 ? cups[cupIdx] : null
-    const comp = cup ? COMPS[cup.tier] : null
-    const cupReady = cup && cup.teams.every((t) => allTeams[t.key])
-    const cupMd = cupReady ? dueMatchday(cup, save.round) : null
-    const myCup = cupMd ? myCupFixture(cup, cupMd, myKey) : null
+    const comp = cup ? compOf(cup) : null
+    const cupMd = live ? live.md : null
+    const myCup = live ? live.fx : null
     const leagueFixture = data && myTeam && !seasonOver
       ? data.schedule[save.round].find((m) => m.home === myTeam.id || m.away === myTeam.id)
       : null
@@ -1034,6 +1055,16 @@ export function GameProvider({ children }) {
             const opp = mineIdx === 0 ? nextFixture.awayTeam : nextFixture.homeTeam
             const after = applyCupMatch({ ...s, cups: s.cups.map((c, i) => (i === cupIdx ? r.cup : c)) }, { myTeam, mineIdx, summary: mine.summary, label: `${cup.name} ${md.label}`, oppName: opp.name })
             const [gf, ga] = mineIdx === 0 ? mine.summary.score : [...mine.summary.score].reverse()
+            // 대회 상금: 참가 수당·경기 수당·단계 진출·우승 (상금의 절반은 이사회가 이적 자금으로 돌려준다)
+            const prizes = cupPrizes(s.cups[cupIdx], r.cup, md, myKey, Math.sign(gf - ga))
+            if (prizes.length) {
+              let fin = after.finance
+              for (const [k, v] of prizes) fin = book(fin, v, `${compOf(cup).short} ${k}`)
+              const sum = prizes.reduce((a, [, v]) => a + v, 0)
+              if (fin.fm >= 5) fin = { ...fin, tb: Math.round(((fin.tb || 0) + sum * 0.5) * 10) / 10 }
+              after.finance = fin
+              after.inbox = [news(s.round, 'finance', `💶 ${cup.name} 상금 ${eur(Math.round(sum * 100) / 100)}`, prizes.map(([k, v]) => `${k} ${eur(v)}`).join(' · ') + '. 절반은 이사회가 이적 자금으로 돌려줬습니다.'), ...(after.inbox || [])].slice(0, 80)
+            }
             const oppGap = strengthOf(opp) - strengthOf(myTeam)
             const money = settleMatch(after, { team: myTeam, leagueId: data.leagueId, home: nextFixture.isHome, result: Math.sign(gf - ga), totalRounds: data.schedule.length, cupStage: md.stage, cupPay: comp.pay, oppGap })
             return done(afterMatchOwner({ ...after, ...money }, Math.sign(gf - ga), { home: nextFixture.isHome, cup: true, oppGap }))

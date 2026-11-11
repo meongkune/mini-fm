@@ -26,7 +26,7 @@ export const COMPETITIONS = {
   DED: { id: 'eredivisie', name: '에레디비시', country: '네덜란드', zones: [[1, 2, '챔피언스리그', '#3b82f6'], [3, 3, '유로파리그', '#f59e0b'], [-3, -3, '강등 플레이오프', '#fb923c'], [-2, -1, '강등', '#ef4444']] },
   PPL: { id: 'primeira-liga', name: '프리메이라 리가', country: '포르투갈', zones: [[1, 2, '챔피언스리그', '#3b82f6'], [3, 3, '유로파리그', '#f59e0b'], [-3, -3, '강등 플레이오프', '#fb923c'], [-2, -1, '강등', '#ef4444']] },
   ELC: { id: 'championship', name: '챔피언십', country: '잉글랜드', zones: [[1, 2, '자동 승격', '#22c55e'], [3, 6, '승격 플레이오프', '#3b82f6'], [-3, -1, '강등', '#ef4444']] },
-  BSA: { id: 'brasileirao', name: '브라질레이랑', country: '브라질', calendarYear: true, zones: [[1, 4, '리베르타도레스', '#3b82f6'], [5, 6, '리베르타도레스 예선', '#60a5fa'], [7, 12, '수다메리카나', '#f59e0b'], [-4, -1, '강등', '#ef4444']] },
+  BSA: { id: 'brasileirao', name: '브라질 세리 A', country: '브라질', calendarYear: true, zones: [[1, 4, '리베르타도레스', '#3b82f6'], [5, 6, '리베르타도레스 예선', '#60a5fa'], [7, 12, '수다메리카나', '#f59e0b'], [-4, -1, '강등', '#ef4444']] },
 }
 
 // 프리미어리그 구단 한국어 이름·짧은 이름·유니폼 색 (TLA 기준). 없는 구단은 API의 영어 이름과 clubColors를 쓴다

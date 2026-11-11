@@ -10,6 +10,22 @@ export const COMPS = [
   { id: 'uecl', name: '컨퍼런스리그', short: '컨퍼런스', icon: '🥉', pay: 0.3 },
 ]
 export const CUP_NAME = COMPS[0].name
+
+// ── 상금 (€M, UEFA 2024-25 배분을 반올림한 대략값) ──
+//   참가 수당(조별리그 시작) · 조별리그 경기 승리/무승부 수당 · 토너먼트 단계 진출 상금 · 우승 보너스
+//   리그컵은 상금이 작고(잉글랜드 EFL컵도 상금보다 입장 수입이 크다), 홈경기 관중 수입이 주된 돈이다
+export const PRIZE = {
+  ucl: { join: 18.6, win: 2.1, draw: 0.7, R16: 11, QF: 12.5, SF: 15, F: 18.5, champion: 6.5 },
+  uel: { join: 4.3, win: 0.45, draw: 0.15, R16: 1.75, QF: 2.5, SF: 4, F: 7, champion: 6 },
+  uecl: { join: 3.2, win: 0.4, draw: 0.13, R16: 1, QF: 1.5, SF: 2.5, F: 4, champion: 3 },
+  lc: { join: 0, win: 0, draw: 0, R32: 0.05, R16: 0.1, QF: 0.2, SF: 0.4, F: 0.6, champion: 1 },
+}
+// 리그컵: 각 리그 1부 팀끼리(잉글랜드는 프리미어리그 + 챔피언십 44팀) 단판 토너먼트
+export const LEAGUE_CUP = { id: 'lc', name: '리그컵', short: '리그컵', icon: '🏅', pay: 0.4 }
+export const LC_LEAGUES = { 'premier-league': ['premier-league', 'championship'], championship: ['premier-league', 'championship'] }
+export const lcName = (leagueId) => (LC_LEAGUES[leagueId] ? 'EFL 컵' : '리그컵')
+/** 대회 정보 (유럽 대항전 3개 + 리그컵) */
+export const compOf = (cup) => (cup?.kind === 'league' ? { ...LEAGUE_CUP, name: cup.name, short: cup.name } : COMPS[cup?.tier ?? 0])
 // 리그별 [챔스, 유로파, 컨퍼런스] 출전 팀 수 → 각 대회 32팀
 const BIG = [5, 3, 4]
 const MID = [3, 5, 4]
@@ -18,6 +34,7 @@ export const CUP_LEAGUES = Object.keys(SLOTS)
 /** 대회 안의 팀 키: 리그가 달라도 약자가 같을 수 있어(FCB=바르셀로나·바이에른) 리그 ID를 붙인다 */
 export const cupKey = (leagueId, teamId) => `${leagueId}/${teamId}`
 
+export const STAGE_LABEL = { PR: '예비 라운드', R32: '32강', R16: '16강', QF: '8강', SF: '4강', F: '결승' }
 const hash = (s) => { let h = 2166136261; for (const c of String(s)) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return h >>> 0 }
 export const strength = (t) => {
   const top = t.players.map(playerOvrOf).sort((a, b) => b - a).slice(0, 11)
@@ -95,7 +112,7 @@ function drawCup(list, name, size, seed, totalRounds) {
     groups: groups.map((g) => g.map((e) => e.key)),
     matchdays: [
       ...groupAfter.map((after, md) => ({ key: `G${md + 1}`, label: `조별리그 ${md + 1}차전`, stage: 'group', md, after })),
-      ...koStages.map((s, i) => ({ key: s, label: { R16: '16강', QF: '8강', SF: '4강', F: '결승' }[s], stage: s, after: koAfter[i] })),
+      ...koStages.map((s, i) => ({ key: s, label: STAGE_LABEL[s], stage: s, after: koAfter[i] })),
     ],
     fixtures,
     played: [], // 끝난 매치데이 key
@@ -103,7 +120,6 @@ function drawCup(list, name, size, seed, totalRounds) {
   }
 }
 
-export const STAGE_LABEL = { R16: '16강', QF: '8강', SF: '4강', F: '결승' }
 
 /** 조 순위 */
 export function groupTable(cup, gi) {
@@ -176,8 +192,9 @@ export function playMatchday(cup, md, teamsById, status, mine, seasonNo = 1) {
   }
   next.played = [...next.played, md.key]
   // 한 단계가 끝나면 바로 다음 대진을 짠다 (다음 상대를 미리 볼 수 있게)
-  const order = next.size === 32 ? ['R16', 'QF', 'SF', 'F'] : ['QF', 'SF', 'F']
+  const order = next.stages || (next.size === 32 ? ['R16', 'QF', 'SF', 'F'] : ['QF', 'SF', 'F'])
   if (md.key === 'G6') next.fixtures.push(...drawFirstKnockout(next))
+  else if (md.stage === 'PR') next.fixtures.push(...drawAfterPrelim(next))
   else if (md.stage !== 'group' && md.stage !== 'F') next.fixtures.push(...drawNext(next, md.stage, order[order.indexOf(md.stage) + 1]))
   if (md.stage === 'F') next.winner = next.fixtures.find((f) => f.stage === 'F')?.winner ?? null
   return { cup: next, results }
@@ -199,6 +216,7 @@ export function cupStatus(cup, teamId) {
   if (lost) return { in: true, out: true, text: `${STAGE_LABEL[lost.stage]} 탈락` }
   if (cup.played.includes('G6') && !ko.length) return { in: true, out: true, text: '조별리그 탈락' }
   const last = ko.at(-1)
+  if (cup.kind === 'league') return { in: true, text: last ? `${STAGE_LABEL[last.stage]}${last.winner === teamId ? ' 통과' : ''}` : '대진 대기 중' }
   const gi = cup.groups.findIndex((g) => g.includes(teamId))
   const pos = groupTable(cup, gi).findIndex((r) => r.id === teamId) + 1
   return { in: true, text: last ? `${STAGE_LABEL[last.stage]} 진출` : `조별리그 ${String.fromCharCode(65 + gi)}조 ${pos}위` }
@@ -212,4 +230,70 @@ export function leagueZones(leagueId, zones = []) {
   let from = 1
   const cups = COMPS.map((c, i) => { const z = { from, to: from + s[i] - 1, label: c.name, color: colors[i] }; from += s[i]; return z })
   return [...cups, ...zones.filter((z) => z.from < 0)]
+}
+
+/**
+ * 리그컵 만들기: 참가팀 수가 2의 거듭제곱(16·32)보다 많으면, 넘치는 만큼만 예비 라운드를 치른다
+ *   예) 20팀 → 16강: 8팀이 예비 라운드 4경기, 나머지 12팀은 부전승으로 16강 직행
+ *       44팀(잉글랜드) → 32강: 24팀이 예비 라운드 12경기, 20팀 부전승
+ *   부전승은 유럽 대항전에 나가는 팀이 먼저 받고(일정이 빡빡해서), 나머지는 추첨
+ * @param teams [{ key, id, leagueId, name, short, color, t(팀 객체) }]
+ */
+export function buildLeagueCup(teams, { name, seed = 1, totalRounds = 38, euroKeys = new Set() } = {}) {
+  if (teams.length < 6) return null
+  const size = teams.length > 32 ? 32 : teams.length > 16 ? 16 : 8
+  const extra = teams.length - size // 예비 라운드 경기 수
+  const shuffled = [...teams].sort((a, b) => hash(`lc-${seed}-${a.key}`) - hash(`lc-${seed}-${b.key}`))
+  const byes = [...shuffled.filter((t) => euroKeys.has(t.key)), ...shuffled.filter((t) => !euroKeys.has(t.key))].slice(0, size - extra)
+  const byeSet = new Set(byes.map((t) => t.key))
+  const pre = shuffled.filter((t) => !byeSet.has(t.key))
+  const fixtures = []
+  for (let i = 0; i < extra; i++) fixtures.push({ stage: 'PR', home: pre[i * 2].key, away: pre[i * 2 + 1].key, slot: i })
+  const first = size === 32 ? 'R32' : size === 16 ? 'R16' : 'QF'
+  const stages = ['R32', 'R16', 'QF', 'SF', 'F'].slice(['R32', 'R16', 'QF', 'SF', 'F'].indexOf(first))
+  const at = (k) => Math.max(1, Math.round(totalRounds * k))
+  const when = { PR: 0.06, R32: 0.14, R16: 0.3, QF: 0.46, SF: 0.64, F: 0.84 }
+  const cup = {
+    kind: 'league', id: 'lc', tier: 3, name, size, stages,
+    teams: teams.map(({ t, ...e }) => e),
+    groups: [],
+    byes: byes.map((t) => t.key),
+    matchdays: [...(extra ? [{ key: 'PR', label: STAGE_LABEL.PR, stage: 'PR', after: at(when.PR) }] : []), ...stages.map((st) => ({ key: st, label: STAGE_LABEL[st], stage: st, after: at(when[st]) }))],
+    fixtures,
+    played: [],
+    winner: null,
+  }
+  if (!extra) cup.fixtures.push(...drawAfterPrelim(cup))
+  return cup
+}
+
+/** 예비 라운드가 끝나면(또는 없으면) 첫 본 라운드 대진: 부전승 팀 + 예비 라운드 승자를 추첨 */
+function drawAfterPrelim(cup) {
+  const stage = cup.stages[0]
+  const winners = cup.fixtures.filter((f) => f.stage === 'PR').map((f) => f.winner).filter(Boolean)
+  const pool = [...cup.byes, ...winners].sort((a, b) => hash(`d-${stage}-${a}`) - hash(`d-${stage}-${b}`))
+  const out = []
+  for (let i = 0; i + 1 < pool.length; i += 2) out.push({ stage, home: pool[i], away: pool[i + 1], slot: i / 2 })
+  return out
+}
+
+/**
+ * 내 팀이 이번 대회 경기로 받는 돈: 경기 결과 수당 + 이번 매치데이로 새로 정해진 단계 진출 상금 + 우승 보너스
+ * @returns [[항목, 금액], …]
+ */
+export function cupPrizes(before, after, md, myKey, result) {
+  const P = PRIZE[before.kind === 'league' ? 'lc' : before.id] || PRIZE.uecl
+  const out = []
+  if (md.stage === 'group') {
+    if (md.key === 'G1' && P.join) out.push(['참가 수당', P.join])
+    if (result > 0 && P.win) out.push(['승리 수당', P.win])
+    else if (result === 0 && P.draw) out.push(['무승부 수당', P.draw])
+  }
+  // 새로 정해진 다음 단계 대진에 내가 있으면 그 단계 진출 상금
+  const had = new Set(before.fixtures.filter((f) => f.home === myKey || f.away === myKey).map((f) => f.stage))
+  for (const f of after.fixtures) {
+    if ((f.home === myKey || f.away === myKey) && !had.has(f.stage) && P[f.stage]) out.push([`${STAGE_LABEL[f.stage]} 진출`, P[f.stage]])
+  }
+  if (md.stage === 'F' && after.winner === myKey && P.champion) out.push(['우승 상금', P.champion])
+  return out
 }
