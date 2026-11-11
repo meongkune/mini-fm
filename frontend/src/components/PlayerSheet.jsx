@@ -14,7 +14,8 @@ import { eur, yearsLeft } from '../game/finance.js'
 import { useGame } from '../store.jsx'
 
 export default function PlayerSheet({ player, onClose, inLineup, onToggle }) {
-  const { status, save, talkTo, myTeam, teams, finishTalk, totalRounds, contractOf, renewalAsk, renew, releaseCost, release, forceSell, addPromise, isLoanIn, loanOptions, loanOut, transferWindow, clearNotForSale } = useGame()
+  const { status, save, talkTo, myTeam, teams, finishTalk, totalRounds, contractOf, renewalAsk, renew, releaseCost, release, forceSell, addPromise, isLoanIn, loanOptions, loanOut, transferWindow, clearNotForSale, buyLoan } = useGame()
+  const [optMsg, setOptMsg] = useState('')
   const [nego, setNego] = useState(null) // 연봉 협상 대화 (재계약)
   const [negoMsg, setNegoMsg] = useState('')
   const [battle, setBattle] = useState(false)
@@ -80,6 +81,13 @@ export default function PlayerSheet({ player, onClose, inLineup, onToggle }) {
               <div className="contract-box">
                 <h4>임대 선수</h4>
                 <p className="small">🔁 {save.loans[player.id].club}에서 시즌 끝까지 임대 왔습니다. 연봉 {Math.round((save.loans[player.id].share ?? 1) * 100)}% 부담 ({eur(contractOf(player).wage)}/년). 시즌이 끝나면 돌아가며, 재계약·판매·방출은 할 수 없습니다.</p>
+                {save.loans[player.id].option ? (
+                  <>
+                    <p className="small">✍️ 완전 영입 옵션: <b>{eur(save.loans[player.id].option)}</b>을 내면 시즌이 끝나기 전 언제든 완전히 데려올 수 있습니다 (3년 계약).</p>
+                    <button className="btn small wide" onClick={() => { if (!confirm(`${player.name}을(를) ${eur(save.loans[player.id].option)}에 완전 영입할까요?`)) return; const r = buyLoan(player, 3); setOptMsg(r.ok ? `✍️ 완전 영입 완료 — 연봉 ${eur(r.wage)}/년` : r.reason) }}>✍️ 완전 영입 옵션 행사 ({eur(save.loans[player.id].option)})</button>
+                  </>
+                ) : null}
+                {optMsg && <p className="small notice">{optMsg}</p>}
               </div>
             ) : (
               <>
@@ -87,10 +95,12 @@ export default function PlayerSheet({ player, onClose, inLineup, onToggle }) {
                   onNego={(ask) => { setNegoMsg(''); setNego(ask) }} negoMsg={negoMsg}
                   onRelease={() => { if (confirm(`${player.name}을(를) 방출할까요? 위약금 ${eur(releaseCost(player))}`)) { release(player); onClose() } }}
                   onSell={() => { if (confirm(`${player.name}을(를) 감독·선수 의사와 상관없이 즉시 팔까요? (가치의 60~120%)`)) { setDeal(forceSell(player)) } }} />
+                {optMsg && <p className="small notice">{optMsg}</p>}
+                {save.sellOnOwed?.[player.id] && <p className="small notice">📎 셀온 약속: 이 선수를 팔면 이적료의 {save.sellOnOwed[player.id].pct}%를 {save.sellOnOwed[player.id].club}에 줘야 합니다.</p>}
                 {save.notForSale?.[player.id] === (save.seasonNo || 1) && (
                   <p className="small notice">🔒 판매 불가 선언 중 — 이번 시즌 이 선수에게 오는 이적 제안을 모두 거절합니다. <button className="linkish" onClick={() => clearNotForSale(player.id)}>해제</button></p>
                 )}
-                <LoanOutBox player={player} open={transferWindow.open} options={loanOptions} onLoan={(o) => { const r = loanOut(player, o); if (r.ok) onClose(); else alert(r.reason) }} />
+                <LoanOutBox player={player} open={transferWindow.open} options={loanOptions} onLoan={(o, withOption) => { const r = loanOut(player, o, withOption); if (r.ok) onClose(); else alert(r.reason) }} />
               </>
             )}
             {nego && (
@@ -147,10 +157,11 @@ function LoanOutBox({ player, open, options, onLoan }) {
           : list.map((o) => (
             <div key={o.team.id} className="row loan-opt">
               <span className="small"><b>{o.team.name}</b> · {o.role} · 임대료 {eur(o.fee)}</span>
-              <button className="btn small" onClick={() => { if (confirm(`${player.name}을(를) ${o.team.name}에 시즌 끝까지 임대 보낼까요? (임대료 ${eur(o.fee)})`)) onLoan(o) }}>보내기</button>
+              <button className="btn small" onClick={() => { if (confirm(`${player.name}을(를) ${o.team.name}에 시즌 끝까지 임대 보낼까요? (임대료 ${eur(o.fee)})`)) onLoan(o, false) }}>보내기</button>
+              <button className="btn small ghost" title="시즌이 끝날 때 그 구단이 선수를 마음에 들어 하면 미리 정한 금액(지금 몸값의 110%)에 완전히 데려갑니다" onClick={() => { if (confirm(`${player.name}을(를) ${o.team.name}에 완전 영입 옵션을 붙여 임대 보낼까요? 시즌이 끝날 때 그 구단이 원하면 지금 몸값의 110%를 내고 완전히 데려갑니다.`)) onLoan(o, true) }}>옵션 포함</button>
             </div>
           ))}
-      <p className="small muted">어린 선수·후보 선수는 출전 기회가 생겨 반기지만, 주전급 베테랑은 서운해합니다.</p>
+      <p className="small muted">어린 선수·후보 선수는 출전 기회가 생겨 반기지만, 주전급 베테랑은 서운해합니다. '옵션 포함'으로 보내면 시즌이 끝날 때 그 구단이 선수를 완전히 사 갈 수 있습니다(지금 몸값의 110%).</p>
     </div>
   )
 }

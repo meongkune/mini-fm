@@ -1298,6 +1298,10 @@ html.desktop .tabs-line { position: static; margin: 0 0 12px; padding: 0; backgr
 .ask-quick button { padding: 1px 5px; border-radius: 6px; border: 1px solid var(--line); background: transparent; color: var(--muted, #94a3b8); font: inherit; font-size: .64rem; cursor: pointer; }
 .mkc-tag { font-weight: 700; font-size: .66rem; white-space: nowrap; }
 .mkc-tag.warn { color: #fcd34d; }
+.mkc-tag.ok { color: #86efac; }
+.clause-opt { display: flex; gap: 6px; align-items: flex-start; margin: 6px 0; line-height: 1.35; }
+.clause-opt input { margin-top: 2px; flex: none; }
+.clause-note { margin: 6px 0; padding: 6px 8px; border-radius: 8px; background: rgba(34, 197, 94, .1); }
 .mkc-tag.bad { color: #fca5a5; }
 .ask-price select { max-width: 120px; padding: 4px; border-radius: 7px; border: 1px solid var(--line); background: var(--panel-2); color: var(--text); font: inherit; font-size: .72rem; }
 

@@ -6,7 +6,7 @@
 //   - 가끔 더 큰 구단이 내 주전 선수에게 먼저 제안을 넣는다 (판매 목록에 없어도)
 // 모든 선택은 시즌·라운드·구단 ID의 해시로 정해져서, 같은 세이브에서는 항상 같은 결과가 나온다.
 import { playerOvrOf } from '../engine/engine.js'
-import { clubBill, clubKOf, squadWeight } from './finance.js'
+import { clubBill, clubKOf, squadWeight, takeFee } from './finance.js'
 import { news } from './season.js'
 import { aiBidFor, evaluateBid, executeTransfer, money, potentialOf, valueCtx, valueOf, windowState } from './trade.js'
 
@@ -77,6 +77,17 @@ export function runMarket(save, { teams, myTeamId, leagueId, round, totalRounds,
   const ct = { ...(s.aiCt || {}) } // 새로 맺은 계약 (만료 시즌)
   const aiLoans = { ...(s.aiLoans || {}) } // 다른 구단끼리의 임대
   const newDeal = (p, years) => { ct[p.id] = season + years - 1 }
+  // 셀온: 내가 셀온을 붙여 판 선수가 이적료를 받고 다시 팔리면 그 몫이 들어온다
+  const payouts = []
+  const sellOnHit = (p, fee, toName) => {
+    const e = s.sellOn?.[p.id]
+    if (!e || !(fee > 0)) return
+    const cut = r1((fee * e.pct) / 100)
+    const rest = { ...s.sellOn }
+    delete rest[p.id]
+    s = { ...s, sellOn: rest, ...(s.finance ? { finance: takeFee(s.finance, cut, '셀온 수입') } : {}) }
+    payouts.push(news(round, 'trade', `📎 셀온 수입 ${money(cut)}: ${p.name}`, `셀온 조항을 붙여 판 ${p.name} 선수가 ${toName}(으)로 ${money(fee)}에 이적했습니다. 약속한 ${e.pct}%인 ${money(cut)}이 들어왔습니다.`))
+  }
   const done = { ...(s.aiDeals?.[wkey] || {}) }
   const cash = { ...s.aiCash }
   const deals = []
@@ -148,6 +159,7 @@ export function runMarket(save, { teams, myTeamId, leagueId, round, totalRounds,
     done[buyer.id] = (done[buyer.id] || 0) + 1
     bought++
     deals.push({ season, round, name: p.name, pos: p.pos, ovr: playerOvrOf(p), age: p.age, from: t.name, to: buyer.name, league, fee })
+    sellOnHit(p, fee, buyer.name)
     // 명단이 넘치면 그 포지션에서 가장 약한 선수를 내보낸다 (FA 시장으로)
     const now = byId()[buyer.id]
     if (now.players.length > ROSTER_SOFT) {
@@ -210,6 +222,7 @@ export function runMarket(save, { teams, myTeamId, leagueId, round, totalRounds,
         move(p, st.id, null)
         cash[st.id] = r1((cash[st.id] || 0) + fee * 0.8)
         deals.push({ season, round, name: p.name, pos: p.pos, ovr: playerOvrOf(p), age: p.age, from: st.name, to: dest.team.name, league: dest.league, fee, out: true })
+        sellOnHit(p, fee, dest.team.name)
       }
     }
   }
@@ -245,6 +258,7 @@ export function runMarket(save, { teams, myTeamId, leagueId, round, totalRounds,
     cash[st.id] = r1((cash[st.id] || 0) + fee * 0.8)
     poached++
     deals.push({ season, round, name: p.name, pos: p.pos, ovr: playerOvrOf(p), age: p.age, from: st.name, to: dest.team.name, league: dest.league, fee, out: true })
+    sellOnHit(p, fee, dest.team.name)
   }
 
   // 임대 (여름 시장): 강한 구단의 벤치 유망주(21세 이하, 팀 내 17위 밖, 성장 여지 4 이상)를 그 선수가 뛸 수 있는 약한 구단으로 한 시즌 보낸다
@@ -276,7 +290,7 @@ export function runMarket(save, { teams, myTeamId, leagueId, round, totalRounds,
     }
   }
 
-  const inbox = []
+  const inbox = [...payouts]
   if (deals.length) {
     const lines = deals.map((d) => `${d.name}(${POS_KO[d.pos]}, ${d.age}세): ${d.from} → ${d.to}${d.league ? ` (${d.league})` : ''} · ${d.fa ? 'FA 영입' : d.loan ? '임대' : money(d.fee)}`)
     inbox.push(news(round, 'trade', `📰 이적 시장 소식 ${deals.length}건`, lines.join(' / '), { read: true }))

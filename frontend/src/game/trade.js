@@ -56,6 +56,25 @@ export function valueCtx(save, p, leagueId) {
 }
 export const money = (v) => eur(v) // 통화 설정(유로·원화)을 따른다
 
+// ── 이적 조항 ──
+/** 셀온: 나중에 그 선수가 다시 팔릴 때 이적료에서 떼어 받는(주는) 비율 */
+export const SELL_ON = 15
+/** 셀온을 붙이면 지금 이적료가 깎이는 정도: 내가 팔 때 −8%, 내가 살 때 상대가 원하는 금액 −7% */
+export const SELL_ON_NOW = 0.92
+export const SELL_ON_CUT = 0.07
+/** 임대 후 완전 영입 옵션: 미리 정해 두는 이적료 (빌려 올 때 가치의 115%, 빌려 줄 때 110%) */
+export const optionFee = (value, dir = 'in') => Math.round(value * (dir === 'in' ? 1.15 : 1.1) * 10) / 10
+/**
+ * 바이아웃 조항: 다른 구단 선수 10명 중 3명에게 있다 (선수 ID로 고정). 금액은 기본 몸값(폼·계약 보정 전)의 110~160%
+ *   이 금액을 현금으로 내면 구단은 거절할 수 없다 — 핵심 선수(보통 몸값의 130%를 부른다)를 더 싸게 데려오거나,
+ *   협상 횟수를 다 썼거나 "팔면 인원이 모자란다"며 거절하는 구단에서도 데려올 수 있다
+ */
+export function buyoutOf(p) {
+  const h = hash(`bo-${p.id}`)
+  if (h % 100 >= 30) return null
+  return Math.max(0.5, Math.round(valueOf(p) * (1.1 + ((h >>> 8) % 6) / 10) * 10) / 10)
+}
+
 /** 이적 시장이 열리는 라운드: 시즌 초반 4라운드, 중반 4라운드 */
 export function windowState(round, totalRounds) {
   const mid = Math.floor(totalRounds / 2)
@@ -137,7 +156,7 @@ export function swapCredit(theirs, mine, value) {
  *   핵심(상위 3명)·주전(상위 11명, 24세 이상)은 임대 불가 → 완전 이적만
  *   임대료 기준: 가치의 8% × (어린 선수 0.6 · 후보 0.8 · 주전 경계 1.2) × 연봉 부담이 적을수록 더 요구 (share: 우리가 내는 연봉 비율 0.5~1)
  */
-export function evaluateLoan({ theirs, player, fee, share = 1, value, tries = 0 }) {
+export function evaluateLoan({ theirs, player, fee, share = 1, value, tries = 0, option = false }) {
   const after = theirs.players.filter((p) => p.id !== player.id)
   const prob = squadProblem(after, { minOnly: true })
   if (prob) return { verdict: 'reject', reason: `"그 선수를 보내면 우리 팀 ${prob}. 임대도 어렵습니다."` }
@@ -145,7 +164,8 @@ export function evaluateLoan({ theirs, player, fee, share = 1, value, tries = 0 
   if (rank < 3) return { verdict: 'reject', reason: '"핵심 선수는 임대 보내지 않습니다."' }
   if (rank < 11 && player.age >= 24) return { verdict: 'reject', reason: '"주전 선수라 임대는 안 됩니다. 완전 이적이라면 이야기해 보죠."' }
   const young = player.age <= 22
-  const k = (young ? 0.6 : 1) * (rank >= 18 ? 0.8 : 1.2) * (1 + (1 - share) * 2.5)
+  // 완전 영입 옵션을 붙이면 임대료를 20% 더 받는다 (시즌 중 언제든 정해 둔 금액에 데려갈 권리)
+  const k = (young ? 0.6 : 1) * (rank >= 18 ? 0.8 : 1.2) * (1 + (1 - share) * 2.5) * (option ? 1.2 : 1)
   const need = Math.round(Math.max(0.1, value * 0.08 * k * Math.max(0.8, 1 - tries * 0.05)) * 10) / 10
   const why = young ? ' 꾸준히 뛰게 해 주는 게 조건입니다.' : rank >= 18 ? ' 우리 팀에서는 기회가 적으니 보내 줄 수 있습니다.' : ''
   if (fee >= need) return { verdict: 'accept', reason: `"좋습니다. 임대료 ${money(fee)}, 연봉 ${Math.round(share * 100)}% 부담이면 시즌 끝까지 보내 드리죠.${why}"`, need }
@@ -225,7 +245,7 @@ export function aiBidFor(save, teams, myTeamId, playerId, round, leagueId = save
     const fee = Math.round(open * 10) / 10
     out.push(news(round, 'offer', `💰 ${team.name}${pick.league ? ` (${pick.league})` : ''}의 영입 제안: ${p.name}`, `${team.name}이(가) ${p.name}(${p.pos}, OVR ${playerOvrOf(p)}, ${p.age}세)에게 ${money(fee)}을 제시했습니다. (희망 가격 ${money(ask)} · 선수 가치 ${money(v)})`, {
       offer: { teamId: team.id, lid: pick.lid, playerId: p.id, fee, cap, ask, tries: 0 },
-      actions: [['accept', '✅ 수락', `${money(fee)}에 판매합니다`], ['counter', '↗️ 더 달라고 하기', `희망 가격 ${money(ask)}에 맞춰 달라고 요구합니다`], ['decline', '❌ 거절', '제안을 거절합니다'], ['nfs', '🔒 판매 불가', '이번 시즌에는 어떤 제안도 받지 않습니다 (다른 제안도 모두 거절)']],
+      actions: [['accept', '✅ 수락', `${money(fee)}에 판매합니다`], ['sellon', '📎 셀온 붙여 수락', `지금은 ${money(Math.round(fee * SELL_ON_NOW * 10) / 10)}만 받고, 이 선수가 나중에 다른 구단으로 팔리면 그 이적료의 ${SELL_ON}%를 받습니다`], ['counter', '↗️ 더 달라고 하기', `희망 가격 ${money(ask)}에 맞춰 달라고 요구합니다`], ['decline', '❌ 거절', '제안을 거절합니다'], ['nfs', '🔒 판매 불가', '이번 시즌에는 어떤 제안도 받지 않습니다 (다른 제안도 모두 거절)']],
     }))
   }
   return out

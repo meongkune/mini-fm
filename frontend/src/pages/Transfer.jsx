@@ -9,7 +9,7 @@ import FreeAgents from './FreeAgents.jsx'
 import { Crest, Flag } from '../components/Badges.jsx'
 import NeedTeam from './NeedTeam.jsx'
 import { CondBar } from '../components/Rating.jsx'
-import { PATIENCE, money, potentialStars, valueOf } from '../game/trade.js'
+import { PATIENCE, SELL_ON, buyoutOf, money, optionFee, potentialStars, valueOf } from '../game/trade.js'
 import { eur, transferFunds, wageBill, wageBudget, yearsLeft } from '../game/finance.js'
 import { sayToClub } from '../game/aiTalk.js'
 import { playerOvr, short, useGame } from '../store.jsx'
@@ -159,7 +159,7 @@ export default function Transfer() {
                   <span className="mkc-pos"><Avatar player={p} color={t.color} size={34} number={false} /><em>{roleOf(p)}</em></span>
                   <span className="mkc-main">
                     <strong><Flag nation={p.nation} size={14} /> {p.name}{status[p.id]?.inj > 0 ? ' 🚑' : ''}</strong>
-                    <small><Crest team={t} size={14} /> {short(t)}{lid !== data.leagueId ? ` · ${league}` : ''} · {p.age}세{yearsLeft(save, contractOf(p)) <= 1 ? <b className="mkc-tag warn" title="계약이 1년 남아 몸값이 싸다"> ⏳계약 1년</b> : null}{lid === data.leagueId && inDeficit(save, t.id) ? <b className="mkc-tag bad" title="재정난 구단 — 원하는 금액을 10% 깎아 준다"> 💸재정난</b> : null}{save.aiLoans?.[p.id] ? <b className="mkc-tag" title="다른 구단에 임대 중 — 시즌이 끝날 때까지 영입할 수 없다"> 🔁임대 중</b> : null}</small>
+                    <small><Crest team={t} size={14} /> {short(t)}{lid !== data.leagueId ? ` · ${league}` : ''} · {p.age}세{yearsLeft(save, contractOf(p)) <= 1 ? <b className="mkc-tag warn" title="계약이 1년 남아 몸값이 싸다"> ⏳계약 1년</b> : null}{lid === data.leagueId && inDeficit(save, t.id) ? <b className="mkc-tag bad" title="재정난 구단 — 원하는 금액을 10% 깎아 준다"> 💸재정난</b> : null}{save.aiLoans?.[p.id] ? <b className="mkc-tag" title="다른 구단에 임대 중 — 시즌이 끝날 때까지 영입할 수 없다"> 🔁임대 중</b> : null}{buyoutOf(p) ? <b className="mkc-tag ok" title={`바이아웃 조항 ${money(buyoutOf(p))} — 이 금액을 내면 구단이 거절할 수 없다`}> 🔓바이아웃</b> : null}</small>
                     <span className="mkc-attrs">{keyAttrs20(p).map(([k, x]) => <span key={k} className={x >= 16 ? 'hi' : x >= 12 ? 'mid' : 'lo'}><b>{x}</b>{k}</span>)}</span>
                   </span>
                   <span className="mkc-side">
@@ -179,6 +179,9 @@ export default function Transfer() {
       {tab === 'sell' && (
         <>
           <p className="small muted">판매 목록에 올리고 <b>희망 가격을 직접 입력</b>하세요(€M). 제안은 <b>경기를 치를 때마다</b>(라운드가 넘어갈 때) 이적 시장이 열려 있는 동안 메시지함으로 옵니다 — 판매 등록한 선수는 매 라운드 1건(능력 78 이상은 2건), 어느 구단이 얼마를 부를지만 달라집니다. 사는 쪽이 낼 수 있는 상한은 몸값의 약 110~140%라서, 그보다 높게 부르면 제안이 상한에 맞춰 낮게 옵니다. 급하게 팔려면 선수 상세의 "강제 매각"(몸값의 75~100%)을 쓰세요.</p>
+          {Object.keys(save.sellOn || {}).length > 0 && (
+            <p className="small notice">📎 셀온 보유: {Object.values(save.sellOn).map((e) => `${e.name}(${e.club}) ${e.pct}%`).join(' · ')} — 이 선수들이 이적료를 받고 다시 팔리면 그 몫이 들어옵니다.</p>
+          )}
           <div className="card flush">
             <ul className="mk">
               {mineList.map(({ p, v, pot }) => {
@@ -232,7 +235,10 @@ const r1 = (x) => Math.round(x * 10) / 10
 const ROLE_TXT = (rank) => (rank < 3 ? '핵심 선수' : rank < 11 ? '주전' : rank < 18 ? '로테이션' : '후보')
 
 function BidSheet({ p, t, lid, onClose }) {
-  const { bidFor, loanBid, loanIn, loanWage, swapPreview, signTransfer, askWage, transferWindow, valueFor, save, myTeam, data, totalRounds, addPromise, isLoanIn, contractOf } = useGame()
+  const { bidFor, loanBid, loanIn, loanWage, swapPreview, signTransfer, askWage, transferWindow, valueFor, save, myTeam, data, totalRounds, addPromise, isLoanIn, contractOf, noteSellOn } = useGame()
+  const [sellOn, setSellOn] = useState(false) // 셀온을 주고 이적료를 깎는다
+  const [opt, setOpt] = useState(false) // 임대에 완전 영입 옵션을 붙인다
+  const clause = buyoutOf(p)
   const cash = transferFunds(save.finance || {})
   const room = Math.max(0, wageBudget(save.finance || {}) - wageBill(save, myTeam, data.leagueId))
   const v = valueFor(p)
@@ -253,10 +259,15 @@ function BidSheet({ p, t, lid, onClose }) {
   const swapList = [...myTeam.players].filter((x) => !isLoanIn(x.id)).sort((a, b) => playerOvr(b) - playerOvr(a))
   const rank = [...t.players].sort((a, b) => playerOvr(b) - playerOvr(a)).findIndex((x) => x.id === p.id)
   const reset = () => { setReply(null); setDone(null) }
-  const ask = () => (mode === 'loan' ? { ...loanBid(ref, p.id, loanFee, share), mode } : { ...bidFor(ref, p.id, fee, { swapId: swapId || null, talk: talkCut }), mode })
+  const ask = () => (mode === 'loan' ? { ...loanBid(ref, p.id, loanFee, share, opt), mode } : { ...bidFor(ref, p.id, fee, { swapId: swapId || null, talk: talkCut, sellOn }), mode })
   const offer = () => { setDone(null); setReply(ask()) }
   const cashFee = reply ? (reply.verdict === 'counter' ? reply.ask : reply.mode === 'loan' ? loanFee : fee) : 0
-  const sign = () => setDone(reply.mode === 'loan' ? { ...loanIn(ref, p.id, cashFee, share), loan: true } : signTransfer(ref, p.id, cashFee, years, null, { swapId: reply.swapId }))
+  const sign = () => {
+    if (reply.mode === 'loan') return setDone({ ...loanIn(ref, p.id, cashFee, share, reply.option || null), loan: true, option: reply.option })
+    const x = signTransfer(ref, p.id, cashFee, years, null, { swapId: reply.swapId })
+    if (x.ok && reply.sellOn) noteSellOn(p.id, t.name)
+    setDone(x)
+  }
   const ok = reply && (reply.verdict === 'accept' || reply.verdict === 'counter') && !done?.ok
   // 단장에게 넘길 사실 (게임이 정한 결정 포함)
   const facts = (r) => ({
@@ -304,6 +315,11 @@ function BidSheet({ p, t, lid, onClose }) {
                   </select>
                   {swap && <p className="small">{t.name} 평가: <b className="good-text">{money(swap.credit)}</b> — {swap.note}. 현금 {money(fee)} + {swap.player.name} = 총 {money(r1(fee + swap.credit))}</p>}
                 </div>
+                <label className="small clause-opt"><input type="checkbox" checked={sellOn} onChange={(e) => { setSellOn(e.target.checked); reset() }} /> 📎 셀온 {SELL_ON}% 주기 — 상대가 원하는 금액을 7% 깎아 주는 대신, 이 선수를 나중에 팔 때 이적료의 {SELL_ON}%를 {t.name}에 줍니다</label>
+                {clause && (
+                  <p className="small clause-note">🔓 바이아웃 조항 <b>{money(clause)}</b> — 현금으로 이 금액을 내면 구단이 거절할 수 없습니다 (선수 끼워 넣기 없이).
+                    {' '}<button type="button" className="linkish" onClick={() => { setFee(clause); setSwapId(''); reset() }}>이 금액으로 맞추기</button></p>
+                )}
                 <div className="row">
                   <span className="small">계약 기간</span>
                   <select value={years} onChange={(e) => setYears(Number(e.target.value))}>{[1, 2, 3, 4, 5].map((y) => <option key={y} value={y}>{y}년</option>)}</select>
@@ -323,6 +339,7 @@ function BidSheet({ p, t, lid, onClose }) {
                   <select value={share} onChange={(e) => { setShare(Number(e.target.value)); reset() }}>{[1, 0.75, 0.5].map((x) => <option key={x} value={x}>{Math.round(x * 100)}% ({eur(r1(fullWage * x))}/년)</option>)}</select>
                   <button className="btn" disabled={!transferWindow.open || reply?.verdict === 'accept'} onClick={offer}>제안하기</button>
                 </div>
+                <label className="small clause-opt"><input type="checkbox" checked={opt} onChange={(e) => { setOpt(e.target.checked); reset() }} /> ✍️ 완전 영입 옵션 붙이기 — 임대료를 20% 더 요구하지만, 시즌 중 언제든 <b>{money(optionFee(v, 'in'))}</b>에 완전히 데려올 수 있습니다 (선수 상세에서 행사)</label>
                 <p className="small muted">임대 선수는 시즌이 끝나면 원래 구단으로 돌아갑니다. 연봉을 적게 부담할수록 임대료를 더 요구합니다. 핵심·주전 선수는 임대해 주지 않습니다.</p>
               </>
             )}
@@ -332,7 +349,8 @@ function BidSheet({ p, t, lid, onClose }) {
           <div className={`deal-reply ${reply.verdict}`}>
             <strong>{t.name}{reply.tries ? <span className="muted small"> · 협상 {reply.tries}/{PATIENCE}</span> : null}</strong>
             <p>{reply.reason}</p>
-            {ok && reply.mode === 'loan' && <button className="btn wide" onClick={sign}>🔁 임대료 {money(cashFee)} · 연봉 {Math.round(share * 100)}% 부담으로 임대 확정</button>}
+            {ok && reply.mode === 'loan' && <button className="btn wide" onClick={sign}>🔁 임대료 {money(cashFee)} · 연봉 {Math.round(share * 100)}% 부담으로 임대 확정{reply.option ? ` (완전 영입 옵션 ${money(reply.option)})` : ''}</button>}
+            {ok && reply.mode === 'buy' && reply.sellOn && <p className="small">📎 셀온 {SELL_ON}% 조건이 포함된 금액입니다.</p>}
             {ok && reply.mode === 'buy' && <button className="btn wide" onClick={sign}>✍️ 현금 {money(cashFee)}{reply.swapId ? ' + 선수' : ''}에 계약 확정 (요구 연봉 {eur(wage)} 그대로)</button>}
             {ok && reply.mode === 'buy' && <button className="btn wide ghost talk-start" onClick={() => setNego(true)}>🗣️ 선수와 연봉 협상 후 계약</button>}
           </div>
@@ -348,6 +366,7 @@ function BidSheet({ p, t, lid, onClose }) {
               setNego(false)
               if (!r.deal) return
               const x = signTransfer(ref, p.id, cashFee, r.deal.years, r.deal.wage, { swapId: reply.swapId })
+              if (x.ok && reply.sellOn) noteSellOn(p.id, t.name)
               if (x?.ok && r.deal.raise) addPromise(p.id, { kind: 'raise', cond: 6.9, minApps: 10, target: r1(r.deal.wage * 1.25), made: save.round, text: `이번 시즌 활약(평균 평점 6.9·10경기 이상)하면 다음 시즌 €${r1(r.deal.wage * 1.25)}M으로 인상` })
               setDone(x)
             }} />
