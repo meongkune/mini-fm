@@ -1,0 +1,25 @@
+# 명단 점검 (수동 실행): 우리 2025-26 명단 vs 위키백과 시즌 문서 1군 명단 → 빠진 선수 목록 (데이터는 바꾸지 않음)
+name: Squad audit
+
+on:
+  workflow_dispatch:
+    inputs:
+      competitions:
+        description: '대회 코드 (공백 구분, 비우면 9개 리그 전부)'
+        default: ''
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: 명단 점검
+        env:
+          FOOTBALL_DATA_TOKEN: ${{ secrets.FOOTBALL_DATA_TOKEN }}
+        run: node tools/squad_audit.mjs ${{ inputs.competitions }} | tee -a "$GITHUB_STEP_SUMMARY"
