@@ -136,7 +136,7 @@ function LayoutEffects({ formation }) {
   const items = []
   if (Math.abs(g.d.dfY) >= 3) items.push(g.d.dfY > 0 ? ['mid', `수비 라인 높음 (+${Math.round(g.line)}): 압박·오프사이드 ↑, 상대 역습에 뒷공간 위험`] : ['mid', `수비 라인 낮음 (${Math.round(g.line)}): 뒷공간은 안전, 중원 장악력 ↓`])
   if (Math.abs(g.d.width) >= 3) items.push(g.d.width > 0 ? ['good', `폭 넓음 (+${Math.round(g.width)}): 측면 공격 ↑ (측면 자원이 적은 상대에 강함)`] : ['mid', `폭 좁음 (${Math.round(g.width)}): 중앙이 촘촘, 내려앉은 상대 공략은 어려움`])
-  if (Math.abs(g.att) >= 0.5 || Math.abs(g.def) >= 0.5) items.push([g.att > g.def ? 'good' : 'mid', `팀 높이·간격: 공격 ${g.att >= 0 ? '+' : ''}${g.att.toFixed(1)} · 수비 ${g.def >= 0 ? '+' : ''}${g.def.toFixed(1)}`])
+  if (Math.abs(g.att) >= 0.5 || Math.abs(g.def) >= 0.5) items.push([g.att > g.def ? 'good' : 'mid', `팀 전진 정도·선수 간격: 공격 ${g.att >= 0 ? '+' : ''}${g.att.toFixed(1)} · 수비 ${g.def >= 0 ? '+' : ''}${g.def.toFixed(1)}`])
   if (!items.length) return <p className="small muted">기본 위치와 거의 같습니다.</p>
   return <ul className="layout-fx">{items.map(([t, x], i) => <li key={i} className={t}>📐 {x}</li>)}</ul>
 }
