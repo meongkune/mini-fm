@@ -34,6 +34,13 @@ const CHANCE = 0.12
 const K_CRE = 450
 // 오픈 플레이 결정력 기본값 (세트피스 골이 생긴 만큼 낮췄다)
 const OPEN_Q = 0.22
+// 중거리 슈팅: 찬스 없이 끝난 공격 중 먼 거리에서 때리는 비율 · 그 슈팅의 질
+//   (예전 0.158 · 0.09는 경기당 슛이 30개로 실제 25~27개보다 많았다 → 수를 줄이고 그만큼 질을 올려 중거리 골 수는 그대로)
+export const SHOT_W = { open: { FW: 2.45, MF: 1.45, DF: 0.5 }, long: { FW: 1.2, MF: 1.8, DF: 0.4 }, st: 1.4, pow: 3.5 }
+const LONG_SHARE = 0.115
+const LONG_Q = 0.122
+// 홈 팀이 만드는 찬스 배수 (관중·익숙한 구장) — 점유(HOME_ADV)만으로는 홈 승률이 낮았다
+export const HOME = { ch: 1.18 }
 // 반칙 위치 비율: 박스 안(페널티킥) · 직접 프리킥 거리 · 측면 크로스 프리킥
 const P_PEN = 0.015
 const P_FK = 0.05
@@ -169,6 +176,37 @@ export function tacticalEdges(match, ctx, idx) {
   return edges({ tac: sd.tactics, formation: sd.tactics.formation, ...me }, { tac: od.tactics, formation: od.tactics.formation, ...op })
 }
 
+// ── 경기 흐름: 점수 차에 따라 그 팀이 만드는 찬스 수(ch, 배수)·찬스의 질(q, 더하기)이 달라진다 ──
+//   분 단위 확률이 점수와 무관하면 두 팀 득점이 서로 독립이 되어, 한번 벌어진 경기가 그대로 더 벌어진다(대승 과다·무승부 부족).
+//   실제 축구는 앞선 팀이 템포를 늦추고 공을 돌리며(찬스 감소), 뒤진 팀이 숫자를 올려 몰아붙인다(찬스 증가).
+//   대신 올라온 뒤 공간으로 나가는 앞선 팀의 역습은 수는 적어도 질이 좋다. 3골 넘게 벌어지면 양쪽 모두 힘을 뺀다.
+//   효과는 시간이 갈수록 커진다 (전반 초반의 한 골은 경기 운영을 거의 바꾸지 않는다)
+export const FLOW = {
+  lead: [0, 0.14, 0.36, 0.55], // 앞선 골 수(1·2·3+)별 찬스 감소 (경기 시작 시점)
+  leadLate: 0.16, // 시간이 갈수록 더해지는 감소 (75분에 최대)
+  trail: [0, 0.08, 0.14, 0.1], // 뒤진 골 수(1·2·3+)별 찬스 증가
+  trailLate: 0.14,
+  counter: 0.025, // 앞선 팀 역습의 질 (상대가 1~2골 뒤져 올라올 때, 후반으로 갈수록)
+  levelLate: 0, // 동점으로 막판(75분 이후)에 들어갔을 때 양쪽이 몸을 사리는 정도 — 무승부가 이미 충분해 지금은 끈다
+  base: 0.975, // 위 효과로 줄어든 전체 득점을 되돌리는 보정
+}
+function flowOf(match, idx) {
+  const diff = match.score[idx] - match.score[1 - idx]
+  const t = clamp((match.minute - 10) / 65, 0, 1)
+  const k = Math.min(3, Math.abs(diff))
+  let ch = FLOW.base
+  let q = 0
+  if (diff > 0) {
+    ch *= 1 - FLOW.lead[k] - FLOW.leadLate * t
+    if (k <= 2) q = FLOW.counter * t
+  } else if (diff < 0) {
+    ch *= 1 + FLOW.trail[k] + (k <= 2 ? FLOW.trailLate * t : 0)
+  } else if (match.minute > 75) {
+    ch *= 1 - FLOW.levelLate
+  }
+  return { ch, q }
+}
+
 function sideRatings(match, ctx, idx) {
   const sd = match.sides[idx]
   const { xi, g } = xiOf(match, ctx, idx)
@@ -177,14 +215,6 @@ function sideRatings(match, ctx, idx) {
   const t = tacOf(sd.tactics)
   const missing = 11 - xi.length // 퇴장·부상으로 빈 자리
   const penalty = (g.GK.length !== 1 ? 15 : 0) + missing * 6
-  // 경기 상황: 후반 55분 이후 지는 팀은 라인을 올려 몰아붙이고, 이기는 팀은 지키는 쪽으로 기운다
-  const diff = match.score[idx] - match.score[1 - idx]
-  const late = match.minute > 55 ? Math.min(1, (match.minute - 55) / 20) : 0
-  const chase = late * (diff < 0 ? (diff <= -3 ? 0.6 : Math.min(2, -diff)) : 0) // 3골 넘게 지면 체념 — 무리하게 올라가지 않는다
-  const hold = late * (diff > 0 ? 1 : 0)
-  const ease = match.minute > 30 && diff >= 2 ? Math.min(2, diff - 1) : 0 // 2골 넘게 앞서면 힘을 뺀다 (대승이 지나치게 많지 않게)
-  const gsAtt = chase * 3 - hold * 2 - ease * 4
-  const gsDef = -chase * 1.8 + hold * 2 + ease * 1.5
   // 세부 능력치를 장면별로 쓴다 (FM처럼): 데이터가 없으면 공격·수비로 추정한 값
   const at = (p, k) => p.A?.[k] ?? (k === '수비' || k === '전술' ? p.def : p.att)
   const fwAtt = g.FW.map((p) => at(p, '공격'))
@@ -203,10 +233,10 @@ function sideRatings(match, ctx, idx) {
     organise: avg([...g.DF, ...g.MF.filter((p) => p.slot === 'DM' || p.slot === 'CM')].map((p) => at(p, '전술')), 60),
     // 패스 정확도: 미드필더 기술
     passTech: avg(g.MF.map((p) => at(p, '기술')), 65),
-    // 전술·경기 상황 — 선수 능력보다 크게 반영 (약팀도 전술로 뒤집을 수 있게)
-    tAtt: e.att + gsAtt,
+    // 전술 — 선수 능력보다 크게 반영 (약팀도 전술로 뒤집을 수 있게). 점수 차에 따른 경기 흐름은 flowOf에서 따로 건다
+    tAtt: e.att,
     tMid: e.mid,
-    tDef: e.def + gsDef,
+    tDef: e.def,
     notes: e.notes,
     keeper: gk ? (gk.A?.['선방'] != null ? gk.A['선방'] * 0.6 + gk.A['예측'] * 0.25 + gk.A['공중볼'] * 0.15 : gk.def) : 40,
     gk: g.GK[0] || null,
@@ -375,6 +405,7 @@ export function step(match, ctx, { withEvents = true } = {}) {
   const a = r[atk].attack
   const d = r[dfn].defense
   const tEdge = r[atk].tAtt - r[dfn].tDef // 전술 상성 (공격 쪽 전술 - 수비 쪽 전술)
+  const flow = flowOf(match, atk) // 점수 차에 따른 경기 흐름 (이 분이 시작될 때의 점수 기준)
   const keeper = r[dfn].keeper
   const gkAttr = r[dfn].gk ? r[dfn].gk.A || attrsOf(r[dfn].gk).map : null
 
@@ -488,11 +519,12 @@ export function step(match, ctx, { withEvents = true } = {}) {
   const shoot = (long) => {
     const shooters = field(atk)
     if (!shooters.length) return
-    const w = long ? { FW: 1.2, MF: 1.8, DF: 0.4 } : { FW: 3.0, MF: 1.3, DF: 0.35 }
-    const shooter = rng.weighted(shooters, shooters.map((p) => w[p.pos] * p.att * p.att / 70)) // 공격력이 높은 선수일수록 슈팅 기회가 많다
+    const w = long ? SHOT_W.long : SHOT_W.open
+    // 공격력이 높은 선수일수록 슈팅 기회가 많다. 박스 안 찬스는 중앙 공격수(ST)에게 더 몰린다 → 득점왕이 실제처럼 25~30골
+    const shooter = rng.weighted(shooters, shooters.map((p) => w[p.pos] * (!long && p.slot === 'ST' ? SHOT_W.st : 1) * (p.att / 70) ** SHOT_W.pow))
     const helpers = shooters.filter((p) => p.id !== shooter.id)
     const assister = helpers.length && rng.random() < (long ? 0.35 : 0.78) ? rng.weighted(helpers, helpers.map((p) => ({ MF: 2.2, FW: 1.6, DF: 0.7 })[p.pos] * p.att)) : null
-    const quality = long ? 0.09 : OPEN_Q + ((shooter.A?.['공격'] ?? shooter.att) - keeper) / K_FINISH + (a - d) / K_QUAL + tEdge / K_TQUAL + r[atk].quality
+    const quality = long ? LONG_Q : OPEN_Q + flow.q +((shooter.A?.['공격'] ?? shooter.att) - keeper) / K_FINISH + (a - d) / K_QUAL + tEdge / K_TQUAL + r[atk].quality
     const pOn = long ? 0.28 : clamp(0.45 + (shooter.att - 60) / 200, 0.25, 0.75)
     const pGoal = clamp(quality, long ? 0.04 : 0.08, 0.55)
     const res = resolve({ shooter, assister, pOn, pGoal, how: long ? 'long' : 'open' })
@@ -509,7 +541,7 @@ export function step(match, ctx, { withEvents = true } = {}) {
     }
   }
 
-  if (rng.random() > CHANCE * (0.84 + 0.32 * Math.min(1, minute / 90)) + r[atk].chance + (a - d) / K_CHANCE + (r[atk].create - r[dfn].organise) / K_CRE + tEdge / K_TCHANCE) {
+  if (rng.random() > (CHANCE * (0.84 + 0.32 * Math.min(1, minute / 90)) + r[atk].chance + (a - d) / K_CHANCE + (r[atk].create - r[dfn].organise) / K_CRE + tEdge / K_TCHANCE) * flow.ch * (atk === 0 ? HOME.ch : 1)) {
     // 결정적 찬스 없이 끝난 공격: 파울(→ 프리킥·페널티킥), 오프사이드, 중거리 슈팅, 태클, 크로스 → 코너킥
     const x = rng.random()
     const defenders = field(dfn)
@@ -548,7 +580,7 @@ export function step(match, ctx, { withEvents = true } = {}) {
     } else if (x < 0.24 * r[dfn].foul + 0.032 * r[dfn].offside) {
       S[atk].offsides++ // 수비 라인이 높을수록 상대가 오프사이드에 자주 걸린다
       tick.r = 'offside'
-    } else if (x < 0.43) {
+    } else if (x < 0.24 + 0.032 + LONG_SHARE) {
       shoot(true)
     } else if (x < 0.75 && defenders.length) {
       const t = rng.weighted(defenders, defenders.map((p) => ({ DF: 2, MF: 1.4, FW: 0.3 })[p.pos] * p.def))
