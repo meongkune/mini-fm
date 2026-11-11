@@ -1,0 +1,46 @@
+# 홈구장 이름·수용 인원 (수동 실행): football-data + TheSportsDB → data/stadiums.json → 검사 → 커밋 → Pages 재배포
+name: Stadiums
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  stadiums:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: 구장 정보 받기
+        env:
+          FOOTBALL_DATA_TOKEN: ${{ secrets.FOOTBALL_DATA_TOKEN }}
+        shell: bash
+        run: set -o pipefail; node tools/stadiums.mjs | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: 데이터 검사 (이상하면 커밋하지 않음)
+        shell: bash
+        run: set -o pipefail; node tools/check_data.mjs --base HEAD | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: 변경 사항 커밋
+        id: commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add frontend/public/data/stadiums.json
+          if git diff --cached --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            git commit -m "data: 홈구장 이름·수용 인원"
+            git pull --rebase origin main
+            git push
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: GitHub Pages 재배포
+        if: steps.commit.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run pages.yml --ref main
