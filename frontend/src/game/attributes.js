@@ -76,6 +76,8 @@ export function detailBase(p, label) {
   const level = a.gk ? (m.선방 + m.예측 + m.빌드업 + m.공중볼) / 4 : (m.공격 + m.기술 + m.전술 + m.수비 + m.창의성) / 5
   return (DETAIL_ANCHOR[label](m, p) + level) / 2
 }
+/** 세부 능력치 천장 완화: 85를 넘는 부분은 0.55배로 — 스타는 중심값이 높아 99에서 잘리면 모든 항목이 20점으로 뭉친다 */
+export const softTop = (v) => (v <= 85 ? v : 85 + (v - 85) * 0.55)
 const detailCache = new WeakMap()
 /** { labels, values(30~99), est: [추정 여부] } */
 export function detailOf(p) {
@@ -84,9 +86,9 @@ export function detailOf(p) {
   const a = attrsOf(p)
   const labels = a.gk ? DETAIL_GK : DETAIL
   if (Array.isArray(p.det) && p.det.length === labels.length) {
-    c = { labels, values: labels.map((l, i) => clamp(detailBase(p, l) + p.det[i])), est: labels.map((_, i) => !!(p.detE & (1 << i))) }
+    c = { labels, values: labels.map((l, i) => clamp(softTop(detailBase(p, l) + p.det[i]))), est: labels.map((_, i) => !!(p.detE & (1 << i))) }
   } else {
-    c = { labels, values: labels.map((l) => clamp(detailBase(p, l))), est: labels.map(() => true) }
+    c = { labels, values: labels.map((l) => clamp(softTop(detailBase(p, l)))), est: labels.map(() => true) }
   }
   detailCache.set(p, c)
   return c

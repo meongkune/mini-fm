@@ -10,7 +10,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { attrsOf, detailBase, DETAIL, DETAIL_GK } from '../frontend/src/game/attributes.js'
+import { attrsOf, detailBase, softTop, DETAIL, DETAIL_GK } from '../frontend/src/game/attributes.js'
 import { roleOf } from '../frontend/src/engine/formation.js'
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
@@ -260,10 +260,11 @@ for (const x of all) {
       wsum += w
     }
     if (!wsum) est |= 1 << i
-    return clamp(base + tilt)
+    return base + tilt // 자르지 않은 값 — 게임에서 천장 완화(softTop) 후 30~99로 자른다
   })
   // 저장은 '중심값과의 차이'(o) — 게임에서 선수가 성장·노화해 중심값이 바뀌면 세부 능력치도 같이 움직인다
   const o = v.map((val, i) => Math.round(val - bases[i]))
+  for (let i = 0; i < v.length; i++) v[i] = clamp(softTop(v[i]))
   ;(out[x.lid] ??= {})[x.p.id] = est ? { o, e: est } : { o }
   if (REPORT) famous.push({ name: x.p.name, team: x.team.short, role: roleOf(x.p), labels, v, est })
 }
