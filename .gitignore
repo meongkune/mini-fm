@@ -52,3 +52,6 @@ frontend/public/_test/
 # Cloudflare Worker 로컬 캐시
 worker/.wrangler/
 worker/node_modules/
+
+# 외부 데이터셋 원본(Kaggle 등) — 약관상 공개하지 않음, 계산 결과만 커밋
+data_in/
