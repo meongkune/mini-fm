@@ -16,8 +16,10 @@ import { roleOf } from '../frontend/src/engine/formation.js'
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const IN = path.join(ROOT, 'data_in')
 const DATA = path.join(ROOT, 'frontend', 'public', 'data')
-const OUT = path.join(DATA, 'attrs')
+const OUT = process.env.ATTRS_OUT || path.join(DATA, 'attrs')
 const REPORT = process.argv.includes('--report')
+// 검증용: 2025-26 기록(FBref·SofaScore)을 빼고 2024-25까지의 기록만으로 계산 → 2025-26을 얼마나 맞히는지 (표본 밖 검증)
+const PAST_ONLY = process.env.PAST_ONLY === '1'
 
 const LEAGUES = {
   'premier-league': { cur: 'eng Premier League', old: 'ENG-Premier League', sofa: 'Premier League' },
@@ -217,7 +219,7 @@ for (const [lid, L] of Object.entries(LEAGUES)) {
       if (c) { m++; rep.matched++ } else rep.unmatched.push(`${t.short} ${p.name}`)
       if (olds.length) rep.old++
       if (sofa) rep.sofa++
-      all.push({ lid, team: t, p, group: GROUP[roleOf(p)] || 'CM', metrics: c || olds.length ? metricsOf(c, olds, sofa) : {} })
+      all.push({ lid, team: t, p, group: GROUP[roleOf(p)] || 'CM', metrics: c || olds.length ? metricsOf(PAST_ONLY ? null : c, olds, PAST_ONLY ? null : sofa) : {} })
     }
     rep.teams.push(`${t.short}=${squad || '없음'}(${m}/${ps.length})`)
   }
