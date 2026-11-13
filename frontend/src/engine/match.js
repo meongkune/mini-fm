@@ -12,9 +12,28 @@ const DEFAULT_TACTICS = { formation: '4-4-2', mentality: 'balanced', pressing: '
 // 팀 지시: 수비 라인 높이, 템포
 export const LINE = { low: { mid: -3, def: 3, offside: 0.6 }, normal: { mid: 0, def: 0, offside: 1 }, high: { mid: 3, def: -2, offside: 1.7 } }
 export const TEMPO = { slow: { att: -2, mid: 2, acc: 0.03, drain: 0.95 }, normal: { att: 0, mid: 0, acc: 0, drain: 1 }, fast: { att: 3, mid: -1, acc: -0.03, drain: 1.1 } }
-// AI 구단 전형: 구단마다 고정 (다양한 상대를 만나도록)
-const AI_SHAPES = ['4-4-2', '4-3-3', '4-2-3-1', '4-1-4-1', '3-5-2', '4-4-1-1', '4-3-3', '4-2-3-1']
-export const aiFormation = (teamId) => AI_SHAPES[[...String(teamId)].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7) % AI_SHAPES.length]
+// AI 구단 전형: 자기 선수단으로 가장 강한 선발(능력 × 자리 적합도 합)이 나오는 전형 — 예전엔 구단 ID 해시로만 정해서
+//   맨시티가 3-5-2(공격형 MF·윙어·DM 자리 없음)에 묶여 포든·도쿠·로드리가 벤치에 앉았다.
+//   1.5% 안쪽으로 비슷한 전형끼리는 구단 해시로 골라 리그 안 전형이 다양하게 남는다. 선수단 객체마다 한 번만 계산
+const AI_SHAPES = ['4-4-2', '4-3-3', '4-2-3-1', '4-1-4-1', '3-5-2', '4-4-1-1', '4-3-1-2', '3-4-3']
+const shapeCache = new WeakMap()
+const idHash = (id) => [...String(id)].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7)
+export const aiFormation = (team) => {
+  if (!team || typeof team !== 'object') return AI_SHAPES[idHash(team) % AI_SHAPES.length]
+  let f = shapeCache.get(team)
+  if (f) return f
+  const byId = Object.fromEntries(team.players.map((p) => [p.id, p]))
+  const scored = AI_SHAPES.map((shape) => {
+    const slots = buildSlots(shape)
+    const ids = assignSlots(team, shape, { useCondition: false })
+    return { shape, v: ids.reduce((s, id, i) => s + (id ? playerOvrOf(byId[id]) * fitOf(byId[id], slots[i].role) : 0), 0) }
+  })
+  const best = Math.max(...scored.map((s) => s.v))
+  const near = scored.filter((s) => s.v >= best * 0.985)
+  f = near[idHash(team.id) % near.length].shape
+  shapeCache.set(team, f)
+  return f
+}
 export const MAX_SUBS = 5
 // 전력 차가 결과에 미치는 정도 (클수록 이변이 잦다)
 const HOME_ADV = 5
@@ -104,8 +123,8 @@ export function createMatch({ home, away, homeCfg = {}, awayCfg = {}, seed, stat
   const sideState = (team, cfg) => {
     // 상대(AI)는 구단 고유 전형 + 전력에 맞는 스타일 (강팀: 점유·압박, 약팀: 역습·수비)
     const strength = levelOf(team) + lift
-    const tactics = cfg.tactics ? { ...DEFAULT_TACTICS, ...cfg.tactics } : { ...DEFAULT_TACTICS, ...aiTactics(team, strength), formation: aiFormation(team.id) }
-    if (!cfg.tactics?.formation && !cfg.lineup) tactics.formation = aiFormation(team.id)
+    const tactics = cfg.tactics ? { ...DEFAULT_TACTICS, ...cfg.tactics } : { ...DEFAULT_TACTICS, ...aiTactics(team, strength), formation: aiFormation(team) }
+    if (!cfg.tactics?.formation && !cfg.lineup) tactics.formation = aiFormation(team)
     const byId = Object.fromEntries(team.players.map((p) => [p.id, p]))
     // 정해 둔 자리는 그대로, 비었거나 출전할 수 없는 자리만 가장 알맞은 선수로 채운다
     const keep = {}
