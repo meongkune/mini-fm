@@ -139,6 +139,8 @@ export function createMatch({ home, away, homeCfg = {}, awayCfg = {}, seed, stat
     return { teamId: team.id, name: team.short || team.name, tactics, onPitch, slots: slotRoles, vacant: [], subsLeft: MAX_SUBS, subs: [], sentOff: [], injured: [], yellows: {}, energy }
   }
   const s = seed ?? Math.floor(Math.random() * 1e9) + 1
+  const gap = levelOf(home) - levelOf(away)
+  const mis = clamp((Math.abs(gap) - MISMATCH.from) * MISMATCH.k, 0, MISMATCH.max)
   const match = {
     seed: s, rng: s, minute: 0, myIdx,
     plus: 0, added: [null, null], stop: 0, // 추가시간: 지금 +몇 분 · 전반/후반 추가시간 · 쌓인 지연(골·교체·부상·카드)
@@ -151,6 +153,7 @@ export function createMatch({ home, away, homeCfg = {}, awayCfg = {}, seed, stat
     // 그날의 컨디션(운): 같은 전력이라도 경기마다 ±4% 안팎으로 달라진다 → 약팀이 이기는 날도 있다
     day: [dayForm(s, 1), dayForm(s, 2)],
     lift,
+    mis: gap >= 0 ? [mis, mis * MISMATCH.dog] : [mis * MISMATCH.dog, mis], // 팀별 찬스 감소 (전력 차가 클 때 약팀의 밀집 수비)
     scorers: [],
     events: [],
     timeline: [],
@@ -160,6 +163,10 @@ export function createMatch({ home, away, homeCfg = {}, awayCfg = {}, seed, stat
   return match
 }
 
+// 전력 차가 큰 경기: 약팀이 내려앉아 공간을 지우므로 강팀의 찬스가 줄고(완전히), 약팀의 찬스도 준다(절반).
+//   레알·바르사/PSG처럼 리그 안 전력 폭이 13점 안팎인 리그에서 강팀 홈 대승이 실제보다 많고 무승부가 적었다 (라리가 3골 차 16%, 무 19.6%).
+//   전력 차(선발 11명 OVR 평균) 3점까지는 그대로, 넘는 1점마다 2.5%씩 최대 18%
+export const MISMATCH = { from: 3, k: 0.03, max: 0.22, dog: 0.5 }
 const LEVEL_REF = 81
 const levelOf = (team) => { const o = team.players.map(playerOvrOf).sort((a, b) => b - a).slice(0, 11); return o.length ? o.reduce((a, b) => a + b, 0) / o.length : LEVEL_REF }
 
@@ -226,7 +233,7 @@ export const FLOW = {
   trail: [0, 0.08, 0.14, 0.1], // 뒤진 골 수(1·2·3+)별 찬스 증가
   trailLate: 0.14,
   counter: 0.025, // 앞선 팀 역습의 질 (상대가 1~2골 뒤져 올라올 때, 후반으로 갈수록)
-  levelLate: 0, // 동점으로 막판(75분 이후)에 들어갔을 때 양쪽이 몸을 사리는 정도 — 무승부가 이미 충분해 지금은 끈다
+  levelLate: 0.1, // 동점으로 막판(75분 이후)에 들어갔을 때 양쪽이 몸을 사리는 정도 (전력 차 효과를 넣은 뒤 라리가 무승부가 20%로 모자라 다시 켬)
   base: 0.955, // 위 효과로 줄어든 전체 득점을 되돌리는 보정
 }
 function flowOf(match, idx) {
@@ -765,7 +772,7 @@ export function step(match, ctx, { withEvents = true } = {}) {
     }
   }
 
-  if (rng.random() > (CHANCE * (0.84 + 0.32 * Math.min(1, minute / 90)) + r[atk].chance + (a - d) / K_CHANCE + (r[atk].create - r[dfn].organise) / K_CRE + tEdge / K_TCHANCE) * flow.ch * (atk === 0 ? HOME.ch : 1)) {
+  if (rng.random() > (CHANCE * (0.84 + 0.32 * Math.min(1, minute / 90)) + r[atk].chance + (a - d) / K_CHANCE + (r[atk].create - r[dfn].organise) / K_CRE + tEdge / K_TCHANCE) * flow.ch * (atk === 0 ? HOME.ch : 1) * (1 - (match.mis?.[atk] ?? 0))) {
     // 결정적 찬스 없이 끝난 공격: 파울(→ 프리킥·페널티킥), 오프사이드, 중거리 슈팅, 태클, 크로스 → 코너킥
     const x = rng.random()
     const defenders = field(dfn)
