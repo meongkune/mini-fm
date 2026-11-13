@@ -11,7 +11,11 @@ export const markOf = (p) => at(p, '수비') * 0.6 + at(p, '전술') * 0.4
 export const finishOf = (p) => at(p, '공격') * 0.6 + at(p, '기술') * 0.4
 // 공중볼: 수비력·공격력·체력 + 자리(센터백·스트라이커가 강하고 윙어·공격형 미드가 약하다)
 const AERIAL_ROLE = { CB: 8, ST: 5, DM: 2, CM: 0, LB: -3, RB: -3, LWB: -3, RWB: -3, LM: -4, RM: -4, AM: -5, LW: -7, RW: -7 }
-export const aerialOf = (p) => p.def * 0.45 + p.att * 0.35 + (p.sta ?? 70) * 0.2 + (AERIAL_ROLE[p.slot] ?? 0)
+// 세부 능력치 '공중볼'(실제 공중 경합 기록 기반)이 있으면 반반 섞는다
+export const aerialOf = (p) => {
+  const base = p.def * 0.45 + p.att * 0.35 + (p.sta ?? 70) * 0.2
+  return (p.D?.['공중볼'] != null ? base * 0.5 + p.D['공중볼'] * 0.5 : base) + (AERIAL_ROLE[p.slot] ?? 0)
+}
 
 export const CHANNEL_LABEL = { left: '왼쪽 측면', right: '오른쪽 측면', center: '중앙', air: '공중볼' }
 // 측면에서 가장 앞에 서는 선수 / 그 쪽을 막는 선수 (없으면 다음 순서)

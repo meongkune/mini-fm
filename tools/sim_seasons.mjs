@@ -27,7 +27,8 @@ const load = (lid) => {
   const d = readJson(path.join(FE, 'public/data', l.seasons[0].file))
   const r = readJson(path.join(FE, 'public/data/ratings', `${lid}.json`))?.players || {}
   const w = readJson(path.join(FE, 'public/data/wages', `${lid}.json`))?.players || {}
-  return { ...d, name: l.name, teams: d.teams.map((t) => ({ ...t, players: t.players.map((p) => ({ ...p, ...(r[p.id] || {}), ...(w[p.id]?.w ? { realWage: w[p.id].w } : {}) })) })) }
+  const at = readJson(path.join(FE, 'public/data/attrs', `${lid}.json`))?.players || {} // 실제 기록 기반 세부 능력치
+  return { ...d, name: l.name, teams: d.teams.map((t) => ({ ...t, players: t.players.map((p) => ({ ...p, ...(r[p.id] || {}), ...(w[p.id]?.w ? { realWage: w[p.id].w } : {}), ...(at[p.id] ? { det: at[p.id].o, detE: at[p.id].e || 0 } : {}) })) })) }
 }
 const data = load(LID)
 const MY = args[1] || data.teams[Math.floor(data.teams.length / 2)].id

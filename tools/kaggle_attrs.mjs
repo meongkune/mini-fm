@@ -3,7 +3,7 @@
 //     kaggle-fbref-2025-26/players_data-2025_2026.csv           FBref 2025-26 (MIT 표기) — 득점·슈팅·크로스·인터셉트·태클 성공·파울·골키퍼
 //     kaggle-fbref-2017-2025/Top5_League_Players_2017to2024_dataset.csv  FBref 2017-18~2024-25 (CC0) — 패스·드리블·공중볼·찬스 창출·xG
 //     kaggle-sofascore-2025-26/all_player_*.csv                 SofaScore 2025-26 (비상업 표기) — 이번 시즌 xG·xA·태클
-//   출력: frontend/public/data/attrs/{리그}.json — 원본 숫자는 남기지 않고, 계산한 게임용 값(30~99)과 추정 여부만
+//   출력: frontend/public/data/attrs/{리그}.json — 원본 숫자는 남기지 않고, 게임용 값의 '중심값과의 차이'(o)와 추정 여부(e 비트)만
 //   방식: 같은 역할군(GK·CB·풀백·중앙 MF·2선·ST) 안 백분위 → 그 선수의 레이더(2층) 값을 중심으로 ±기울이기.
 //         표본(출전 시간·슛 수 등)이 적을수록 레이더 쪽으로 끌어당긴다. 기록이 없으면 레이더로 추정(e 비트).
 // 실행: node tools/kaggle_attrs.mjs [--report]
@@ -247,8 +247,9 @@ const famous = []
 for (const x of all) {
   const labels = attrsOf(x.p).gk ? DETAIL_GK : DETAIL
   let est = 0
+  const bases = labels.map((label) => detailBase(x.p, label))
   const v = labels.map((label, i) => {
-    const base = detailBase(x.p, label)
+    const base = bases[i]
     let tilt = 0, wsum = 0
     for (const [k, w, half] of RECIPE[label]) {
       const mm = x.metrics[k]
@@ -261,7 +262,9 @@ for (const x of all) {
     if (!wsum) est |= 1 << i
     return clamp(base + tilt)
   })
-  ;(out[x.lid] ??= {})[x.p.id] = est ? { v, e: est } : { v }
+  // 저장은 '중심값과의 차이'(o) — 게임에서 선수가 성장·노화해 중심값이 바뀌면 세부 능력치도 같이 움직인다
+  const o = v.map((val, i) => Math.round(val - bases[i]))
+  ;(out[x.lid] ??= {})[x.p.id] = est ? { o, e: est } : { o }
   if (REPORT) famous.push({ name: x.p.name, team: x.team.short, role: roleOf(x.p), labels, v, est })
 }
 

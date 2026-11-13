@@ -59,7 +59,8 @@ function calcAttrs(p) {
 }
 
 // ---------- 세부 능력치 3층 (실제 경기 기록 기반, 시험) ----------
-// tools/kaggle_attrs.mjs가 계산한 값(det, 추정 비트 detE)이 있으면 그대로, 없으면 레이더로 추정 — 같은 중심값 공식
+// tools/kaggle_attrs.mjs가 계산한 '중심값과의 차이'(det, 추정 비트 detE)가 있으면 중심값 + 차이, 없으면 중심값(레이더 추정)
+// 차이로 두기 때문에 시즌이 지나 공격·수비·레이더가 성장·노화하면 세부 능력치도 같이 움직인다
 export const DETAIL = ['결정력', '슈팅', '패스', '찬스 창출', '드리블', '크로스', '태클', '위치 선정', '공중볼', '안정성', '규율']
 export const DETAIL_GK = ['선방률', 'PK 선방', '빌드업']
 const DETAIL_ANCHOR = {
@@ -83,7 +84,7 @@ export function detailOf(p) {
   const a = attrsOf(p)
   const labels = a.gk ? DETAIL_GK : DETAIL
   if (Array.isArray(p.det) && p.det.length === labels.length) {
-    c = { labels, values: p.det, est: labels.map((_, i) => !!(p.detE & (1 << i))) }
+    c = { labels, values: labels.map((l, i) => clamp(detailBase(p, l) + p.det[i])), est: labels.map((_, i) => !!(p.detE & (1 << i))) }
   } else {
     c = { labels, values: labels.map((l) => clamp(detailBase(p, l))), est: labels.map(() => true) }
   }

@@ -52,7 +52,7 @@ async function getSeason(file) {
             ...(rp[p.id] ? { ...rp[p.id], rated: true } : {}),
             ...(ph[p.id] ? { img: ph[p.id].img, imgPage: ph[p.id].page } : {}),
             ...(fc[p.id] ? { face: dataUrl(`faces/${p.id}.webp`) } : {}),
-            ...(ap[p.id] ? { det: ap[p.id].v, detE: ap[p.id].e || 0 } : {}),
+            ...(ap[p.id] ? { det: ap[p.id].o, detE: ap[p.id].e || 0 } : {}),
             ...(w ? { number, ...(w.w ? { realWage: w.w } : {}), ...(w.h ? { height: w.h } : {}) } : {}),
           }
         }),

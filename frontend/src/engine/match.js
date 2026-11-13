@@ -6,7 +6,7 @@ import { MENTALITY, PRESSING, playerOvrOf } from './engine.js'
 import { ROLE_POS, assignSlots, buildSlots, fitOf, shapeMods } from './formation.js'
 import { aiTactics, edges, tacOf } from './tactics.js'
 import { CHANNEL_LABEL, aerialOf, channels } from './matchups.js'
-import { attrsOf } from '../game/attributes.js'
+import { attrsOf, detailOf } from '../game/attributes.js'
 
 const DEFAULT_TACTICS = { formation: '4-4-2', mentality: 'balanced', pressing: 'normal', line: 'normal', tempo: 'normal' }
 // 팀 지시: 수비 라인 높이, 템포
@@ -177,7 +177,11 @@ function xiOf(match, ctx, idx) {
     const A = {}
     const am = attrsOf(p).map
     for (const key in am) A[key] = am[key] * k + lift
-    xi.push({ ...p, att: p.att * k + lift, def: p.def * k + lift, A, pos: ROLE_POS[sd.slots[i]], realPos: p.pos, slot: sd.slots[i] })
+    // 세부 능력치 3층(결정력·슈팅·찬스 창출·크로스·태클·공중볼·규율 등, 실제 기록 기반) — 개인 결정에 쓴다
+    const D = {}
+    const dt = detailOf(p)
+    dt.labels.forEach((l, j) => { D[l] = dt.values[j] * k + lift })
+    xi.push({ ...p, att: p.att * k + lift, def: p.def * k + lift, A, D, pos: ROLE_POS[sd.slots[i]], realPos: p.pos, slot: sd.slots[i] })
   })
   const g = Object.fromEntries(['GK', 'DF', 'MF', 'FW'].map((pos) => [pos, xi.filter((p) => p.pos === pos)]))
   return { xi, g, fwAtt: avg(g.FW.map((p) => p.att), 60), mfAtt: avg(g.MF.map((p) => p.att), 60), dfDef: avg(g.DF.map((p) => p.def), 60) }
@@ -491,9 +495,22 @@ function injure(match, ctx, idx, rng, withEvents) {
 
 // ── 세트피스 ──
 // 공중볼(aerialOf)은 matchups.js
-// 킥 능력(코너·프리킥): 기술·창의성 / 페널티: 결정력(공격)·기술
-const kickOf = (p) => { const a = p.A || attrsOf(p).map; return ((a['기술'] ?? p.att) + (a['창의성'] ?? p.att)) / 2 }
-const penOf = (p) => p.att * 0.6 + kickOf(p) * 0.4
+// 킥 능력(코너·프리킥): 기술·창의성 + 크로스 / 페널티: 공격·결정력·킥
+// 세부 능력치(D)는 경기 중 선수에 붙어 있고, 화면(키커 자동 지정)에서는 원래 선수라 detailOf로 읽는다
+const detMaps = new WeakMap()
+const det = (p, k, fb) => {
+  let m = p.D || detMaps.get(p)
+  if (!m) { const d = detailOf(p); m = Object.fromEntries(d.labels.map((l, i) => [l, d.values[i]])); detMaps.set(p, m) }
+  return m[k] ?? fb
+}
+const kickOf = (p) => { const a = p.A || attrsOf(p).map; return ((a['기술'] ?? p.att) + (a['창의성'] ?? p.att)) / 4 + det(p, '크로스', p.att) / 2 }
+const penOf = (p) => p.att * 0.3 + det(p, '결정력', p.att) * 0.3 + kickOf(p) * 0.4
+// 개인 결정용 능력: 원래 값(공격·수비)과 세부 능력치를 반반 — 평균은 그대로, 같은 수준 안에서 성향이 갈린다
+const shotOf = (p) => p.att * 0.5 + det(p, '슈팅', p.att) * 0.5
+const finishOf = (p) => (p.A?.['공격'] ?? p.att) * 0.5 + det(p, '결정력', p.att) * 0.5
+const createOf = (p) => p.att * 0.5 + det(p, '찬스 창출', p.att) * 0.5
+const crossOf = (p) => p.att * 0.5 + det(p, '크로스', p.att) * 0.5
+const tackleOf = (p) => p.def * 0.5 + det(p, '태클', p.def) * 0.5
 // 코너킥 루틴 vs 상대 코너 수비 → 슈팅으로 이어질 확률 보정
 //   니어 포스트는 지역 방어의 앞 공간을, 파 포스트는 대인 방어의 높이 싸움을 노린다
 export const CORNER_EDGE = {
@@ -702,18 +719,18 @@ export function step(match, ctx, { withEvents = true } = {}) {
     // 개인 매치업: 찬스가 어느 통로(왼쪽·오른쪽·중앙·공중볼)에서 났는가 — 전술이 그 통로를 쓰는 비중 × 그 통로의 유불리
     const ch = !long && lanes.length ? rng.weighted(lanes, lanes.map((c) => c.w * Math.exp(c.adv / MU_PICK))) : null
     const wide = ch && (ch.key === 'left' || ch.key === 'right') ? ch.a.id : null // 그 측면을 뚫은 선수
-    const teamAtt = avg(shooters.map((p) => p.att), 70)
-    const posAtt = Object.fromEntries(['DF', 'MF', 'FW'].map((k) => [k, avg(shooters.filter((p) => p.pos === k).map((p) => p.att), teamAtt)]))
+    const teamAtt = avg(shooters.map(shotOf), 70)
+    const posAtt = Object.fromEntries(['DF', 'MF', 'FW'].map((k) => [k, avg(shooters.filter((p) => p.pos === k).map(shotOf), teamAtt)]))
     const refOf = (p) => SHOT_W.rel * posAtt[p.pos] + (1 - SHOT_W.rel) * teamAtt
     const easing = match.score[atk] - match.score[dfn] >= 2 // 이 분이 시작될 때 2골 넘게 앞서 있었나
     const shotPow = easing ? SHOT_W.easePow : SHOT_W.pow
     const stK = easing ? SHOT_W.easeSt : SHOT_W.st
-    const shooter = rng.weighted(shooters, shooters.map((p) => w[p.pos] * (!long && p.slot === 'ST' ? stK : 1) * (p.att / refOf(p)) ** shotPow * SHOT_W.mark ** (match.ps[p.id]?.g || 0)))
+    const shooter = rng.weighted(shooters, shooters.map((p) => w[p.pos] * (!long && p.slot === 'ST' ? stK : 1) * (shotOf(p) / refOf(p)) ** shotPow * SHOT_W.mark ** (match.ps[p.id]?.g || 0)))
     const helpers = shooters.filter((p) => p.id !== shooter.id)
-    const assister = helpers.length && rng.random() < (long ? 0.35 : 0.78) ? rng.weighted(helpers, helpers.map((p) => ({ MF: 2.2, FW: 1.6, DF: 0.7 })[p.pos] * p.att * (p.id === wide ? 3 : 1))) : null
+    const assister = helpers.length && rng.random() < (long ? 0.35 : 0.78) ? rng.weighted(helpers, helpers.map((p) => ({ MF: 2.2, FW: 1.6, DF: 0.7 })[p.pos] * (p.id === wide ? crossOf(p) * 3 : createOf(p)))) : null
     if (ch) { tick.ch = ch.key; tick.w = ch.a.id } // 화면: 어느 통로에서, 누가 만든 찬스인가
-    const quality = long ? LONG_Q : OPEN_Q + flow.q + (ch ? clamp(ch.adv, -MU_CAP, MU_CAP) / K_MU : 0) + ((shooter.A?.['공격'] ?? shooter.att) - keeper) / K_FINISH + (a - d) / K_QUAL + tEdge / K_TQUAL + r[atk].quality
-    const pOn = long ? 0.28 : clamp(0.45 + (shooter.att - 60) / 200, 0.25, 0.75)
+    const quality = long ? LONG_Q : OPEN_Q + flow.q + (ch ? clamp(ch.adv, -MU_CAP, MU_CAP) / K_MU : 0) + (finishOf(shooter) - keeper) / K_FINISH + (a - d) / K_QUAL + tEdge / K_TQUAL + r[atk].quality
+    const pOn = long ? 0.28 : clamp(0.45 + (shotOf(shooter) - 60) / 200, 0.25, 0.75)
     const pGoal = clamp(quality, long ? 0.04 : 0.08, 0.55)
     const res = resolve({ shooter, assister, pOn, pGoal, how: long ? 'long' : 'open' })
     if (res === 'goal') {
@@ -735,7 +752,8 @@ export function step(match, ctx, { withEvents = true } = {}) {
     const defenders = field(dfn)
     if (x < 0.24 * r[dfn].foul && defenders.length) {
       S[dfn].fouls++
-      const fouler = rng.weighted(defenders, defenders.map((p) => ({ DF: 2, MF: 1.6, FW: 0.6 })[p.pos]))
+      // 규율이 낮은(파울·카드가 잦은) 선수가 반칙을 더 자주 한다 — 규율 70 기준 1배, 50이면 약 1.4배, 90이면 약 0.6배
+      const fouler = rng.weighted(defenders, defenders.map((p) => ({ DF: 2, MF: 1.6, FW: 0.6 })[p.pos] * clamp((120 - det(p, '규율', 70)) / 50, 0.4, 1.8)))
       // 반칙 위치: 박스 안(페널티킥) · 슈팅 거리(직접 프리킥) · 측면(크로스 프리킥) · 그 밖(그냥 재개)
       const z = rng.random()
       const zone = z < P_PEN ? 'pen' : z < P_PEN + P_FK ? 'fk' : z < P_PEN + P_FK + P_FKX ? 'fkx' : 'mid'
@@ -772,7 +790,7 @@ export function step(match, ctx, { withEvents = true } = {}) {
     } else if (x < 0.24 + 0.032 + LONG_SHARE) {
       shoot(true)
     } else if (x < 0.75 && defenders.length) {
-      const t = rng.weighted(defenders, defenders.map((p) => ({ DF: 2, MF: 1.4, FW: 0.3 })[p.pos] * p.def))
+      const t = rng.weighted(defenders, defenders.map((p) => ({ DF: 2, MF: 1.4, FW: 0.3 })[p.pos] * tackleOf(p)))
       match.ps[t.id].tk++
     }
   } else {
