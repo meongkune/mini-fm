@@ -58,6 +58,39 @@ function calcAttrs(p) {
   return { labels: FIELD, values, map: Object.fromEntries(FIELD.map((l, i) => [l, values[i]])), est: !Array.isArray(p.rad), gk: false }
 }
 
+// ---------- 세부 능력치 3층 (실제 경기 기록 기반, 시험) ----------
+// tools/kaggle_attrs.mjs가 계산한 값(det, 추정 비트 detE)이 있으면 그대로, 없으면 레이더로 추정 — 같은 중심값 공식
+export const DETAIL = ['결정력', '슈팅', '패스', '찬스 창출', '드리블', '크로스', '태클', '위치 선정', '공중볼', '안정성', '규율']
+export const DETAIL_GK = ['선방률', 'PK 선방', '빌드업']
+const DETAIL_ANCHOR = {
+  결정력: (a) => a.공격, 슈팅: (a) => a.공격, 패스: (a) => a.기술 * 0.6 + a.전술 * 0.4, '찬스 창출': (a) => a.창의성,
+  드리블: (a) => a.기술, 크로스: (a) => (a.기술 + a.창의성) / 2, 태클: (a) => a.수비, '위치 선정': (a) => a.수비 * 0.5 + a.전술 * 0.5,
+  공중볼: (a, p) => p.def * 0.45 + p.att * 0.35 + (p.sta ?? 70) * 0.2, 안정성: (a) => a.전술, 규율: (a) => a.전술,
+  선방률: (a) => a.선방, 'PK 선방': (a) => a.선방 - 4, 빌드업: (a) => a.빌드업,
+}
+/** 세부 능력치 중심값: 그 항목과 가까운 레이더 값과 전체 수준의 반반 (tools/kaggle_attrs.mjs도 같은 값을 기준으로 기울인다) */
+export function detailBase(p, label) {
+  const a = attrsOf(p)
+  const m = a.map
+  const level = a.gk ? (m.선방 + m.예측 + m.빌드업 + m.공중볼) / 4 : (m.공격 + m.기술 + m.전술 + m.수비 + m.창의성) / 5
+  return (DETAIL_ANCHOR[label](m, p) + level) / 2
+}
+const detailCache = new WeakMap()
+/** { labels, values(30~99), est: [추정 여부] } */
+export function detailOf(p) {
+  let c = detailCache.get(p)
+  if (c) return c
+  const a = attrsOf(p)
+  const labels = a.gk ? DETAIL_GK : DETAIL
+  if (Array.isArray(p.det) && p.det.length === labels.length) {
+    c = { labels, values: p.det, est: labels.map((_, i) => !!(p.detE & (1 << i))) }
+  } else {
+    c = { labels, values: labels.map((l) => clamp(detailBase(p, l))), est: labels.map(() => true) }
+  }
+  detailCache.set(p, c)
+  return c
+}
+
 /** 카드에 보여줄 포지션 핵심 능력치 3개 [[이름, 값]] */
 export function keyAttrs(p) {
   const a = attrsOf(p)

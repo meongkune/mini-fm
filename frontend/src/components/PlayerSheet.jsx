@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { fetchProfile } from '../game/wiki.js'
 import PlayerCard from './PlayerCard.jsx'
 import AttrRadar from './AttrRadar.jsx'
+import DetailAttrs from './DetailAttrs.jsx'
 import { AbilityStars } from './Stars.jsx'
 import { Flag, nationName } from './Badges.jsx'
 import Rating, { CondBar } from './Rating.jsx'
@@ -61,6 +62,8 @@ export default function PlayerSheet({ player, onClose, inLineup, onToggle }) {
 
         <h4>세부 능력치 <span className="muted small">1~20점 · {player.role || player.pos} 기준</span></h4>
         <AttrRadar player={player} color={teams.find((t) => t.players.some((p) => p.id === player.id))?.color} sta={player.sta} />
+        <h4>플레이 성향 <span className="muted small">실제 경기 기록 기반 · 시험</span></h4>
+        <DetailAttrs player={player} />
 
 
         <h4>이번 시즌</h4>
