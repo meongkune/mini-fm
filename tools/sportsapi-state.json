@@ -6438,7 +6438,8 @@
    "sid": 294597,
    "lid": "serie-a",
    "ovr": 76,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "FIO-102591": {
    "sid": 958982,
@@ -6493,7 +6494,8 @@
    "sid": 19352,
    "lid": "serie-a",
    "ovr": 75,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": "none"
   },
   "BOL-32491": {
    "sid": 855829,
@@ -6527,13 +6529,15 @@
    "sid": 928104,
    "lid": "serie-a",
    "ovr": 76,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "BOL-56645": {
    "sid": 862697,
    "lid": "serie-a",
    "ovr": 74,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "BOL-2292": {
    "sid": 14718,
@@ -6704,7 +6708,8 @@
    "sid": 176301,
    "lid": "serie-a",
    "ovr": 74,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": "none"
   },
   "JUV-2105": {
    "sid": 161325,
@@ -6800,7 +6805,8 @@
    "sid": 139273,
    "lid": "serie-a",
    "ovr": 73,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "LAZ-23703": {
    "sid": 798002,
@@ -6831,13 +6837,15 @@
    "sid": 108484,
    "lid": "serie-a",
    "ovr": 74,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "HVE-111555": {
    "sid": 976025,
    "lid": "serie-a",
    "ovr": 75,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "HVE-2891": {
    "sid": 253391,
@@ -6861,7 +6869,8 @@
    "sid": 877371,
    "lid": "serie-a",
    "ovr": 76,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": "none"
   },
   "CRE-57805": {
    "sid": 849274,
@@ -6891,7 +6900,8 @@
    "sid": 984998,
    "lid": "serie-a",
    "ovr": 74,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "USL-286314": {
    "sid": 1149067,
@@ -6903,7 +6913,8 @@
    "sid": 1651825,
    "lid": "serie-a",
    "ovr": 76,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "USL-213073": {
    "sid": 1090374,
@@ -6952,7 +6963,8 @@
    "sid": 1486729,
    "lid": "serie-a",
    "ovr": 74,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "PAR-31881": {
    "sid": 856065,
@@ -6978,13 +6990,15 @@
    "sid": 876259,
    "lid": "serie-a",
    "ovr": 76,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "FIO-171123": {
    "sid": 1067204,
    "lid": "serie-a",
    "ovr": 76,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "PAR-152734": {
    "sid": 1086199,
@@ -7002,7 +7016,8 @@
    "sid": 1201388,
    "lid": "serie-a",
    "ovr": 74,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "PAR-289179": {
    "sid": 1542692,
@@ -7021,7 +7036,8 @@
    "sid": 1516324,
    "lid": "serie-a",
    "ovr": 76,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "PAR-97151": {
    "sid": 958517,
@@ -7033,7 +7049,8 @@
    "sid": 990411,
    "lid": "serie-a",
    "ovr": 76,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "MIL-145": {
    "sid": 817957,
@@ -7195,19 +7212,22 @@
    "sid": 847467,
    "lid": "serie-a",
    "ovr": 76,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "FIO-1778": {
    "sid": 893998,
    "lid": "serie-a",
    "ovr": 76,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "FIO-129801": {
    "sid": 972886,
    "lid": "serie-a",
    "ovr": 75,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "FIO-3188": {
    "sid": 69378,
@@ -7258,7 +7278,8 @@
    "sid": 825271,
    "lid": "serie-a",
    "ovr": 74,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "UDI-7567": {
    "sid": 904887,
@@ -7271,13 +7292,15 @@
    "sid": 1154894,
    "lid": "serie-a",
    "ovr": 74,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "UDI-822": {
    "sid": 351434,
    "lid": "serie-a",
    "ovr": 75,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "UDI-202427": {
    "sid": 1476922,
@@ -7289,13 +7312,15 @@
    "sid": 227894,
    "lid": "serie-a",
    "ovr": 76,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "UDI-2996": {
    "sid": 922928,
    "lid": "serie-a",
    "ovr": 75,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "HVE-10887": {
    "sid": 575852,
@@ -7320,7 +7345,8 @@
    "sid": 798147,
    "lid": "serie-a",
    "ovr": 74,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "UDI-8111": {
    "sid": 58351,
@@ -7338,7 +7364,8 @@
    "sid": 1136399,
    "lid": "serie-a",
    "ovr": 75,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "UDI-65480": {
    "sid": 891656,
@@ -7358,13 +7385,15 @@
    "sid": 856737,
    "lid": "serie-a",
    "ovr": 75,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "TOR-4119": {
    "sid": 773409,
    "lid": "serie-a",
    "ovr": 75,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "TOR-59075": {
    "sid": 826026,
@@ -7376,7 +7405,8 @@
    "sid": 1103488,
    "lid": "serie-a",
    "ovr": 76,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "TOR-7843": {
    "sid": 357596,
@@ -7422,7 +7452,8 @@
    "sid": 840414,
    "lid": "serie-a",
    "ovr": 75,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "TOR-1776": {
    "sid": 122848,
@@ -7434,7 +7465,8 @@
    "sid": 1084846,
    "lid": "serie-a",
    "ovr": 75,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": "none"
   },
   "TOR-217847": {
    "sid": 1519010,
@@ -7578,7 +7610,8 @@
    "sid": 1017649,
    "lid": "serie-a",
    "ovr": 75,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "LAZ-171448": {
    "sid": 1069244,
@@ -7605,13 +7638,15 @@
    "sid": 1389689,
    "lid": "serie-a",
    "ovr": 74,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "LAZ-147781": {
    "sid": 910121,
    "lid": "serie-a",
    "ovr": 76,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "LAZ-111220": {
    "sid": 937324,
@@ -7624,7 +7659,8 @@
    "sid": 317301,
    "lid": "serie-a",
    "ovr": 76,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "LAZ-286550": {
    "sid": 1547464,
@@ -7649,7 +7685,8 @@
    "sid": 267619,
    "lid": "serie-a",
    "ovr": 76,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "LAZ-2358": {
    "sid": 273405,
@@ -7661,7 +7698,8 @@
    "sid": 1518983,
    "lid": "serie-a",
    "ovr": 76,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "LAZ-118438": {
    "sid": 984095,
@@ -7853,25 +7891,29 @@
    "sid": 1142238,
    "lid": "serie-a",
    "ovr": 76,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "COM-114212": {
    "sid": 974581,
    "lid": "serie-a",
    "ovr": 74,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "COM-9471": {
    "sid": 226974,
    "lid": "serie-a",
    "ovr": 75,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "CAG-40265": {
    "sid": 870211,
    "lid": "serie-a",
    "ovr": 75,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "COM-2187": {
    "sid": 295133,
@@ -7890,7 +7932,8 @@
    "sid": 45925,
    "lid": "serie-a",
    "ovr": 75,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "GEN-144566": {
    "sid": 930191,
@@ -7910,7 +7953,8 @@
    "sid": 1012172,
    "lid": "serie-a",
    "ovr": 76,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "GEN-24119": {
    "sid": 918440,
@@ -7935,7 +7979,8 @@
    "sid": 933203,
    "lid": "serie-a",
    "ovr": 74,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "GEN-2443": {
    "sid": 184421,
@@ -8098,7 +8143,8 @@
    "sid": 970928,
    "lid": "serie-a",
    "ovr": 76,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "SAS-161370": {
    "sid": 788061,
@@ -8122,7 +8168,8 @@
    "sid": 1012179,
    "lid": "serie-a",
    "ovr": 76,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "CAG-185019": {
    "sid": 928777,
@@ -8153,13 +8200,15 @@
    "sid": 360396,
    "lid": "serie-a",
    "ovr": 74,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "CAG-170374": {
    "sid": 964153,
    "lid": "serie-a",
    "ovr": 76,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "CAG-286712": {
    "sid": 1798927,
@@ -8190,13 +8239,15 @@
    "sid": 869795,
    "lid": "serie-a",
    "ovr": 75,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "PIS-56853": {
    "sid": 826326,
    "lid": "serie-a",
    "ovr": 74,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "FIO-267944": {
    "sid": 1526933,
@@ -8228,13 +8279,15 @@
    "sid": 1155625,
    "lid": "serie-a",
    "ovr": 75,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "HVE-105081": {
    "sid": 983601,
    "lid": "serie-a",
    "ovr": 76,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "SAS-172183": {
    "sid": 1134351,
@@ -8247,19 +8300,22 @@
    "sid": 1149288,
    "lid": "serie-a",
    "ovr": 76,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "SAS-3438": {
    "sid": 44241,
    "lid": "serie-a",
    "ovr": 76,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "CAG-188791": {
    "sid": 105905,
    "lid": "serie-a",
    "ovr": 74,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "SAS-44033": {
    "sid": 924973,
@@ -8278,7 +8334,8 @@
    "sid": 882592,
    "lid": "serie-a",
    "ovr": 74,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": "none"
   },
   "SAS-53403": {
    "sid": 933641,
@@ -8291,7 +8348,8 @@
    "sid": 886243,
    "lid": "serie-a",
    "ovr": 75,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "COM-126768": {
    "sid": 989186,
@@ -8352,7 +8410,8 @@
    "sid": 970998,
    "lid": "serie-a",
    "ovr": 75,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "MAR-8476": {
    "sid": 859026,
@@ -8884,7 +8943,8 @@
    "sid": 1409700,
    "lid": "serie-a",
    "ovr": 76,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "LYO-137655": {
    "sid": 1014540,
@@ -10033,7 +10093,8 @@
    "sid": 857480,
    "lid": "serie-a",
    "ovr": 75,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "AZ-178402": {
    "sid": 1145989,
@@ -10137,7 +10198,8 @@
    "sid": 1004790,
    "lid": "serie-a",
    "ovr": 74,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "GRO-41302": {
    "sid": 907520,
@@ -10260,7 +10322,8 @@
    "sid": 126588,
    "lid": "serie-a",
    "ovr": 75,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "PSV-176932": {
    "sid": 1146018,
@@ -13476,7 +13539,8 @@
    "sid": 173827,
    "lid": "serie-a",
    "ovr": 74,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "BUR-143054": {
    "sid": 996985,
@@ -14120,13 +14184,15 @@
    "sid": 895592,
    "lid": "serie-a",
    "ovr": 75,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "UDI-99311": {
    "sid": 964119,
    "lid": "serie-a",
    "ovr": 75,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "WAT-129591": {
    "sid": 987346,
@@ -17385,7 +17451,8 @@
    "sid": 999231,
    "lid": "serie-a",
    "ovr": 76,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": "none"
   },
   "BHA-209504": {
    "sid": 1155321,
@@ -17997,7 +18064,8 @@
    "sid": 786259,
    "lid": "serie-a",
    "ovr": 74,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "LIV-248990": {
    "sid": 1550811,
@@ -18121,7 +18189,8 @@
    "sid": 1514800,
    "lid": "serie-a",
    "ovr": 77,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": "none"
   },
   "NIC-213270": {
    "sid": 1063235,
@@ -18164,7 +18233,8 @@
    "sid": 1087514,
    "lid": "serie-a",
    "ovr": 77,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "HUL-80761": {
    "sid": 945806,
@@ -18260,7 +18330,8 @@
    "sid": 1084730,
    "lid": "serie-a",
    "ovr": 75,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "ESP-33358": {
    "sid": 84972,
@@ -18385,7 +18456,8 @@
    "sid": 318603,
    "lid": "serie-a",
    "ovr": 75,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "RAY-176202": {
    "sid": 1089108,
@@ -18702,7 +18774,8 @@
    "sid": 848355,
    "lid": "serie-a",
    "ovr": 74,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": "none"
   },
   "MIL-81299": {
    "sid": 945062,
@@ -18751,7 +18824,8 @@
    "sid": 797286,
    "lid": "serie-a",
    "ovr": 75,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "TOR-166329": {
    "sid": 1111640,
@@ -18845,7 +18919,8 @@
    "sid": 1101942,
    "lid": "serie-a",
    "ovr": 74,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "OVI-193621": {
    "sid": 1201412,
@@ -18989,7 +19064,8 @@
    "sid": 377118,
    "lid": "serie-a",
    "ovr": 76,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "MIL-304": {
    "sid": 132645,
@@ -19062,7 +19138,8 @@
    "sid": 850891,
    "lid": "serie-a",
    "ovr": 74,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "UNB-171757": {
    "sid": 1210666,
@@ -19592,13 +19669,15 @@
    "sid": 1092081,
    "lid": "serie-a",
    "ovr": 75,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": "none"
   },
   "PAR-272754": {
    "sid": 1963449,
    "lid": "serie-a",
    "ovr": 74,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "PSG-101431": {
    "sid": 934510,
@@ -19616,7 +19695,8 @@
    "sid": 1520771,
    "lid": "serie-a",
    "ovr": 76,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "FUL-33124": {
    "sid": 822470,
@@ -19635,7 +19715,8 @@
    "sid": 1390489,
    "lid": "serie-a",
    "ovr": 77,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "NOT-177477": {
    "sid": 1090963,
@@ -19757,7 +19838,8 @@
    "sid": 1030829,
    "lid": "serie-a",
    "ovr": 74,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "BET-1745": {
    "sid": 67769,
@@ -19769,7 +19851,8 @@
    "sid": 1210848,
    "lid": "serie-a",
    "ovr": 77,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "EVE-138174": {
    "sid": 1020141,
@@ -19882,7 +19965,8 @@
    "sid": 982778,
    "lid": "serie-a",
    "ovr": 75,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "ATA-1848": {
    "sid": 100389,
@@ -19971,7 +20055,8 @@
    "sid": 888219,
    "lid": "serie-a",
    "ovr": 74,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "PNE-67743": {
    "sid": 928047,
@@ -20027,7 +20112,8 @@
    "sid": 148899,
    "lid": "serie-a",
    "ovr": 77,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "CHE-170426": {
    "sid": 904827,
@@ -20046,7 +20132,8 @@
    "sid": 1165371,
    "lid": "serie-a",
    "ovr": 74,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": "none"
   },
   "CAG-289719": {
    "sid": 1615784,
@@ -20095,7 +20182,8 @@
    "sid": 1499991,
    "lid": "serie-a",
    "ovr": 75,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "SPO-53190": {
    "sid": 878496,
@@ -20120,7 +20208,8 @@
    "sid": 1162611,
    "lid": "serie-a",
    "ovr": 75,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "TOR-265154": {
    "sid": 1142692,
@@ -20144,7 +20233,8 @@
    "sid": 893752,
    "lid": "serie-a",
    "ovr": 74,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": "none"
   },
   "SVW-16346": {
    "sid": 830127,
@@ -20182,7 +20272,8 @@
    "sid": 1029456,
    "lid": "serie-a",
    "ovr": 74,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": "none"
   },
   "WOL-7910": {
    "sid": 867441,
@@ -20372,7 +20463,8 @@
    "sid": 960080,
    "lid": "serie-a",
    "ovr": 75,
-   "attr": null
+   "attr": "2026-11-17",
+   "rad": true
   },
   "REN-289597": {
    "sid": 2111258,
@@ -21683,12 +21775,16 @@
   "PAR-204310": {
    "sid": 984527,
    "lid": "serie-a",
-   "ovr": 74
+   "ovr": 74,
+   "attr": "2026-11-17",
+   "rad": "none"
   },
   "PAR-1839": {
    "sid": 928103,
    "lid": "serie-a",
-   "ovr": 76
+   "ovr": 76,
+   "attr": "2026-11-17",
+   "rad": true
   },
   "MIL-144909": {
    "sid": 1034082,
@@ -21733,7 +21829,9 @@
   "NAP-181795": {
    "sid": 1170773,
    "lid": "serie-a",
-   "ovr": 76
+   "ovr": 76,
+   "attr": "2026-11-17",
+   "rad": true
   },
   "NAP-8354": {
    "sid": 787941,
