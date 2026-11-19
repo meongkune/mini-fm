@@ -2940,7 +2940,8 @@
    "sid": 891511,
    "lid": "la-liga",
    "ovr": 76,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": "none"
   },
   "ESP-33652": {
    "sid": 877262,
@@ -2959,7 +2960,8 @@
    "sid": 826010,
    "lid": "la-liga",
    "ovr": 76,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": true
   },
   "ESP-151031": {
    "sid": 1064009,
@@ -3023,13 +3025,15 @@
    "sid": 547838,
    "lid": "la-liga",
    "ovr": 76,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": true
   },
   "BET-3216": {
    "sid": 798835,
    "lid": "la-liga",
    "ovr": 76,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": true
   },
   "BET-99992": {
    "sid": 838629,
@@ -3073,7 +3077,8 @@
    "sid": 851271,
    "lid": "la-liga",
    "ovr": 76,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": true
   },
   "BET-7783": {
    "sid": 188365,
@@ -3116,7 +3121,8 @@
    "sid": 951008,
    "lid": "la-liga",
    "ovr": 76,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": "none"
   },
   "FCB-202283": {
    "sid": 1402912,
@@ -3227,7 +3233,8 @@
    "sid": 50490,
    "lid": "la-liga",
    "ovr": 76,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": "none"
   },
   "RAY-115175": {
    "sid": 910024,
@@ -3308,7 +3315,8 @@
    "sid": 88528,
    "lid": "la-liga",
    "ovr": 76,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": true
   },
   "RAY-2071": {
    "sid": 850035,
@@ -3359,7 +3367,8 @@
    "sid": 146866,
    "lid": "la-liga",
    "ovr": 76,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": true
   },
   "VIL-177826": {
    "sid": 1172477,
@@ -3406,7 +3415,8 @@
    "sid": 2238900,
    "lid": "la-liga",
    "ovr": 76,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": true
   },
   "VIL-7996": {
    "sid": 873189,
@@ -3426,7 +3436,8 @@
    "sid": 1184541,
    "lid": "la-liga",
    "ovr": 76,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": true
   },
   "ESP-186564": {
    "sid": 1396048,
@@ -3539,13 +3550,15 @@
    "sid": 785989,
    "lid": "la-liga",
    "ovr": 76,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": true
   },
   "CEL-3201": {
    "sid": 19356,
    "lid": "la-liga",
    "ovr": 76,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": true
   },
   "CEL-83406": {
    "sid": 949962,
@@ -3615,7 +3628,8 @@
    "sid": 360718,
    "lid": "la-liga",
    "ovr": 76,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": true
   },
   "CEL-2788": {
    "sid": 815202,
@@ -3662,7 +3676,8 @@
    "sid": 280979,
    "lid": "la-liga",
    "ovr": 76,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": true
   },
   "RSO-170540": {
    "sid": 1066045,
@@ -3680,7 +3695,8 @@
    "sid": 832427,
    "lid": "la-liga",
    "ovr": 76,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": true
   },
   "RSO-156615": {
    "sid": 980410,
@@ -3700,7 +3716,7 @@
    "sid": 1402908,
    "lid": "la-liga",
    "ovr": 76,
-   "attr": null
+   "attr": "2026-11-19"
   },
   "RSO-141571": {
    "sid": 1116388,
@@ -6557,7 +6573,8 @@
    "sid": 1526395,
    "lid": "serie-a",
    "ovr": 54,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": "none"
   },
   "ATA-129947": {
    "sid": 960441,
@@ -6920,7 +6937,8 @@
    "sid": 1149067,
    "lid": "serie-a",
    "ovr": 59,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": "none"
   },
   "USL-246341": {
    "sid": 1651825,
@@ -7164,7 +7182,8 @@
    "sid": 1983939,
    "lid": "serie-a",
    "ovr": 63,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": "none"
   },
   "MIL-8390": {
    "sid": 191210,
@@ -7513,7 +7532,8 @@
    "sid": 1519010,
    "lid": "serie-a",
    "ovr": 64,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": "none"
   },
   "INT-3220": {
    "sid": 823984,
@@ -7708,7 +7728,8 @@
    "sid": 1547464,
    "lid": "serie-a",
    "ovr": 54,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": true
   },
   "LAZ-80459": {
    "sid": 944973,
@@ -7749,7 +7770,8 @@
    "sid": 984095,
    "lid": "serie-a",
    "ovr": 65,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": "none"
   },
   "ROM-2046": {
    "sid": 256219,
@@ -8063,7 +8085,8 @@
    "sid": 1526308,
    "lid": "serie-a",
    "ovr": 60,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": true
   },
   "GEN-7460": {
    "sid": 556696,
@@ -8076,7 +8099,8 @@
    "sid": 595572,
    "lid": "serie-a",
    "ovr": 61,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": "none"
   },
   "NAP-152770": {
    "sid": 1086417,
@@ -8250,7 +8274,8 @@
    "sid": 1151647,
    "lid": "serie-a",
    "ovr": 57,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": true
   },
   "CAG-3728": {
    "sid": 360396,
@@ -8270,7 +8295,8 @@
    "sid": 1798927,
    "lid": "serie-a",
    "ovr": 58,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": true
   },
   "CAG-82004": {
    "sid": 947954,
@@ -8465,7 +8491,8 @@
    "sid": 1861673,
    "lid": "serie-a",
    "ovr": 64,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": true
   },
   "CRE-2107": {
    "sid": 869888,
@@ -10556,7 +10583,8 @@
    "sid": 359272,
    "lid": "la-liga",
    "ovr": 77,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": true
   },
   "TOT-8410": {
    "sid": 844842,
@@ -13640,7 +13668,8 @@
    "sid": 909966,
    "lid": "la-liga",
    "ovr": 77,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": true
   },
   "BUR-9405": {
    "sid": 809276,
@@ -17284,7 +17313,8 @@
    "sid": 859773,
    "lid": "la-liga",
    "ovr": 80,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": true
   },
   "AJA-9034": {
    "sid": 804434,
@@ -17509,7 +17539,8 @@
    "sid": 1485300,
    "lid": "la-liga",
    "ovr": 79,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": true
   },
   "MCI-270613": {
    "sid": 1899484,
@@ -17791,7 +17822,8 @@
    "sid": 814590,
    "lid": "la-liga",
    "ovr": 83,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": true
   },
   "MUN-289557": {
    "sid": 1465865,
@@ -17863,7 +17895,8 @@
    "sid": 1010421,
    "lid": "la-liga",
    "ovr": 80,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": true
   },
   "RC-191068": {
    "sid": 1149148,
@@ -17968,7 +18001,8 @@
    "sid": 965011,
    "lid": "la-liga",
    "ovr": 81,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": true
   },
   "SOU-131035": {
    "sid": 980637,
@@ -18052,7 +18086,8 @@
    "sid": 1402716,
    "lid": "la-liga",
    "ovr": 81,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": true
   },
   "FUL-217577": {
    "sid": 1503757,
@@ -18078,7 +18113,8 @@
    "sid": 988672,
    "lid": "la-liga",
    "ovr": 81,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": true
   },
   "PSG-172762": {
    "sid": 996952,
@@ -18103,7 +18139,8 @@
    "sid": 1145642,
    "lid": "la-liga",
    "ovr": 82,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": true
   },
   "CHA-187370": {
    "sid": 1134530,
@@ -18115,7 +18152,8 @@
    "sid": 925097,
    "lid": "la-liga",
    "ovr": 82,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": true
   },
   "LIV-7869": {
    "sid": 151545,
@@ -18228,7 +18266,8 @@
    "sid": 1154587,
    "lid": "la-liga",
    "ovr": 78,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": true
   },
   "PNE-169191": {
    "sid": 1096136,
@@ -18439,13 +18478,15 @@
    "sid": 1011375,
    "lid": "la-liga",
    "ovr": 83,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": true
   },
   "BET-66": {
    "sid": 103417,
    "lid": "la-liga",
    "ovr": 78,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": true
   },
   "FLU-245200": {
    "sid": 1177404,
@@ -18457,7 +18498,8 @@
    "sid": 1186010,
    "lid": "la-liga",
    "ovr": 77,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": true
   },
   "BET-33038": {
    "sid": 99519,
@@ -18497,7 +18539,8 @@
    "sid": 1402913,
    "lid": "la-liga",
    "ovr": 84,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": true
   },
   "FCM-216372": {
    "sid": 875677,
@@ -18546,13 +18589,15 @@
    "sid": 1012444,
    "lid": "la-liga",
    "ovr": 82,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": true
   },
   "VIL-178769": {
    "sid": 1087359,
    "lid": "la-liga",
    "ovr": 81,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": true
   },
   "RBL-9533": {
    "sid": 37096,
@@ -18571,7 +18616,8 @@
    "sid": 37318,
    "lid": "la-liga",
    "ovr": 78,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": true
   },
   "OSA-130324": {
    "sid": 997280,
@@ -18607,7 +18653,8 @@
    "sid": 294377,
    "lid": "la-liga",
    "ovr": 79,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": true
   },
   "OSA-278562": {
    "sid": 2030379,
@@ -18625,7 +18672,8 @@
    "sid": 1126779,
    "lid": "la-liga",
    "ovr": 78,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": true
   },
   "CEL-175892": {
    "sid": 996931,
@@ -18649,7 +18697,8 @@
    "sid": 1526627,
    "lid": "la-liga",
    "ovr": 79,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": true
   },
   "CEL-211835": {
    "sid": 1012410,
@@ -18668,7 +18717,8 @@
    "sid": 966862,
    "lid": "la-liga",
    "ovr": 79,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": true
   },
   "RSO-279958": {
    "sid": 1111081,
@@ -18705,7 +18755,8 @@
    "sid": 783374,
    "lid": "la-liga",
    "ovr": 79,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": true
   },
   "ATH-101870": {
    "sid": 944165,
@@ -18717,7 +18768,8 @@
    "sid": 149734,
    "lid": "la-liga",
    "ovr": 79,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": true
   },
   "ATH-217432": {
    "sid": 1391374,
@@ -18805,7 +18857,8 @@
    "sid": 1156645,
    "lid": "la-liga",
    "ovr": 79,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": true
   },
   "LIV-9542": {
    "sid": 826215,
@@ -18889,7 +18942,8 @@
    "sid": 1097719,
    "lid": "la-liga",
    "ovr": 78,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": true
   },
   "REN-265516": {
    "sid": 1606013,
@@ -18962,13 +19016,15 @@
    "sid": 807771,
    "lid": "la-liga",
    "ovr": 84,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": true
   },
   "ATL-46554": {
    "sid": 263651,
    "lid": "la-liga",
    "ovr": 78,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": true
   },
   "CSC-143251": {
    "sid": 1016019,
@@ -19043,7 +19099,8 @@
    "sid": 138572,
    "lid": "la-liga",
    "ovr": 77,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": true
   },
   "SEV-21410": {
    "sid": 68332,
@@ -19100,7 +19157,8 @@
    "sid": 369004,
    "lid": "la-liga",
    "ovr": 78,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": true
   },
   "SCI-114877": {
    "sid": 965822,
@@ -19578,7 +19636,8 @@
    "sid": 1868083,
    "lid": "serie-a",
    "ovr": 56,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": true
   },
   "AJA-171286": {
    "sid": 1127191,
@@ -19590,7 +19649,8 @@
    "sid": 1544466,
    "lid": "serie-a",
    "ovr": 59,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": true
   },
   "OVI-226037": {
    "sid": 1120504,
@@ -19651,7 +19711,8 @@
    "sid": 901325,
    "lid": "la-liga",
    "ovr": 82,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": true
   },
   "AVL-33525": {
    "sid": 867887,
@@ -19698,7 +19759,8 @@
    "sid": 946381,
    "lid": "la-liga",
    "ovr": 80,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": true
   },
   "FCB-270450": {
    "sid": 1590761,
@@ -19742,13 +19804,15 @@
    "sid": 1403088,
    "lid": "serie-a",
    "ovr": 63,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": true
   },
   "USL-283194": {
    "sid": 1587294,
    "lid": "serie-a",
    "ovr": 58,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": true
   },
   "PAR-184455": {
    "sid": 1092081,
@@ -19828,7 +19892,8 @@
    "sid": 1907240,
    "lid": "serie-a",
    "ovr": 57,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": "none"
   },
   "EVE-125044": {
    "sid": 987489,
@@ -19868,7 +19933,8 @@
    "sid": 1910431,
    "lid": "serie-a",
    "ovr": 54,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": "none"
   },
   "WAT-8917": {
    "sid": 858191,
@@ -19957,7 +20023,8 @@
    "sid": 1590981,
    "lid": "serie-a",
    "ovr": 58,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": true
   },
   "LEE-1331": {
    "sid": 871290,
@@ -20065,13 +20132,15 @@
    "sid": 1524408,
    "lid": "serie-a",
    "ovr": 63,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": true
   },
   "ATL-46452": {
    "sid": 831799,
    "lid": "la-liga",
    "ovr": 80,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": true
   },
   "MAR-82020": {
    "sid": 928236,
@@ -20090,7 +20159,8 @@
    "sid": 811629,
    "lid": "la-liga",
    "ovr": 79,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": true
   },
   "CHE-7810": {
    "sid": 826134,
@@ -20116,13 +20186,15 @@
    "sid": 2290290,
    "lid": "serie-a",
    "ovr": 58,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": "none"
   },
   "COM-284110": {
    "sid": 2035779,
    "lid": "serie-a",
    "ovr": 61,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": true
   },
   "CHE-135555": {
    "sid": 920546,
@@ -20168,13 +20240,15 @@
    "sid": 799054,
    "lid": "la-liga",
    "ovr": 77,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": true
   },
   "GEN-250853": {
    "sid": 1403204,
    "lid": "serie-a",
    "ovr": 61,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": true
   },
   "GEN-39330": {
    "sid": 889785,
@@ -20214,7 +20288,8 @@
    "sid": 984623,
    "lid": "la-liga",
    "ovr": 78,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": true
   },
   "TOR-214546": {
    "sid": 1165371,
@@ -20312,7 +20387,8 @@
    "sid": 1838644,
    "lid": "serie-a",
    "ovr": 59,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": true
   },
   "RSO-10206": {
    "sid": 257091,
@@ -20409,7 +20485,8 @@
    "sid": 855833,
    "lid": "la-liga",
    "ovr": 86,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": true
   },
   "PSG-278406": {
    "sid": 1861665,
@@ -20593,7 +20670,8 @@
    "sid": 2706970,
    "lid": "serie-a",
    "ovr": 56,
-   "attr": null
+   "attr": "2026-11-19",
+   "rad": "none"
   },
   "NIC-274450": {
    "sid": 1591099,
@@ -20868,7 +20946,9 @@
   "CAG-192169": {
    "sid": 1469998,
    "lid": "serie-a",
-   "ovr": 64
+   "ovr": 64,
+   "attr": "2026-11-19",
+   "rad": true
   },
   "VAL-181914": {
    "sid": 1211006,
@@ -20950,7 +21030,9 @@
   "SEV-249864": {
    "sid": 1160957,
    "lid": "la-liga",
-   "ovr": 77
+   "ovr": 77,
+   "attr": "2026-11-19",
+   "rad": true
   },
   "BEN-157796": {
    "sid": 1100952,
@@ -21767,7 +21849,9 @@
   "BET-100130": {
    "sid": 964983,
    "lid": "la-liga",
-   "ovr": 81
+   "ovr": 81,
+   "attr": "2026-11-19",
+   "rad": true
   },
   "FCB-205534": {
    "sid": 1162107,
@@ -21782,7 +21866,9 @@
   "OSA-151019": {
    "sid": 1067582,
    "lid": "la-liga",
-   "ovr": 78
+   "ovr": 78,
+   "attr": "2026-11-19",
+   "rad": true
   },
   "ATH-32581": {
    "sid": 96365,
@@ -21797,7 +21883,9 @@
   "ATH-151439": {
    "sid": 959872,
    "lid": "la-liga",
-   "ovr": 77
+   "ovr": 77,
+   "attr": "2026-11-19",
+   "rad": true
   },
   "VAL-157190": {
    "sid": 996929,
@@ -21920,7 +22008,9 @@
   "GEN-276932": {
    "sid": 1605324,
    "lid": "serie-a",
-   "ovr": 64
+   "ovr": 64,
+   "attr": "2026-11-19",
+   "rad": "none"
   },
   "NAP-181795": {
    "sid": 1170773,
