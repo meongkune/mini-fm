@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import { ink, short } from '../store.jsx'
 import { clockText } from '../engine/match.js'
 import { H, W } from '../engine/positions.js'
-import { makeSim, startClip, stepSim } from '../engine/playback.js'
+import { makeSim, startClip, stepSim, syncPlayers } from '../engine/playback.js'
 
 // 상단 문구는 재생 대본의 구간마다 정해진다(engine/playback.js의 label) — 화면에서 지금 벌어지는 일과 같이 바뀐다
 
@@ -48,9 +48,11 @@ function drawPitch(g, w, h, land) {
 /**
  * tactics: [홈 전술, 원정 전술] — 선수 위치가 철학·라인·압박·폭을 따라 달라진다
  * score: 크게 보기에서 보여 줄 점수 [홈, 원정] (화면에 이미 드러난 점수)
- * duration: 이 장면을 보여 줄 시간(ms) — 대본 길이를 여기에 맞춰 재생한다
+ * speed: 배속 배수. 장면 길이는 화면이 정하지 않는다 — 재생이 끝나면 onEnd(tick)로 알리고, 결과가 드러나는 순간 onReveal(tick)로 알린다
+ *        (타이머로 장면을 넘기면 키커를 기다리느라 길어진 장면이 잘리거나 문구와 어긋난다)
+ * frozen: 일시정지·교체 화면 중에는 그 자리에서 멈춘다
  */
-export default function MatchPitch({ home, away, lineups, tick, duration = 300, scorerName, idleLabel = '킥오프 대기', myIdx = 0, caption = null, tactics = null, score = null }) {
+export default function MatchPitch({ home, away, lineups, tick, speed = 1, frozen = false, onReveal = null, onEnd = null, scorerName, idleLabel = '킥오프 대기', myIdx = 0, caption = null, tactics = null, score = null }) {
   const stageRef = useRef(null)
   const planeRef = useRef(null)
   const canvasRef = useRef(null)
@@ -61,7 +63,7 @@ export default function MatchPitch({ home, away, lineups, tick, duration = 300, 
   const [hud, setHud] = useState({ label: '', shown: false }) // 상단 문구(지금 구간) · 결과가 드러났는가
   const land = big && wide
   if (!simRef.current) simRef.current = makeSim()
-  live.current = { lineups, tactics, tick, duration, myIdx, land, teams: [home, away] }
+  live.current = { lineups, tactics, tick, speed, frozen, onReveal, onEnd, myIdx, land, teams: [home, away] }
 
   // 크게 보기: 전체 화면 API가 되면 그것으로, 안 되면 화면 고정. 가로가 더 길면 경기장을 눕힌다
   useEffect(() => {
@@ -84,8 +86,12 @@ export default function MatchPitch({ home, away, lineups, tick, duration = 300, 
   // 장면이 바뀌면 대본만 새로 건다 (선수·공 위치는 이어진다)
   useEffect(() => {
     if (!lineups) return
-    startClip(simRef.current, lineups, tick, tactics)
-    setHud({ label: simRef.current.label, shown: false })
+    const sim = simRef.current
+    // 같은 장면이 이미 끝난 뒤 명단만 바뀌었으면(교체) 장면을 다시 틀지 않는다
+    if (tick && sim.tick === tick && sim.done) { syncPlayers(sim, lineups, tactics); return }
+    startClip(sim, lineups, tick, tactics)
+    sim.told = 0
+    setHud({ label: sim.label, shown: false })
   }, [tick, lineups && lineups.map((l) => l.map((p) => p.id).join()).join('|')])
 
   // 그리기 루프: 매 프레임 재생 상태를 진행하고 Canvas에 그린다
@@ -100,14 +106,17 @@ export default function MatchPitch({ home, away, lineups, tick, duration = 300, 
       const cv = canvasRef.current
       const plane = planeRef.current
       if (!cv || !plane || !L.lineups) { last = now; return }
-      const real = Math.min(0.1, (now - last) / 1000) // 탭이 쉬다 돌아와도 한 번에 건너뛰지 않게
+      const real = Math.min(1.5, (now - last) / 1000) // 화면이 가려져 프레임이 드물게 와도 실제 시간만큼 진행한다 (오래 쉬다 돌아왔을 때만 잘라 낸다)
       last = now
-      // 대본 시간으로 환산: 대본 전체가 duration 안에 끝나게
-      const rate = sim.script ? (sim.script.dur * 1000) / Math.max(60, L.duration) : 1
-      let left = real * rate
-      while (left > 0) { const d = Math.min(0.05, left); stepSim(sim, L.lineups, L.tactics, d); left -= d } // 빠른 배속에서도 잘게 나눠 진행
+      // 대본 시간으로 환산: 1배속에서 대본 1초 = rate초. 장면은 대본이 끝날 때 끝난다 (기다리는 구간이 있으면 그만큼 길어진다)
+      let left = L.frozen ? 0 : (real * (L.tick ? L.speed : 1)) / (sim.script?.rate || 1)
+      while (left > 0 && !(L.tick && sim.done)) { const d = Math.min(0.05, left); stepSim(sim, L.lineups, L.tactics, d); left -= d } // 빠른 배속에서도 잘게 나눠 진행
+      if (L.tick && sim.tick === L.tick) {
+        if (sim.revealed && !(sim.told & 1)) { sim.told |= 1; L.onReveal?.(L.tick) }
+        if (sim.done && !(sim.told & 2)) { sim.told |= 2; L.onEnd?.(L.tick) }
+      }
       // 상단 문구: 구간이 바뀔 때만 갱신한다
-      const shown = !!sim.script && sim.t >= sim.script.revealAt
+      const shown = !!sim.script && sim.revealed
       const key = `${sim.label}|${shown}`
       if (key !== shownKey) { shownKey = key; setHud({ label: sim.label, shown }) }
 

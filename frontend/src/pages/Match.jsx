@@ -67,6 +67,7 @@ export default function Match() {
   const [shown, setShown] = useState(-1) // 지금 보여주는 장면(timeline 번호) — 계산은 앞서 있고 화면이 차례로 따라간다
   const [lastShout, setLastShout] = useState(null)
   const [revealed, setRevealed] = useState(true) // 지금 장면의 결과(골·자막)를 드러냈는가
+  const [doneTick, setDoneTick] = useState(null) // 경기장이 재생을 끝냈다고 알려 온 장면
   const logRef = useRef(null)
 
   const fixtureKey = frozen.current?.key || (nextFixture ? `${nextFixture.cup ? 'cup' : 'lg'}-${save.round}-${nextFixture.home}-${nextFixture.away}` : '')
@@ -152,10 +153,10 @@ export default function Match() {
     return () => window.removeEventListener('beforeunload', warn)
   }, [phase])
 
-  // 장면 결과는 슈팅이 날아간 뒤(장면의 약 75% 지점)에 드러낸다
+  // 장면 결과(점수·자막)는 경기장에서 슛이 끝난 순간 드러낸다 (MatchPitch onReveal). 타이머는 화면이 쉬고 있을 때(숨겨진 탭)만 쓰는 대비책
   useEffect(() => {
     setRevealed(false)
-    const t = setTimeout(() => setRevealed(true), delay * 0.72)
+    const t = setTimeout(() => setRevealed(true), delay * 2 + 12000 / SPEEDS[speed])
     return () => clearTimeout(t)
   }, [shown])
 
@@ -163,6 +164,8 @@ export default function Match() {
   useEffect(() => {
     if (phase !== 'live' || paused || sheet || interrupt || !match) return
     const tl = match.timeline
+    // 장면은 경기장이 재생을 끝냈을 때 넘어간다 (MatchPitch onEnd). 타이머로 넘기면 화면과 문자 중계가 어긋난다
+    const played = shown >= 0 && doneTick === lastTick
     const t = setTimeout(() => {
       if (shown < tl.length - 1) { setShown(shown + 1); return }
       if (match.minute === 45 && halfOver(match, 1) && !match.htShown) { match.htShown = true; setPhase('ht'); return }
@@ -172,7 +175,7 @@ export default function Match() {
       if (it) { setInterrupt(it); setSheet('subs') }
       setShown(before)
       rerender()
-    }, shown >= 0 ? delay : IDLE_MS / SPEEDS[speed])
+    }, shown < 0 || !lastTick ? IDLE_MS / SPEEDS[speed] : played ? 0 : delay * 2 + 16000 / SPEEDS[speed])
     return () => clearTimeout(t)
   })
 
@@ -312,8 +315,11 @@ export default function Match() {
         lineups={lineups}
         tactics={[match.sides[0].tactics, match.sides[1].tactics]}
         score={score}
-        tick={live && !paused ? lastTick : null}
-        duration={live ? delay : 300}
+        tick={live ? lastTick : null}
+        speed={SPEEDS[speed]}
+        frozen={paused || !!sheet || !!interrupt}
+        onReveal={(t) => { if (t === lastTick) setRevealed(true) }}
+        onEnd={(t) => { if (t === lastTick) { setRevealed(true); setDoneTick(t) } }}
         scorerName={lastTick?.p ? byId[lastTick.p]?.name : ''}
         idleLabel={phase === 'ht' ? '하프타임' : phase === 'ft' ? '경기 종료' : paused ? '일시정지' : '킥오프 대기'}
         caption={caption && { text: caption.text, minute: clockText(caption.minute, caption.plus), type: caption.type, color: onDark(kits[caption.team]?.color || '#7c5cff') }}
