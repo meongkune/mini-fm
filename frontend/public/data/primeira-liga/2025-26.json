@@ -5525,8 +5525,8 @@
   },
   {
    "id": "ALV",
-   "name": "Alverca",
-   "short": "Alverca",
+   "name": "FC 알베르카",
+   "short": "알베르카",
    "color": "#5B5F6B",
    "alt": "#F5F5F5",
    "ext": 7822,
@@ -5895,7 +5895,8 @@
      "nation": "Brazil",
      "ext": 267815
     }
-   ]
+   ],
+   "manual": true
   },
   {
    "id": "AMA",
@@ -6273,7 +6274,7 @@
   },
   {
    "id": "AVS",
-   "name": "AVS",
+   "name": "AVS 푸테볼",
    "short": "AVS",
    "color": "#5B5F6B",
    "alt": "#F5F5F5",
@@ -6606,7 +6607,8 @@
      "nation": "Colombia",
      "ext": 182441
     }
-   ]
+   ],
+   "manual": true
   }
  ]
 }

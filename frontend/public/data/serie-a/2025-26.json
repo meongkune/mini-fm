@@ -1153,7 +1153,7 @@
   {
    "id": "ATA",
    "name": "아탈란타 BC",
-   "short": "아탈란타 BC",
+   "short": "아탈란타",
    "color": "#151515",
    "alt": "#1F4FB0",
    "ext": 102,
@@ -1522,7 +1522,8 @@
      "nation": "Italy",
      "ext": 217758
     }
-   ]
+   ],
+   "manual": true
   },
   {
    "id": "BOL",
@@ -1901,7 +1902,7 @@
   {
    "id": "CAG",
    "name": "칼리아리 칼초",
-   "short": "칼리아리 칼초",
+   "short": "칼리아리",
    "color": "#D7262F",
    "alt": "#132257",
    "ext": 104,
@@ -2270,7 +2271,8 @@
      "nation": "France",
      "ext": 289719
     }
-   ]
+   ],
+   "manual": true
   },
   {
    "id": "GEN",
@@ -2651,8 +2653,8 @@
   },
   {
    "id": "INT",
-   "name": "Inter",
-   "short": "Inter",
+   "name": "인테르 밀란",
+   "short": "인테르",
    "color": "#1F4FB0",
    "alt": "#151515",
    "ext": 108,
@@ -3025,7 +3027,8 @@
      "nation": "Italy",
      "ext": 215433
     }
-   ]
+   ],
+   "manual": true
   },
   {
    "id": "JUV",
@@ -4528,7 +4531,7 @@
   {
    "id": "UDI",
    "name": "우디네세 칼초",
-   "short": "우디네세 칼초",
+   "short": "우디네세",
    "color": "#F5F5F5",
    "alt": "#151515",
    "ext": 115,
@@ -4862,7 +4865,8 @@
      "nation": "Italy",
      "ext": 285327
     }
-   ]
+   ],
+   "manual": true
   },
   {
    "id": "HVE",
@@ -6740,7 +6744,7 @@
   {
    "id": "USL",
    "name": "US 레체",
-   "short": "US 레체",
+   "short": "레체",
    "color": "#F2C500",
    "alt": "#D7262F",
    "ext": 5890,
@@ -7109,12 +7113,13 @@
      "nation": "Italy",
      "ext": 242550
     }
-   ]
+   ],
+   "manual": true
   },
   {
    "id": "COM",
    "name": "코모 1907",
-   "short": "코모 1907",
+   "short": "코모",
    "color": "#6CABDD",
    "alt": "#F5F5F5",
    "ext": 7397,
@@ -7485,7 +7490,8 @@
      "nation": "Senegal",
      "ext": 218474
     }
-   ]
+   ],
+   "manual": true
   }
  ]
 }

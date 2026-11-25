@@ -4492,7 +4492,7 @@
   {
    "id": "GOA",
    "name": "고 어헤드 이글스",
-   "short": "고",
+   "short": "고 어헤드",
    "color": "#D7262F",
    "alt": "#F2C500",
    "ext": 718,
@@ -4861,7 +4861,8 @@
      "nation": "Netherlands",
      "ext": 248997
     }
-   ]
+   ],
+   "manual": true
   },
   {
    "id": "TEL",
@@ -6365,7 +6366,7 @@
   },
   {
    "id": "SPA",
-   "name": "AC 스파르타 프라하",
+   "name": "스파르타 로테르담",
    "short": "스파르타",
    "color": "#D7262F",
    "alt": "#F5F5F5",
@@ -6725,7 +6726,8 @@
      "nation": "Netherlands",
      "ext": 7592
     }
-   ]
+   ],
+   "manual": true
   }
  ]
 }

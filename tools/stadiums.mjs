@@ -35,9 +35,12 @@ for (const [code, lid] of Object.entries(LEAGUES)) {
   const season = JSON.parse(fs.readFileSync(path.join(DATA, index.leagues.find((l) => l.id === lid).seasons[0].file), 'utf8'))
   const fd = await fetch(`https://api.football-data.org/v4/competitions/${code}/teams?season=2025`, { headers: { 'X-Auth-Token': FD } }).then((r) => r.json())
   const byExt = Object.fromEntries((fd.teams || []).map((t) => [t.id, t]))
+  // 손으로 고친 구장(manual: true)은 다시 돌려도 유지 — TheSportsDB 이름 검색이 같은 이름의 다른 구단(호주 뉴캐슬 제츠 등)을 잡는 일이 많았다
+  const manual = Object.fromEntries(Object.entries(out[lid] || {}).filter(([, v]) => v.manual))
   out[lid] = {}
   let found = 0
   for (const t of season.teams) {
+    if (manual[t.id]) { out[lid][t.id] = manual[t.id]; found++; continue }
     const en = byExt[t.ext]
     if (!en) continue
     const rec = { name: en.venue || null, cap: null }

@@ -781,7 +781,7 @@
   {
    "id": "QPR",
    "name": "퀸스 파크 레인저스 FC",
-   "short": "레인저스",
+   "short": "QPR",
    "color": "#1F4FB0",
    "alt": "#F5F5F5",
    "ext": 69,
@@ -1150,7 +1150,8 @@
      "nation": "Australia",
      "ext": 218038
     }
-   ]
+   ],
+   "manual": true
   },
   {
    "id": "STK",
@@ -6333,7 +6334,7 @@
   {
    "id": "SHE",
    "name": "셰필드 유나이티드 FC",
-   "short": "유나이티드",
+   "short": "셰필드 Utd",
    "color": "#D7262F",
    "alt": "#F5F5F5",
    "ext": 356,
@@ -6703,7 +6704,8 @@
      "nation": "England",
      "ext": 7875
     }
-   ]
+   ],
+   "manual": true
   },
   {
    "id": "MIL",
@@ -8571,7 +8573,7 @@
   {
    "id": "OXF",
    "name": "옥스퍼드 유나이티드 FC",
-   "short": "유나이티드",
+   "short": "옥스퍼드",
    "color": "#F2C500",
    "alt": "#1F4FB0",
    "ext": 1082,
@@ -8940,7 +8942,8 @@
      "nation": "England",
      "ext": 187412
     }
-   ]
+   ],
+   "manual": true
   }
  ]
 }

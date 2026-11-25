@@ -30,8 +30,8 @@
  "teams": [
   {
    "id": "ATH",
-   "name": "올덤 애슬레틱 AFC",
-   "short": "올덤 애슬레틱",
+   "name": "아틀레틱 빌바오",
+   "short": "아틀레틱",
    "color": "#D7262F",
    "alt": "#F5F5F5",
    "ext": 77,
@@ -400,7 +400,8 @@
      "nation": "Ghana",
      "ext": 32629
     }
-   ]
+   ],
+   "manual": true
   },
   {
    "id": "ATL",
@@ -3028,7 +3029,7 @@
   {
    "id": "LEV",
    "name": "레반테 UD",
-   "short": "레반테 UD",
+   "short": "레반테",
    "color": "#1F4FB0",
    "alt": "#F5F5F5",
    "ext": 88,
@@ -3397,7 +3398,8 @@
      "nation": "Spain",
      "ext": 290072
     }
-   ]
+   ],
+   "manual": true
   },
   {
    "id": "MAL",
@@ -4152,7 +4154,7 @@
   {
    "id": "RSO",
    "name": "레알 소시에다드",
-   "short": "레알",
+   "short": "소시에다드",
    "color": "#1F4FB0",
    "alt": "#F5F5F5",
    "ext": 92,
@@ -4521,7 +4523,8 @@
      "nation": "Iceland",
      "ext": 182319
     }
-   ]
+   ],
+   "manual": true
   },
   {
    "id": "VIL",
@@ -4900,8 +4903,8 @@
   },
   {
    "id": "VAL",
-   "name": "Valencia",
-   "short": "Valencia",
+   "name": "발렌시아 CF",
+   "short": "발렌시아",
    "color": "#F5F5F5",
    "alt": "#F37021",
    "ext": 95,
@@ -5270,7 +5273,8 @@
      "nation": "Spain",
      "ext": 181914
     }
-   ]
+   ],
+   "manual": true
   },
   {
    "id": "ALA",

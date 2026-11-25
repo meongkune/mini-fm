@@ -1531,7 +1531,7 @@
   {
    "id": "BOT",
    "name": "보타포구 FR",
-   "short": "보타포구 FR",
+   "short": "보타포구",
    "color": "#151515",
    "alt": "#F5F5F5",
    "ext": 1770,
@@ -1901,7 +1901,8 @@
      "nation": "Brazil",
      "ext": 206708
     }
-   ]
+   ],
+   "manual": true
   },
   {
    "id": "CRU",
