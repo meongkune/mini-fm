@@ -96,6 +96,44 @@ export function detailOf(p) {
   return c
 }
 
+// ---------- 플레이 스타일 태그 ----------
+// 세부 능력치 중 '실제 기록 기반'이고 중심값보다 확실히 높은(=그 선수만의 강점) 항목만 태그로 — 추정값으로는 붙이지 않는다
+//   [태그, 능력치, 최소 값(30~99), 중심값보다 최소 몇 높아야, 역할 조건]
+const WIDE = ['LB', 'RB', 'LWB', 'RWB', 'LM', 'RM', 'LW', 'RW']
+const STYLE_RULES = [
+  ['해결사', '결정력', 82, 5, ['ST', 'LW', 'RW', 'AM']],
+  ['뒷공간 침투', '침투', 80, 5, null],
+  ['볼 운반', '운반', 78, 6, null],
+  ['드리블러', '드리블', 80, 6, null],
+  ['플레이메이커', '찬스 창출', 80, 6, null],
+  ['패스 마스터', '패스', 82, 6, ['CB', 'DM', 'CM', 'AM', 'LB', 'RB']],
+  ['크로서', '크로스', 78, 7, WIDE],
+  ['타깃맨', '공중볼', 80, 5, ['ST']],
+  ['공중볼 장악', '공중볼', 82, 5, ['CB', 'DM']],
+  ['압박 엔진', '압박', 78, 6, null],
+  ['파이터', '투쟁심', 78, 6, null],
+  ['볼 탈취', '태클', 80, 6, null],
+  ['수비 리더', '위치 선정', 82, 6, ['CB', 'DM', 'LB', 'RB']],
+  ['볼 지킴이', '안정성', 82, 6, ['DM', 'CM', 'CB']],
+  ['선방 장인', '선방률', 82, 5, ['GK']],
+  ['빌드업 골키퍼', '빌드업', 80, 6, ['GK']],
+]
+/** 최대 3개 [{ tag, label(능력치), v }] — 강점이 클수록 앞 */
+export function styleTags(p) {
+  const d = detailOf(p)
+  const role = roleOf(p)
+  const out = []
+  for (const [tag, label, min, edge, roles] of STYLE_RULES) {
+    const i = d.labels.indexOf(label)
+    if (i < 0 || d.est[i] || (roles && !roles.includes(role))) continue
+    const v = d.values[i]
+    const gap = v - clamp(softTop(detailBase(p, label)))
+    // 중심값보다 확실히 높거나, 중심값이 이미 높은 최상위 선수는 값 자체가 아주 높으면(91 이상 ≈ 1~20점의 17 이상) 인정
+    if (((v >= min && gap >= edge) || v >= 91) && !out.some((o) => o.label === label)) out.push({ tag, label, v, gap, score: gap + (v - 85) / 2 })
+  }
+  return out.sort((a, b) => b.score - a.score).slice(0, 3)
+}
+
 /** 카드에 보여줄 포지션 핵심 능력치 3개 [[이름, 값]] */
 export function keyAttrs(p) {
   const a = attrsOf(p)

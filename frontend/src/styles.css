@@ -1294,6 +1294,9 @@ html.desktop .tabs-line { position: static; margin: 0 0 12px; padding: 0; backgr
 .da-list { grid-template-columns: 1fr 1fr; column-gap: 14px; }
 .da-list li { grid-template-columns: 58px 1fr 28px; }
 .da-list li.est { opacity: .6; }
+.da-list li.res span { color: var(--text); }
+.da-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.da-tags .chip { cursor: default; }
 .da-note { margin: 6px 0 0; }
 .screen .attr-radar { grid-template-columns: 130px 1fr; }
 .ask-price { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; padding: 6px 10px 8px; font-size: .7rem; background: rgba(124, 92, 255, .08); border-bottom: 1px solid var(--line); }
