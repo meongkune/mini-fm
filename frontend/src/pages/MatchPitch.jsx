@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { ink, short } from '../store.jsx'
 import { clockText } from '../engine/match.js'
 import { H, W, applyRestart, computeFrame, setPieceFrame } from '../engine/positions.js'
+import { SCENE_LABEL } from '../engine/chain.js'
 
 const SP_LABEL = { corner: '🚩 코너킥', fk: '🎯 직접 프리킥', fkx: '🎯 프리킥 크로스', pen: '⚠️ 페널티킥' }
 const RESTART_LABEL = { goalkick: '골킥', gk: '골키퍼가 잡아냅니다', throw: '스로인', fk: '프리킥', offside: '오프사이드 → 프리킥' }
@@ -17,6 +18,14 @@ function toScreen(x, y, myIdx, land = false) {
 
 // 찬스가 난 통로 (개인 매치업) — 경기장 위 공격 표시에 쓴다
 const LANE_LABEL = { left: '왼쪽 측면 공격', right: '오른쪽 측면 공격', center: '중앙 돌파', air: '공중볼 공격' }
+const SIDE_KO = { left: '왼쪽 ', right: '오른쪽 ' }
+/** 사슬 엔진의 장면 이름: '오른쪽 측면 돌파 → 크로스', '짧은 빌드업 · 압박에 뺏김' */
+function sceneText(tick) {
+  if (tick.ev === 'press') return '짧은 빌드업 · 압박에 뺏김'
+  const head = tick.ev === 'dribble' ? `${SIDE_KO[tick.ch] || ''}측면 돌파` : SCENE_LABEL[tick.ev] || '공격'
+  const fin = { cross: '크로스', oneOnOne: '1대1', cutback: '컷백', knock: '떨궈 준 공' }[tick.fin]
+  return fin ? `${head} → ${fin}` : head
+}
 
 /**
  * tactics: [홈 전술, 원정 전술] — 선수 위치가 철학·라인·압박·폭을 따라 달라진다 (engine/positions.js)
@@ -73,7 +82,7 @@ export default function MatchPitch({ home, away, lineups, tick, duration = 300, 
   const fly = Math.max(160, Math.min(650, duration * 0.4))
   const teams = [home, away]
   const goalFlash = tick?.k === 'goal' && stage === 1
-  const attackLabel = tick ? `${clockText(tick.m, tick.plus)}' ${short(teams[tick.t])} ${tick.sp ? SP_LABEL[tick.sp] : tick.ch ? LANE_LABEL[tick.ch] : '공격'}` : idleLabel
+  const attackLabel = tick ? `${clockText(tick.m, tick.plus)}' ${short(teams[tick.t])} ${tick.sp ? SP_LABEL[tick.sp] : tick.ev ? sceneText(tick) : tick.ch ? LANE_LABEL[tick.ch] : '공격'}` : idleLabel
   const mine = teams[myIdx]
   const theirs = teams[1 - myIdx]
 

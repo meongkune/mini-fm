@@ -52,6 +52,38 @@ for (let k = 0; k < 40; k++) {
   if (r[0] !== r[1] || r[1] !== r[2]) diff++
 }
 
+// 내 경기 엔진(공격 전개 사슬): 같은 seed면 1분씩 재생 · 건너뛰기 · 빠른 계산이 같아야 하고,
+//   경기 도중 상태를 저장했다가(JSON) 불러와 이어 가도 같은 경기여야 한다. 결과 분포도 빠른 엔진과 같은 범위여야 한다
+let diffMine = 0
+let diffSave = 0
+for (let k = 0; k < 30; k++) {
+  const h = pl[k % 20]
+  const a = pl[(k * 7 + 3) % 20]
+  if (h === a) continue
+  const ctx = { teams: [h, a], status: {} }
+  const sig = (m) => JSON.stringify([m.score, m.scorers.map((s) => [s.playerId, s.minute, s.plus]), m.stats.map((s) => [s.shots, s.corners, s.fouls])])
+  const run = (mode) => {
+    let m = M.createMatch({ home: h, away: a, seed: 2000 + k, status: {}, engine: 'chain' })
+    if (mode === 'step') { while (!M.halfOver(m, 2)) M.step(m, ctx) }
+    else if (mode === 'skip') { M.advance(m, ctx, 45); M.advance(m, ctx, 90) }
+    else if (mode === 'save') { M.advance(m, ctx, 31); m = JSON.parse(JSON.stringify(m)); M.advance(m, ctx, 67, { withEvents: false }); m = JSON.parse(JSON.stringify(m)); M.advance(m, ctx, 90) }
+    else M.advance(m, ctx, 90, { withEvents: false })
+    return sig(m)
+  }
+  const r = [run('step'), run('skip'), run('quick')]
+  if (r[0] !== r[1] || r[1] !== r[2]) diffMine++
+  if (run('save') !== r[0]) diffSave++
+}
+const C = { n: 0, goals: 0, d: 0, sh: 0 }
+let cseed = 1
+for (const h of pl) for (const a of pl) {
+  if (h === a) continue
+  const m = M.createMatch({ home: h, away: a, seed: cseed++ * 7919, status: {}, engine: 'chain' })
+  M.advance(m, { teams: [h, a], status: {} }, 90, { withEvents: false })
+  C.n++; C.goals += m.score[0] + m.score[1]; C.sh += m.stats[0].shots + m.stats[1].shots
+  if (m.score[0] === m.score[1]) C.d++
+}
+
 const pct = (v) => (v / T.n) * 100
 const checks = [
   ['경기당 골', T.goals / T.n, 2.3, 3.3, (v) => v.toFixed(2)],
@@ -60,6 +92,11 @@ const checks = [
   ['세트피스 골 비율', (T.sp / T.goals) * 100, 15, 38, (v) => `${v.toFixed(1)}%`],
   ['점유율 70% 넘는 경기', pct(T.poss70), 0, 20, (v) => `${v.toFixed(1)}%`],
   ['배속·건너뛰기 결과 불일치', diff, 0, 0, (v) => `${v}경기`],
+  ['[내 경기 엔진] 경기당 골', C.goals / C.n, 2.3, 3.3, (v) => v.toFixed(2)],
+  ['[내 경기 엔진] 무승부', (C.d / C.n) * 100, 16, 31, (v) => `${v.toFixed(1)}%`],
+  ['[내 경기 엔진] 경기당 슛', C.sh / C.n, 22, 30, (v) => v.toFixed(1)],
+  ['[내 경기 엔진] 배속·건너뛰기 결과 불일치', diffMine, 0, 0, (v) => `${v}경기`],
+  ['[내 경기 엔진] 저장 후 이어 하기 불일치', diffSave, 0, 0, (v) => `${v}경기`],
 ]
 let bad = 0
 console.log(`프리미어리그·분데스리가 ${T.n}경기 시뮬레이션`)

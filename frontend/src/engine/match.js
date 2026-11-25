@@ -7,6 +7,7 @@ import { ROLE_POS, assignSlots, buildSlots, fitOf, shapeMods } from './formation
 import { aiTactics, edges, tacOf } from './tactics.js'
 import { CHANNEL_LABEL, aerialOf, channels } from './matchups.js'
 import { attrsOf, detailOf } from '../game/attributes.js'
+import { playChain } from './chain.js'
 
 // 값이 없으면 철학(균형)의 기본값을 쓴다 — 여기에 line·tempo를 적어 두면 내 구단의 '배치에서 계산되는 수비 라인'을 덮어쓴다
 const DEFAULT_TACTICS = { formation: '4-4-2' }
@@ -116,7 +117,11 @@ export function pickLineup(team, formation = '4-4-2', status = {}, { useConditio
   return assignSlots(team, formation, { status, useCondition, keep, available: (id) => available(status, id) }).filter(Boolean)
 }
 
-export function createMatch({ home, away, homeCfg = {}, awayCfg = {}, seed, status = {}, myIdx = null }) {
+/**
+ * engine: 'chain' = 공격 전개 사슬(engine/chain.js, 장면이 위치·선수 대결에서 생긴다) · 'quick' = 한 번 주사위(빠름)
+ *   정하지 않으면 내 경기(myIdx가 있는 경기)는 chain, 다른 팀끼리의 경기는 quick. 두 엔진의 결과 분포는 같게 맞춰 둔다
+ */
+export function createMatch({ home, away, homeCfg = {}, awayCfg = {}, seed, status = {}, myIdx = null, engine = null }) {
   // 리그 수준 보정: 엔진의 여러 기준(AI 전술 성향·상성 문턱)이 프리미어리그 수준의 절대값에 맞춰져 있어서, 수준이 낮은 리그는
   //   거의 모든 팀이 '약팀'으로 분류돼 수비적으로 나오고 골이 덜 나왔다 (에레디비시 2.2골 — 실제는 3골대).
   //   두 팀의 평균 수준이 기준(81)보다 낮으면 양 팀을 똑같이 올려서 본다 → 두 팀의 차이는 그대로
@@ -143,7 +148,7 @@ export function createMatch({ home, away, homeCfg = {}, awayCfg = {}, seed, stat
   const gap = levelOf(home) - levelOf(away)
   const mis = clamp((Math.abs(gap) - MISMATCH.from) * MISMATCH.k, 0, MISMATCH.max)
   const match = {
-    seed: s, rng: s, minute: 0, myIdx,
+    seed: s, rng: s, minute: 0, myIdx, engine: engine || (myIdx != null ? 'chain' : 'quick'),
     plus: 0, added: [null, null], stop: 0, // 추가시간: 지금 +몇 분 · 전반/후반 추가시간 · 쌓인 지연(골·교체·부상·카드)
     teams: [home.id, away.id],
     sides: [sideState(home, homeCfg), sideState(away, awayCfg)],
@@ -592,7 +597,9 @@ export function step(match, ctx, { withEvents = true } = {}) {
   if (withEvents && minute === 46 && !match.plus) match.events.push({ minute: 45, type: 'info', text: '후반전 시작!' })
   const r = [sideRatings(match, ctx, 0), sideRatings(match, ctx, 1)]
   const mid = [r[0].midfield + HOME_ADV, r[1].midfield] // 홈 어드밴티지
-  const atk = rng.random() < clamp(0.5 + (mid[0] - mid[1]) / K_POSS + (r[0].tMid - r[1].tMid) / K_TMID, 0.22, 0.78) ? 0 : 1
+  const chainOn = match.engine === 'chain'
+  const drawn = rng.random() < clamp(0.5 + (mid[0] - mid[1]) / K_POSS + (r[0].tMid - r[1].tMid) / K_TMID, 0.22, 0.78) ? 0 : 1
+  const atk = chainOn && match.counter ? match.counter.t : drawn
   const dfn = 1 - atk
   const S = match.stats
   S[atk].poss++
@@ -738,13 +745,13 @@ export function step(match, ctx, { withEvents = true } = {}) {
   }
 
   // 오픈 플레이 슈팅: long=true면 먼 거리·수비 맞고 굴절되는 낮은 확률의 슈팅
-  const shoot = (long) => {
+  const shoot = (long, opts = {}) => {
     const shooters = field(atk)
     if (!shooters.length) return
     const w = long ? SHOT_W.long : SHOT_W.open
     // 공격력이 높은 선수일수록 슈팅 기회가 많다. 박스 안 찬스는 중앙 공격수(ST)에게 더 몰린다 → 득점왕이 실제처럼 25~30골
     // 개인 매치업: 찬스가 어느 통로(왼쪽·오른쪽·중앙·공중볼)에서 났는가 — 전술이 그 통로를 쓰는 비중 × 그 통로의 유불리
-    const ch = !long && lanes.length ? rng.weighted(lanes, lanes.map((c) => c.w * Math.exp(c.adv / MU_PICK))) : null
+    const ch = opts.lane !== undefined ? opts.lane : !long && lanes.length ? rng.weighted(lanes, lanes.map((c) => c.w * Math.exp(c.adv / MU_PICK))) : null
     const wide = ch && (ch.key === 'left' || ch.key === 'right') ? ch.a.id : null // 그 측면을 뚫은 선수
     const teamAtt = avg(shooters.map(shotOf), 70)
     const posAtt = Object.fromEntries(['DF', 'MF', 'FW'].map((k) => [k, avg(shooters.filter((p) => p.pos === k).map(shotOf), teamAtt)]))
@@ -752,12 +759,12 @@ export function step(match, ctx, { withEvents = true } = {}) {
     const easing = match.score[atk] - match.score[dfn] >= 2 // 이 분이 시작될 때 2골 넘게 앞서 있었나
     const shotPow = easing ? SHOT_W.easePow : SHOT_W.pow
     const stK = easing ? SHOT_W.easeSt : SHOT_W.st
-    const shooter = rng.weighted(shooters, shooters.map((p) => w[p.pos] * (!long && p.slot === 'ST' ? stK : 1) * (shotOf(p) / refOf(p)) ** shotPow * SHOT_W.mark ** (match.ps[p.id]?.g || 0)))
+    const shooter = rng.weighted(shooters, shooters.map((p) => w[p.pos] * (!long && p.slot === 'ST' ? stK : 1) * (shotOf(p) / refOf(p)) ** shotPow * SHOT_W.mark ** (match.ps[p.id]?.g || 0) * (opts.shooterK ? opts.shooterK(p) : 1)))
     const helpers = shooters.filter((p) => p.id !== shooter.id)
-    const assister = helpers.length && rng.random() < (long ? 0.35 : 0.78) ? rng.weighted(helpers, helpers.map((p) => ({ MF: 2.2, FW: 1.6, DF: 0.7 })[p.pos] * (p.id === wide ? crossOf(p) * 3 : createOf(p)))) : null
-    if (ch) { tick.ch = ch.key; tick.w = ch.a.id } // 화면: 어느 통로에서, 누가 만든 찬스인가
-    const quality = long ? LONG_Q : OPEN_Q + flow.q + (ch ? clamp(ch.adv, -MU_CAP, MU_CAP) / K_MU : 0) + (finishOf(shooter) - keeper) / K_FINISH + (a - d) / K_QUAL + tEdge / K_TQUAL + r[atk].quality
-    const pOn = long ? 0.28 : clamp(0.45 + (shotOf(shooter) - 60) / 200, 0.25, 0.75)
+    const assister = opts.assister === false ? null : opts.assister && opts.assister.id !== shooter.id ? opts.assister : helpers.length && rng.random() < (long ? 0.35 : 0.78) ? rng.weighted(helpers, helpers.map((p) => ({ MF: 2.2, FW: 1.6, DF: 0.7 })[p.pos] * (p.id === wide ? crossOf(p) * 3 : createOf(p)))) : null
+    if (ch) { tick.ch = ch.key; tick.w = tick.w ?? ch.a.id } // 화면: 어느 통로에서, 누가 만든 찬스인가
+    const quality = long ? LONG_Q : OPEN_Q + flow.q + (ch ? clamp(ch.adv, -MU_CAP, MU_CAP) / K_MU : 0) + (finishOf(shooter) - keeper) / K_FINISH + (a - d) / K_QUAL + tEdge / K_TQUAL + r[atk].quality + (opts.q || 0)
+    const pOn = long ? 0.28 : clamp(0.45 + (shotOf(shooter) - 60) / 200 + (opts.on || 0), 0.25, 0.75)
     const pGoal = clamp(quality, long ? 0.04 : 0.08, 0.55)
     const res = resolve({ shooter, assister, pOn, pGoal, how: long ? 'long' : 'open' })
     if (res === 'goal') {
@@ -773,44 +780,59 @@ export function step(match, ctx, { withEvents = true } = {}) {
     }
   }
 
-  if (rng.random() > (CHANCE * (0.84 + 0.32 * Math.min(1, minute / 90)) + r[atk].chance + (a - d) / K_CHANCE + (r[atk].create - r[dfn].organise) / K_CRE + tEdge / K_TCHANCE) * flow.ch * (atk === 0 ? HOME.ch : 1) * (1 - (match.mis?.[atk] ?? 0))) {
+  // 반칙 처리: 카드 판정 → 위치에 따라 페널티킥·직접 프리킥·크로스 프리킥·중원 프리킥
+  const commitFoul = (fouler, zone) => {
+    S[dfn].fouls++
+    const c = rng.random()
+    const sd = match.sides[dfn]
+    const yellowAt = zone === 'pen' ? 0.4 : 0.195
+    if (c < 0.0015 || (c < 0.035 && sd.yellows[fouler.id])) { // 경고 받은 선수는 조심하므로 두 번째 경고 확률이 낮다
+      const second = c >= 0.0015
+      S[dfn].red++
+      if (second) S[dfn].yellow++
+      match.ps[fouler.id].rc++
+      if (second) match.ps[fouler.id].yc++
+      sd.sentOff.push(fouler.id)
+      sd.lostRoles = [...(sd.lostRoles || []), sd.slots[sd.onPitch.indexOf(fouler.id)]] // AI 감독이 빈 자리를 메울 때 쓴다
+      removeFromPitch(match, dfn, fouler.id, minute)
+      match.stop += 0.5
+      Object.assign(tick, { k: 'card', p: fouler.id })
+      if (withEvents) match.events.push({ minute, type: 'red', team: dfn, player: fouler.name, text: `🟥 ${fouler.name}(${names[dfn]}) 퇴장! ${second ? '경고 누적입니다.' : '위험한 태클에 곧바로 레드카드.'}` })
+    } else if (c < yellowAt) {
+      S[dfn].yellow++
+      sd.yellows[fouler.id] = 1
+      match.ps[fouler.id].yc++
+      match.stop += 0.2
+      Object.assign(tick, { k: 'card', p: fouler.id })
+      if (withEvents) match.events.push({ minute, type: 'card', team: dfn, player: fouler.name, text: `🟨 ${fouler.name}(${names[dfn]}) 경고. ${zone === 'pen' ? '박스 안에서 무리한 태클이었습니다.' : '거친 태클이었습니다.'}` })
+    }
+    if (zone === 'pen') penalty(fouler)
+    else if (zone === 'fk') directFk()
+    else if (zone === 'fkx') aerialPlay('fkx')
+    else tick.r = 'fk'
+  }
+
+  // 이 공격이 결정적 찬스로 이어질 확률 (전력·전술 상성·경기 흐름·홈·전력 차 밀집 수비)
+  const pCh = (CHANCE * (0.84 + 0.32 * Math.min(1, minute / 90)) + r[atk].chance + (a - d) / K_CHANCE + (r[atk].create - r[dfn].organise) / K_CRE + tEdge / K_TCHANCE) * flow.ch * (atk === 0 ? HOME.ch : 1) * (1 - (match.mis?.[atk] ?? 0))
+  if (chainOn) {
+    // 사슬 엔진: 빌드업 → 전진 → 마무리 (engine/chain.js). 세트피스는 공격의 결과로만 생긴다
+    playChain({
+      match, rng, r, atk, dfn, minute, pCh, lanes, hash, withEvents,
+      t: tacOf(match.sides[atk].tactics), to: tacOf(match.sides[dfn].tactics),
+      skill: { det, shotOf, createOf, crossOf, tackleOf, aerialOf },
+      tick: () => tick, say, shoot, foul: commitFoul, corner: () => aerialPlay('corner'),
+    })
+  } else if (rng.random() > pCh) {
     // 결정적 찬스 없이 끝난 공격: 파울(→ 프리킥·페널티킥), 오프사이드, 중거리 슈팅, 태클, 크로스 → 코너킥
     const x = rng.random()
     const defenders = field(dfn)
     if (x < 0.24 * r[dfn].foul && defenders.length) {
-      S[dfn].fouls++
       // 규율이 낮은(파울·카드가 잦은) 선수가 반칙을 더 자주 한다 — 규율 70 기준 1배, 50이면 약 1.4배, 90이면 약 0.6배
       const fouler = rng.weighted(defenders, defenders.map((p) => ({ DF: 2, MF: 1.6, FW: 0.6 })[p.pos] * clamp((120 - det(p, '규율', 70)) / 50, 0.4, 1.8)))
       // 반칙 위치: 박스 안(페널티킥) · 슈팅 거리(직접 프리킥) · 측면(크로스 프리킥) · 그 밖(그냥 재개)
       const z = rng.random()
       const zone = z < P_PEN ? 'pen' : z < P_PEN + P_FK ? 'fk' : z < P_PEN + P_FK + P_FKX ? 'fkx' : 'mid'
-      const c = rng.random()
-      const sd = match.sides[dfn]
-      const yellowAt = zone === 'pen' ? 0.4 : 0.195
-      if (c < 0.0015 || (c < 0.035 && sd.yellows[fouler.id])) { // 경고 받은 선수는 조심하므로 두 번째 경고 확률이 낮다
-        const second = c >= 0.0015
-        S[dfn].red++
-        if (second) S[dfn].yellow++
-        match.ps[fouler.id].rc++
-        if (second) match.ps[fouler.id].yc++
-        sd.sentOff.push(fouler.id)
-        sd.lostRoles = [...(sd.lostRoles || []), sd.slots[sd.onPitch.indexOf(fouler.id)]] // AI 감독이 빈 자리를 메울 때 쓴다
-        removeFromPitch(match, dfn, fouler.id, minute)
-        match.stop += 0.5
-        Object.assign(tick, { k: 'card', p: fouler.id })
-        if (withEvents) match.events.push({ minute, type: 'red', team: dfn, player: fouler.name, text: `🟥 ${fouler.name}(${names[dfn]}) 퇴장! ${second ? '경고 누적입니다.' : '위험한 태클에 곧바로 레드카드.'}` })
-      } else if (c < yellowAt) {
-        S[dfn].yellow++
-        sd.yellows[fouler.id] = 1
-        match.ps[fouler.id].yc++
-        match.stop += 0.2
-        Object.assign(tick, { k: 'card', p: fouler.id })
-        if (withEvents) match.events.push({ minute, type: 'card', team: dfn, player: fouler.name, text: `🟨 ${fouler.name}(${names[dfn]}) 경고. ${zone === 'pen' ? '박스 안에서 무리한 태클이었습니다.' : '거친 태클이었습니다.'}` })
-      }
-      if (zone === 'pen') penalty(fouler)
-      else if (zone === 'fk') directFk()
-      else if (zone === 'fkx') aerialPlay('fkx')
-      else tick.r = 'fk'
+      commitFoul(fouler, zone)
     } else if (x < 0.24 * r[dfn].foul + 0.032 * r[dfn].offside) {
       S[atk].offsides++ // 수비 라인이 높을수록 상대가 오프사이드에 자주 걸린다
       tick.r = 'offside'
@@ -823,7 +845,7 @@ export function step(match, ctx, { withEvents = true } = {}) {
   } else {
     shoot(false)
   }
-  if (rng.random() < P_CROSS_CORNER) aerialPlay('corner') // 크로스·돌파가 수비 맞고 나가 코너킥
+  if (!chainOn && rng.random() < P_CROSS_CORNER) aerialPlay('corner') // 크로스·돌파가 수비 맞고 나가 코너킥 (사슬 엔진은 막힌 돌파·크로스에서 직접 나온다)
   // 아무 일 없이 끝난 장면은 가끔 스로인으로 끊긴다 (화면 연출만, 결과에는 영향 없음)
   if (tick.k === 'build' && !tick.r && hash(`throw-${match.seed}-${minute}-${match.plus}`) < 0.32) tick.r = 'throw'
 
@@ -1024,13 +1046,14 @@ export function summarize(match, ctx) {
     mom,
     injuries: match.injuries || [],
     energy,
+    ...(match.cs ? { scenes: match.cs } : {}), // 사슬 엔진: 장면 종류별 [시도, 성공]
   }
 }
 
 /** AI 경기: 이벤트 없이 90분 */
-export function quickMatch(home, away, status, seed) {
+export function quickMatch(home, away, status, seed, { engine = null } = {}) {
   const ctx = { teams: [home, away], status }
-  const match = createMatch({ home, away, seed, status })
+  const match = createMatch({ home, away, seed, status, engine })
   advance(match, ctx, 90, { withEvents: false })
   return summarize(match, ctx)
 }

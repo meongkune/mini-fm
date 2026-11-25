@@ -62,6 +62,11 @@ function passChain(mine, tick, base) {
   if (end) chain[chain.length - 1] = end.id
   // 개인 매치업: 그 통로를 연 선수(측면이면 윙어·풀백, 중앙·공중볼이면 공격수)가 마무리 직전에 공을 잡는다
   if (end && tick.w && tick.w !== end.id && chain.length >= 2 && field.some((p) => p.id === tick.w)) chain[chain.length - 2] = tick.w
+  // 사슬 엔진(tick.ev): 실제로 그 장면을 만든 선수들이 공을 잡는다
+  const has = (id) => id && field.some((p) => p.id === id)
+  if (tick.ev === 'press' && has(tick.a)) return [chain[0] === tick.a ? chain[1] ?? tick.a : chain[0], tick.a] // 뒤에서 돌리다가 뺏긴다
+  if (tick.ev === 'long' && has(tick.a) && has(tick.w) && tick.a !== tick.w) return end && end.id !== tick.w ? [tick.a, tick.w, end.id] : [tick.a, tick.w]
+  if (!end && has(tick.w)) chain[chain.length - 1] = tick.w
   return chain
 }
 
@@ -186,13 +191,15 @@ export function computeFrame(lineups, tick, sub, shotStage, tactics = [null, nul
   const chain = passChain(lineups[atk], tick, base)
   const holder = chain[Math.min(sub, chain.length - 1)]
   const prog = chain.length > 1 ? Math.min(1, sub / (chain.length - 1)) : 1 // 공격 진행도 0(빌드업)~1(마무리)
-  const A = ATTACK_SHAPE[T[atk].phil] || ATTACK_SHAPE.balanced
+  // 역습 장면은 철학과 상관없이 역습 모양(깊은 곳에서 출발해 앞선이 달린다)
+  const A = tick.ev === 'counter' ? ATTACK_SHAPE.counter : ATTACK_SHAPE[T[atk].phil] || ATTACK_SHAPE.balanced
   // 이번 공격이 어느 측면으로 가는지 (공격 팀 기준 -1 왼쪽 / 1 오른쪽): 매치업 통로가 측면이면 그 쪽
   const laneSide = (tick.ch === 'left' || tick.ch === 'right') && N[atk][tick.w] ? Math.sign(N[atk][tick.w].l) : 0
   const flank = laneSide || (rand(tick.m * 53 + atk) < 0.5 ? -1 : 1)
   const central = tick.ch === 'center' || tick.ch === 'air'
   // 공의 기준점 (공격 팀 기준): 철학에 따라 출발 깊이가 다르고, 슈팅이면 박스 근처까지 간다
-  const au = lerp(A.from, shot ? 88 : A.to, prog)
+  // 압박에 뺏기는 장면은 자기 진영에서 끝나고, 막힌 전진은 박스 앞에서 끝난다
+  const au = lerp(A.from, shot ? 88 : tick.ev === 'press' ? A.from + 8 : tick.ev && tick.ev !== 'build' ? 78 : A.to, prog)
   const spread = central ? 6 : 20 + (T[atk].width / 100) * 8
   const av = H / 2 + flank * spread * Math.sin(Math.min(1, prog * 1.15) * Math.PI) * (shot ? 0.85 : 1) // 측면으로 나갔다가 마무리 때 안으로
   const refW = world(atk, au, av)
@@ -255,10 +262,16 @@ export function computeFrame(lineups, tick, sub, shotStage, tactics = [null, nul
   }
   ball.x = clamp(ball.x, -2.5, W + 2.5)
   ball.y = clamp(ball.y, -1, H + 1)
+  // 공을 뺏긴 장면(사슬 엔진): 마지막 단계에서 뺏은 수비수가 공을 갖는다
+  const lostStep = !!tick.lost && !shot && sub >= chain.length && pos[tick.lost]
+  if (lostStep) {
+    pos[tick.lost] = { ...pos[tick.lost], x: c.x + dir * 0.9, y: c.y + 0.4 }
+    ball = { x: pos[tick.lost].x - dir * 1.1, y: pos[tick.lost].y, z: 0 }
+  }
   // 공이 이 단계로 온 방식: 직선 철학의 첫 전진·먼 거리는 뜬 공, 측면에서 마무리로 들어가는 패스는 크로스
   const last = sub >= chain.length - 1
-  const kind = sub === 0 ? 'ground' : shot && last && !central && tick.ch ? 'cross' : (T[atk].phil === 'direct' && sub === 1) || (T[atk].passing >= 75 && sub === 1) || tick.ch === 'air' ? 'loft' : 'ground'
-  return { pos, ball, carrier: shot && shotStage ? null : holder, steps: chain.length, kind: shot && shotStage ? 'shot' : kind }
+  const kind = tick.ev ? (sub === 0 || lostStep ? 'ground' : tick.ev === 'long' && sub === 1 ? 'loft' : shot && last && tick.fin === 'cross' ? 'cross' : 'ground') : sub === 0 ? 'ground' : shot && last && !central && tick.ch ? 'cross' : (T[atk].phil === 'direct' && sub === 1) || (T[atk].passing >= 75 && sub === 1) || tick.ch === 'air' ? 'loft' : 'ground'
+  return { pos, ball, carrier: shot && shotStage ? null : lostStep ? tick.lost : holder, steps: chain.length + (tick.lost && !shot ? 1 : 0), kind: shot && shotStage ? 'shot' : kind }
 }
 
 /** 진단용: 그 장면에서 한 팀의 블록 모양 (맨 뒷줄 높이·길이·폭) — 철학별 차이를 숫자로 확인한다 */

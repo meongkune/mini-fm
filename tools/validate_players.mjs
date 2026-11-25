@@ -58,7 +58,7 @@ function simulate(lid, withDet) {
   for (let s = 0; s < N; s++) for (const h of teams) for (const a of teams) {
     if (h === a) continue
     const ctx = { teams: [h, a], status: {} }
-    const m = M.createMatch({ home: h, away: a, seed: seed++, status: {} })
+    const m = M.createMatch({ home: h, away: a, seed: seed++, status: {}, ...(process.argv.includes('--mine') ? { engine: 'chain' } : {}) }) // --mine: 내 경기 엔진(공격 전개 사슬)
     M.advance(m, ctx, 90, { withEvents: false })
     for (const t of [h, a]) for (const p of t.players) {
       const ps = m.ps[p.id]

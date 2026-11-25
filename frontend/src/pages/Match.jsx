@@ -424,6 +424,7 @@ export default function Match() {
           </div>
 
           {tab === 'stats' && <StatsPanel stats={S} kits={kits} />}
+          {tab === 'stats' && match.cs && <ScenePanel scenes={match.cs} kits={kits} />}
           {tab === 'lineups' && <LineupPanel match={match} ctx={ctx} kits={kits} rt={rt} myIdx={myIdx} status={status} />}
           {tab === 'feed' && (
             <div className="card log" ref={logRef}>
@@ -480,6 +481,28 @@ function recentForm(results, teamId) {
 }
 
 // 포털 중계 화면처럼 항목별 좌우 비교
+// 장면 종류별 횟수 (공격 전개 사슬): 시도(성공) — 전술에 따라 비율이 달라진다
+const SCENE_ROWS = [['build', '짧은 빌드업'], ['long', '롱볼'], ['dribble', '측면 돌파'], ['combo', '중앙 콤비네이션'], ['through', '스루패스'], ['cross', '크로스 마무리'], ['oneOnOne', '1대1'], ['counter', '역습'], ['longshot', '중거리 슛'], ['press', '압박으로 뺏음']]
+function ScenePanel({ scenes, kits }) {
+  const cell = (side, k) => { const v = scenes[side]?.[k]; return v ? (v[1] === v[0] ? `${v[0]}` : `${v[0]} (${v[1]} 성공)`) : '0' }
+  return (
+    <div className="card scene-stats">
+      <h3>장면 <span className="muted small">공격을 어떻게 풀었나 — 시도 (성공)</span></h3>
+      <table>
+        <tbody>
+          {SCENE_ROWS.map(([k, label]) => (
+            <tr key={k}>
+              <td style={{ color: onDark(kits[0].color) }}>{cell(0, k)}</td>
+              <th>{label}</th>
+              <td style={{ color: onDark(kits[1].color) }}>{cell(1, k)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
+}
+
 function StatsPanel({ stats: S, kits }) {
   const tot = S[0].poss + S[1].poss || 1
   const poss = Math.round((S[0].poss * 100) / tot)

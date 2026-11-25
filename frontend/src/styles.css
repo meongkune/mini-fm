@@ -320,6 +320,10 @@ select { background: var(--panel-2); color: var(--text); border: 1px solid var(-
 .ball.arc.loft.b { animation: ball-loft-b var(--fly) ease-out; }
 .ball.arc.cross.a { animation: ball-cross-a var(--fly) ease-out; }
 .ball.arc.cross.b { animation: ball-cross-b var(--fly) ease-out; }
+.scene-stats table { width: 100%; border-collapse: collapse; font-size: .8rem; }
+.scene-stats th { font-weight: 600; text-align: center; color: var(--muted, #94a3b8); padding: 4px 6px; }
+.scene-stats td { width: 34%; padding: 4px 6px; font-weight: 800; }
+.scene-stats td:first-child { text-align: right; }
 /* 크게 보기 */
 .pitch-big { position: absolute; right: 8px; top: 6px; z-index: 4; width: 28px; height: 28px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, .25); background: rgba(0, 0, 0, .55); color: #fff; font-size: .9rem; cursor: pointer; }
 .pitch-score { position: absolute; left: 12px; top: 8px; z-index: 3; padding: 3px 10px; border-radius: 999px; background: rgba(0, 0, 0, .6); font-size: .8rem; font-weight: 800; }
