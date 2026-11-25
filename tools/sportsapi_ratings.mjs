@@ -19,7 +19,7 @@ if (!KEY) throw new Error('SPORTSAPIPRO_KEY 환경 변수가 없습니다')
 // 우리 리그 ID → SportsAPI(유니크) 대회 ID
 const TOURNAMENTS = {
   'premier-league': 17, 'la-liga': 8, bundesliga: 35, 'serie-a': 23, 'ligue-1': 34,
-  eredivisie: 37, 'primeira-liga': 238, // 챔피언십(18)·브라질(325)은 리그 목록에서 빠져 수집하지 않는다 (2026-11)
+  // 에레디비시(37)·포르투갈(238)·챔피언십(18)·브라질(325)은 리그 목록에서 빠져 수집하지 않는다 (2026-11, 빅5만)
 }
 // SportsAPI 세부 포지션 코드 → 게임 역할
 const ROLE = { GK: 'GK', DC: 'CB', DL: 'LB', DR: 'RB', DM: 'DM', MC: 'CM', ML: 'LM', MR: 'RM', AM: 'AM', LW: 'LW', RW: 'RW', ST: 'ST', CF: 'ST', WBL: 'LWB', WBR: 'RWB' }

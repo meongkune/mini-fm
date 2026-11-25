@@ -26,11 +26,11 @@ export const LC_LEAGUES = {} // 리그 ID → 리그컵에 함께 나가는 리�
 export const lcName = (leagueId) => (leagueId === 'premier-league' ? 'EFL 컵' : '리그컵')
 /** 대회 정보 (유럽 대항전 3개 + 리그컵) */
 export const compOf = (cup) => (cup?.kind === 'league' ? { ...LEAGUE_CUP, name: cup.name, short: cup.name } : COMPS[cup?.tier ?? 0])
-// 리그별 [챔스, 유로파, 컨퍼런스] 출전 팀 수 → 각 대회 32팀
-const BIG = [5, 3, 4]
-const MID = [3, 5, 4]
-// (브라질은 리그 목록에서 빠졌다 — 모자라는 자리는 buildCups가 남은 상위 팀으로 32팀을 채운다)
-export const SLOTS = { 'premier-league': BIG, 'la-liga': BIG, bundesliga: BIG, 'serie-a': BIG, 'ligue-1': MID, eredivisie: MID, 'primeira-liga': MID }
+// 리그별 [챔스, 유로파, 컨퍼런스] 출전 팀 수
+//   2026-11: 리그를 빅5(96팀)만 남기면서 대회 크기를 줄였다 — 예전처럼 3개 대회 32팀씩이면 96팀 전부가 유럽에 나간다.
+//   챔스 16팀(4조) · 유로파 16팀 · 컨퍼런스 없음 → 빅5 팀의 약 3분의 1이 유럽 대항전 (실제 빅5는 리그당 7~8팀)
+export const CUP_SIZE = [16, 16, 0]
+export const SLOTS = { 'premier-league': [4, 2, 0], 'la-liga': [4, 2, 0], bundesliga: [3, 2, 0], 'serie-a': [3, 2, 0], 'ligue-1': [2, 2, 0] }
 export const CUP_LEAGUES = Object.keys(SLOTS)
 /** 대회 안의 팀 키: 리그가 달라도 약자가 같을 수 있어(FCB=바르셀로나·바이에른) 리그 ID를 붙인다 */
 export const cupKey = (leagueId, teamId) => `${leagueId}/${teamId}`
@@ -58,6 +58,7 @@ export function buildCups(leagues, { seed = 1, totalRounds = 38 } = {}) {
   const used = new Set()
   const cups = []
   COMPS.forEach((comp, ci) => {
+    if (!CUP_SIZE[ci]) return
     const picked = []
     for (const p of pools) {
       for (const t of p.ranked.slice(p.next, p.next + SLOTS[p.leagueId][ci])) picked.push({ t, leagueId: p.leagueId })
@@ -66,7 +67,7 @@ export function buildCups(leagues, { seed = 1, totalRounds = 38 } = {}) {
     // 리그 데이터가 빠져 자리가 남으면 아직 안 뽑힌 팀 중 리그 순위가 높은 팀부터 채운다
     const left = pools.flatMap((p) => p.ranked.slice(p.next).map((t, i) => ({ t, leagueId: p.leagueId, i, p })))
       .filter((e) => !used.has(cupKey(e.leagueId, e.t.id))).sort((a, b) => a.i - b.i || strength(b.t) - strength(a.t))
-    const size = picked.length + left.length >= 32 ? 32 : 16
+    const size = Math.min(CUP_SIZE[ci], picked.length + left.length >= 32 ? 32 : 16)
     while (picked.length < size && left.length) { const e = left.shift(); e.p.next++; picked.push(e) }
     const entrants = picked.slice(0, size).map((e) => ({ t: e.t, leagueId: e.leagueId, key: cupKey(e.leagueId, e.t.id) }))
     entrants.forEach((e) => used.add(e.key))
@@ -229,7 +230,7 @@ export function leagueZones(leagueId, zones = []) {
   if (!s) return zones
   const colors = ['#3b82f6', '#f59e0b', '#22c55e']
   let from = 1
-  const cups = COMPS.map((c, i) => { const z = { from, to: from + s[i] - 1, label: c.name, color: colors[i] }; from += s[i]; return z })
+  const cups = COMPS.map((c, i) => { const z = { from, to: from + s[i] - 1, label: c.name, color: colors[i] }; from += s[i]; return z }).filter((z) => z.to >= z.from)
   return [...cups, ...zones.filter((z) => z.from < 0)]
 }
 

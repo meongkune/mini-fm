@@ -53,19 +53,6 @@
    ]
   },
   {
-   "id": "eredivisie",
-   "name": "에레디비시",
-   "country": "네덜란드",
-   "seasons": [
-    {
-     "id": "2025-26",
-     "file": "eredivisie/2025-26.json",
-     "teams": 18
-    }
-   ],
-   "marketOnly": true
-  },
-  {
    "id": "ligue-1",
    "name": "리그 1",
    "country": "프랑스",
@@ -76,19 +63,6 @@
      "teams": 18
     }
    ]
-  },
-  {
-   "id": "primeira-liga",
-   "name": "프리메이라 리가",
-   "country": "포르투갈",
-   "seasons": [
-    {
-     "id": "2025-26",
-     "file": "primeira-liga/2025-26.json",
-     "teams": 18
-    }
-   ],
-   "marketOnly": true
   }
  ]
 }
