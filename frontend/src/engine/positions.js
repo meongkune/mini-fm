@@ -95,7 +95,7 @@ function normalised(xi) {
     const ys = field.map((p) => p.sy)
     const lo = Math.min(...ys)
     const span = Math.max(1, Math.max(...ys) - lo)
-    for (const p of field) out[p.id] = { d: (p.sy - lo) / span, l: (p.sx - 50) / 50, pos: posOf(p), slot: p.slot }
+    for (const p of field) out[p.id] = { d: (p.sy - lo) / span, l: clamp((p.sx - 50) / 40, -1.2, 1.2), pos: posOf(p), slot: p.slot }
   } else {
     for (const pos of ['DF', 'MF', 'FW']) {
       const row = field.filter((p) => posOf(p) === pos)
@@ -124,19 +124,19 @@ export function computeFrame(lineups, tick, sub, shotStage, tactics = [null, nul
   const rel = (side, x, y) => ({ u: side === 0 ? x : W - x, v: side === 0 ? y : H - y })
 
   // 수비 블록 (공이 그 팀 골문에서 bu만큼 떨어져 있고 좌우로 bv에 있을 때)
-  const defend = (side, bu, bv) => {
+  const defend = (side, bu, bv, halfW = null) => {
     const t = T[side]
     const counter = t.approach === 'counter'
     let back = 14 + 22 * (t.line / 100) + (bu - 52.5) * 0.45 // 라인 높이 + 공을 따라 물러서고 올라옴
     if (t.press >= 60 && bu > 62) back += ((t.press - 50) / 50) * 9 // 전방 압박: 상대 진영에서 블록
     back = clamp(Math.min(back, bu - 3), 6, 62)
     const len = 30 - ((t.press - 50) / 50) * 3 - (counter ? 4 : 0) // 두 줄 사이 간격: 내려앉는 팀일수록 촘촘
-    const half = 17 - (counter ? 2 : 0)
+    const half = halfW ?? 19 - (counter ? 2 : 0) // 수비 블록 폭 약 38m (전술 탭에서 좌우로 벌려 놓은 만큼)
     const out = {}
     for (const p of lineups[side]) {
       const n = N[side][p.id]
       if (n.pos === 'GK') { out[p.id] = { u: clamp(3 + (back - 14) * 0.18, 2.5, 11), v: H / 2 + (bv - H / 2) * 0.22 }; continue }
-      out[p.id] = { u: back + n.d * len, v: H / 2 + n.l * half + (bv - H / 2) * 0.5 }
+      out[p.id] = { u: back + n.d * len, v: clamp(H / 2 + n.l * half + (bv - H / 2) * 0.5, 2.5, H - 2.5) }
     }
     return { out, back }
   }
@@ -146,7 +146,7 @@ export function computeFrame(lineups, tick, sub, shotStage, tactics = [null, nul
     const A = ATTACK_SHAPE[t.phil] || ATTACK_SHAPE.balanced
     const back = clamp(16 + 18 * (t.line / 100) + (au - 30) * 0.45, 12, 60) // 뒤에 남는 수비도 공을 따라 올라온다
     const len = lerp(A.len[0], A.len[1], prog)
-    const half = 20 + 11 * (t.width / 100) + A.wide
+    const half = 23 + 8 * (t.width / 100) + A.wide // 공격 폭 약 46~62m
     const hugs = t.focus === 'wings' || t.width >= 65 // 윙어가 터치라인에 붙어 있나
     const out = {}
     for (const p of lineups[side]) {
@@ -167,16 +167,16 @@ export function computeFrame(lineups, tick, sub, shotStage, tactics = [null, nul
         if (n.slot === 'CB') v += Math.sign(n.l || (hashId(p.id) % 2 ? 1 : -1)) * 4 // 센터백이 벌려 선다
       }
       if (t.phil === 'counter' && DEEP.has(n.slot)) u -= 4 * prog // 중원은 따라가지 못하고 앞선만 달린다
-      out[p.id] = { u: Math.min(u, offside), v }
+      out[p.id] = { u: Math.min(u, offside), v: clamp(v, 2.5, H - 2.5) }
     }
     return out
   }
 
   if (!tick) {
-    // 대기 화면: 두 팀 모두 자기 진영에서 수비 블록 모양으로 선다 (전술이 보이게)
+    // 대기 화면·킥오프: 두 팀 모두 자기 진영에서 전술 탭의 배치 모양대로 선다
     const pos = {}
     for (const side of [0, 1]) {
-      const { out, back } = defend(side, 58, H / 2)
+      const { out, back } = defend(side, 40, H / 2, 20 + 8 * (T[side].width / 100)) // 대기·킥오프: 전술 탭의 배치 그대로 넓게 선다
       // 자기 진영 안에 들어오게 블록 길이만 줄인다 (라인이 높은 팀은 앞뒤가 촘촘해 보인다 — 한 줄로 뭉개지지 않게 비율로)
       const front = Math.max(...lineups[side].map((p) => out[p.id].u))
       const k = front > 47 ? (47 - back) / (front - back) : 1

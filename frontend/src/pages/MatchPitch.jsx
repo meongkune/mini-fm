@@ -151,7 +151,7 @@ export default function MatchPitch({ home, away, lineups, tick, speed = 1, froze
         g.beginPath(); g.arc(it.x, it.y, R + (has ? 1.5 : 0), 0, Math.PI * 2); g.stroke()
         g.fillStyle = gk ? '#fff' : ink(team.color)
         g.font = `900 ${Math.round(R * 1.05)}px system-ui, sans-serif`
-        g.fillText(String(it.p.number ?? ''), it.x, it.y + 0.5)
+        g.fillText(String(it.p.number ?? (String(it.p.name || '').split(' ').at(-1)[0] || '')), it.x, it.y + 0.5) // 등번호가 비어 있는 선수(번호 중복으로 지워진 경우)는 성의 첫 글자
         if (has) {
           // 공 가진 선수 이름
           const name = String(it.p.name || '').split(' ').at(-1)
