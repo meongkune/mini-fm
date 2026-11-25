@@ -18,7 +18,7 @@ const W = 105, H = 68
 const SHOT = new Set(['goal', 'save', 'miss'])
 const issues = {}
 const bump = (k, ex) => { (issues[k] ??= { n: 0, ex: [] }).n++; if (issues[k].ex.length < 3) issues[k].ex.push(ex) }
-let circs = 0, clips = 0, shots = 0, losts = 0, passes = 0, changes = 0, traced = 0, kickoffs = 0, corners = 0, secs = 0
+let restarts = 0, circs = 0, clips = 0, shots = 0, losts = 0, passes = 0, changes = 0, traced = 0, kickoffs = 0, corners = 0, secs = 0
 for (let g = 0; g < N; g++) {
   const home = d.teams[(g * 3) % d.teams.length], away = d.teams[(g * 7 + 5) % d.teams.length]
   if (home === away) continue
@@ -39,6 +39,8 @@ for (let g = 0; g < N; g++) {
     for (; shown < match.timeline.length; shown++) {
       const tick = match.timeline[shown]
       const before = { carrier: sim.carrier, ball: { ...sim.ball }, prev: sim.tick }
+      // 재개(골킥·프리킥·스로인·오프사이드) 다음 장면: 차는 선수가 공 옆에 서 있어야 한다
+      if (before.prev?.r) { restarts++; const nd = Math.min(...lu.flat().map((p) => sim.pos[p.id] ? Math.hypot(sim.pos[p.id].x - sim.ball.x, sim.pos[p.id].y - sim.ball.y) : 99)); if (nd > 3 || !before.carrier) bump('재개인데 공 옆에 차는 선수가 없음', (before.prev.r) + ' 뒤 ' + tick.m + "' (" + nd.toFixed(0) + 'm)') }
       PB.startClip(sim, lu, tick, T)
       let sc = sim.script
       clips++
@@ -125,7 +127,7 @@ for (let g = 0; g < N; g++) {
     }
   }
 }
-console.log(`\n장면 ${clips}개 (슛 ${shots} · 뺏김 ${losts} · 패스 ${passes} · 공 돌리기 ${circs} · 뺏으며 시작 ${changes} · 킥오프 ${kickoffs} · 코너킥 ${corners}) · 대본 시간 경기당 ${(secs / N / 60).toFixed(1)}분`)
+console.log(`\n장면 ${clips}개 (슛 ${shots} · 뺏김 ${losts} · 패스 ${passes} · 재개 ${restarts} · 공 돌리기 ${circs} · 뺏으며 시작 ${changes} · 킥오프 ${kickoffs} · 코너킥 ${corners}) · 대본 시간 경기당 ${(secs / N / 60).toFixed(1)}분`)
 const keys = Object.keys(issues)
 if (!keys.length) console.log('규칙에 걸린 장면 없음 (규칙에 적은 것만 본다)')
 for (const k of keys.sort((a, b) => issues[b].n - issues[a].n)) { console.log(`✖ ${k}: ${issues[k].n}건`); for (const e of issues[k].ex) console.log('     예) ' + e) }
