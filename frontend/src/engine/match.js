@@ -8,7 +8,8 @@ import { aiTactics, edges, tacOf } from './tactics.js'
 import { CHANNEL_LABEL, aerialOf, channels } from './matchups.js'
 import { attrsOf, detailOf } from '../game/attributes.js'
 
-const DEFAULT_TACTICS = { formation: '4-4-2', mentality: 'balanced', pressing: 'normal', line: 'normal', tempo: 'normal' }
+// 값이 없으면 철학(균형)의 기본값을 쓴다 — 여기에 line·tempo를 적어 두면 내 구단의 '배치에서 계산되는 수비 라인'을 덮어쓴다
+const DEFAULT_TACTICS = { formation: '4-4-2' }
 // 팀 지시: 수비 라인 높이, 템포
 export const LINE = { low: { mid: -3, def: 3, offside: 0.6 }, normal: { mid: 0, def: 0, offside: 1 }, high: { mid: 3, def: -2, offside: 1.7 } }
 export const TEMPO = { slow: { att: -2, mid: 2, acc: 0.03, drain: 0.95 }, normal: { att: 0, mid: 0, acc: 0, drain: 1 }, fast: { att: 3, mid: -1, acc: -0.03, drain: 1.1 } }

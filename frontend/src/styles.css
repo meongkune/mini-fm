@@ -311,6 +311,25 @@ select { background: var(--panel-2); color: var(--text); border: 1px solid var(-
   background: rgba(0, 0, 0, .6); font-size: .74rem; font-weight: 700; white-space: nowrap;
 }
 .pitch-hud em { font-style: normal; color: #fde047; }
+/* 공 궤적: 뜬 공·크로스는 날아가는 동안 솟았다가 떨어진다 (a·b는 같은 모양 — 단계마다 번갈아 써서 애니메이션을 다시 시작시킨다) */
+@keyframes ball-loft-a { 0% { transform: translateZ(5px) rotateX(calc(-1 * var(--tilt))); } 45% { transform: translateZ(64px) rotateX(calc(-1 * var(--tilt))) scale(1.35); } 100% { transform: translateZ(calc(var(--z) + 5px)) rotateX(calc(-1 * var(--tilt))); } }
+@keyframes ball-loft-b { 0% { transform: translateZ(5px) rotateX(calc(-1 * var(--tilt))); } 45% { transform: translateZ(64px) rotateX(calc(-1 * var(--tilt))) scale(1.35); } 100% { transform: translateZ(calc(var(--z) + 5px)) rotateX(calc(-1 * var(--tilt))); } }
+@keyframes ball-cross-a { 0% { transform: translateZ(5px) rotateX(calc(-1 * var(--tilt))); } 55% { transform: translateZ(40px) rotateX(calc(-1 * var(--tilt))) scale(1.2); } 100% { transform: translateZ(calc(var(--z) + 14px)) rotateX(calc(-1 * var(--tilt))); } }
+@keyframes ball-cross-b { 0% { transform: translateZ(5px) rotateX(calc(-1 * var(--tilt))); } 55% { transform: translateZ(40px) rotateX(calc(-1 * var(--tilt))) scale(1.2); } 100% { transform: translateZ(calc(var(--z) + 14px)) rotateX(calc(-1 * var(--tilt))); } }
+.ball.arc.loft.a { animation: ball-loft-a var(--fly) ease-out; }
+.ball.arc.loft.b { animation: ball-loft-b var(--fly) ease-out; }
+.ball.arc.cross.a { animation: ball-cross-a var(--fly) ease-out; }
+.ball.arc.cross.b { animation: ball-cross-b var(--fly) ease-out; }
+/* 크게 보기 */
+.pitch-big { position: absolute; right: 8px; top: 6px; z-index: 4; width: 28px; height: 28px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, .25); background: rgba(0, 0, 0, .55); color: #fff; font-size: .9rem; cursor: pointer; }
+.pitch-score { position: absolute; left: 12px; top: 8px; z-index: 3; padding: 3px 10px; border-radius: 999px; background: rgba(0, 0, 0, .6); font-size: .8rem; font-weight: 800; }
+.pitch-score b { color: var(--c); filter: brightness(1.6) saturate(.8); }
+.pitch-stage.big { position: fixed; inset: 0; z-index: 3000; margin: 0; padding: 44px 12px 34px; border: 0; border-radius: 0; display: grid; place-items: center; perspective: 1400px; }
+.pitch-stage.big .pitch-plane { --tilt: 24deg; width: min(92vw, calc((100vh - 110px) * 68 / 105)); margin: -6% auto 0; }
+.pitch-stage.big.land .pitch-plane { --tilt: 30deg; aspect-ratio: 105 / 68; width: min(94vw, calc((100vh - 96px) * 105 / 68)); margin: -4% auto 0; }
+.pitch-stage.big .pl span { width: 26px; height: 26px; font-size: 11px; }
+.pitch-stage.big .ball { width: 12px; height: 12px; }
+.pitch-stage:fullscreen { width: 100vw; height: 100vh; }
 .hud-dot { width: 9px; height: 9px; border-radius: 50%; }
 .pitch-legend { position: absolute; left: 10px; right: 10px; bottom: 6px; z-index: 3; display: flex; justify-content: space-between; font-size: .66rem; font-weight: 700; }
 .pitch-legend span { display: flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 999px; background: rgba(0, 0, 0, .55); }

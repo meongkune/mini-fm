@@ -302,6 +302,8 @@ export default function Match() {
         away={away}
         myIdx={myIdx}
         lineups={lineups}
+        tactics={[match.sides[0].tactics, match.sides[1].tactics]}
+        score={score}
         tick={live && !paused ? lastTick : null}
         duration={live ? delay : 300}
         scorerName={lastTick?.p ? byId[lastTick.p]?.name : ''}
