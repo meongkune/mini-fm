@@ -807,6 +807,7 @@ html.framed body { overflow: hidden; height: 100vh; }
 .ts-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; text-align: center; }
 .ts-grid span { display: block; font-size: .62rem; color: var(--muted); font-weight: 700; }
 .ts-grid strong { font-size: 1.1rem; font-weight: 900; font-variant-numeric: tabular-nums; }
+.ts-grid > div > small { display: block; font-size: .66rem; font-weight: 800; margin-top: 1px; }
 .ts-grid .good { color: #86efac; } .ts-grid .ok { color: #fde68a; } .ts-grid .bad { color: #fca5a5; }
 .ts-inbox { display: flex; align-items: center; gap: 8px; margin-top: 10px; padding: 9px 10px; border-radius: 10px; background: var(--panel-2); font-size: .78rem; }
 .ts-inbox span { font-weight: 800; flex: none; }

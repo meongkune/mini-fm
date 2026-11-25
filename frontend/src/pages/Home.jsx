@@ -109,7 +109,7 @@ export default function Home() {
 
       <RecentMatches save={save} teamId={myTeam.id} teamsById={teamsById} />
 
-      <TeamStatus team={myTeam} status={status} lineup={save.lineup} inbox={save.inbox || []} unread={unread} onPick={setDetail} />
+      <TeamStatus team={myTeam} status={status} lineup={save.lineup} inbox={save.inbox || []} unread={unread} onPick={setDetail} streak={save.streak} />
 
       <div className="card next-match">
         {seasonOver ? (
@@ -159,7 +159,7 @@ export default function Home() {
 }
 
 // 팀 상태 요약: 선발 평균 컨디션, 팀 사기, 부상·징계·불만 — 숫자를 누르면 누가 왜 그런지 펼쳐진다
-function TeamStatus({ team, status, lineup, inbox, unread, onPick }) {
+function TeamStatus({ team, status, lineup, inbox, unread, onPick, streak }) {
   const [open, setOpen] = useState(null) // 'out' | 'upset'
   const ids = team.players.map((p) => p.id)
   const out = team.players.filter((p) => unavailable(status[p.id])).map((p) => ({ p, u: unavailable(status[p.id]) }))
@@ -189,7 +189,9 @@ function TeamStatus({ team, status, lineup, inbox, unread, onPick }) {
     <div className="card team-status">
       <div className="ts-grid">
         <div><span>선발 컨디션</span><strong className={cond >= 80 ? 'good' : cond >= 65 ? 'ok' : 'bad'}>{cond}%</strong></div>
-        <div><span>팀 사기</span><strong className={morale >= 60 ? 'good' : morale >= 45 ? 'ok' : 'bad'}>{morale}</strong></div>
+        <div><span>팀 사기</span><strong className={morale >= 60 ? 'good' : morale >= 45 ? 'ok' : 'bad'}>{morale}</strong>
+          {streak?.n >= 2 && streak.kind && <small className={streak.kind === 'w' ? 'good-text' : 'bad-text'} title="리그 연승·연패: 3경기부터 사기가 경기마다 추가로 오르내립니다">{streak.kind === 'w' ? `🔥 ${streak.n}연승` : `📉 ${streak.n}연패`}</small>}
+        </div>
         <Tile k="out" label="부상·징계" value={out.length} tone={out.length ? 'bad' : 'good'} />
         <Tile k="upset" label="불만" value={upset.length} tone={upset.length ? 'bad' : 'good'} />
       </div>

@@ -3,7 +3,7 @@
 import { playerOvrOf } from '../engine/engine.js'
 import { quickMatch } from '../engine/match.js'
 import { aiBidFor, windowState } from './trade.js'
-import { reactToSpeech } from './speech.js'
+import { personality, reactToSpeech } from './speech.js'
 import { checkPromises } from './relations.js'
 import { contractOf, wageFor } from './finance.js'
 import { buildSlots, fitOf } from '../engine/formation.js'
@@ -15,6 +15,31 @@ const hash = (s) => { let h = 2166136261; for (const c of String(s)) h = Math.im
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v))
 
 export const defaultStatus = () => ({ cond: 100, morale: 60, form: 6.6, fr: [], inj: 0, susp: 0, benched: 0 })
+
+/**
+ * 시즌 기세: 리그 연승·연패가 쌓이면 팀 전체 사기가 추가로 오르내린다 (경기력에는 사기를 거쳐 반영 — 사기 ±8%)
+ *   3연승부터 이길 때마다 +1~+3 / 3연패부터 질 때마다 −2~−5. 무승부는 기세를 끊는다.
+ *   성격이 멘탈 역할: 프로의식 65 이상은 연패에 덜 흔들리고(절반), 다혈질 70 이상은 더 흔들린다(1.5배)
+ * @returns { streak: { kind: 'w'|'l'|null, n }, bonus: 선수 → 사기 보정, news }
+ */
+export function streakEffect(prev = {}, res) {
+  const kind = res > 0 ? 'w' : res < 0 ? 'l' : null
+  const n = kind && prev.kind === kind ? (prev.n || 0) + 1 : kind ? 1 : 0
+  const streak = { kind, n }
+  const base = n >= 3 ? (kind === 'w' ? Math.min(3, n - 2) : -Math.min(5, n)) : 0
+  const bonus = (p) => {
+    if (!base) return 0
+    if (base > 0) return base
+    const t = personality(p)
+    return Math.round(base * (t.pro >= 65 ? 0.5 : 1) * (t.temper >= 70 ? 1.5 : 1))
+  }
+  const milestone = [3, 5, 8, 12].includes(n)
+  const title = !milestone ? null : kind === 'w' ? `🔥 ${n}연승 — 팀 분위기 최고조` : `📉 ${n}연패 — 분위기 위기`
+  const body = !milestone ? null : kind === 'w'
+    ? `리그 ${n}연승입니다. 선수단 사기가 경기마다 조금씩 더 오릅니다. 들뜬 분위기에서 방심하지 않게 관리하세요.`
+    : `리그 ${n}연패입니다. 경기마다 사기가 더 떨어지고 있습니다(프로의식이 높은 선수는 덜, 다혈질인 선수는 더). 팀 토크나 개별 면담으로 분위기를 바꾸거나, 이길 수 있는 경기에서 흐름을 끊어야 합니다.`
+  return { streak, bonus, title, body }
+}
 
 /** 선수 상태 (없으면 기본값) */
 export const statusOf = (save, id) => ({ ...defaultStatus(), ...(save.status?.[id] || {}) })
@@ -101,6 +126,8 @@ export function applyRound(save, { teamsById, schedule, myTeamId, mine, buyers =
     const myIdx = mine.home === myTeamId ? 0 : 1
     const [gf, ga] = myIdx === 0 ? mine.summary.score : [...mine.summary.score].reverse()
     const res = Math.sign(gf - ga)
+    const mo = streakEffect(save.streak, res)
+    if (mo.title) inbox.push(news(round, 'streak', mo.title, mo.body))
     // 불만을 낼 만한 선수: GK가 아니고, 같은 포지션 선발 중 가장 낮은 선수와 실력이 비슷하거나 나은 선수
     const starterMin = {}
     for (const p of my.players) if (mine.summary.players[p.id]?.start) starterMin[p.pos] = Math.min(starterMin[p.pos] ?? 99, playerOvrOf(p))
@@ -117,7 +144,7 @@ export function applyRound(save, { teamsById, schedule, myTeamId, mine, buyers =
     for (const p of my.players) {
       const s = touch(p.id)
       const r = mine.summary.players[p.id]
-      let dm = res > 0 ? 3 : res < 0 ? -3 : 0
+      let dm = (res > 0 ? 3 : res < 0 ? -3 : 0) + mo.bonus(p)
       if (r) {
         dm += clamp((r.r - 6.6) * 2.5, -3, 5) // 뛰는 선수는 평점이 나빠도 사기가 크게 꺾이지 않는다
         s.benched = 0
@@ -196,8 +223,16 @@ export function applyRound(save, { teamsById, schedule, myTeamId, mine, buyers =
     if (m.playerId && st[m.playerId]) st[m.playerId] = { ...st[m.playerId], morale: Math.max(0, (st[m.playerId].morale ?? 60) - 4) }
     return { ...m, resolved: 'ignored', read: true, ignoredAt: round }
   })
+  // 시즌 기세(리그 연승·연패) 기록 — 내 경기가 있는 라운드만
+  let streak = save.streak
+  if (my && mine) {
+    const myIdx = mine.home === myTeamId ? 0 : 1
+    const [gf, ga] = myIdx === 0 ? mine.summary.score : [...mine.summary.score].reverse()
+    streak = streakEffect(save.streak, Math.sign(gf - ga)).streak
+  }
   return {
     ...save,
+    streak,
     round: round + 1,
     results: [...save.results, ...results],
     status: st,

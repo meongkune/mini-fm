@@ -8,7 +8,7 @@ import { applyDeal, situationOf } from '../game/aiTalk.js'
 import TalkLog, { talkOf } from '../components/TalkLog.jsx'
 
 const NL = String.fromCharCode(10)
-export const ICON = { 'talk-log': '🗣️', offer: '💰', contract: '📝', finance: '💼', owner: '🏢', press: '📰', talk: '💬', promise: '💔', request: '✈️', sulk: '😤', injury: '🚑', susp: '🟥', mom: '🏅', board: '🏛️', trade: '🔄', season: '🏁', youth: '🌱', cup: '🏆' }
+export const ICON = { 'talk-log': '🗣️', offer: '💰', contract: '📝', finance: '💼', owner: '🏢', press: '📰', talk: '💬', promise: '💔', request: '✈️', sulk: '😤', injury: '🚑', susp: '🟥', mom: '🏅', board: '🏛️', trade: '🔄', season: '🏁', youth: '🌱', cup: '🏆', streak: '📈' }
 // 메시지 분류: 색·필터
 export const CAT = {
   squad: ['선수단', ['injury', 'susp', 'mom', 'sulk', 'request', 'talk', 'talk-log', 'promise', 'youth', 'contract']],
