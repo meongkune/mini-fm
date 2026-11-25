@@ -847,7 +847,8 @@ export function step(match, ctx, { withEvents = true } = {}) {
   }
   if (!chainOn && rng.random() < P_CROSS_CORNER) aerialPlay('corner') // 크로스·돌파가 수비 맞고 나가 코너킥 (사슬 엔진은 막힌 돌파·크로스에서 직접 나온다)
   // 아무 일 없이 끝난 장면은 가끔 스로인으로 끊긴다 (화면 연출만, 결과에는 영향 없음)
-  if (tick.k === 'build' && !tick.r && hash(`throw-${match.seed}-${minute}-${match.plus}`) < 0.32) tick.r = 'throw'
+  //   사슬 엔진은 공이 누구에게 넘어갔는지가 정해져 있으므로(뺏은 선수가 이어서 공격한다) 임의의 스로인을 붙이지 않는다
+  if (!chainOn && tick.k === 'build' && !tick.r && hash(`throw-${match.seed}-${minute}-${match.plus}`) < 0.32) tick.r = 'throw'
 
   // 부상 (팀당 경기마다 약 0.3명)
   for (const idx of [0, 1]) {

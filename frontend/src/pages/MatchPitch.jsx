@@ -4,20 +4,8 @@ import { ink, short } from '../store.jsx'
 import { clockText } from '../engine/match.js'
 import { H, W } from '../engine/positions.js'
 import { makeSim, startClip, stepSim } from '../engine/playback.js'
-import { SCENE_LABEL } from '../engine/chain.js'
 
-const SP_LABEL = { corner: '🚩 코너킥', fk: '🎯 직접 프리킥', fkx: '🎯 프리킥 크로스', pen: '⚠️ 페널티킥' }
-const RESTART_LABEL = { goalkick: '골킥', gk: '골키퍼가 잡아냅니다', throw: '스로인', fk: '프리킥', offside: '오프사이드 → 프리킥' }
-// 찬스가 난 통로 (개인 매치업) — 경기장 위 공격 표시에 쓴다
-const LANE_LABEL = { left: '왼쪽 측면 공격', right: '오른쪽 측면 공격', center: '중앙 돌파', air: '공중볼 공격' }
-const SIDE_KO = { left: '왼쪽 ', right: '오른쪽 ' }
-/** 사슬 엔진의 장면 이름: '오른쪽 측면 돌파 → 크로스', '짧은 빌드업 · 압박에 뺏김' */
-function sceneText(tick) {
-  if (tick.ev === 'press') return '짧은 빌드업 · 압박에 뺏김'
-  const head = tick.ev === 'dribble' ? `${SIDE_KO[tick.ch] || ''}측면 돌파` : SCENE_LABEL[tick.ev] || '공격'
-  const fin = { cross: '크로스', oneOnOne: '1대1', cutback: '컷백', knock: '떨궈 준 공' }[tick.fin]
-  return fin ? `${head} → ${fin}` : head
-}
+// 상단 문구는 재생 대본의 구간마다 정해진다(engine/playback.js의 label) — 화면에서 지금 벌어지는 일과 같이 바뀐다
 
 /**
  * 경기 좌표(x 0~105 홈 → 원정 방향, y 0~68) → 화면 좌표(0~1). 내 팀이 항상 아래 → 위(세로) 또는 왼쪽 → 오른쪽(가로)으로 공격한다
@@ -70,7 +58,7 @@ export default function MatchPitch({ home, away, lineups, tick, duration = 300, 
   const live = useRef({}) // 그리기 루프가 읽는 최신 값
   const [big, setBig] = useState(false)
   const [wide, setWide] = useState(false)
-  const [phase, setPhase] = useState('play') // HUD 문구용: play · shot(결과가 드러남) · restart
+  const [hud, setHud] = useState({ label: '', shown: false }) // 상단 문구(지금 구간) · 결과가 드러났는가
   const land = big && wide
   if (!simRef.current) simRef.current = makeSim()
   live.current = { lineups, tactics, tick, duration, myIdx, land, teams: [home, away] }
@@ -97,14 +85,14 @@ export default function MatchPitch({ home, away, lineups, tick, duration = 300, 
   useEffect(() => {
     if (!lineups) return
     startClip(simRef.current, lineups, tick, tactics)
-    setPhase('play')
+    setHud({ label: simRef.current.label, shown: false })
   }, [tick, lineups && lineups.map((l) => l.map((p) => p.id).join()).join('|')])
 
   // 그리기 루프: 매 프레임 재생 상태를 진행하고 Canvas에 그린다
   useEffect(() => {
     let raf = 0
     let last = performance.now()
-    let shownPhase = 'play'
+    let shownKey = ''
     const loop = (now) => {
       raf = requestAnimationFrame(loop)
       const L = live.current
@@ -118,10 +106,10 @@ export default function MatchPitch({ home, away, lineups, tick, duration = 300, 
       const rate = sim.script ? (sim.script.dur * 1000) / Math.max(60, L.duration) : 1
       let left = real * rate
       while (left > 0) { const d = Math.min(0.05, left); stepSim(sim, L.lineups, L.tactics, d); left -= d } // 빠른 배속에서도 잘게 나눠 진행
-      // HUD 문구: 결과가 드러나는 시점·재개 시점
-      const seg = sim.script?.segs[sim.seg]
-      const ph = seg?.type === 'restart' ? 'restart' : sim.script && sim.t >= sim.script.revealAt ? 'shot' : 'play'
-      if (ph !== shownPhase) { shownPhase = ph; setPhase(ph) }
+      // 상단 문구: 구간이 바뀔 때만 갱신한다
+      const shown = !!sim.script && sim.t >= sim.script.revealAt
+      const key = `${sim.label}|${shown}`
+      if (key !== shownKey) { shownKey = key; setHud({ label: sim.label, shown }) }
 
       // 크기 맞추기 (선명하게: 기기 픽셀 비율만큼 키운다)
       const dpr = Math.min(2, window.devicePixelRatio || 1)
@@ -179,9 +167,8 @@ export default function MatchPitch({ home, away, lineups, tick, duration = 300, 
 
   if (!lineups) return <div className="pitch-stage empty">선발 명단을 불러오는 중…</div>
   const teams = [home, away]
-  const shotTick = !!tick && ['goal', 'save', 'miss'].includes(tick.k)
-  const goalFlash = tick?.k === 'goal' && phase !== 'play'
-  const attackLabel = tick ? `${clockText(tick.m, tick.plus)}' ${short(teams[tick.t])} ${tick.sp ? SP_LABEL[tick.sp] : tick.ev ? sceneText(tick) : tick.ch ? LANE_LABEL[tick.ch] : '공격'}` : idleLabel
+  const goalFlash = tick?.k === 'goal' && hud.shown
+  const attackLabel = tick ? `${clockText(tick.m, tick.plus)}' ${short(teams[tick.t])} · ${hud.label || '공격'}` : idleLabel
   const mine = teams[myIdx]
   const theirs = teams[1 - myIdx]
 
@@ -192,11 +179,6 @@ export default function MatchPitch({ home, away, lineups, tick, duration = 300, 
       <div className="pitch-hud">
         <span className="hud-dot" style={{ background: tick ? teams[tick.t].color : '#94a3b8' }} />
         {attackLabel}
-        {shotTick && tick.k === 'save' && phase !== 'play' && <em> · 🧤 선방!</em>}
-        {shotTick && tick.k === 'miss' && phase !== 'play' && <em> · 빗나감</em>}
-        {tick?.k === 'clear' && phase !== 'play' && <em> · 걷어냅니다</em>}
-        {tick?.lost && !shotTick && phase !== 'play' && <em> · 뺏겼습니다</em>}
-        {tick?.r && phase === 'restart' && <em> · {RESTART_LABEL[tick.r]}</em>}
       </div>
       <div className="pitch-plane" ref={planeRef}>
         <canvas ref={canvasRef} className="pitch-canvas" />
