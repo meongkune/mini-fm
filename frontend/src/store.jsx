@@ -1,4 +1,5 @@
-import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react'
+import { CACHE_KEY, cloudActive, flush as flushCloud, queueSave, summaryOf } from './game/cloud.js'
 import { api, loadSeasonFile, loadStadiums } from './api.js'
 import { playerOvrOf, roundRobin } from './engine/engine.js'
 import { available } from './engine/match.js'
@@ -52,9 +53,14 @@ const EMPTY_SAVE = {
   board: null, // 보드 목표·신뢰도
 }
 
+// 로그인해서 클라우드 슬롯으로 하고 있으면 그 슬롯의 세이브(캐시), 아니면 이 브라우저의 게스트 세이브
+const saveKey = () => (cloudActive() ? CACHE_KEY : STORAGE_KEY)
+export const GUEST_KEY = STORAGE_KEY
+export const emptySave = () => ({ ...EMPTY_SAVE })
+
 function loadSave() {
   try {
-    const s = { ...EMPTY_SAVE, ...JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}') }
+    const s = { ...EMPTY_SAVE, ...JSON.parse(localStorage.getItem(saveKey()) || '{}') }
     // 예전 버그로 생긴 중복 영입·괄호 붙은 이름 정리
     if (s.rosters) s.rosters = Object.fromEntries(Object.entries(s.rosters).map(([k, ids]) => [k, [...new Set(ids)]]))
     if (s.signed) s.signed = s.signed.map((p) => ({ ...p, name: cleanName(p.name) }))
@@ -496,9 +502,24 @@ export function GameProvider({ children }) {
     })
   }, [data, save.cups, save.round, cupTeams])
 
+  // 저장: 이 브라우저에 쓰고, 클라우드 슬롯이면 서버에도 올린다 (라운드·시즌·팀이 바뀌면 바로, 나머지는 잠깐 모아서)
+  const lastSaved = useRef(null)
   useEffect(() => {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(save)) } catch { /* 저장 실패해도 게임은 계속 */ }
-  }, [save])
+    const key = saveKey()
+    try { localStorage.setItem(key, JSON.stringify(save)) } catch { /* 저장 실패해도 게임은 계속 */ }
+    const prev = lastSaved.current
+    lastSaved.current = save
+    if (!prev || prev === save || key !== CACHE_KEY) return // 처음 불러온 직후·데이터만 바뀐 때는 올릴 필요 없음
+    const important = prev.round !== save.round || prev.seasonNo !== save.seasonNo || prev.teamId !== save.teamId || (prev.history?.length || 0) !== (save.history?.length || 0)
+    const team = data?.teams?.find((t) => t.id === save.teamId)
+    queueSave(save, summaryOf(save, { team: team?.name || '', leagueName: data?.leagueInfo?.name || '', total: data?.schedule?.length || 0 }), important)
+  }, [save, data])
+  // 창을 닫거나 다른 앱으로 넘어가면 모아 둔 것을 바로 올린다
+  useEffect(() => {
+    const h = () => { if (document.visibilityState === 'hidden') flushCloud() }
+    document.addEventListener('visibilitychange', h)
+    return () => document.removeEventListener('visibilitychange', h)
+  }, [])
 
   const value = useMemo(() => {
     const teams = data ? effectiveTeams(data.teams, save) : []

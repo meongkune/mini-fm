@@ -11,6 +11,9 @@ import Admin from './pages/Admin.jsx'
 import Inbox from './pages/Inbox.jsx'
 import Transfer from './pages/Transfer.jsx'
 import Club from './pages/Club.jsx'
+import Account from './pages/Account.jsx'
+import Privacy from './pages/Privacy.jsx'
+import { CloudBadge } from './components/CloudBadge.jsx'
 import { Crest } from './components/Badges.jsx'
 import { setViewMode, useViewMode } from './components/DeviceFrame.jsx'
 import { eur } from './game/finance.js'
@@ -83,6 +86,8 @@ function Pages() {
           <Route path="/inbox" element={<Inbox />} />
           <Route path="/transfer" element={<Transfer />} />
           <Route path="/club" element={<Club />} />
+          <Route path="/account" element={<Account />} />
+          <Route path="/privacy" element={<Privacy />} />
           <Route path="*" element={<div className="card">페이지를 찾을 수 없습니다.</div>} />
         </Routes>
         </PageErrorBoundary>
@@ -117,6 +122,7 @@ function DesktopApp() {
           ))}
         </nav>
         <div className="side-foot">
+          <CloudBadge />
           <button className="linkish small" onClick={() => setViewMode('phone')}>📱 모바일 보기</button>
         </div>
       </aside>
@@ -158,6 +164,7 @@ function MobileApp() {
           </div>
         </div>
         <div className="top-actions">
+        <CloudBadge compact />
         {myTeam && (
           <Link to="/inbox" className="bell" aria-label={`메시지함${unread ? ` (새 소식 ${unread}개)` : ''}`}>
             📬{unread > 0 && <b>{unread > 9 ? '9+' : unread}</b>}

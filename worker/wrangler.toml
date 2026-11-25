@@ -3,3 +3,14 @@
 name = "mini-fm-talk"
 main = "src/index.js"
 compatibility_date = "2026-10-01"
+
+# 클라우드 세이브 (계정·세이브 슬롯·휴지통) — 표 구조는 schema.sql
+[[d1_databases]]
+binding = "DB"
+database_name = "mini-fm-db"
+database_id = "0d9cea18-50d4-4247-90f1-292404af8f5b"
+
+[vars]
+# 구글 로그인 웹 클라이언트 ID (공개 값). ID 토큰의 aud가 이것과 같아야 한다
+GOOGLE_CLIENT_ID = "751296159418-na2n9kkm0cno51l8oj66eqbqsd42i82a.apps.googleusercontent.com"
+# UID_PEPPER(비밀값): 구글 고유 번호를 해시할 때 섞는 값 — npx wrangler secret put UID_PEPPER 로 Cloudflare에만 저장

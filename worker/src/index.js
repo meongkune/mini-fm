@@ -2,6 +2,8 @@
 // 게임(브라우저)에서 선수 정보·대화 기록을 받아 Gemini에게 '그 선수'를 연기시키고,
 // 대사 + 신뢰도 변화 + 결과(잔류·이적 요청·태업·폭로 등)를 JSON으로 돌려준다.
 // Gemini 키는 Cloudflare 비밀값(GEMINI_API_KEY)에만 있고, 게임 코드·GitHub에는 없다.
+// 클라우드 세이브(구글 로그인·D1)는 cloud.js
+import { handleCloud } from './cloud.js'
 
 const ALLOWED = ['https://meongkune.github.io', 'http://localhost:5173', 'http://localhost:4173', 'http://127.0.0.1:5173']
 const MODELS = ['gemini-flash-lite-latest', 'gemini-flash-latest'] // 가벼운 대화: 빠른 경량 모델 먼저, 한도·지연·오류면 다음 모델로
@@ -13,8 +15,8 @@ const OUTCOMES = ['none', 'resolved', 'promise_start', 'promise_role', 'promise_
 
 const cors = (origin) => ({
   'Access-Control-Allow-Origin': ALLOWED.includes(origin) ? origin : ALLOWED[0],
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
   Vary: 'Origin',
 })
 const json = (body, status, origin) => new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json; charset=utf-8', ...cors(origin) } })
@@ -163,9 +165,16 @@ export default {
     const origin = req.headers.get('Origin') || ''
     if (req.method === 'OPTIONS') return new Response(null, { headers: cors(origin) })
     const url = new URL(req.url)
-    if (req.method === 'GET' && url.pathname === '/health') return json({ ok: true, key: !!env.GEMINI_API_KEY }, 200, origin)
-    if (req.method !== 'POST' || url.pathname !== '/talk') return json({ error: 'not found' }, 404, origin)
+    if (req.method === 'GET' && url.pathname === '/health') return json({ ok: true, key: !!env.GEMINI_API_KEY, cloud: !!(env.DB && env.UID_PEPPER) }, 200, origin)
     if (!ALLOWED.includes(origin)) return json({ error: 'forbidden origin' }, 403, origin)
+    // 클라우드 세이브 (로그인·슬롯·저장)
+    try {
+      const r = await handleCloud(req, env, url)
+      if (r) return json(r[0], r[1], origin)
+    } catch (e) {
+      return json({ error: e.status === 401 ? 'auth' : 'server', message: e.status === 401 ? e.message : '서버 오류' }, e.status || 500, origin)
+    }
+    if (req.method !== 'POST' || url.pathname !== '/talk') return json({ error: 'not found' }, 404, origin)
     if (!env.GEMINI_API_KEY) return json({ error: 'no key', fallback: true }, 503, origin)
     let body
     try { body = await req.json() } catch { return json({ error: 'bad json' }, 400, origin) }
