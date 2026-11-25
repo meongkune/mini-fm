@@ -16,7 +16,7 @@ const load = (lid) => {
   const r = fs.existsSync(rf) ? JSON.parse(fs.readFileSync(rf, 'utf8')).players : {}
   const af = path.join(FE, 'public/data/attrs', `${lid}.json`) // 실제 기록 기반 세부 능력치 (api.js와 같은 방식으로 붙인다)
   const at = fs.existsSync(af) ? JSON.parse(fs.readFileSync(af, 'utf8')).players : {}
-  return d.teams.map((t) => ({ ...t, players: t.players.map((p) => ({ ...p, ...(r[p.id] || {}), ...(at[p.id] ? { det: at[p.id].o, detE: at[p.id].e || 0 } : {}) })) }))
+  return d.teams.map((t) => ({ ...t, players: t.players.map((p) => ({ ...p, ...(r[p.id] || {}), ...(at[p.id] ? { det: at[p.id].o, detE: at[p.id].e || 0, ...(at[p.id].r && !r[p.id]?.rad ? { rad: at[p.id].r } : {}) } : {}) })) }))
 }
 
 const T = { n: 0, goals: 0, hw: 0, d: 0, sp: 0, poss70: 0 }

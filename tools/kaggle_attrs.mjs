@@ -12,6 +12,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { attrsOf, detailBase, softTop, DETAIL, DETAIL_GK } from '../frontend/src/game/attributes.js'
 import { roleOf } from '../frontend/src/engine/formation.js'
+import { playerOvrOf } from '../frontend/src/engine/engine.js'
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const IN = path.join(ROOT, 'data_in')
@@ -140,6 +141,21 @@ function metricsOf(c, olds, sofa) {
   const discParts = olds.map((r) => [fp(num(r.Performance_Fls), num(r.Performance_CrdY), num(r.Performance_CrdR)), om(r), r.w])
   if (c) discParts.push([fp(num(c.Fls), num(c.CrdY), num(c.CrdR)), curMin, 1])
   const [dp, dMin] = pool(discParts); add('disc', -(dp / Math.max(dMin, 1)) * 90, dMin)
+  // ── 결과 능력치: 속도·활동량처럼 직접 잴 수 없는 능력을 '그 능력이 남긴 기록'으로 ──
+  // 침투(오프 더 볼): 오프사이드(뒷공간으로 자주 뛰는 선수일수록 많다) · 전진 패스를 받은 횟수 · 상대 박스 안 터치
+  const [off, offMin] = per90('Performance_Off', C('Off')); add('off90', off, offMin)
+  const [prgr] = per90('Receiving_PrgR'); add('prgr90', prgr, oMin)
+  const [box] = per90('Touches_Att Pen'); add('box90', box, oMin)
+  // 운반(속도를 쓰는 전진): 전진 운반 거리 · 돌파 성공 · 반칙 유도
+  const [pdist] = per90('Carries_PrgDist'); add('pdist90', pdist, oMin)
+  const [fld, fldMin] = per90('Performance_Fld', C('Fld')); add('fld90', fld, fldMin)
+  // 압박(활동량): 공격 3분의 1 지역 태클 · 볼 회수
+  const [t3] = per90('Tackles_Att 3rd'); add('tkl3rd90', t3, oMin)
+  const [rec] = per90('Performance_Recov'); add('recov90', rec, oMin)
+  // 투쟁심(공격성·용감함): 1대1 수비 시도 · 블록 · 공중 경합 시도
+  const [cha] = per90('Challenges_Att'); add('chAtt90', cha, oMin)
+  const [blk] = per90('Blocks_Blocks'); add('blk90', blk, oMin)
+  add('duels90', ((aw + al) / Math.max(oMin, 1)) * 90, oMin)
   // 골키퍼 (이번 시즌만)
   if (c && num(c.SoTA) > 0) {
     add('savePct', (num(c.Saves) + 20) / (num(c.SoTA) + 29), num(c.SoTA)) // 20/29 ≈ 리그 평균 쪽으로
@@ -162,6 +178,10 @@ const RECIPE = {
   공중볼: [['aw90', 0.5, 900], ['awPct', 0.5, 25]],
   안정성: [['lossPct', 0.7, 40], ['err90', 0.3, 900]],
   규율: [['disc', 1, 900]],
+  침투: [['off90', 0.35, 900], ['prgr90', 0.4, 900], ['box90', 0.25, 900]],
+  운반: [['pdist90', 0.45, 900], ['tos90', 0.3, 900], ['fld90', 0.25, 900]],
+  압박: [['tkl3rd90', 0.5, 900], ['recov90', 0.5, 900]],
+  투쟁심: [['chAtt90', 0.4, 900], ['blk90', 0.3, 900], ['duels90', 0.3, 900]],
   선방률: [['savePct', 1, 80]], // 한 시즌 선방률은 수비진 영향이 커서 더 보수적으로
   'PK 선방': [['pkSave', 1, 8]],
   빌드업: [['cmpPct', 1, 40]],
@@ -244,10 +264,35 @@ const pctOf = (g, k, v) => {
   return lo / d.length
 }
 
+// ── 레이더(2층)를 실제 기록으로: SportsAPI 레이더가 없는 필드 선수만 ──
+//   SportsAPI 레이더와 같은 형식 = OVR + (그 항목의 포지션 안 백분위 − 50) × 0.3  (sportsapi_ratings.mjs conv와 같은 척도)
+//   항목별 재료: 공격(결정력·슈팅·박스 터치) · 기술(패스 성공·돌파·운반·볼 지키기) · 전술(인터셉트·전진 패스·볼 지키기·규율) · 수비(태클·1대1·인터셉트·클리어·공중볼) · 창의성(키패스·xA·슈팅 기회 창출·전진 패스)
+const RADAR_FROM = [
+  ['fin', 'sh90', 'sotPct', 'box90'],
+  ['cmpPct', 'tos90', 'toPct', 'prgc90', 'lossPct'],
+  ['int90', 'prgp90', 'lossPct', 'disc'],
+  ['tkl90', 'chPct', 'int90', 'clr90', 'aw90'],
+  ['kp90', 'xa90', 'sca90', 'prgp90'],
+]
+function radarOf(x) {
+  const ovr = playerOvrOf(x.p)
+  const vals = RADAR_FROM.map((keys) => {
+    let s = 0, w = 0
+    for (const k of keys) { const mm = x.metrics[k]; const pc = mm && pctOf(x.group, k, mm.v); if (pc == null) continue; const c = mm.n / (mm.n + 900); s += pc * c; w += c }
+    return w >= 0.4 ? Math.max(30, Math.min(99, Math.round(ovr + (s / w * 100 - 50) * 0.3))) : null
+  })
+  return vals.every((v) => v != null) ? vals : null
+}
+let radarMade = 0
+
 const out = {}
 const famous = []
 for (const x of all) {
-  const labels = attrsOf(x.p).gk ? DETAIL_GK : DETAIL
+  const gkPlayer = attrsOf(x.p).gk
+  // 레이더가 없는 선수는 기록으로 만든 레이더를 붙이고, 세부 능력치 중심값도 그 레이더로 계산한다 (게임에서도 같은 순서로 붙는다)
+  const r = !gkPlayer && !Array.isArray(x.p.rad) ? radarOf(x) : null
+  if (r) { x.p = { ...x.p, rad: r }; radarMade++ }
+  const labels = gkPlayer ? DETAIL_GK : DETAIL
   let est = 0
   const bases = labels.map((label) => detailBase(x.p, label))
   const v = labels.map((label, i) => {
@@ -267,7 +312,7 @@ for (const x of all) {
   // 저장은 '중심값과의 차이'(o) — 게임에서 선수가 성장·노화해 중심값이 바뀌면 세부 능력치도 같이 움직인다
   const o = v.map((val, i) => Math.round(val - bases[i]))
   for (let i = 0; i < v.length; i++) v[i] = clamp(softTop(v[i]))
-  ;(out[x.lid] ??= {})[x.p.id] = est ? { o, e: est } : { o }
+  ;(out[x.lid] ??= {})[x.p.id] = { o, ...(est ? { e: est } : {}), ...(r ? { r } : {}) }
   if (REPORT) famous.push({ name: x.p.name, team: x.team.short, role: roleOf(x.p), labels, v, est })
 }
 
@@ -281,6 +326,7 @@ for (const [lid, players] of Object.entries(out)) {
 }
 
 // ---------- 보고 ----------
+console.log(`기록으로 만든 레이더: ${radarMade}명 (SportsAPI 레이더가 없던 필드 선수)`)
 for (const [lid, r] of Object.entries(report.leagues)) {
   console.log(`\n[${lid}] 이번 시즌 기록 매칭 ${r.matched}/${r.total} (${Math.round((r.matched / r.total) * 100)}%) · 과거 기록 ${r.old} · SofaScore ${r.sofa}`)
   if (REPORT) { console.log('  구단 짝:', r.teams.join(', ')); console.log('  못 찾음(앞 15):', r.unmatched.slice(0, 15).join(', ')) }

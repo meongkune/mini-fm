@@ -234,7 +234,7 @@ export const FLOW = {
   trailLate: 0.14,
   counter: 0.025, // 앞선 팀 역습의 질 (상대가 1~2골 뒤져 올라올 때, 후반으로 갈수록)
   levelLate: 0.1, // 동점으로 막판(75분 이후)에 들어갔을 때 양쪽이 몸을 사리는 정도 (전력 차 효과를 넣은 뒤 라리가 무승부가 20%로 모자라 다시 켬)
-  base: 0.955, // 위 효과로 줄어든 전체 득점을 되돌리는 보정
+  base: 0.975, // 위 효과로 줄어든 전체 득점을 되돌리는 보정 (0.955 → 0.975: 실제 기록 기반 레이더 647명이 들어오며 공격 값이 SportsAPI 기준으로 내려가 골이 2~4% 줄어서)
 }
 function flowOf(match, idx) {
   const diff = match.score[idx] - match.score[1 - idx]

@@ -52,7 +52,7 @@ async function getSeason(file) {
             ...(rp[p.id] ? { ...rp[p.id], rated: true } : {}),
             ...(ph[p.id] ? { img: ph[p.id].img, imgPage: ph[p.id].page } : {}),
             ...(fc[p.id] ? { face: dataUrl(`faces/${p.id}.webp`) } : {}),
-            ...(ap[p.id] ? { det: ap[p.id].o, detE: ap[p.id].e || 0 } : {}),
+            ...(ap[p.id] ? { det: ap[p.id].o, detE: ap[p.id].e || 0, ...(ap[p.id].r && !rp[p.id]?.rad ? { rad: ap[p.id].r } : {}) } : {}), // r: SportsAPI 레이더가 없는 선수의 기록 기반 레이더
             ...(w ? { number, ...(w.w ? { realWage: w.w } : {}), ...(w.h ? { height: w.h } : {}) } : {}),
           }
         }),

@@ -19,7 +19,7 @@ const rf = path.join(FE, 'public/data/ratings', `${lid}.json`)
 const r = fs.existsSync(rf) ? JSON.parse(fs.readFileSync(rf, 'utf8')).players : {}
 const af = path.join(FE, 'public/data/attrs', `${lid}.json`) // 실제 기록 기반 세부 능력치 (api.js와 같은 방식으로 붙인다)
 const at = fs.existsSync(af) ? JSON.parse(fs.readFileSync(af, 'utf8')).players : {}
-const teams = d.teams.map((t) => ({ ...t, players: t.players.map((p) => ({ ...p, ...(r[p.id] || {}), ...(at[p.id] ? { det: at[p.id].o, detE: at[p.id].e || 0 } : {}) })) }))
+const teams = d.teams.map((t) => ({ ...t, players: t.players.map((p) => ({ ...p, ...(r[p.id] || {}), ...(at[p.id] ? { det: at[p.id].o, detE: at[p.id].e || 0, ...(at[p.id].r && !r[p.id]?.rad ? { rad: at[p.id].r } : {}) } : {}) })) }))
 const str = (t) => { const o = t.players.map(playerOvrOf).sort((a, b) => b - a).slice(0, 11); return o.reduce((a, b) => a + b, 0) / o.length }
 const byPid = Object.fromEntries(teams.flatMap((t) => t.players.map((p) => [p.id, p])))
 const games = teams.length * 2 - 2

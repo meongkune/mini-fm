@@ -52,7 +52,7 @@ function simulate(lid, withDet) {
   const d = rd(path.join(FE, 'public/data', lid, '2025-26.json'))
   const r = rd(path.join(FE, 'public/data/ratings', `${lid}.json`))?.players || {}
   const at = withDet ? rd(path.join(ATTRS_DIR, `${lid}.json`))?.players || {} : {}
-  const teams = d.teams.map((t) => ({ ...t, players: t.players.map((p) => ({ ...p, ...(r[p.id] || {}), ...(at[p.id] ? { det: at[p.id].o, detE: at[p.id].e || 0 } : {}) })) }))
+  const teams = d.teams.map((t) => ({ ...t, players: t.players.map((p) => ({ ...p, ...(r[p.id] || {}), ...(at[p.id] ? { det: at[p.id].o, detE: at[p.id].e || 0, ...(at[p.id].r && !r[p.id]?.rad ? { rad: at[p.id].r } : {}) } : {}) })) }))
   const P = {}
   let seed = 11
   for (let s = 0; s < N; s++) for (const h of teams) for (const a of teams) {
