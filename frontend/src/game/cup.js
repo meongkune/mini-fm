@@ -20,16 +20,17 @@ export const PRIZE = {
   uecl: { join: 3.2, win: 0.4, draw: 0.13, R16: 1, QF: 1.5, SF: 2.5, F: 4, champion: 3 },
   lc: { join: 0, win: 0, draw: 0, R32: 0.05, R16: 0.1, QF: 0.2, SF: 0.4, F: 0.6, champion: 1 },
 }
-// 리그컵: 각 리그 1부 팀끼리(잉글랜드는 프리미어리그 + 챔피언십 44팀) 단판 토너먼트
+// 리그컵: 각 리그 1부 팀끼리 단판 토너먼트 (예전엔 잉글랜드만 챔피언십을 더해 44팀 — 챔피언십을 빼면서 1부만)
 export const LEAGUE_CUP = { id: 'lc', name: '리그컵', short: '리그컵', icon: '🏅', pay: 0.4 }
-export const LC_LEAGUES = { 'premier-league': ['premier-league', 'championship'], championship: ['premier-league', 'championship'] }
-export const lcName = (leagueId) => (LC_LEAGUES[leagueId] ? 'EFL 컵' : '리그컵')
+export const LC_LEAGUES = {} // 리그 ID → 리그컵에 함께 나가는 리그들 (없으면 그 리그만)
+export const lcName = (leagueId) => (leagueId === 'premier-league' ? 'EFL 컵' : '리그컵')
 /** 대회 정보 (유럽 대항전 3개 + 리그컵) */
 export const compOf = (cup) => (cup?.kind === 'league' ? { ...LEAGUE_CUP, name: cup.name, short: cup.name } : COMPS[cup?.tier ?? 0])
 // 리그별 [챔스, 유로파, 컨퍼런스] 출전 팀 수 → 각 대회 32팀
 const BIG = [5, 3, 4]
 const MID = [3, 5, 4]
-export const SLOTS = { 'premier-league': BIG, 'la-liga': BIG, bundesliga: BIG, 'serie-a': BIG, 'ligue-1': MID, eredivisie: MID, 'primeira-liga': MID, brasileirao: MID }
+// (브라질은 리그 목록에서 빠졌다 — 모자라는 자리는 buildCups가 남은 상위 팀으로 32팀을 채운다)
+export const SLOTS = { 'premier-league': BIG, 'la-liga': BIG, bundesliga: BIG, 'serie-a': BIG, 'ligue-1': MID, eredivisie: MID, 'primeira-liga': MID }
 export const CUP_LEAGUES = Object.keys(SLOTS)
 /** 대회 안의 팀 키: 리그가 달라도 약자가 같을 수 있어(FCB=바르셀로나·바이에른) 리그 ID를 붙인다 */
 export const cupKey = (leagueId, teamId) => `${leagueId}/${teamId}`

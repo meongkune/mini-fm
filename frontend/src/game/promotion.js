@@ -6,7 +6,9 @@ import { playerOvrOf, roundRobin } from '../engine/engine.js'
 
 export const TOP = 'premier-league'
 export const LOW = 'championship'
-export const PAIR = { [TOP]: LOW, [LOW]: TOP }
+// 2026-11: 챔피언십을 리그 목록에서 빼면서 승강제를 껐다 (2부 선수 데이터가 추정값뿐). 비워 두면 store.jsx의 승강 처리가 모두 건너뛴다.
+//   다시 켜려면 { [TOP]: LOW, [LOW]: TOP }로 되돌리고 index.json에 championship을 넣는다.
+export const PAIR = {}
 export const DOWN = 3 // 강등 팀 수 (= 승격 팀 수)
 
 const hash = (s) => { let h = 2166136261; for (const c of String(s)) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return h >>> 0 }

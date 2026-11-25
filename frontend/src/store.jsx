@@ -239,8 +239,11 @@ export function GameProvider({ children }) {
       let t = t0
       let s = s0
       let pool = null
-      if (PAIR[sel.leagueId]) {
-        const ol = index.leagues.find((l) => l.id === PAIR[sel.leagueId])
+      // 승강제를 끈 뒤에도(PAIR가 비어도) 이미 승격·강등이 반영된 예전 세이브는 그 구성을 유지한다 — 시즌 중간 세이브의 일정·기록이 어긋나지 않게.
+      //   챔피언십은 리그 목록(index)에서 빠졌지만 데이터 파일은 남아 있어 경로로 직접 읽는다
+      const otherId = PAIR[sel.leagueId] || (sel.leagueId === TOP && save.divisions?.[TOP]?.length ? LOW : null)
+      if (otherId) {
+        const ol = index.leagues.find((l) => l.id === otherId) || { seasons: [{ id: sel.seasonId, file: `${otherId}/${sel.seasonId}.json` }] }
         const os = ol && (ol.seasons.find((x) => x.id === sel.seasonId) || ol.seasons[0])
         const od = os ? await loadSeasonFile(os.file).catch(() => null) : null
         pool = Object.fromEntries([...(od?.teams || []), ...t0.teams].map((x) => [x.id, x]))
@@ -556,7 +559,7 @@ export function GameProvider({ children }) {
 
     /** 이 경기의 구장·관중: 홈 구단 구장, 내 홈경기는 티켓 가격·민심으로 정한 관중률, 다른 경기는 82~99% */
     const venueOf = (homeId, lid = data?.leagueId, seed = '') => {
-      const st0 = stadiums[lid]?.[homeId] ?? (PAIR[lid] ? stadiums[PAIR[lid]]?.[homeId] : null) // 승격·강등된 팀은 원래 리그 기준으로 저장돼 있다
+      const st0 = stadiums[lid]?.[homeId] ?? stadiums[PAIR[lid] || (lid === TOP ? LOW : '')]?.[homeId] ?? null // 승격·강등된 팀은 원래 리그 기준으로 저장돼 있다 (승강을 끈 뒤의 예전 세이브 포함)
       // 명명권을 팔았으면 내 구장 이름이 바뀐다
       const nm = homeId === save.teamId && save.owner?.naming && save.owner.naming.until >= (save.seasonNo || 1) ? save.owner.naming.name : null
       const st = nm ? { ...(st0 || {}), name: nm } : st0

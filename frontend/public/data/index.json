@@ -62,31 +62,8 @@
      "file": "eredivisie/2025-26.json",
      "teams": 18
     }
-   ]
-  },
-  {
-   "id": "championship",
-   "name": "챔피언십",
-   "country": "잉글랜드",
-   "seasons": [
-    {
-     "id": "2025-26",
-     "file": "championship/2025-26.json",
-     "teams": 24
-    }
-   ]
-  },
-  {
-   "id": "brasileirao",
-   "name": "브라질 세리 A",
-   "country": "브라질",
-   "seasons": [
-    {
-     "id": "2025",
-     "file": "brasileirao/2025.json",
-     "teams": 20
-    }
-   ]
+   ],
+   "marketOnly": true
   },
   {
    "id": "ligue-1",
@@ -110,20 +87,8 @@
      "file": "primeira-liga/2025-26.json",
      "teams": 18
     }
-   ]
-  },
-  {
-   "id": "k-league",
-   "name": "K리그",
-   "country": "대한민국",
-   "marketOnly": true,
-   "seasons": [
-    {
-     "id": "2026",
-     "file": "k-league/2026.json",
-     "teams": 25
-    }
-   ]
+   ],
+   "marketOnly": true
   }
  ]
 }

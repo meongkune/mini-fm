@@ -19,7 +19,7 @@ if (!KEY) throw new Error('SPORTSAPIPRO_KEY 환경 변수가 없습니다')
 // 우리 리그 ID → SportsAPI(유니크) 대회 ID
 const TOURNAMENTS = {
   'premier-league': 17, 'la-liga': 8, bundesliga: 35, 'serie-a': 23, 'ligue-1': 34,
-  eredivisie: 37, 'primeira-liga': 238, championship: 18, brasileirao: 325,
+  eredivisie: 37, 'primeira-liga': 238, // 챔피언십(18)·브라질(325)은 리그 목록에서 빠져 수집하지 않는다 (2026-11)
 }
 // SportsAPI 세부 포지션 코드 → 게임 역할
 const ROLE = { GK: 'GK', DC: 'CB', DL: 'LB', DR: 'RB', DM: 'DM', MC: 'CM', ML: 'LM', MR: 'RM', AM: 'AM', LW: 'LW', RW: 'RW', ST: 'ST', CF: 'ST', WBL: 'LWB', WBR: 'RWB' }
@@ -189,7 +189,13 @@ try {
   // 우선순위: PRIORITY_LEAGUES(지금 플레이 중인 리그 등) 먼저, 그 안에서는 OVR 높은 선수부터. 레이더 값을 아직 저장 못 한 선수도 다시 받는다
   const prio = (process.env.PRIORITY_LEAGUES || 'bundesliga').split(',').map((x) => x.trim()).filter(Boolean)
   const rank = (lid) => (prio.includes(lid) ? prio.indexOf(lid) : prio.length)
-  const todo = Object.entries(state.players).filter(([, s]) => !s.attr || !s.rad).sort((a, b) => rank(a[1].lid) - rank(b[1].lid) || b[1].ovr - a[1].ovr)
+  // Kaggle 실제 기록으로 세부 능력치가 있는 선수(data/attrs, 추정 비트 없음)는 뒤로 — 기록이 없는 선수의 레이더가 더 급하다
+  const attrsOf = (lid) => { try { return JSON.parse(fs.readFileSync(path.join(DATA, 'attrs', `${lid}.json`), 'utf8')).players || {} } catch { return {} } }
+  const kaggle = Object.fromEntries(Object.keys(TOURNAMENTS).map((lid) => [lid, attrsOf(lid)]))
+  const hasReal = (pid, lid) => { const a = kaggle[lid]?.[pid]; return !!a && !a.e }
+  const todo = Object.entries(state.players)
+    .filter(([, s]) => TOURNAMENTS[s.lid] && (!s.attr || !s.rad)) // 리그 목록에서 빠진 리그(챔피언십·브라질) 선수는 받지 않는다
+    .sort((a, b) => hasReal(a[0], a[1].lid) - hasReal(b[0], b[1].lid) || rank(a[1].lid) - rank(b[1].lid) || b[1].ovr - a[1].ovr)
   for (const [pid, s] of todo) {
     const d = await tryGet(`/api/players/${s.sid}/attribute-overviews`)
     const cur = (d?.playerAttributeOverviews || []).sort((a, b) => a.yearShift - b.yearShift)[0]
