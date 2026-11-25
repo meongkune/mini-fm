@@ -225,7 +225,7 @@ export function scriptOf(lineups, tick, tactics, sim = null, stage2 = false) {
     if (nx && !(cutPass && ev === 'long' && nx.id === w && i + 1 === nodes.length - 1)) {
       const d = dist(nd.pt, nx.pt)
       const kind = nx.cross ? 'cross' : nx.loft || d > 30 ? 'loft' : 'ground'
-      add('pass', clamp(d / (kind === 'ground' ? 17 : 22), 0.4, 2.4), { who: nd.id, to: nx.id, ptFrom: nd.pt, ptTo: nx.pt, kind, label: nx.cross ? `${route} → 크로스` : nx.id === shooter && (tick.fin === 'oneOnOne' || tick.fin === 'counter') ? `${route} → 1대1` : i + 1 === nodes.length - 1 ? route : '빌드업', s: lerp(nd.s, nx.s, 0.5) })
+      add('pass', clamp(d / (kind === 'ground' ? 17 : 22), 0.4, 2.4), { who: nd.id, to: nx.id, ptFrom: nd.pt, ptTo: nx.pt, kind, label: nx.cross ? `${route} → 크로스` : nx.id === shooter && (tick.fin === 'oneOnOne' || tick.fin === 'counter') ? `${route} → 1대1` : i + 1 === nodes.length - 1 ? route : uOf(nx.pt) > 55 ? '공격 전개' : '빌드업', s: lerp(nd.s, nx.s, 0.5) })
     }
   })
   const lastHold = [...segs].reverse().find((sg) => sg.type === 'hold')
@@ -581,6 +581,8 @@ export function stepSim(sim, lineups, tactics, dt) {
       targets = f.pos
       runRestart(f, pre)
     }
+    // 세트피스 직후: 박스에 몰려 있던 선수들이 서둘러 제자리로 흩어진다
+    if (sim.prevTick?.sp && sim.t < 5) for (const side of lineups) for (const q of side) fast.add(q.id)
     // ── 공 없는 선수의 움직임: 대형 자리에 서 있기만 하지 않는다 ──
     sim.clock = (sim.clock || 0) + dt
     const hold = sim.carrier && P[sim.carrier] ? sim.carrier : who
@@ -639,7 +641,7 @@ export function stepSim(sim, lineups, tactics, dt) {
     const d = Math.hypot(dx, dy)
     if (d < 0.02) continue
     const pace = 0.92 + (hashId(p.id) % 17) / 100 // 선수마다 조금씩 다른 빠르기
-    const vmax = (fast.has(p.id) ? 8.2 : isGk(p) ? 4 : 5.6) * pace
+    const vmax = (fast.has(p.id) ? 8.2 : isGk(p) ? 4 : 5.6) * pace * (seg.type === 'kickoff' ? 1.7 : 1) // 골 뒤 자기 진영으로 돌아가는 시간은 줄여서 보여 준다
     const v = Math.min(vmax, d * 3.2) // 가까워지면 속도를 줄인다
     const stepLen = Math.min(d, v * dt)
     q.x = clamp(q.x + (dx / d) * stepLen, 0.8, W - 0.8)

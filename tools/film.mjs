@@ -1,5 +1,5 @@
 // 재생 장면을 연속 프레임 그림으로 뽑는다 (사람이 보는 관점에서 직접 확인하기 위한 도구)
-//   node tools/film.mjs [경기=0] [시작 분=1] [프레임 수=12] [간격 초=0.6]  → frontend/public/_film.html (개발 서버에서 /_film.html)
+//   node tools/film.mjs [경기=0] [시작 분=1] [프레임 수=12] [간격 초=0.6] [건너뛸 초=0] [--num]  → frontend/public/_film.html (개발 서버에서 /_film.html)
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
@@ -21,7 +21,8 @@ const lineupsOf = (match) => match.sides.map((sd, i) => {
 const match = M.createMatch({ home, away, seed: 100 + G, status: {}, myIdx: 0 })
 const sim = PB.makeSim()
 const frames = []
-let shown = 0, clock = 0, nextShot = 0
+const SKIP = Number(process.argv[6]) || 0 // 시작 분에서 몇 초 뒤부터
+let shown = 0, clock = 0, nextShot = SKIP
 const S = 2.15, W = 105, H = 68
 outer: while (!M.halfOver(match, 2)) {
   M.step(match, ctx)
