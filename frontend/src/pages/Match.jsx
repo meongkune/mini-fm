@@ -316,6 +316,7 @@ export default function Match() {
         tactics={[match.sides[0].tactics, match.sides[1].tactics]}
         score={score}
         tick={live ? lastTick : null}
+        nextTick={live && lastTick ? match.timeline[shown + 1] || null : null}
         speed={SPEEDS[speed]}
         frozen={paused || !!sheet || !!interrupt}
         onReveal={(t) => { if (t === lastTick) setRevealed(true) }}

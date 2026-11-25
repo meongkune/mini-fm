@@ -315,7 +315,7 @@ export function setPieceFrame(lineups, tick, sub, shotStage) {
     const b = base[p.id]
     if (b.pos === 'GK') { pos[p.id] = { ...b }; continue }
     if (p.id === kt) { pos[p.id] = { ...b, x: spot.x - dir * 0.8, y: spot.y }; continue }
-    if (tick.sp === 'pen') { pos[p.id] = { ...b, x: goalX - dir * (18 + h(p.id, 1) * 5), y: H / 2 + (h(p.id, 2) - 0.5) * 34 }; continue }
+    if (tick.sp === 'pen') { const yy = (h(p.id, 2) - 0.5) * 44; pos[p.id] = { ...b, x: goalX - dir * (Math.abs(yy) < 10 ? 21.5 : 17.5 + h(p.id, 1) * 5), y: H / 2 + yy }; continue } // 박스·아크 밖에 선다
     if (stay.has(p.id)) { pos[p.id] = { ...b, x: W / 2 + dir * (4 + h(p.id, 1) * 8), y: H / 2 + (h(p.id, 2) - 0.5) * 30 }; continue }
     pos[p.id] = { ...b, x: goalX - dir * (5 + h(p.id, 1) * 10), y: H / 2 + (h(p.id, 2) - 0.5) * 26 }
   }
@@ -329,7 +329,7 @@ export function setPieceFrame(lineups, tick, sub, shotStage) {
   for (const p of lineups[1 - atk]) {
     const b = base[p.id]
     if (b.pos === 'GK') { pos[p.id] = { ...b, x: goalX - dir * 0.8, y: H / 2 + (tick.sp === 'corner' ? side * 1.5 : 0) }; continue }
-    if (tick.sp === 'pen') { pos[p.id] = { ...b, x: goalX - dir * (18 + h(p.id, 3) * 5), y: H / 2 + (h(p.id, 4) - 0.5) * 34 }; continue }
+    if (tick.sp === 'pen') { const yy = (h(p.id, 4) - 0.5) * 44; pos[p.id] = { ...b, x: goalX - dir * (Math.abs(yy) < 10 ? 21.5 : 17.5 + h(p.id, 3) * 5), y: H / 2 + yy }; continue }
     if (p.id === outlet && tick.sp !== 'fk') { pos[p.id] = { ...b, x: W / 2 - dir * 2, y: H / 2 + (h(p.id, 4) - 0.5) * 16 }; continue }
     if (tick.sp === 'fk' && wi < 4) { const o = (wi++ - 1.5) * 0.9; pos[p.id] = { ...b, x: wallC.x - (toGoal.y / len) * o, y: wallC.y + (toGoal.x / len) * o }; continue }
     pos[p.id] = { ...b, x: goalX - dir * (3 + h(p.id, 3) * 11), y: H / 2 + (h(p.id, 4) - 0.5) * 24 }

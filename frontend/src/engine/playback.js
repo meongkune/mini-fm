@@ -109,12 +109,16 @@ export function scriptOf(lineups, tick, tactics, sim = null, stage2 = false) {
   const u0 = clamp(uOf(origin), 5, 97)
   const v0 = vOf(origin)
   const evk = tick.ev
-  const uEnd = shot ? (evk === 'longshot' ? clamp(Math.max(u0, 76), 0, 84) : Math.max(u0 + 1, 91))
+  // 이어지는 세트피스: 다음 장면이 같은 분·같은 팀의 페널티킥·프리킥이면 이 장면은 반칙으로 끝난 것 — 반칙은 그 킥 지점에서 난다
+  const nx = sim?.nextTick
+  const lead = nx && nx.sp && nx.m === tick.m && nx.t === atk && !shot && nx.sp !== 'corner' ? nx.sp : null
+  const leadSpot = !lead ? null : lead === 'pen' ? world(94, clamp(v0, H / 2 - 12, H / 2 + 12)) : (() => { const wantY = world(0, tick.ch === 'left' ? H / 2 - 23 : tick.ch === 'right' ? H / 2 + 23 : v0).y; const b = setPieceFrame(lineups, { ...nx, side: wantY > H / 2 ? 1 : -1 }, 0, false).ball; return { x: b.x, y: b.y } })() // 킥 지점은 반칙이 난 쪽 측면에 잡는다
+  const uEnd = leadSpot ? uOf(leadSpot) : shot ? (evk === 'longshot' ? clamp(Math.max(u0, 76), 0, 84) : Math.max(u0 + 1, 91))
     : evk === 'press' ? Math.min(98, u0 + 5)
       : evk === 'long' ? clamp(Math.max(u0 + 28, 68), 0, 90)
         : evk ? clamp(Math.max(u0 + 10, 72), 0, 92)
           : clamp(Math.max(u0 + 10, 58), 0, 90)
-  const flankV = tick.ch === 'left' ? H / 2 - 23 : tick.ch === 'right' ? H / 2 + 23 : clamp(v0, H / 2 - 9, H / 2 + 9)
+  const flankV = leadSpot ? vOf(leadSpot) : tick.ch === 'left' ? H / 2 - 23 : tick.ch === 'right' ? H / 2 + 23 : clamp(v0, H / 2 - 9, H / 2 + 9)
   const refAt = (sv) => {
     const k = clamp(sv, 0, 1)
     const v = k >= 0.95 && shot ? H / 2 + (flankV - H / 2) * 0.25 : lerp(v0, flankV, Math.min(1, k * 1.7)) // 마무리는 박스 안쪽에서
@@ -154,7 +158,7 @@ export function scriptOf(lineups, tick, tactics, sim = null, stage2 = false) {
     const k = { ...k0, id: actorFor(k0, nodes.at(-1).pt) }
     if (k.id === nodes.at(-1).id) { Object.assign(nodes.at(-1), { carry: k.carry, s: Math.max(nodes.at(-1).s, k.s), pt: nodes.length === 1 ? nodes[0].pt : refAt(k.s), goto: refAt(k.s) }); continue }
     const from = nodes.at(-1)
-    const to = spotFor(k.id, refAt(k.s), k.id === shooter ? 99 : 14)
+    const to = spotFor(k.id, refAt(k.s), k.id === shooter ? 99 : leadSpot ? 24 : 14)
     if (!k.loft && dist(from.pt, to) > 30 && nodes.length === 1) {
       const midPt = { x: lerp(from.pt.x, to.x, 0.5), y: lerp(from.pt.y, to.y, 0.5) }
       const mid = nearest(atk, midPt, [from.id, k.id, ...key.map((x) => x.id)])
@@ -205,7 +209,8 @@ export function scriptOf(lineups, tick, tactics, sim = null, stage2 = false) {
       if (drive) add('hold', 1.9, { who: start, pt: origin, next: { x: clamp(origin.x + dir * 26, 6, W - 6), y: lerp(origin.y, H / 2, 0.15) }, carry: true, label: '직접 치고 나갑니다', s: 0.2 })
       // 어느 쪽으로 돌리나: 압박에 뺏기는 장면·롱볼은 뒤로 돌리다가, 나머지는 옆·앞으로
       const bias = ev === 'press' ? -0.5 : ev === 'long' ? -0.3 : u0 < 35 ? 0.5 : 0.25
-      for (let i = 0; i < n; i++) add('circ', 1.5 + hsh('cd' + i) * 0.5, { who: start, bias: startMode === 'kickoff' && i === 0 ? -1.6 : bias, label: startMode === 'kickoff' && i === 0 ? '킥오프' : '공을 돌립니다', s: 0.08 + 0.05 * i })
+      const capU = leadSpot && lead !== 'pen' ? uOf(leadSpot) - 4 : 80 // 공 돌리기는 상대 박스 안까지 들어가지 않는다
+      for (let i = 0; i < n; i++) add('circ', 1.5 + hsh('cd' + i) * 0.5, { who: start, capU, bias: startMode === 'kickoff' && i === 0 ? -1.6 : bias, label: startMode === 'kickoff' && i === 0 ? '킥오프' : '공을 돌립니다', s: 0.08 + 0.05 * i })
       add('plan', 0.05, { who: start, label: '공을 돌립니다', s: 0.2 })
       return { dur: t, segs, revealAt: Infinity, staged: true, rate: shot || tick.k === 'card' ? PLAY_RATE.key : PLAY_RATE.plain }
     }
@@ -220,7 +225,7 @@ export function scriptOf(lineups, tick, tactics, sim = null, stage2 = false) {
     const label = isLast && shooter === nd.id && nodes.length > 1 ? finLabel(tick, route) : isKey || isLast ? route : uOf(nd.pt) > 55 ? '공격 전개' : '빌드업'
     // 롱볼이 차단되는 장면: 넘겨 주는 선수까지만 잡고, 공은 날아가다 수비 머리에 걸린다
     if (cutPass && ev === 'long' && isLast && nodes.length > 1 && nd.id === w) return
-    add('hold', (i === 0 ? 0.55 : 0.45) + (nd.carry ? 1.2 : 0) + (ev === 'counter' && isLast ? 0.4 : 0), { who: nd.id, pt: nd.pt, next: nodes[i + 1]?.pt || null, nextId: nodes[i + 1]?.id || null, nextShooter: !!nodes[i + 1] && nodes[i + 1].id === shooter, carry: !!nd.carry, label, s: nd.s, last: isLast })
+    add('hold', (i === 0 ? 0.55 : 0.45) + (nd.carry ? 1.2 : 0) + (ev === 'counter' && isLast ? 0.4 : 0), { who: nd.id, pt: nd.pt, next: nodes[i + 1]?.pt || null, nextId: nodes[i + 1]?.id || null, nextShooter: !!nodes[i + 1] && nodes[i + 1].id === shooter, carry: !!nd.carry, label, s: nd.s, last: isLast, goto: isLast && leadSpot ? leadSpot : null })
     const nx = nodes[i + 1]
     if (nx && !(cutPass && ev === 'long' && nx.id === w && i + 1 === nodes.length - 1)) {
       const d = dist(nd.pt, nx.pt)
@@ -259,7 +264,7 @@ export function scriptOf(lineups, tick, tactics, sim = null, stage2 = false) {
     add('after', 0.4, { who: taker, lost: true, label: `${route} · ${ev === 'press' ? '압박에 뺏깁니다' : '태클에 막힙니다'}`, s: last.s })
   } else {
     revealAt = t
-    add('after', tick.k === 'card' ? 1.2 : 0.4, { who: last.id, label: tick.k === 'card' ? `${route} · 반칙!` : route, s: last.s, foul: tick.k === 'card' })
+    add('after', tick.k === 'card' || leadSpot ? 1.2 : 0.4, { who: last.id, label: lead === 'pen' ? `${route} · 박스 안 반칙!` : tick.k === 'card' || leadSpot ? `${route} · 반칙!` : route, s: last.s, foul: tick.k === 'card' || !!leadSpot })
   }
   if (tick.r) add('restart', 1.0, { label: offside ? '오프사이드 · 프리킥' : RESTART_LABEL[tick.r] })
   return { dur: Math.max(t, revealAt / 0.72), segs, revealAt, rate: shot || tick.k === 'card' ? PLAY_RATE.key : PLAY_RATE.plain, taker, nodes: nodes.map((n) => n.id) }
@@ -288,7 +293,10 @@ export function syncPlayers(sim, lineups, tactics) {
   for (const id of Object.keys(sim.pos)) if (!live.has(id)) { delete sim.pos[id]; delete sim.lag[id] }
   if (sim.carrier && !live.has(sim.carrier)) sim.carrier = null
 }
-export function startClip(sim, lineups, tick, tactics) {
+export function startClip(sim, lineups, tick, tactics, nextTick = null) {
+  sim.nextTick = nextTick
+  // 반칙에 이어진 프리킥은 반칙이 난 쪽에서 찬다 (엔진이 정한 좌우 대신 화면에서 공이 있던 쪽)
+  sim.spSide = tick?.sp && tick.sp !== 'corner' && tick.sp !== 'pen' && sim.tick && sim.tick.m === tick.m && sim.tick.t === tick.t ? (sim.ball.y > H / 2 ? 1 : -1) : null
   const prev = sim.tick
   syncPlayers(sim, lineups, tactics)
   if (!tick || prev?.k === 'goal') { sim.ball = { x: W / 2, y: H / 2, z: 0 }; sim.carrier = null }
@@ -307,7 +315,7 @@ export function startClip(sim, lineups, tick, tactics) {
 }
 
 /** 공 돌리기에서 누구에게 줄까: 가깝고(15m 안팎), 주변에 상대가 없고, 패스 길이 비어 있는 동료. bias > 0이면 앞쪽, < 0이면 뒤쪽을 고른다 */
-function pickSupport(sim, lineups, atk, holder, bias, avoid) {
+function pickSupport(sim, lineups, atk, holder, bias, avoid, capU = 80) {
   const P = sim.pos
   const dir = atk === 0 ? 1 : -1
   const h = P[holder]
@@ -321,6 +329,7 @@ function pickSupport(sim, lineups, atk, holder, bias, avoid) {
     const d = dist(h, q)
     const gk = isGk(p)
     if (d < 6 || d > 34 || (gk && bias >= 0)) continue
+    if ((atk === 0 ? q.x : W - q.x) > capU) continue
     const fwd = (q.x - h.x) * dir
     const open = Math.min(9, ...opp.map((o) => dist(o, q)))
     const free = Math.min(4, ...opp.map((o) => lane(o, h, q)))
@@ -416,7 +425,13 @@ export function stepSim(sim, lineups, tactics, dt) {
     const placed = chase(held ? { x: P[taker].x + td * 0.5, y: P[taker].y, z: 0 } : spot, 28)
     const there = placed && dist(P[taker], stand) < 1.6
     sim.carrier = there ? taker : null
-    waitFor(there, 9)
+    // 골킥·골키퍼가 잡은 공: 박스에 몰려 있던 선수들이 흩어져 자리를 잡은 뒤에 찬다
+    let crowd = 0
+    if (tick.r === 'goalkick' || tick.r === 'gk') {
+      const ff = computeFrame(lineups, { t: td > 0 ? 0 : 1, m: tick.m, i: tick.i, k: 'build' }, 0, false, tactics, { x: spot.x, y: spot.y, prog: 0.15, holder: taker })
+      for (const side of lineups) for (const q of side) if (q.id !== taker && P[q.id] && ff.pos[q.id]) { targets[q.id] = ff.pos[q.id]; fast.add(q.id); if (!isGk(q) && dist(P[q.id], spot) < 20) crowd++ }
+    }
+    waitFor(there && crowd <= 2, 9)
   }
   const stick = (id, d) => { const q = feet(id, d); if (sim.carrier !== id && dist(ball, q) > 1.4 && !chase(q)) return false; ball.x = q.x; ball.y = q.y; ball.z = 0; sim.carrier = id; return true }
 
@@ -428,7 +443,7 @@ export function stepSim(sim, lineups, tactics, dt) {
     // 세트피스: 단계별 자리로 걸어가고, 킥이 날아간다
     const stage = seg.type === 'setup' ? 0 : seg.type === 'kick' ? 1 : seg.type === 'clear' ? 2 : 1
     const shotStage = seg.type === 'shot' || seg.type === 'after' || seg.type === 'restart'
-    let f = setPieceFrame(lineups, tick, stage, shotStage && SHOT.has(tick.k))
+    let f = setPieceFrame(lineups, sim.spSide ? { ...tick, side: sim.spSide } : tick, stage, shotStage && SHOT.has(tick.k))
     const preSp = f.pos
     if (seg.type === 'restart') f = applyRestart({ ...f, ball: sim.rst && sim.rst.seg === si && sim.rst.tick === tick ? sim.rst.spot : f.ball }, tick, lineups)
     targets = f.pos
@@ -436,7 +451,9 @@ export function stepSim(sim, lineups, tactics, dt) {
       // 공은 킥 지점에 놓이고, 키커가 그 앞에 설 때까지 기다린다
       const placed = chase(f.ball, 26)
       const kt = f.carrier
-      const ready = placed && (!kt || !P[kt] || dist(P[kt], targets[kt]) < 1.6)
+      let inBox = 0
+      if (tick.sp === 'pen') { const gx = tick.t === 0 ? W : 0; for (const side of lineups) for (const p of side) { const q = P[p.id]; if (q && p.id !== kt && !isGk(p) && Math.abs(q.x - gx) < 16.5 && Math.abs(q.y - H / 2) < 20.2) { inBox++; fast.add(p.id) } } }
+      const ready = placed && (!kt || !P[kt] || dist(P[kt], targets[kt]) < 1.6) && inBox === 0
       if (kt) fast.add(kt)
       sim.carrier = ready ? kt : null
       waitFor(ready, 13) // 키커가 멀리 있으면 달려오는 데 시간이 걸린다
@@ -479,7 +496,7 @@ export function stepSim(sim, lineups, tactics, dt) {
       if (!sim.circ) {
         if (who && sim.carrier !== who) stick(who, dir)
         if (u > 0.35 && who && sim.carrier === who) {
-          const to = pickSupport(sim, lineups, atk, who, seg.bias ?? 0, sim.lastFrom)
+          const to = pickSupport(sim, lineups, atk, who, seg.bias ?? 0, sim.lastFrom, seg.capU ?? 80)
           if (to) { sim.circ = { seg: si, from: who, to }; sim.lastFrom = who; sim.carrier = null }
         } else if (who && sim.carrier === who) targets[who] = { ...targets[who], x: P[who].x + dir * (seg.bias > 0 ? 0.7 : 0.2), y: P[who].y }
       }
@@ -519,8 +536,10 @@ export function stepSim(sim, lineups, tactics, dt) {
       const ahead = seg.next || goal
       const k = seg.carry ? 0.6 : 0.2
       const base = sim.base || seg.pt
-      targets[who] = { ...targets[who], x: lerp(base.x, ahead.x, u * k), y: lerp(base.y, ahead.y, u * k) }
+      if (seg.goto) { const g = clamp(u * 1.3, 0, 1); targets[who] = { ...targets[who], x: lerp(base.x, seg.goto.x, g), y: lerp(base.y, seg.goto.y, g) } }
+      else targets[who] = { ...targets[who], x: lerp(base.x, ahead.x, u * k), y: lerp(base.y, ahead.y, u * k) }
       stick(who, dir)
+      if (seg.goto) { waitFor(dist(P[who], seg.goto) < 2.5, 6); if (tick.d && P[tick.d]) { targets[tick.d] = { ...targets[tick.d], x: P[who].x + dir * 1.4, y: P[who].y }; fast.add(tick.d) } }
       if (seg.nextId && P[seg.nextId] && seg.next) {
         targets[seg.nextId] = { ...targets[seg.nextId], x: seg.next.x, y: seg.next.y }
         fast.add(seg.nextId)
@@ -573,6 +592,7 @@ export function stepSim(sim, lineups, tactics, dt) {
       } else if (who) {
         if (!stick(who, seg.lost ? -dir : dir) && seg.lost && u > 0.5) { const q = feet(who, -dir); ball.x = q.x; ball.y = q.y; ball.z = 0; sim.carrier = who }
         if (seg.lost) targets[who] = { ...targets[who], x: P[who].x - dir * 1.5, y: P[who].y }
+        if (seg.foul && tick.d && P[tick.d]) { targets[tick.d] = { ...targets[tick.d], x: P[who].x + dir * 0.8, y: P[who].y }; fast.add(tick.d) } // 반칙한 수비가 붙어 있다
       }
     } else if (seg.type === 'restart') {
       const pre = f.pos

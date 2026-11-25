@@ -29,7 +29,7 @@ outer: while (!M.halfOver(match, 2)) {
   const lu = lineupsOf(match), T = match.sides.map((s) => s.tactics)
   for (; shown < match.timeline.length; shown++) {
     const tick = match.timeline[shown]
-    PB.startClip(sim, lu, tick, T)
+    PB.startClip(sim, lu, tick, T, match.timeline[shown + 1] || null)
     let guard = 0
     while (!sim.done && guard++ < 2400) {
       PB.stepSim(sim, lu, T, 1 / 60)

@@ -8,6 +8,7 @@ const FE = path.join(path.resolve(path.dirname(fileURLToPath(import.meta.url)), 
 const imp = (f) => import(pathToFileURL(path.join(FE, 'src', f)).href)
 const M = await imp('engine/match.js')
 const PB = await imp('engine/playback.js')
+const POS = await imp('engine/positions.js')
 const { buildSlots } = await imp('engine/formation.js')
 const N = Number(process.argv[2]) || 4
 const TR = process.argv.includes('--trace') ? Number(process.argv[process.argv.indexOf('--trace') + 1]) || 12 : 0
@@ -18,7 +19,7 @@ const W = 105, H = 68
 const SHOT = new Set(['goal', 'save', 'miss'])
 const issues = {}
 const bump = (k, ex) => { (issues[k] ??= { n: 0, ex: [] }).n++; if (issues[k].ex.length < 3) issues[k].ex.push(ex) }
-let restarts = 0, circs = 0, clips = 0, shots = 0, losts = 0, passes = 0, changes = 0, traced = 0, kickoffs = 0, corners = 0, secs = 0
+let fouls = 0, restarts = 0, circs = 0, clips = 0, shots = 0, losts = 0, passes = 0, changes = 0, traced = 0, kickoffs = 0, corners = 0, secs = 0
 for (let g = 0; g < N; g++) {
   const home = d.teams[(g * 3) % d.teams.length], away = d.teams[(g * 7 + 5) % d.teams.length]
   if (home === away) continue
@@ -41,7 +42,9 @@ for (let g = 0; g < N; g++) {
       const before = { carrier: sim.carrier, ball: { ...sim.ball }, prev: sim.tick }
       // 재개(골킥·프리킥·스로인·오프사이드) 다음 장면: 차는 선수가 공 옆에 서 있어야 한다
       if (before.prev?.r) { restarts++; const nd = Math.min(...lu.flat().map((p) => sim.pos[p.id] ? Math.hypot(sim.pos[p.id].x - sim.ball.x, sim.pos[p.id].y - sim.ball.y) : 99)); if (nd > 3 || !before.carrier) bump('재개인데 공 옆에 차는 선수가 없음', (before.prev.r) + ' 뒤 ' + tick.m + "' (" + nd.toFixed(0) + 'm)') }
-      PB.startClip(sim, lu, tick, T)
+      // 페널티킥·프리킥: 바로 앞 장면(반칙)이 그 킥 지점에서 끝났어야 한다
+      if ((tick.sp === 'pen' || tick.sp === 'fk' || tick.sp === 'fkx') && before.prev && before.prev.m === tick.m && before.prev.t === tick.t) { fouls++; const sp = POS.setPieceFrame(lu, { ...tick, side: sim.ball.y > H / 2 ? 1 : -1 }, 0, false).ball; const dd = Math.hypot(sim.ball.x - sp.x, sim.ball.y - sp.y); const gx = tick.t === 0 ? W : 0; const inBox = Math.abs(sim.ball.x - gx) < 16.5 && Math.abs(sim.ball.y - H / 2) < 20.2; if (tick.sp === 'pen' ? !inBox : dd > 6 || inBox) bump(tick.sp === 'pen' ? '페널티킥인데 반칙이 박스 밖에서 남' : '프리킥인데 반칙 지점이 킥 지점과 다름', tick.m + "' (" + dd.toFixed(0) + 'm' + (inBox ? ', 박스 안' : '') + ') 앞: ev=' + before.prev.ev + ' k=' + before.prev.k + ' sp=' + before.prev.sp + ' lost=' + !!before.prev.lost + ' r=' + before.prev.r) }
+      PB.startClip(sim, lu, tick, T, match.timeline[shown + 1] || null)
       let sc = sim.script
       clips++
       const atk = tick.t, goalX = atk === 0 ? W : 0, dir = atk === 0 ? 1 : -1
@@ -127,7 +130,7 @@ for (let g = 0; g < N; g++) {
     }
   }
 }
-console.log(`\n장면 ${clips}개 (슛 ${shots} · 뺏김 ${losts} · 패스 ${passes} · 재개 ${restarts} · 공 돌리기 ${circs} · 뺏으며 시작 ${changes} · 킥오프 ${kickoffs} · 코너킥 ${corners}) · 대본 시간 경기당 ${(secs / N / 60).toFixed(1)}분`)
+console.log(`\n장면 ${clips}개 (슛 ${shots} · 뺏김 ${losts} · 패스 ${passes} · 반칙→킥 ${fouls} · 재개 ${restarts} · 공 돌리기 ${circs} · 뺏으며 시작 ${changes} · 킥오프 ${kickoffs} · 코너킥 ${corners}) · 대본 시간 경기당 ${(secs / N / 60).toFixed(1)}분`)
 const keys = Object.keys(issues)
 if (!keys.length) console.log('규칙에 걸린 장면 없음 (규칙에 적은 것만 본다)')
 for (const k of keys.sort((a, b) => issues[b].n - issues[a].n)) { console.log(`✖ ${k}: ${issues[k].n}건`); for (const e of issues[k].ex) console.log('     예) ' + e) }
