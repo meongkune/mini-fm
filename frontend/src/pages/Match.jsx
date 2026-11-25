@@ -5,7 +5,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { buildSlots, fitOf, fitTone } from '../engine/formation.js'
 import { AI_STYLE, aiStyle, CORNER_EDGE, MAX_SUBS, advance, benchOf, clockText, createMatch, halfOver, dropInjured, fillVacant, moveToVacant, predict, ratings, reshape, step, substitute, summarize, swapPositions, tacticalEdges } from '../engine/match.js'
-import { styleName, tacOf } from '../engine/tactics.js'
+import { SHOUTS, adjText, applyShout, styleName, tacOf } from '../engine/tactics.js'
 import { TEAM_TALKS, teamTalkEffect, unavailable as outReason } from '../game/season.js'
 import Rating, { CondBar } from '../components/Rating.jsx'
 import { Crest, Flag, Kit } from '../components/Badges.jsx'
@@ -23,17 +23,7 @@ const TICK_MULT = { build: 1, card: 2, clear: 2, miss: 2.5, save: 2.5, goal: 5 }
 const tickDelay = (t, base) => base * ((TICK_MULT[t?.k] || 1) + (t?.sp ? 1.5 : 0) + (t?.sp === 'pen' ? 1.5 : 0) + (t?.r ? 0.6 : 0))
 const POS_ORDER = { GK: 0, DF: 1, MF: 2, FW: 3 }
 const seedOf = (s) => { let h = 2166136261; for (const c of String(s)) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return (h >>> 0) % 1e9 + 1 }
-// 터치라인 지시(FM식 외침): 버튼 한 번으로 지금 전술을 그 방향으로 민다. 여러 번 누르면 더 세진다
-const cl = (v) => Math.max(0, Math.min(100, v))
-const SHOUTS = [
-  ['push', '⚔️ 공격 앞으로', '라인을 올리고 더 많이 공격합니다', (t) => ({ mentality: cl(t.mentality + 20), line: cl(t.line + 10) })],
-  ['hold', '🛡️ 지키자', '내려앉아 리드를 지킵니다', (t) => ({ mentality: cl(t.mentality - 20), line: cl(t.line - 15) })],
-  ['press', '🔥 압박 올려', '전방에서 공을 뺏습니다 (체력 소모 ↑)', (t) => ({ pressing: cl(t.press + 25) })],
-  ['breathe', '😮‍💨 숨 고르기', '압박·템포를 낮춰 체력을 아낍니다', (t) => ({ pressing: cl(t.press - 25), tempo: cl(t.tempo - 20) })],
-  ['wings', '↔️ 측면으로', '넓게 벌려 측면을 공략합니다', (t) => ({ width: cl(t.width + 25), focus: 'wings' })],
-  ['direct', '🎯 뒷공간으로', '길고 빠르게 수비 뒤를 노립니다', (t) => ({ passing: cl(t.passing + 25), tempo: cl(t.tempo + 15) })],
-  ['waste', '⏳ 시간 끌기', '템포를 늦추고 볼을 돌립니다', (t) => ({ tempo: cl(t.tempo - 30), mentality: cl(t.mentality - 10), passing: cl(t.passing - 20) })],
-]
+// 터치라인 지시(engine/tactics.js SHOUTS): 버튼 한 번으로 이 경기 전술에 잠깐 더하는 값(adj)을 쌓는다. 여러 번 누르면 더 세지고, 한 번에 되돌릴 수 있다
 
 // 진행 중인 경기 (앱 안에서 다른 탭에 다녀와도 이어서 하도록 화면 밖에 보관). 새로 고침·창 닫기로는 사라진다
 const LIVE = { match: null, ui: null }
@@ -225,16 +215,24 @@ export default function Match() {
       const lineup = roles.map((r) => { const i = mySide.slots.findIndex((x, j) => !used.has(j) && x === r); if (i < 0) return null; used.add(i); return mySide.onPitch[i] })
       update({ formation: patch.formation, lineup })
     } else {
-      update(patch)
+      // 터치라인 지시(adj)는 이 경기에만 건다 — 저장된 팀 전술에는 넣지 않는다
+      const { adj: _adj, ...keep } = patch
+      update(keep)
       mySide.tactics = { ...mySide.tactics, ...patch }
     }
     rerender()
   }
   // 터치라인 지시: 이 경기 전술만 바꾸고(저장된 팀 전술은 그대로) 문자 중계에 남긴다
-  const shout = ([key, label, , fn]) => {
-    mySide.tactics = { ...mySide.tactics, ...fn(tacOf(mySide.tactics)) }
+  const shout = ([key, label]) => {
+    mySide.tactics = applyShout(mySide.tactics, key)
     match.events.push({ minute: match.minute, plus: match.plus || undefined, type: 'info', team: myIdx, text: `📣 ${mySide.name} 감독 지시: ${label.replace(/^\S+ /, '')}` })
     setLastShout(key)
+    rerender()
+  }
+  const clearShouts = () => {
+    mySide.tactics = { ...mySide.tactics, adj: null }
+    match.events.push({ minute: match.minute, plus: match.plus || undefined, type: 'info', team: myIdx, text: `📣 ${mySide.name} 감독 지시: 원래 전술로` })
+    setLastShout(null)
     rerender()
   }
   const doSub = (outId, inId) => {
@@ -371,6 +369,9 @@ export default function Match() {
                 <button key={s[0]} className={`chip shout ${lastShout === s[0] ? 'on' : ''}`} title={s[2]} onClick={() => shout(s)}>{s[1]}</button>
               ))}
             </div>
+            {adjText(mySide.tactics).length > 0 && (
+              <p className="small shout-adj">지금 걸린 지시: {adjText(mySide.tactics).map((x) => <b key={x}>{x}</b>)} <button type="button" className="linkish" onClick={clearShouts}>↺ 원래 전술로</button></p>
+            )}
           </div>
         )}
 

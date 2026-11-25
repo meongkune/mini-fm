@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import { philOf, tacOf } from './engine/tactics.js'
 import { api, loadSeasonFile, loadStadiums } from './api.js'
 import { playerOvrOf, roundRobin } from './engine/engine.js'
 import { available } from './engine/match.js'
@@ -95,9 +96,14 @@ export function teamOvr(team) {
 }
 
 /** 저장된 내 팀 전술 (경기 엔진에 넘기는 형태) */
+//   전술 구조: 철학(phil) + 공격 방향 + 세부 조정(공격 가담·템포·패스 길이, 없으면 철학 기본값) + 수비 성향(압박·태클·트랩)
+//   수비 라인 높이·공격 폭은 저장하지 않는다 — 배치(드래그)와 철학·압박에서 계산된다 (engine/tactics.js tacOf·shapeOf)
 export const myTactics = (save) => ({
-  formation: save.formation, mentality: save.mentality, pressing: save.pressing, line: save.line ?? 'normal', tempo: save.tempo ?? 'normal',
-  width: save.width ?? 50, passing: save.passing ?? 50, approach: save.approach || 'balanced', focus: save.focus || 'mixed', trap: !!save.trap, tackling: save.tackling || 'normal',
+  formation: save.formation, phil: save.phil, focus: save.focus || 'mixed',
+  mentality: save.mentality ?? null, tempo: save.tempo ?? null, passing: save.passing ?? null,
+  // 예전 전술 저장(tacSets)을 불러온 직후처럼 철학이 없을 때만 예전 '공격 방식'으로 철학을 알아낸다
+  approach: save.phil ? null : save.approach || null,
+  pressing: save.pressing, trap: !!save.trap, tackling: save.tackling || 'normal',
   // 세트피스: 코너킥 루틴 · 상대 코너킥 수비 · 키커(없으면 자동)
   corner: save.corner || 'mixed', cornerDef: save.cornerDef || 'zonal', spTaker: save.spTaker || null, penTaker: save.penTaker || null,
 })
@@ -281,6 +287,22 @@ export function GameProvider({ children }) {
   useEffect(() => {
     if (data && save.teamId && !save.board) setSave((s) => ({ ...s, board: newBoard(effectiveTeams(data.teams, s), s.teamId, null, data.leagueId) }))
   }, [data, save.teamId, save.board])
+
+  // 전술 구조 옮기기: 예전 세이브(운영 성향·공격 방식·수비 라인·공격 폭을 따로 고르던 구조)를 철학 중심 구조로
+  //   철학은 예전 공격 방식·패스 길이에서 알아내고, 공격 가담·템포·패스 길이는 '세부 조정'으로 그대로 남긴다 (경기력이 갑자기 달라지지 않게)
+  //   수비 라인·공격 폭 값은 버린다 — 이제 배치와 철학·압박에서 계산된다. 예전 문자열 값('balanced'·'normal')도 지운다
+  useEffect(() => {
+    if (!save.teamId || save.phil) return
+    setSave((s) => {
+      if (!s.teamId || s.phil) return s // 두 번 실행돼도 한 번만
+      const phil = philOf(s)
+      const old = tacOf({ mentality: s.mentality, tempo: s.tempo, passing: s.passing, pressing: s.pressing, approach: s.approach }) // 예전 값(문자열 포함)을 숫자로
+      const base = tacOf({ phil }) // 그 철학의 기본값
+      // 철학 기본값과 다른 것만 세부 조정으로 남긴다
+      const keep = (k) => (s[k] != null && old[k] !== base[k] ? old[k] : null)
+      return { ...s, phil, mentality: keep('mentality'), tempo: keep('tempo'), passing: keep('passing'), pressing: old.press, approach: null, line: null, width: null }
+    })
+  }, [save.teamId, save.phil])
 
   // 재정 5판으로 옮기기: 매출 고정 · 운영비 · 이사회 예산(이적 자금/임금 예산) · 이적료 분할
   useEffect(() => {

@@ -1153,8 +1153,18 @@ html.framed body { overflow: hidden; height: 100vh; }
 .screen .tr-stats { grid-template-columns: auto 1fr; gap: 4px 8px; }
 /* 팀 지시 패널 */
 .tp-presets { margin-bottom: 8px; }
+.tp-warn { list-style: none; margin: 0 0 10px; padding: 8px 10px; border-radius: 9px; background: rgba(245, 158, 11, .12); border: 1px solid rgba(245, 158, 11, .35); display: grid; gap: 4px; font-size: .76rem; color: #fcd34d; }
+.tp-read { display: grid; grid-template-columns: 5.2em 1fr 5em; align-items: center; gap: 8px; margin-bottom: 8px; font-size: .8rem; }
+.tp-read em { font-style: normal; text-align: right; color: var(--muted, #94a3b8); }
+.tp-read-bar { position: relative; height: 6px; border-radius: 999px; background: var(--panel-2); border: 1px solid var(--line); }
+.tp-read-bar i { position: absolute; top: 50%; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%; background: var(--accent); }
+.tp-fine { margin: 6px 0 10px; }
+.tp-fine summary { cursor: pointer; font-size: .8rem; font-weight: 700; margin-bottom: 8px; }
+.tp-phil { margin: -4px 0 10px; }
+.shout-adj { margin: 6px 0 0; display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: center; }
+.shout-adj b { padding: 1px 7px; border-radius: 999px; background: rgba(124, 92, 255, .18); font-weight: 700; }
 .tp-style { color: var(--accent); }
-.tp-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.tp-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 6px 16px; }
 .tp.compact .tp-cols, .screen .tp-cols { grid-template-columns: 1fr; gap: 6px; }
 .tp-cols h4 { margin: 6px 0; }
 .tp-slider { display: grid; gap: 2px; margin-bottom: 10px; }
@@ -1315,7 +1325,7 @@ html.desktop .tabs-line { position: static; margin: 0 0 12px; padding: 0; backgr
 /* 세트피스 지시 */
 .tp-select { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 6px 0; font-size: 13px; }
 .tp-select select { flex: 1; max-width: 62%; background: var(--card2, #1e1b2e); color: inherit; border: 1px solid rgba(255,255,255,.15); border-radius: 8px; padding: 5px 6px; font: inherit; }
-.tp-cols > section:nth-child(3) { grid-column: 1 / -1; }
+.tp-cols > section:nth-child(4) { grid-column: 1 / -1; }
 .sp-note { margin: 4px 0 8px; line-height: 1.5; }
 
 /* 터치라인 지시 */

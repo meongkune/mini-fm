@@ -13,23 +13,119 @@ const OLD = {
 }
 const num = (v, key) => (typeof v === 'number' ? v : OLD[key]?.[v] ?? 50)
 
-/** 전술 기본값 + 예전 값 변환 */
+// ── 전술 구조 ──
+// 감독이 정하는 것은 세 덩어리다:
+//   ① 어디에 서나 — 포메이션·드래그 배치(formation.js). 수비 라인 높이와 공격 폭은 여기서 '계산'된다 (따로 고르지 않는다)
+//   ② 어떻게 공격하나 — 철학(phil: 점유·균형·역습·직선) + 공격 방향(focus). 철학이 공격 가담·템포·패스 길이의 기본값을 정한다 (세부 조정 가능)
+//   ③ 어떻게 뺏나 — 압박 강도(pressing)·태클(tackling)·오프사이드 트랩(trap)
+//   경기 중 터치라인 지시는 adj(잠깐 더하는 값)에 따로 쌓인다 → 무엇이 바뀌었는지 보여 주고 한 번에 되돌릴 수 있다
+// 엔진이 읽는 값(tacOf 결과)은 예전과 같다. 값이 명시돼 있으면(AI 구단 프리셋·예전 세이브·세부 조정) 그대로, 없으면 철학의 기본값.
+export const PHILS = [
+  ['possession', '점유', '짧은 패스로 공을 지키며 상대를 끌어낸다. 중원을 잡지만 찬스는 천천히 난다', { approach: 'possession', mentality: 55, tempo: 35, passing: 20, line: 62 }],
+  ['balanced', '균형', '상황에 맞춰 짧게도 길게도 푼다', { approach: 'balanced', mentality: 50, tempo: 50, passing: 50, line: 50 }],
+  ['counter', '역습', '내려앉아 버티다가 공을 잡으면 빠르게 뒷공간을 찌른다. 공은 덜 갖는다', { approach: 'counter', mentality: 40, tempo: 75, passing: 65, line: 35 }],
+  ['direct', '직선', '길게 넘겨 최전방 타깃과 2선 침투로 마무리한다. 공중볼 싸움이 중요하다', { approach: 'balanced', mentality: 55, tempo: 70, passing: 90, line: 45 }],
+]
+const PHIL_BASE = Object.fromEntries(PHILS.map(([k, , , v]) => [k, v]))
+const has = (v) => v !== undefined && v !== null
+/** 철학: 저장된 값이 없으면(예전 세이브·AI 프리셋) 공격 방식·패스 길이로 알아낸다 */
+export const philOf = (t = {}) => (PHIL_BASE[t.phil] ? t.phil : t.approach === 'possession' ? 'possession' : t.approach === 'counter' ? 'counter' : typeof t.passing === 'number' && t.passing >= 80 ? 'direct' : 'balanced')
+/** 세부 조정을 지우는 patch (철학·빠른 설정을 고를 때 같이 쓴다) */
+export const TAC_CLEAR = { mentality: null, tempo: null, passing: null, approach: null, line: null, width: null, adj: null }
+
+/** 엔진이 읽는 전술 값 (0~100, 50 = 보통). 예전 저장값(문자열: 'attacking', 'high' …)도 그대로 읽는다 */
 export function tacOf(t = {}) {
+  const phil = philOf(t)
+  const P = PHIL_BASE[phil]
+  const adj = t.adj || {}
+  const n = (v, key, d) => (has(v) ? num(v, key) : d)
+  const c = (v, key) => (adj[key] ? clamp(v + adj[key], 0, 100) : v)
+  const press = n(t.pressing, 'pressing', 50)
   return {
-    mentality: num(t.mentality, 'mentality'),
-    tempo: num(t.tempo, 'tempo'),
-    width: t.width ?? 50,
-    passing: t.passing ?? 50, // 0 짧게 ~ 100 길게(직선적)
-    approach: t.approach || 'balanced', // possession | balanced | counter
-    focus: t.focus || 'mixed', // mixed | wings | center
-    press: num(t.pressing, 'pressing'),
-    line: num(t.line, 'line'),
+    phil,
+    mentality: c(n(t.mentality, 'mentality', P.mentality), 'mentality'),
+    tempo: c(n(t.tempo, 'tempo', P.tempo), 'tempo'),
+    width: c(has(t.width) ? t.width : 50, 'width'), // 드래그 배치의 폭은 edges에서 더해진다
+    passing: c(has(t.passing) ? t.passing : P.passing, 'passing'), // 0 짧게 ~ 100 길게(직선적)
+    approach: t.approach || P.approach, // possession | balanced | counter
+    focus: adj.focus || t.focus || 'mixed', // mixed | wings | center
+    press: c(press, 'pressing'),
+    // 수비 라인: 명시된 값이 없으면 철학 기본 + 압박 강도 (전방 압박을 하면 블록 전체가 올라간다). 드래그 배치의 높이는 edges에서 더해진다
+    line: c(has(t.line) ? num(t.line, 'line') : clamp(P.line + (press - 50) * 0.5, 5, 95), 'line'),
     trap: !!t.trap, // 오프사이드 트랩
     tackling: t.tackling || 'normal', // soft | normal | hard
   }
 }
 
-/** 전술 프리셋 (FM식 스타일) */
+/** 화면 표시용: 드래그 배치까지 더한 수비 라인 높이·공격 폭 (엔진의 edges와 같은 계산) */
+export function shapeOf(t = {}, formation = t.formation) {
+  const x = tacOf(t)
+  const g = layoutShift(formation)
+  return { line: clamp(x.line + g.line, 0, 100), width: clamp(x.width + g.width, 0, 100), dragged: !!g.d }
+}
+
+/** 빠른 설정 (내 구단용): 예전 스타일 프리셋을 새 구조(철학 + 수비 성향 + 세부 조정)로 옮긴 것 */
+export const QUICK_SETUPS = [
+  ['gegen', '게겐프레싱', { phil: 'balanced', focus: 'mixed', mentality: 65, tempo: 75, passing: 40, pressing: 90, trap: true, tackling: 'hard' }],
+  ['tiki', '점유율 축구', { phil: 'possession', focus: 'center', pressing: 65, trap: false, tackling: 'normal' }],
+  ['counter', '역습', { phil: 'counter', focus: 'mixed', pressing: 35, trap: false, tackling: 'normal' }],
+  ['wing', '측면 공격', { phil: 'balanced', focus: 'wings', mentality: 60, tempo: 60, pressing: 55, trap: false, tackling: 'normal' }],
+  ['route1', '롱볼', { phil: 'direct', focus: 'center', pressing: 45, trap: false, tackling: 'hard' }],
+  ['bus', '버스 세우기', { phil: 'counter', focus: 'mixed', mentality: 12, tempo: 30, pressing: 20, trap: false, tackling: 'hard' }],
+].map(([k, label, p]) => [k, label, { ...TAC_CLEAR, ...p }])
+
+/**
+ * 서로 어긋나는 조합 경고 (고르는 즉시 보여 준다). 드래그 배치까지 더한 값으로 본다
+ * @returns [문구…]
+ */
+export function tacWarnings(t = {}, formation = t.formation) {
+  const x = tacOf(t)
+  const s = shapeOf(t, formation)
+  const out = []
+  if (x.approach === 'counter' && s.line >= 65) out.push('역습인데 수비 라인이 높습니다 — 내려앉아야 뒷공간이 생기고, 지금은 우리 뒷공간만 내줍니다')
+  if (x.approach === 'counter' && x.tempo <= 35) out.push('역습인데 템포가 느립니다 — 공을 잡은 뒤 빨리 나가지 못하면 역습이 되지 않습니다')
+  if (x.approach === 'counter' && x.mentality >= 75) out.push('역습인데 공격 가담이 너무 많습니다 — 다 올라가면 버틸 사람이 없습니다')
+  if (x.approach === 'possession' && x.passing >= 70) out.push('점유인데 패스가 깁니다 — 롱볼은 공을 자주 잃어 점유가 되지 않습니다')
+  if (x.approach === 'possession' && x.tempo >= 75) out.push('점유인데 템포가 아주 빠릅니다 — 서두르면 패스 실수가 늘어납니다')
+  if (x.press >= 75 && s.line <= 35) out.push('전방 압박인데 수비 라인이 낮습니다 — 앞과 뒤 사이가 벌어져 중원이 뚫립니다')
+  if (x.press <= 35 && s.line >= 70) out.push('라인은 높은데 압박이 약합니다 — 상대가 편하게 뒷공간으로 공을 넣습니다')
+  if (x.trap && s.line <= 40) out.push('오프사이드 트랩은 라인이 높아야 통합니다 — 지금 높이에서는 효과가 거의 없습니다')
+  if (x.focus === 'wings' && s.width <= 35) out.push('측면 공격인데 배치가 좁습니다 — 윙어·풀백을 바깥으로 벌려 세우세요')
+  if (x.focus === 'center' && s.width >= 75) out.push('중앙 공격인데 배치가 아주 넓습니다 — 중앙에 숫자가 부족합니다')
+  if (x.mentality <= 20 && x.press >= 75) out.push('잠그는 운영인데 압박이 아주 강합니다 — 체력만 쓰고 자리를 비우게 됩니다')
+  return out
+}
+
+// ── 터치라인 지시: 전술값에 잠깐 더하는 값(adj)으로 쌓인다. 저장된 팀 전술은 그대로 ──
+export const SHOUTS = [
+  ['push', '⚔️ 공격 앞으로', '라인을 올리고 더 많이 공격합니다', { mentality: 20, line: 10 }],
+  ['hold', '🛡️ 지키자', '내려앉아 리드를 지킵니다', { mentality: -20, line: -15 }],
+  ['press', '🔥 압박 올려', '전방에서 공을 뺏습니다 (체력 소모 ↑)', { pressing: 25 }],
+  ['breathe', '😮‍💨 숨 고르기', '압박·템포를 낮춰 체력을 아낍니다', { pressing: -25, tempo: -20 }],
+  ['wings', '↔️ 측면으로', '넓게 벌려 측면을 공략합니다', { width: 25, focus: 'wings' }],
+  ['direct', '🎯 뒷공간으로', '길고 빠르게 수비 뒤를 노립니다', { passing: 25, tempo: 15 }],
+  ['waste', '⏳ 시간 끌기', '템포를 늦추고 볼을 돌립니다', { tempo: -30, mentality: -10, passing: -20 }],
+]
+const ADJ_LABEL = { mentality: '공격 가담', line: '수비 라인', pressing: '압박', tempo: '템포', width: '공격 폭', passing: '패스 길이' }
+const ADJ_MAX = 50
+/** 지시 한 번 적용 → 새 전술 (여러 번 누르면 더 세지고, 반대 지시는 서로 지운다) */
+export function applyShout(t, key) {
+  const d = SHOUTS.find((s) => s[0] === key)?.[3]
+  if (!d) return t
+  const adj = { ...(t.adj || {}) }
+  for (const [k, v] of Object.entries(d)) {
+    if (k === 'focus') adj.focus = v
+    else { adj[k] = clamp((adj[k] || 0) + v, -ADJ_MAX, ADJ_MAX); if (!adj[k]) delete adj[k] }
+  }
+  return { ...t, adj: Object.keys(adj).length ? adj : null }
+}
+/** 지금 걸려 있는 지시 효과 → ['공격 가담 +20', '수비 라인 +10', '측면 집중'] */
+export function adjText(t = {}) {
+  const adj = t.adj || {}
+  return [...Object.entries(ADJ_LABEL).filter(([k]) => adj[k]).map(([k, l]) => `${l} ${adj[k] > 0 ? '+' : ''}${adj[k]}`), ...(adj.focus === 'wings' ? ['측면 집중'] : [])]
+}
+
+/** 전술 프리셋 (AI 구단용 — 값이 모두 명시돼 있다. 내 구단 화면은 QUICK_SETUPS를 쓴다) */
 export const TAC_PRESETS = [
   ['gegen', '게겐프레싱', { mentality: 65, tempo: 75, width: 55, passing: 40, approach: 'balanced', focus: 'mixed', pressing: 90, line: 80, trap: true, tackling: 'hard' }],
   ['tiki', '점유율 축구', { mentality: 55, tempo: 30, width: 60, passing: 15, approach: 'possession', focus: 'center', pressing: 65, line: 70, trap: false, tackling: 'normal' }],

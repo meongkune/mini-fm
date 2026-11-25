@@ -191,7 +191,7 @@ export function SlotSheet({ team, formation, lineup, index, status, onPick, onCl
 }
 
 // 전술 저장 칸에 담는 것: 전형(직접 조정한 위치 포함)·선발·팀 지시·세트피스
-const SET_KEYS = ['formation', 'layout', 'lineup', 'mentality', 'pressing', 'line', 'tempo', 'width', 'passing', 'approach', 'focus', 'trap', 'tackling', 'corner', 'cornerDef', 'spTaker', 'penTaker']
+const SET_KEYS = ['formation', 'layout', 'lineup', 'phil', 'mentality', 'pressing', 'line', 'tempo', 'width', 'passing', 'approach', 'focus', 'trap', 'tackling', 'corner', 'cornerDef', 'spTaker', 'penTaker']
 /**
  * 전술 저장 칸 A·B·C: 지금 전술을 통째로 저장해 두고 언제든 불러온다 (다른 전형을 시험해도 공들인 배치를 잃지 않게)
  * 불러올 때 팀을 떠났거나 다치거나 징계 중인 선수 자리만 알맞은 선수로 채운다
