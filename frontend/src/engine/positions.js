@@ -111,11 +111,12 @@ function normalised(xi) {
  *  tactics: [홈 전술, 원정 전술] (tacOf·shapeOf로 읽는다). 없으면 균형 기본값
  *  반환: { pos, ball, carrier, steps, kind } — kind = 이 단계로 공이 온 방식('ground' 땅볼 · 'loft' 뜬 공 · 'cross' 크로스)
  */
-export function computeFrame(lineups, tick, sub, shotStage, tactics = [null, null]) {
+// live(연속 재생용): { x, y, prog, holder } — 공의 기준점을 '지금 공 위치'로, 진행도·공 가진 선수를 재생 쪽에서 정해 준다
+export function computeFrame(lineups, tick, sub, shotStage, tactics = [null, null], live = null) {
   const base = { ...basePositions(lineups[0], 0), ...basePositions(lineups[1], 1) }
   const all = [...lineups[0], ...lineups[1]]
   const time = (tick?.m ?? 0) + sub * 0.33
-  const wobble = (id, k, amp) => (rand(hashId(id) * 7 + Math.floor(time * 3) * 13 + k) - 0.5) * 2 * amp
+  const wobble = (id, k, amp) => (rand(hashId(id) * 7 + Math.floor(time * 3) * 13 + k) - 0.5) * 2 * amp * (live ? 0.5 : 1)
   const T = [0, 1].map((i) => { const t = tactics?.[i] || {}; const x = tacOf(t); const s = shapeOf(t, t.formation); return { ...x, line: s.line, width: s.width } })
   const N = [normalised(lineups[0]), normalised(lineups[1])]
   // 팀 기준 좌표 → 경기장 좌표 (홈은 x 증가 방향으로 공격, 원정은 반대)
@@ -189,8 +190,8 @@ export function computeFrame(lineups, tick, sub, shotStage, tactics = [null, nul
   const dir = atk === 0 ? 1 : -1 // 공격 방향 (x 증가 = 홈의 공격 방향)
   const shot = tick.k === 'goal' || tick.k === 'save' || tick.k === 'miss'
   const chain = passChain(lineups[atk], tick, base)
-  const holder = chain[Math.min(sub, chain.length - 1)]
-  const prog = chain.length > 1 ? Math.min(1, sub / (chain.length - 1)) : 1 // 공격 진행도 0(빌드업)~1(마무리)
+  const holder = live?.holder ?? chain[Math.min(sub, chain.length - 1)]
+  const prog = live ? live.prog : chain.length > 1 ? Math.min(1, sub / (chain.length - 1)) : 1 // 공격 진행도 0(빌드업)~1(마무리)
   // 역습 장면은 철학과 상관없이 역습 모양(깊은 곳에서 출발해 앞선이 달린다)
   const A = tick.ev === 'counter' ? ATTACK_SHAPE.counter : ATTACK_SHAPE[T[atk].phil] || ATTACK_SHAPE.balanced
   // 이번 공격이 어느 측면으로 가는지 (공격 팀 기준 -1 왼쪽 / 1 오른쪽): 매치업 통로가 측면이면 그 쪽
@@ -199,9 +200,12 @@ export function computeFrame(lineups, tick, sub, shotStage, tactics = [null, nul
   const central = tick.ch === 'center' || tick.ch === 'air'
   // 공의 기준점 (공격 팀 기준): 철학에 따라 출발 깊이가 다르고, 슈팅이면 박스 근처까지 간다
   // 압박에 뺏기는 장면은 자기 진영에서 끝나고, 막힌 전진은 박스 앞에서 끝난다
-  const au = lerp(A.from, shot ? 88 : tick.ev === 'press' ? A.from + 8 : tick.ev && tick.ev !== 'build' ? 78 : A.to, prog)
+  const au0 = lerp(A.from, shot ? 88 : tick.ev === 'press' ? A.from + 8 : tick.ev && tick.ev !== 'build' ? 78 : A.to, prog)
   const spread = central ? 6 : 20 + (T[atk].width / 100) * 8
-  const av = H / 2 + flank * spread * Math.sin(Math.min(1, prog * 1.15) * Math.PI) * (shot ? 0.85 : 1) // 측면으로 나갔다가 마무리 때 안으로
+  const av0 = H / 2 + flank * spread * Math.sin(Math.min(1, prog * 1.15) * Math.PI) * (shot ? 0.85 : 1) // 측면으로 나갔다가 마무리 때 안으로
+  const liveRef = live ? rel(atk, live.x, live.y) : null
+  const au = liveRef ? clamp(liveRef.u, 4, 101) : au0
+  const av = liveRef ? liveRef.v : av0
   const refW = world(atk, au, av)
   const refD = rel(dfn, refW.x, refW.y)
 
@@ -221,8 +225,10 @@ export function computeFrame(lineups, tick, sub, shotStage, tactics = [null, nul
   }
   // 공 가진 선수는 기준점 근처에 있다 (자기 자리와 기준점 사이)
   const c = pos[holder]
-  c.x += (refW.x - c.x) * 0.65
-  c.y += (refW.y - c.y) * 0.65
+  if (!live) {
+    c.x += (refW.x - c.x) * 0.65
+    c.y += (refW.y - c.y) * 0.65
+  }
 
   let ball = { x: c.x + dir * 1.2, y: c.y, z: 0 }
   const goalX = atk === 0 ? W : 0
@@ -271,7 +277,7 @@ export function computeFrame(lineups, tick, sub, shotStage, tactics = [null, nul
   // 공이 이 단계로 온 방식: 직선 철학의 첫 전진·먼 거리는 뜬 공, 측면에서 마무리로 들어가는 패스는 크로스
   const last = sub >= chain.length - 1
   const kind = tick.ev ? (sub === 0 || lostStep ? 'ground' : tick.ev === 'long' && sub === 1 ? 'loft' : shot && last && tick.fin === 'cross' ? 'cross' : 'ground') : sub === 0 ? 'ground' : shot && last && !central && tick.ch ? 'cross' : (T[atk].phil === 'direct' && sub === 1) || (T[atk].passing >= 75 && sub === 1) || tick.ch === 'air' ? 'loft' : 'ground'
-  return { pos, ball, carrier: shot && shotStage ? null : lostStep ? tick.lost : holder, steps: chain.length + (tick.lost && !shot ? 1 : 0), kind: shot && shotStage ? 'shot' : kind }
+  return { pos, ball, carrier: shot && shotStage ? null : lostStep ? tick.lost : holder, steps: chain.length + (tick.lost && !shot ? 1 : 0), kind: shot && shotStage ? 'shot' : kind, chain }
 }
 
 /** 진단용: 그 장면에서 한 팀의 블록 모양 (맨 뒷줄 높이·길이·폭) — 철학별 차이를 숫자로 확인한다 */

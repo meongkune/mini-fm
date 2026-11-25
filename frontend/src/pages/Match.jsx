@@ -13,14 +13,31 @@ import { ink, kitColors, lineupOvr, myTactics, onDark, playerOvr, short, teamOvr
 import TacticsPanel, { CORNER_DEF_OPTS, CORNER_OPTS } from '../components/TacticsPanel.jsx'
 import Matchups from '../components/Matchups.jsx'
 import MatchPitch from './MatchPitch.jsx'
+import { clipMs } from '../engine/playback.js'
 import NeedTeam from './NeedTeam.jsx'
 import { FormationPicker, LINE_OPTS, MENTALITY, OptionGroup, PRESSING, TEMPO_OPTS } from './Tactics.jsx'
 
 // 장면 하나(보통 1분)를 보여주는 시간(ms). 배속은 화면 속도만 바꾸고 경기 결과에는 영향이 없다
-const SPEEDS = { '1x': 650, '2x': 325, '4x': 160, '8x': 80 }
+// 배속: 장면 하나의 재생 시간 = 대본 길이(engine/playback.js clipMs) ÷ 배수. 1배속은 공이 오가는 것이 보이는 속도(한 분 2~5초)
+const SPEEDS = { '1x': 1, '2x': 2, '4x': 5, '8x': 14 }
+const IDLE_MS = 650 // 다음 분을 계산하기 전 잠깐 (1배속 기준)
 // 상황별 장면 길이 배수 — 슈팅·세트피스·골은 천천히, 재개(골킥·스로인)는 조금 더
 const TICK_MULT = { build: 1, card: 2, clear: 2, miss: 2.5, save: 2.5, goal: 5 }
-const tickDelay = (t, base) => base * ((TICK_MULT[t?.k] || 1) + (t?.sp ? 1.5 : 0) + (t?.sp === 'pen' ? 1.5 : 0) + (t?.r ? 0.6 : 0))
+const tickDelay = (lineups, t, tactics, k) => Math.max(70, clipMs(lineups, t, tactics) / k)
+/** 경기장 배치: 포메이션 자리 좌표를 선수에게 붙인다 (경기장 그림과 장면 재생 시간 계산이 같이 쓴다) */
+function pitchLineups(match, teams) {
+  const byId = Object.fromEntries([...teams[0].players, ...teams[1].players].map((p) => [p.id, p]))
+  return match.sides.map((sd) => {
+    const all = buildSlots(sd.tactics.formation)
+    const used = new Set()
+    return sd.onPitch.map((id, i) => {
+      const k = all.findIndex((s, j) => !used.has(j) && s.role === sd.slots[i])
+      if (k >= 0) used.add(k)
+      const s = all[k]
+      return byId[id] && { ...byId[id], sx: s?.x, sy: s?.y, slot: sd.slots[i] }
+    }).filter(Boolean)
+  })
+}
 const POS_ORDER = { GK: 0, DF: 1, MF: 2, FW: 3 }
 const seedOf = (s) => { let h = 2166136261; for (const c of String(s)) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return (h >>> 0) % 1e9 + 1 }
 // 터치라인 지시(engine/tactics.js SHOUTS): 버튼 한 번으로 이 경기 전술에 잠깐 더하는 값(adj)을 쌓는다. 여러 번 누르면 더 세지고, 한 번에 되돌릴 수 있다
@@ -80,7 +97,8 @@ export default function Match() {
   const match = matchRef.current
   if (import.meta.env.DEV) window.__match = match // 개발 중 디버깅용
   const lastTick = match && shown >= 0 ? match.timeline[shown] : null
-  const delay = tickDelay(lastTick, SPEEDS[speed])
+  const pitchXI = match && ctx ? pitchLineups(match, ctx.teams) : null
+  const delay = match && lastTick ? tickDelay(pitchXI, lastTick, [match.sides[0].tactics, match.sides[1].tactics], SPEEDS[speed]) : IDLE_MS / SPEEDS[speed]
 
   // ── 자동 저장 · 중간 이탈 ──
   const saveResult = (m) => {
@@ -154,7 +172,7 @@ export default function Match() {
       if (it) { setInterrupt(it); setSheet('subs') }
       setShown(before)
       rerender()
-    }, shown >= 0 ? delay : SPEEDS[speed])
+    }, shown >= 0 ? delay : IDLE_MS / SPEEDS[speed])
     return () => clearTimeout(t)
   })
 
@@ -177,17 +195,7 @@ export default function Match() {
   const rt = ratings(match, ctx)
   const S = match.stats
   const live = phase === 'live' && match.minute > 0
-  // 경기장 배치: 포메이션 자리 좌표를 선수에게 붙인다
-  const lineups = match.sides.map((sd) => {
-    const all = buildSlots(sd.tactics.formation)
-    const used = new Set()
-    return sd.onPitch.map((id, i) => {
-      const k = all.findIndex((s, j) => !used.has(j) && s.role === sd.slots[i])
-      if (k >= 0) used.add(k)
-      const s = all[k]
-      return byId[id] && { ...byId[id], sx: s?.x, sy: s?.y, slot: sd.slots[i] }
-    }).filter(Boolean)
-  })
+  const lineups = pitchXI
 
   const kickoff = () => { setPhase('live'); rerender() }
   // 건너뛰기: 같은 계산을 한 번에 돌릴 뿐이라 결과는 천천히 볼 때와 같다

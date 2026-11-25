@@ -1,21 +1,13 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+// 경기장 화면: 위치 계산은 engine/positions.js, 연속 재생은 engine/playback.js. 여기서는 Canvas에 매 프레임 그리기만 한다
+import { useEffect, useRef, useState } from 'react'
 import { ink, short } from '../store.jsx'
 import { clockText } from '../engine/match.js'
-import { H, W, applyRestart, computeFrame, setPieceFrame } from '../engine/positions.js'
+import { H, W } from '../engine/positions.js'
+import { makeSim, startClip, stepSim } from '../engine/playback.js'
 import { SCENE_LABEL } from '../engine/chain.js'
 
 const SP_LABEL = { corner: '🚩 코너킥', fk: '🎯 직접 프리킥', fkx: '🎯 프리킥 크로스', pen: '⚠️ 페널티킥' }
 const RESTART_LABEL = { goalkick: '골킥', gk: '골키퍼가 잡아냅니다', throw: '스로인', fk: '프리킥', offside: '오프사이드 → 프리킥' }
-
-// 모바일 세로 화면: 경기 좌표(x 0~105, y 0~68)를 화면 좌표로 변환한다.
-// 내 팀(myIdx)이 항상 화면 아래 → 위로 공격하도록 돌린다.
-//   land(크게 보기 + 가로 화면): 세로 경기장을 시계 방향으로 눕혀, 내 팀이 왼쪽 → 오른쪽으로 공격한다
-function toScreen(x, y, myIdx, land = false) {
-  const up = myIdx === 0 ? (W - x) / W : x / W // 위쪽이 0
-  const side = myIdx === 0 ? y / H : (H - y) / H
-  return land ? { left: `${(1 - up) * 100}%`, top: `${side * 100}%` } : { left: `${side * 100}%`, top: `${up * 100}%` }
-}
-
 // 찬스가 난 통로 (개인 매치업) — 경기장 위 공격 표시에 쓴다
 const LANE_LABEL = { left: '왼쪽 측면 공격', right: '오른쪽 측면 공격', center: '중앙 돌파', air: '공중볼 공격' }
 const SIDE_KO = { left: '왼쪽 ', right: '오른쪽 ' }
@@ -28,14 +20,62 @@ function sceneText(tick) {
 }
 
 /**
- * tactics: [홈 전술, 원정 전술] — 선수 위치가 철학·라인·압박·폭을 따라 달라진다 (engine/positions.js)
+ * 경기 좌표(x 0~105 홈 → 원정 방향, y 0~68) → 화면 좌표(0~1). 내 팀이 항상 아래 → 위(세로) 또는 왼쪽 → 오른쪽(가로)으로 공격한다
+ */
+function mapper(myIdx, land) {
+  return (x, y) => {
+    const up = myIdx === 0 ? (W - x) / W : x / W // 위쪽이 0
+    const side = myIdx === 0 ? y / H : (H - y) / H
+    return land ? [1 - up, side] : [side, up]
+  }
+}
+
+function drawPitch(g, w, h, land) {
+  // 잔디 줄무늬 (공격 방향으로 10줄)
+  for (let i = 0; i < 10; i++) {
+    g.fillStyle = i % 2 ? '#2a8a45' : '#257d3e'
+    if (land) g.fillRect((i * w) / 10, 0, w / 10 + 1, h)
+    else g.fillRect(0, (i * h) / 10, w, h / 10 + 1)
+  }
+  // 선: 경기장 좌표(105 x 68)로 그리고 화면에 맞춰 눕히거나 세운다
+  const L = land ? w / W : h / W // 1m = 몇 px (길이 방향)
+  const S = land ? h / H : w / H
+  const pt = (x, y) => (land ? [x * L, y * S] : [y * S, (W - x) * L])
+  const rect = (x, y, rw, rh) => { const [a, b] = pt(x, y); const [c, d] = pt(x + rw, y + rh); g.strokeRect(Math.min(a, c), Math.min(b, d), Math.abs(c - a), Math.abs(d - b)) }
+  g.strokeStyle = 'rgba(255,255,255,.85)'
+  g.lineWidth = Math.max(1, L * 0.35)
+  rect(0.4, 0.4, W - 0.8, H - 0.8)
+  g.beginPath(); g.moveTo(...pt(W / 2, 0.4)); g.lineTo(...pt(W / 2, H - 0.4)); g.stroke()
+  g.beginPath(); g.arc(...pt(W / 2, H / 2), 9.15 * L, 0, Math.PI * 2); g.stroke()
+  rect(0.4, H / 2 - 20.16, 16.5, 40.32); rect(W - 16.9, H / 2 - 20.16, 16.5, 40.32)
+  rect(0.4, H / 2 - 9.16, 5.5, 18.32); rect(W - 5.9, H / 2 - 9.16, 5.5, 18.32)
+  g.fillStyle = '#fff'
+  g.beginPath(); g.arc(...pt(W / 2, H / 2), Math.max(1.5, L * 0.5), 0, Math.PI * 2); g.fill()
+  // 골대
+  g.fillStyle = 'rgba(255,255,255,.3)'
+  g.strokeStyle = '#fff'
+  for (const gx of [-1.8, W]) { const [a, b] = pt(gx, H / 2 - 3.66); const [c, d] = pt(gx + 1.8, H / 2 + 3.66); g.fillRect(Math.min(a, c), Math.min(b, d), Math.abs(c - a), Math.abs(d - b)); g.strokeRect(Math.min(a, c), Math.min(b, d), Math.abs(c - a), Math.abs(d - b)) }
+}
+
+/**
+ * tactics: [홈 전술, 원정 전술] — 선수 위치가 철학·라인·압박·폭을 따라 달라진다
  * score: 크게 보기에서 보여 줄 점수 [홈, 원정] (화면에 이미 드러난 점수)
+ * duration: 이 장면을 보여 줄 시간(ms) — 대본 길이를 여기에 맞춰 재생한다
  */
 export default function MatchPitch({ home, away, lineups, tick, duration = 300, scorerName, idleLabel = '킥오프 대기', myIdx = 0, caption = null, tactics = null, score = null }) {
-  // 크게 보기: 경기장을 화면 가득 (전체 화면 API가 되면 그것으로, 안 되면 화면 고정). 가로가 더 길면 경기장을 눕힌다
   const stageRef = useRef(null)
+  const planeRef = useRef(null)
+  const canvasRef = useRef(null)
+  const simRef = useRef(null)
+  const live = useRef({}) // 그리기 루프가 읽는 최신 값
   const [big, setBig] = useState(false)
   const [wide, setWide] = useState(false)
+  const [phase, setPhase] = useState('play') // HUD 문구용: play · shot(결과가 드러남) · restart
+  const land = big && wide
+  if (!simRef.current) simRef.current = makeSim()
+  live.current = { lineups, tactics, tick, duration, myIdx, land, teams: [home, away] }
+
+  // 크게 보기: 전체 화면 API가 되면 그것으로, 안 되면 화면 고정. 가로가 더 길면 경기장을 눕힌다
   useEffect(() => {
     if (!big) return undefined
     const fit = () => setWide(window.innerWidth > window.innerHeight)
@@ -52,93 +92,114 @@ export default function MatchPitch({ home, away, lineups, tick, duration = 300, 
     setBig(true)
     try { stageRef.current?.requestFullscreen?.()?.catch(() => {}) } catch { /* 전체 화면을 못 쓰는 환경: 화면 고정으로만 */ }
   }
-  const land = big && wide
-  // 한 분(tick) 안에서 패스 몇 번(sub)을 차례로 보여주고, 슈팅이면 마지막에 공이 골문으로 날아간다
-  const [sub, setSub] = useState(0)
-  const steps = tick && lineups ? (tick.sp ? setPieceFrame(lineups, tick, 0, false).steps : computeFrame(lineups, tick, 0, false, tactics).steps) : 1
-  const shotTick = !!tick && ['goal', 'save', 'miss'].includes(tick.k)
-  const total = steps + (shotTick ? 1 : 0) + (tick?.r ? 1 : 0)
+
+  // 장면이 바뀌면 대본만 새로 건다 (선수·공 위치는 이어진다)
   useEffect(() => {
-    setSub(0)
-    if (!tick) return undefined
-    const each = Math.max(60, (shotTick ? duration * 0.7 : duration) / total)
-    let i = 0
-    const t = setInterval(() => { i++; if (i >= total) { clearInterval(t); return } setSub(i) }, each)
-    return () => clearInterval(t)
-  }, [tick, duration])
-  // 0 = 플레이 · 1 = 슈팅 결과 · 2 = 재개(골킥·스로인·프리킥)
-  const stage = tick?.r && sub >= total - 1 && sub >= steps ? 2 : shotTick && sub >= steps ? 1 : 0
+    if (!lineups) return
+    startClip(simRef.current, lineups, tick, tactics)
+    setPhase('play')
+  }, [tick, lineups && lineups.map((l) => l.map((p) => p.id).join()).join('|')])
 
-  const frame = useMemo(() => {
-    if (!lineups) return null
-    const s = Math.min(sub, steps - 1)
-    const f = tick?.sp ? setPieceFrame(lineups, tick, s, stage >= 1 && shotTick) : computeFrame(lineups, tick, s, stage >= 1 && shotTick, tactics)
-    return stage === 2 ? applyRestart(f, tick, lineups) : f
-  }, [lineups, tick, sub, stage, tactics])
-  if (!frame) return <div className="pitch-stage empty">선발 명단을 불러오는 중…</div>
+  // 그리기 루프: 매 프레임 재생 상태를 진행하고 Canvas에 그린다
+  useEffect(() => {
+    let raf = 0
+    let last = performance.now()
+    let shownPhase = 'play'
+    const loop = (now) => {
+      raf = requestAnimationFrame(loop)
+      const L = live.current
+      const sim = simRef.current
+      const cv = canvasRef.current
+      const plane = planeRef.current
+      if (!cv || !plane || !L.lineups) { last = now; return }
+      const real = Math.min(0.1, (now - last) / 1000) // 탭이 쉬다 돌아와도 한 번에 건너뛰지 않게
+      last = now
+      // 대본 시간으로 환산: 대본 전체가 duration 안에 끝나게
+      const rate = sim.script ? (sim.script.dur * 1000) / Math.max(60, L.duration) : 1
+      let left = real * rate
+      while (left > 0) { const d = Math.min(0.05, left); stepSim(sim, L.lineups, L.tactics, d); left -= d } // 빠른 배속에서도 잘게 나눠 진행
+      // HUD 문구: 결과가 드러나는 시점·재개 시점
+      const seg = sim.script?.segs[sim.seg]
+      const ph = seg?.type === 'restart' ? 'restart' : sim.script && sim.t >= sim.script.revealAt ? 'shot' : 'play'
+      if (ph !== shownPhase) { shownPhase = ph; setPhase(ph) }
 
-  // 이동 속도: 분 간격에 맞춰 부드럽게 (너무 빠르면 순간이동처럼 보이므로 하한)
-  const move = Math.max(140, Math.min(650, (duration / Math.max(1, total)) * 1.1))
-  const fly = Math.max(160, Math.min(650, duration * 0.4))
+      // 크기 맞추기 (선명하게: 기기 픽셀 비율만큼 키운다)
+      const dpr = Math.min(2, window.devicePixelRatio || 1)
+      const w = plane.clientWidth
+      const h = plane.clientHeight
+      if (cv.width !== Math.round(w * dpr) || cv.height !== Math.round(h * dpr)) { cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr) }
+      const g = cv.getContext('2d')
+      g.setTransform(dpr, 0, 0, dpr, 0, 0)
+      drawPitch(g, w, h, L.land)
+      const map = mapper(L.myIdx, L.land)
+      const unit = (L.land ? w / W : h / W) // 1m = px
+      const R = clamp(unit * 1.45, 7, 15) // 선수 원 반지름
+      // 선수 (아래쪽 선수가 위에 겹치게 y 순서로)
+      const items = []
+      L.lineups.forEach((side, si) => side.forEach((p) => { const q = sim.pos[p.id]; if (q) { const [mx, my] = map(q.x, q.y); items.push({ p, si, x: mx * w, y: my * h }) } }))
+      items.sort((a, b) => a.y - b.y)
+      g.textAlign = 'center'
+      g.textBaseline = 'middle'
+      for (const it of items) {
+        const team = L.teams[it.si]
+        const gk = it.p.pos === 'GK' || it.p.slot === 'GK'
+        const has = sim.carrier === it.p.id
+        g.fillStyle = 'rgba(0,0,0,.3)'
+        g.beginPath(); g.ellipse(it.x, it.y + R * 0.85, R * 0.8, R * 0.3, 0, 0, Math.PI * 2); g.fill()
+        g.beginPath(); g.arc(it.x, it.y, R, 0, Math.PI * 2)
+        g.fillStyle = team.color; g.fill()
+        if (gk) { g.save(); g.clip(); g.strokeStyle = 'rgba(0,0,0,.55)'; g.lineWidth = R * 0.35; for (let k = -2; k <= 2; k++) { g.beginPath(); g.moveTo(it.x + k * R * 0.7 - R, it.y + R); g.lineTo(it.x + k * R * 0.7 + R, it.y - R); g.stroke() } g.restore() }
+        g.lineWidth = has ? 3 : 1.5
+        g.strokeStyle = has ? '#fde047' : 'rgba(255,255,255,.92)'
+        g.beginPath(); g.arc(it.x, it.y, R + (has ? 1.5 : 0), 0, Math.PI * 2); g.stroke()
+        g.fillStyle = gk ? '#fff' : ink(team.color)
+        g.font = `900 ${Math.round(R * 1.05)}px system-ui, sans-serif`
+        g.fillText(String(it.p.number ?? ''), it.x, it.y + 0.5)
+        if (has) {
+          // 공 가진 선수 이름
+          const name = String(it.p.name || '').split(' ').at(-1)
+          g.font = `700 ${Math.round(R * 0.95)}px system-ui, sans-serif`
+          g.lineWidth = 3; g.strokeStyle = 'rgba(0,0,0,.7)'; g.strokeText(name, it.x, it.y - R - 8)
+          g.fillStyle = '#fff'; g.fillText(name, it.x, it.y - R - 8)
+        }
+      }
+      // 공: 높이만큼 그림자와 떨어지고 커진다
+      const [bx, by] = map(sim.ball.x, sim.ball.y)
+      const z = sim.ball.z || 0
+      const br = clamp(unit * 0.55, 3.5, 6) * (1 + z * 0.05)
+      g.fillStyle = 'rgba(0,0,0,.4)'
+      g.beginPath(); g.ellipse(bx * w, by * h + 2, br * 0.9, br * 0.45, 0, 0, Math.PI * 2); g.fill()
+      g.beginPath(); g.arc(bx * w, by * h - z * unit * 0.9, br, 0, Math.PI * 2)
+      g.fillStyle = '#fff'; g.fill()
+      g.lineWidth = 1; g.strokeStyle = '#333'; g.stroke()
+    }
+    raf = requestAnimationFrame(loop)
+    return () => cancelAnimationFrame(raf)
+  }, [])
+
+  if (!lineups) return <div className="pitch-stage empty">선발 명단을 불러오는 중…</div>
   const teams = [home, away]
-  const goalFlash = tick?.k === 'goal' && stage === 1
+  const shotTick = !!tick && ['goal', 'save', 'miss'].includes(tick.k)
+  const goalFlash = tick?.k === 'goal' && phase !== 'play'
   const attackLabel = tick ? `${clockText(tick.m, tick.plus)}' ${short(teams[tick.t])} ${tick.sp ? SP_LABEL[tick.sp] : tick.ev ? sceneText(tick) : tick.ch ? LANE_LABEL[tick.ch] : '공격'}` : idleLabel
   const mine = teams[myIdx]
   const theirs = teams[1 - myIdx]
 
   return (
-    <div ref={stageRef} className={`pitch-stage ${big ? 'big' : ''} ${land ? 'land' : ''}`} style={{ '--move': `${move}ms`, '--fly': `${fly}ms` }}>
+    <div ref={stageRef} className={`pitch-stage flat ${big ? 'big' : ''} ${land ? 'land' : ''}`}>
       <button type="button" className="pitch-big" onClick={toggleBig} title={big ? '원래 크기로 (Esc)' : '경기장 크게 보기'} aria-label={big ? '원래 크기로' : '경기장 크게 보기'}>{big ? '✕' : '⛶'}</button>
       {big && score && <div className="pitch-score"><b style={{ '--c': home.color }}>{short(home)}</b> {score[0]} : {score[1]} <b style={{ '--c': away.color }}>{short(away)}</b></div>}
       <div className="pitch-hud">
         <span className="hud-dot" style={{ background: tick ? teams[tick.t].color : '#94a3b8' }} />
         {attackLabel}
-        {tick?.k === 'save' && stage === 1 && <em> · 🧤 선방!</em>}
-        {tick?.k === 'miss' && stage === 1 && <em> · 빗나감</em>}
-        {tick?.k === 'clear' && sub >= 2 && stage !== 2 && <em> · 걷어냅니다</em>}
-        {stage === 2 && <em> · {RESTART_LABEL[tick.r]}</em>}
+        {shotTick && tick.k === 'save' && phase !== 'play' && <em> · 🧤 선방!</em>}
+        {shotTick && tick.k === 'miss' && phase !== 'play' && <em> · 빗나감</em>}
+        {tick?.k === 'clear' && phase !== 'play' && <em> · 걷어냅니다</em>}
+        {tick?.lost && !shotTick && phase !== 'play' && <em> · 뺏겼습니다</em>}
+        {tick?.r && phase === 'restart' && <em> · {RESTART_LABEL[tick.r]}</em>}
       </div>
-      <div className="pitch-plane">
-        {/* 경기장은 가로(105x68) 좌표로 그리고 -90도 회전해 세로로 세운다 */}
-        <svg className="pitch-lines" viewBox={land ? `0 0 ${W} ${H}` : `0 0 ${H} ${W}`} preserveAspectRatio="none" aria-hidden="true">
-          <g transform={land ? undefined : `translate(0 ${W}) rotate(-90)`}>
-          {Array.from({ length: 10 }, (_, i) => (
-            <rect key={i} x={i * 10.5} y="0" width="10.5" height={H} className={i % 2 ? 'stripe a' : 'stripe b'} />
-          ))}
-          <g className="line">
-            <rect x="0.4" y="0.4" width={W - 0.8} height={H - 0.8} />
-            <line x1={W / 2} y1="0.4" x2={W / 2} y2={H - 0.4} />
-            <circle cx={W / 2} cy={H / 2} r="9.15" />
-            <rect x="0.4" y={H / 2 - 20.16} width="16.5" height="40.32" />
-            <rect x={W - 16.9} y={H / 2 - 20.16} width="16.5" height="40.32" />
-            <rect x="0.4" y={H / 2 - 9.16} width="5.5" height="18.32" />
-            <rect x={W - 5.9} y={H / 2 - 9.16} width="5.5" height="18.32" />
-          </g>
-          <circle cx={W / 2} cy={H / 2} r="0.5" fill="#fff" />
-          <rect className="goal" x="-2" y={H / 2 - 3.66} width="2" height="7.32" />
-          <rect className="goal" x={W} y={H / 2 - 3.66} width="2" height="7.32" />
-          </g>
-        </svg>
-
-        {teams.map((team, side) =>
-          lineups[side].map((p) => {
-            const q = frame.pos[p.id]
-            return (
-              <div
-                key={p.id}
-                className={`pl ${p.pos === 'GK' ? 'gk' : ''} ${frame.carrier === p.id ? 'has-ball' : ''}`}
-                style={{ ...toScreen(q.x, q.y, myIdx, land), '--c': team.color, '--ink': ink(team.color) }}
-                title={`${p.number} ${p.name} (${team.name})`}
-              >
-                <span>{p.number}</span>
-              </div>
-            )
-          }),
-        )}
-
-        <div className="ball-shadow" style={toScreen(frame.ball.x, frame.ball.y, myIdx, land)} />
-        {/* 공 궤적: 땅볼은 그대로 굴러가고, 뜬 공·크로스는 포물선을 그린다 (단계마다 애니메이션 이름을 번갈아 써서 다시 시작시킨다) */}
-        <div className={`ball ${frame.kind === 'loft' || frame.kind === 'cross' ? `arc ${frame.kind} ${sub % 2 ? 'b' : 'a'}` : ''}`} style={{ ...toScreen(frame.ball.x, frame.ball.y, myIdx, land), '--z': `${frame.ball.z * 2.2}px` }} />
+      <div className="pitch-plane" ref={planeRef}>
+        <canvas ref={canvasRef} className="pitch-canvas" />
       </div>
       <div className="pitch-legend">
         <span style={{ '--c': mine.color }}><i />{land ? '▶' : '▲'} {short(mine)} (내 팀)</span>
@@ -160,3 +221,4 @@ export default function MatchPitch({ home, away, lineups, tick, duration = 300, 
     </div>
   )
 }
+const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v))
