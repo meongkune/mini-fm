@@ -55,3 +55,4 @@ worker/node_modules/
 
 # 외부 데이터셋 원본(Kaggle 등) — 약관상 공개하지 않음, 계산 결과만 커밋
 data_in/
+frontend/public/_film.html

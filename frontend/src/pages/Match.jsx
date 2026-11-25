@@ -90,7 +90,7 @@ export default function Match() {
     if (isHome) matchRef.current.talk[myIdx] += crowdBoost(save.owner?.freeGate ? 100 : save.fans ?? 60) // 홈 관중: 민심이 높으면 응원, 낮으면 야유
     setPhase('pre'); setTalk(null); setInterrupt(null); setPaused(false); setShown(-1)
     rerender()
-  }, [fixtureKey, save.lineup.join(), save.formation])
+  }, [fixtureKey, save.lineup.join(), save.formation, ctx?.teams.map((t) => t.players.map((p) => p.id).join()).join('|')]) // 선수단이 바뀌면(이적 반영 등) 킥오프 전 명단을 다시 만든다 — 없는 선수가 선발에 남아 화면이 죽던 문제
 
 
   // 다른 탭에 다녀왔으면 보관해 둔 경기를 다시 꺼낸다 (같은 경기일 때만)
@@ -276,7 +276,7 @@ export default function Match() {
   const clockLabel = phase === 'pre' ? '킥오프 전' : phase === 'ht' ? 'HT' : phase === 'ft' ? 'FT' : `${clockText_}'`
   const started = phase !== 'pre'
   const unavailable = save.lineup.filter((id) => id && (status[id]?.inj > 0 || status[id]?.susp > 0))
-  const preFit = Math.round((mySide.onPitch.reduce((s, id, i) => s + fitOf(byId[id], mySide.slots[i]), 0) / (mySide.onPitch.length || 1)) * 100)
+  const preFit = Math.round((mySide.onPitch.reduce((s, id, i) => s + (byId[id] ? fitOf(byId[id], mySide.slots[i]) : 0), 0) / (mySide.onPitch.length || 1)) * 100)
   const promised = myTeam.players.filter((p) => save.status?.[p.id]?.promise === save.round)
   const opp = ctx.teams[1 - myIdx]
   const mom = phase === 'ft' ? Object.keys(rt).sort((a, b) => rt[b] - rt[a])[0] : null
