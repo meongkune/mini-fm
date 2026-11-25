@@ -1124,6 +1124,8 @@ html.framed body { overflow: hidden; height: 100vh; }
 .tr-msg { max-width: 82%; padding: 9px 12px; border-radius: 12px; background: var(--panel-2); border: 1px solid var(--line); }
 .tr-msg.manager { align-self: flex-end; background: color-mix(in srgb, var(--accent) 22%, var(--panel)); border-color: color-mix(in srgb, var(--accent) 45%, transparent); }
 .tr-msg p { margin: 2px 0 0; line-height: 1.5; font-size: .9rem; }
+.tr-msg.system { align-self: center; max-width: 92%; background: transparent; border-style: dashed; }
+.tr-msg.system p { font-size: .8rem; color: var(--muted); }
 .tr-who { font-size: .68rem; font-weight: 800; color: var(--muted); }
 .tr-who em { font-style: normal; color: #fbbf24; }
 .tr-delta { display: inline-block; margin-top: 4px; font-size: .66rem; font-weight: 900; }

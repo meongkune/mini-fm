@@ -39,7 +39,7 @@ export default function TalkLog({ talk, onClose }) {
         <div className="tr-log">
           {talk.lines.map((l, i) => (
             <div key={i} className={`tr-msg ${l.role}`}>
-              <span className="tr-who">{l.role === 'manager' ? '감독' : short}{l.mood && <em> · {l.mood}</em>}</span>
+              <span className="tr-who">{l.role === 'manager' ? '감독' : l.role === 'system' ? '안내' : short}{l.mood && <em> · {l.mood}</em>}</span>
               <p>{l.text}</p>
               {l.delta ? <span className={`tr-delta ${l.delta > 0 ? 'up' : 'down'}`}>신뢰 {l.delta > 0 ? '+' : ''}{l.delta}</span> : null}
             </div>

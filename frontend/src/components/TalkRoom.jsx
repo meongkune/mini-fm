@@ -4,7 +4,7 @@ import { abilityStars, starText } from './Stars.jsx'
 import { useEffect, useRef, useState } from 'react'
 import { Kit, Flag } from './Badges.jsx'
 import { fetchProfile } from '../game/wiki.js'
-import { MAX_TURNS, OUTCOME_LABEL, dealFloor, rankOf, sayToPlayer, startTrust } from '../game/aiTalk.js'
+import { MAX_TURNS, OUTCOME_LABEL, dealFloor, parseOffer, rankOf, sayToPlayer, startTrust } from '../game/aiTalk.js'
 import { TOPICS, relOf } from '../game/relations.js'
 import { personality, personalityText } from '../game/speech.js'
 import { moraleLabel } from '../game/season.js'
@@ -44,11 +44,18 @@ export default function TalkRoom({ player, team, status, reason, situation, topi
     const before = lines
     const withMine = opening ? before : [...before, { role: 'manager', text: message }]
     setLines(withMine)
-    let r = await sayToPlayer({ player, team, status: st, message, intent, history: before.map(({ role, text }) => ({ role, text })), trust, reason, situation, topic, wage, deal, offer: withOffer })
+    let r = await sayToPlayer({ player, team, status: st, message, intent, history: before.filter((l) => l.role !== 'system').map(({ role, text }) => ({ role, text })), trust, reason, situation, topic, wage, deal, offer: withOffer })
     // 계약 수락은 게임이 다시 확인: 하한 밑이면 '수락'을 역제안으로 바꾼다 (말로 연봉을 후려치는 것 방지)
+    //   예전엔 이 안내를 선수 대사 끝에 붙여서 "긍정적으로 검토하겠다 …다만 12.7M 밑으론 안 된다"처럼 앞뒤가 안 맞았다 → 안내 줄로 따로
+    let note = null
     if (deal && r.outcome === 'sign') {
       const floor = dealFloor(player, deal, withOffer, trust)
-      if (!withOffer || withOffer.wage < floor) r = { ...r, outcome: 'counter', counterWage: floor, counterYears: withOffer?.years ?? 3, reply: `${r.reply} …다만 €${floor}M 밑으로는 사인하기 어렵습니다.`, end: false }
+      if (!withOffer || withOffer.wage < floor) {
+        r = { ...r, outcome: 'counter', counterWage: floor, counterYears: withOffer?.years ?? 3, end: false }
+        note = !withOffer
+          ? `계약 조건(연봉·기간)이 없어 서명으로 이어지지 않았습니다. 금액을 말하거나 아래 칸에서 제안하세요. 이 선수가 받아들이는 최소 연봉은 €${floor}M입니다.`
+          : `제안한 €${withOffer.wage}M은 이 선수가 받아들이는 최소 연봉 €${floor}M보다 낮아 서명으로 이어지지 않았습니다.${withOffer.raise ? '' : ' 활약 시 인상 약속을 걸면 최소 연봉이 낮아질 수 있습니다(신뢰 50 이상).'}`
+      }
     }
     if (deal && r.outcome === 'counter') {
       const floor = dealFloor(player, deal, withOffer, trust)
@@ -60,7 +67,7 @@ export default function TalkRoom({ player, team, status, reason, situation, topi
     const nextTrust = Math.max(0, Math.min(100, trust + delta))
     setTrust(nextTrust)
     const said = String(r.reply).trim().replace(/^["“”']+|["“”']+$/g, '')
-    const next = [...withMine, { role: 'player', text: said, mood: r.mood, delta: opening ? null : delta }]
+    const next = [...withMine, { role: 'player', text: said, mood: r.mood, delta: opening ? null : delta }, ...(note ? [{ role: 'system', text: `📋 ${note}` }] : [])]
     setLines(next)
     const mTurns = next.filter((l) => l.role === 'manager').length
     if (deal && r.outcome === 'sign') { setOutcome({ outcome: 'sign', deal: withOffer, trustStart: trust0, trustEnd: nextTrust, lines: next, ai: r.ai, topic, totalRounds }); setBusy(false); return }
@@ -71,7 +78,15 @@ export default function TalkRoom({ player, team, status, reason, situation, topi
     setBusy(false)
   }
 
-  const send = () => { const t = input.trim(); if (!t || busy) return; setInput(''); talk(t, null, false, null) }
+  // 연봉 협상 중 채팅에 금액·기간·인상 약속이 있으면 그 조건을 계약 제안으로 읽어 제안 칸에도 반영한다
+  const send = () => {
+    const t = input.trim()
+    if (!t || busy) return
+    setInput('')
+    const parsed = deal ? parseOffer(t, offer || {}, deal.maxYears) : null
+    if (parsed) { setOffer(parsed); setCounter(null) }
+    talk(t, parsed ? 'offer' : null, false, parsed)
+  }
   const propose = () => { if (busy || !offer) return; setCounter(null); talk(`제안: 연봉 €${offer.wage}M/년, ${offer.years}년 계약${offer.raise ? '. 이번 시즌 활약하면(평균 평점 6.9 이상) 다음 시즌에 연봉을 25% 올려 주겠다고 약속하겠다' : ''}.`, 'offer', false, offer) }
   // 선수 역제안을 그대로 받아들이면 바로 합의
   const acceptCounter = () => setOutcome({ outcome: 'sign', deal: counter, trustStart: trust0, trustEnd: trust, lines: [...lines, { role: 'manager', text: `좋다. €${counter.wage}M · ${counter.years}년으로 하자.` }], ai, topic, totalRounds })
@@ -111,7 +126,7 @@ export default function TalkRoom({ player, team, status, reason, situation, topi
             <div className="tr-log" ref={logRef}>
               {lines.map((l, i) => (
                 <div key={i} className={`tr-msg ${l.role}`}>
-                  <span className="tr-who">{l.role === 'manager' ? '감독' : player.name.split(' ').at(-1)}{l.mood && <em> · {l.mood}</em>}</span>
+                  <span className="tr-who">{l.role === 'manager' ? '감독' : l.role === 'system' ? '안내' : player.name.split(' ').at(-1)}{l.mood && <em> · {l.mood}</em>}</span>
                   <p>{l.text}</p>
                   {l.delta !== null && l.delta !== undefined && l.delta !== 0 && <span className={`tr-delta ${l.delta > 0 ? 'up' : 'down'}`}>신뢰 {l.delta > 0 ? '+' : ''}{l.delta}</span>}
                 </div>

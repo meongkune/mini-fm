@@ -63,6 +63,7 @@ export default function Home() {
         <div className="team-grid">
           {teams.map((t, rank) => (
             <button key={t.id} className="team-card" style={{ '--c': t.color, '--ink': ink(t.color) }} disabled={!!busy}
+              aria-label={`${t.name} 맡기 · 전력 ${teamOvr(t)} · ${strengthLabel(rank, teams.length)}`}
               onClick={async () => { setBusy(t.id); await chooseTeam(t.id); setBusy(null) }}>
               <span className="tc-top">
                 <span className="tc-crest"><Crest team={t} size={30} /></span>

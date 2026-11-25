@@ -209,8 +209,8 @@ export function GameProvider({ children }) {
   useEffect(() => {
     const today = new Date().toISOString().slice(0, 10)
     if (fx.date === today) return
-    // 유럽중앙은행 기준 환율 (영업일마다 갱신). 주소가 바뀌어도 되도록 두 곳을 차례로 시도
-    const urls = ['https://api.frankfurter.app/latest?from=EUR&to=KRW', 'https://api.frankfurter.dev/v1/latest?base=EUR&symbols=KRW']
+    // 유럽중앙은행 기준 환율 (영업일마다 갱신). 예전 주소 api.frankfurter.app은 .dev로 넘겨 주기만 하고(301) CORS 헤더가 없어 브라우저가 막는다 → .dev만
+    const urls = ['https://api.frankfurter.dev/v1/latest?base=EUR&symbols=KRW']
     ;(async () => {
       for (const u of urls) {
         try {

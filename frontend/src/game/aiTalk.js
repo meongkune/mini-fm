@@ -87,6 +87,28 @@ export function dealFloor(player, deal, offer, trust) {
   if (p.pride >= 70) f += 0.05
   return Math.round(deal.ask * clamp(f, 0.8, 1) * 10) / 10
 }
+/**
+ * 연봉 협상 중 채팅으로 쓴 조건을 계약 제안으로 읽는다 — 예전엔 채팅의 "12M에 4년"이 무시되고 제안 칸의 값만 계약으로 쳐서,
+ * AI는 긍정적으로 답하는데 게임이 '하한 밑'이라며 거절하는 앞뒤 안 맞는 답이 나왔다.
+ *  - 연봉: 처음 나온 금액(€12M · 12M · 12m · 12밀리언 · 1200만 유로). 뒤에 나오는 '나중에 24M' 같은 조건부 금액은 인상 약속으로 본다
+ *  - 기간: "4년"  - 인상 약속: 올려·인상·두 배·다음 시즌·챔스 등 → 제안 칸의 '활약 시 인상 약속'과 같게 (지키지 않으면 신뢰 하락)
+ * 읽을 게 없으면 null
+ */
+export function parseOffer(text, base = {}, maxYears = 5) {
+  const t = String(text || '')
+  const money = [...t.matchAll(/€?\s*(\d+(?:\.\d+)?)\s*(?:M|m|밀리언|백만)|(\d{3,5})\s*만\s*(?:유로|€)/g)]
+    .map((m) => (m[1] ? Number(m[1]) : Number(m[2]) / 100))
+    .filter((v) => v > 0 && v < 200)
+  const yearM = t.match(/([1-9])\s*년\s*(?:계약|짜리|으로|에|\b|$)/)
+  const raise = /(올려|인상|두\s*배|2배|다음\s*시즌|담\s*시즌|내년|챔스|챔피언스|파격|더\s*주겠|보장)/.test(t) && (money.length > 1 || /(올려|인상|두\s*배|2배)/.test(t))
+  if (!money.length && !yearM && !raise) return null
+  return {
+    wage: money.length ? Math.round(money[0] * 10) / 10 : base.wage,
+    years: yearM ? Math.min(maxYears, Number(yearM[1])) : base.years,
+    raise: raise || !!base.raise,
+  }
+}
+
 /** AI가 안 될 때 규칙으로 답하는 연봉 협상 */
 function ruleDeal(player, deal, offer, trust) {
   if (!offer) return { reply: '조건을 말씀해 주시면 검토하겠습니다.', mood: '담담', trustDelta: 0, outcome: 'none', end: false }
