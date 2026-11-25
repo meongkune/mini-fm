@@ -3,6 +3,7 @@ import { playerOvrOf } from '../engine/engine.js'
 import { news } from './season.js'
 import { potentialOf } from './trade.js'
 import { aiUntil } from './finance.js'
+import { SLOTS } from './cup.js'
 
 const hash = (s) => { let h = 2166136261; for (const c of String(s)) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return h >>> 0 }
 const rnd = (key) => (hash(key) % 10000) / 10000
@@ -32,11 +33,15 @@ export function boardTarget(teams, myTeamId, leagueId = null) {
     if (rank <= 16) return { pos: 12, label: '중위권 (12위 이내)' }
     return { pos: n - 3, label: `2부 잔류 (${n - 3}위 이내)` }
   }
+  // 대항전 순위는 출전권(cup.js SLOTS)에서 — 대회 크기를 바꿔도 목표가 어긋나지 않게 (예: 프리미어리그 챔스 4·유로파 2 → 대항전 6위)
+  //   승강제가 없어서(2026-11~) '잔류' 대신 하위권은 '하위권 탈출'. 목표를 못 채우면 이사회 신뢰가 떨어지고 경질될 수 있다
+  const [ucl, uel] = SLOTS[leagueId] || [4, 3]
+  const euro = ucl + uel
   if (rank <= 2) return { pos: 2, label: '우승 경쟁 (2위 이내)' }
-  if (rank <= 4) return { pos: 4, label: '챔피언스리그 진출 (4위 이내)' }
-  if (rank <= 7) return { pos: 7, label: '대항전 진출 (7위 이내)' }
+  if (rank <= ucl) return { pos: ucl, label: `챔피언스리그 진출 (${ucl}위 이내)` }
+  if (rank <= euro + 1) return { pos: euro, label: `대항전 진출 (${euro}위 이내)` }
   if (rank <= Math.ceil(n / 2) + 1) return { pos: Math.ceil(n / 2) + 2, label: `중위권 안착 (${Math.ceil(n / 2) + 2}위 이내)` }
-  return { pos: n - 3, label: `1부 잔류 (${n - 3}위 이내)` }
+  return { pos: n - 4, label: `하위권 탈출 (${n - 4}위 이내)` }
 }
 
 export function newBoard(teams, myTeamId, prev, leagueId = null) {

@@ -398,6 +398,15 @@ select { background: var(--panel-2); color: var(--text); border: 1px solid var(-
 .tc-id { font-size: .7rem; font-weight: 900; letter-spacing: .6px; padding: 2px 6px; border-radius: 6px; background: rgba(0, 0, 0, .16); }
 .tc-ovr { font-size: 1.7rem; font-weight: 900; line-height: 1; }
 .tc-label { font-size: .7rem; font-weight: 700; opacity: .8; }
+.tc-more { display: flex; flex-direction: column; gap: 2px; font-size: .68rem; font-weight: 700; opacity: .9; text-align: left; }
+.challenge-picker { margin: 0 0 12px; }
+.start-guide { margin-bottom: 12px; border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); }
+.sg-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 6px; }
+.sg-steps { margin: 6px 0 0; padding-left: 18px; display: grid; gap: 4px; font-size: .82rem; line-height: 1.5; }
+.sg-steps a { color: var(--accent); font-weight: 800; }
+.cp-title { display: block; font-size: .8rem; font-weight: 800; color: var(--muted); margin-bottom: 6px; }
+.cp-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.cp-desc { margin: 8px 0 0; color: var(--muted); }
 .team-hero {
   display: flex; justify-content: space-between; align-items: center; gap: 12px;
   padding: 18px 16px; margin-bottom: 12px; border-radius: 16px;
@@ -1234,6 +1243,14 @@ html.desktop .desk-only { display: block; }
 .home-dash > .dash-col { display: contents; }
 html.desktop .home-dash { display: grid; grid-template-columns: 300px minmax(0, 1fr) 330px; gap: 16px; align-items: start; }
 html.desktop .home-dash > .dash-col { display: block; min-width: 0; }
+/* 창이 좁으면 3단(300 + 가운데 + 330)의 가운데 칸이 0에 가깝게 찌그러졌다 → 2단(메시지함은 위로 넓게), 더 좁으면 1단 */
+@media (max-width: 1240px) {
+  html.desktop .home-dash { grid-template-columns: minmax(0, 1fr) 300px; }
+  html.desktop .home-dash > .dash-col:first-child { grid-column: 1 / -1; }
+}
+@media (max-width: 900px) {
+  html.desktop .home-dash { grid-template-columns: minmax(0, 1fr); }
+}
 .dash-panel h3 { display: flex; justify-content: space-between; align-items: baseline; }
 .dash-inbox { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
 .dash-inbox a { display: grid; gap: 1px; padding: 8px 10px; border-radius: 8px; }

@@ -231,7 +231,8 @@ export function leagueZones(leagueId, zones = []) {
   const colors = ['#3b82f6', '#f59e0b', '#22c55e']
   let from = 1
   const cups = COMPS.map((c, i) => { const z = { from, to: from + s[i] - 1, label: c.name, color: colors[i] }; from += s[i]; return z }).filter((z) => z.to >= z.from)
-  return [...cups, ...zones.filter((z) => z.from < 0)]
+  // 원래 데이터의 강등 구간(from < 0)은 승강제를 끈 뒤(2026-11~)로 표시하지 않는다
+  return cups
 }
 
 /**

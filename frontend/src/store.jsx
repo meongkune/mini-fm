@@ -283,6 +283,13 @@ export function GameProvider({ children }) {
   // 예전 저장(보드 목표 없음)이면 지금 전력으로 목표를 정한다
   useEffect(() => {
     if (data && save.teamId && !save.board) setSave((s) => ({ ...s, board: newBoard(effectiveTeams(data.teams, s), s.teamId, null, data.leagueId) }))
+    // 승강제를 끄기 전의 목표('1부 잔류')나 대항전 축소 전 목표('대항전 진출 (7위 이내)')는 지금 기준으로 다시 (신뢰도·경고 기록은 유지)
+    else if (data && save.teamId && save.board && data.leagueId === save.league) {
+      const nb = newBoard(effectiveTeams(data.teams, save), save.teamId, save.board, data.leagueId)
+      if (/잔류/.test(save.board.label || '') || (/대항전 진출|챔피언스리그 진출/.test(save.board.label || '') && save.board.pos !== nb.pos && /대항전 진출|챔피언스리그 진출/.test(nb.label))) {
+        setSave((s) => ({ ...s, board: { ...s.board, pos: nb.pos, label: nb.label } }))
+      }
+    }
   }, [data, save.teamId, save.board])
 
   // 재정 5판으로 옮기기: 매출 고정 · 운영비 · 이사회 예산(이적 자금/임금 예산) · 이적료 분할

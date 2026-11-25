@@ -9,6 +9,32 @@ import { moraleLabel, unavailable } from '../game/season.js'
 import { eur } from '../game/finance.js'
 import { fanLabel } from '../game/owner.js'
 import { ink, lineupOvr, playerOvr, short, teamOvr, useGame } from '../store.jsx'
+import { boardTarget } from '../game/career.js'
+import { SLOTS } from '../game/cup.js'
+import { potentialOf } from '../game/trade.js'
+
+// ── 시작 추천 4종: 리그 안 전력 순위·대항전 출전권·유망주로 나눈다 (승강제가 없어서 '생존'은 없다) ──
+const CHALLENGES = [
+  ['title', '🏆 우승 도전', '리그 최강 전력. 우승과 챔피언스리그 성적이 목표입니다. 기대가 큰 만큼 이사회 압박도 큽니다.'],
+  ['europe', '🌍 유럽 도전', '대항전 진출권을 다투는 팀. 한두 자리 보강과 전술로 한 단계 위를 노립니다.'],
+  ['rebuild', '🌱 재건', '젊은 유망주가 많은 팀. 출전 시간을 주며 키우고, 몇 시즌 뒤를 봅니다.'],
+  ['underdog', '🐶 언더독', '리그 하위 전력. 큰 팀을 잡고 기대 이상의 순위를 만드는 재미가 있습니다.'],
+]
+/** teams(전력 순 정렬) → { 팀 ID: 추천 종류 } · 유망주 수 */
+function challengeOf(teams, leagueId) {
+  const [ucl, uel] = SLOTS[leagueId] || [4, 3]
+  const euroEnd = ucl + uel + 1 // 대항전 경쟁권 (출전권 + 1)
+  const prospects = (t) => t.players.filter((p) => p.age <= 23 && potentialOf(p) >= playerOvr(p) + 5).length
+  const out = {}
+  teams.forEach((t, i) => {
+    if (i < 2) out[t.id] = 'title'
+    else if (i < euroEnd) out[t.id] = 'europe'
+    else if (i >= teams.length - 4) out[t.id] = 'underdog'
+  })
+  // 재건: 대항전권 밖 중위권 중 유망주가 가장 많은 3팀
+  teams.filter((t) => !out[t.id]).sort((a, b) => prospects(b) - prospects(a)).slice(0, 3).forEach((t) => { out[t.id] = 'rebuild' })
+  return { kind: out, prospects }
+}
 
 // 전력 순위에 따른 한 줄 소개 (팀 수와 관계없이 4등분)
 function strengthLabel(rank, total) {
@@ -23,11 +49,16 @@ export default function Home() {
   const { data, myTeam, save, standings, nextFixture, teamsById, totalRounds, seasonOver, chooseTeam, chooseSeason, quitTeam, status, unread, seasonText, review, startNextSeason, venueOf } = useGame()
   const [busy, setBusy] = useState(null)
   const [detail, setDetail] = useState(null)
+  const [pick, setPick] = useState('all') // 시작 추천 종류
 
   if (!myTeam) {
     const teams = [...data.teams].sort((a, b) => teamOvr(b) - teamOvr(a))
     const top = teamOvr(teams[0])
     const floor = teamOvr(teams.at(-1)) - 4 // 막대 기준점: 최약팀보다 조금 아래
+    const ch = challengeOf(teams, data.leagueId)
+    const shown = pick === 'all' ? teams : teams.filter((t) => ch.kind[t.id] === pick)
+    const chInfo = CHALLENGES.find((c) => c[0] === pick)
+    const stars = (t) => [...t.players].sort((a, b) => playerOvr(b) - playerOvr(a)).slice(0, 2).map((p) => p.name.split(' ').at(-1))
     return (
       <section>
         {save.sacked && (
@@ -60,20 +91,41 @@ export default function Home() {
             </div>
           ))}
         </div>
+        <div className="challenge-picker" role="group" aria-label="시작 추천">
+          <span className="cp-title">어떻게 시작할까요?</span>
+          <div className="cp-chips">
+            <button className={`chip ${pick === 'all' ? 'on' : ''}`} aria-pressed={pick === 'all'} onClick={() => setPick('all')}>전체 {teams.length}팀</button>
+            {CHALLENGES.map(([k, label]) => (
+              <button key={k} className={`chip ${pick === k ? 'on' : ''}`} aria-pressed={pick === k} onClick={() => setPick(k)}>{label}</button>
+            ))}
+          </div>
+          {chInfo && <p className="cp-desc small">{chInfo[2]}</p>}
+        </div>
         <div className="team-grid">
-          {teams.map((t, rank) => (
-            <button key={t.id} className="team-card" style={{ '--c': t.color, '--ink': ink(t.color) }} disabled={!!busy}
-              aria-label={`${t.name} 맡기 · 전력 ${teamOvr(t)} · ${strengthLabel(rank, teams.length)}`}
-              onClick={async () => { setBusy(t.id); await chooseTeam(t.id); setBusy(null) }}>
-              <span className="tc-top">
-                <span className="tc-crest"><Crest team={t} size={30} /></span>
-                <span className="tc-ovr">{teamOvr(t)}</span>
-              </span>
-              <strong>{t.name}</strong>
-              <span className="tc-bar"><span style={{ width: `${((teamOvr(t) - floor) / (top - floor)) * 100}%` }} /></span>
-              <span className="tc-label">{busy === t.id ? '계약 중…' : strengthLabel(rank, teams.length)}</span>
-            </button>
-          ))}
+          {shown.map((t) => {
+            const rank = teams.indexOf(t)
+            const goal = boardTarget(teams, t.id, data.leagueId).label
+            const tag = CHALLENGES.find((c) => c[0] === ch.kind[t.id])?.[1]
+            return (
+              <button key={t.id} className="team-card" style={{ '--c': t.color, '--ink': ink(t.color) }} disabled={!!busy}
+                aria-label={`${t.name} 맡기 · 전력 ${teamOvr(t)} · ${tag || strengthLabel(rank, teams.length)} · 이사회 목표 ${goal}`}
+                onClick={async () => { setBusy(t.id); await chooseTeam(t.id); setBusy(null) }}>
+                <span className="tc-top">
+                  <span className="tc-crest"><Crest team={t} size={30} /></span>
+                  <span className="tc-ovr">{teamOvr(t)}</span>
+                </span>
+                <strong>{t.name}</strong>
+                <span className="tc-bar"><span style={{ width: `${((teamOvr(t) - floor) / (top - floor)) * 100}%` }} /></span>
+                <span className="tc-label">{busy === t.id ? '계약 중…' : tag || strengthLabel(rank, teams.length)}</span>
+                {pick !== 'all' && (
+                  <span className="tc-more">
+                    <span>🎯 {goal}</span>
+                    <span>⭐ {stars(t).join(' · ')}{ch.kind[t.id] === 'rebuild' ? ` · 유망주 ${ch.prospects(t)}명` : ''}</span>
+                  </span>
+                )}
+              </button>
+            )
+          })}
         </div>
       </section>
     )
@@ -91,6 +143,7 @@ export default function Home() {
         <InboxPanel inbox={save.inbox || []} unread={unread} />
       </div>
       <div className="dash-col">
+      {!played && <StartGuide board={save.board} />}
       <div className="team-hero" style={{ '--c': myTeam.color, '--ink': ink(myTeam.color) }}>
         <span className="th-crest"><Crest team={myTeam} size={54} /></span>
         <div className="th-text">
@@ -155,6 +208,26 @@ export default function Home() {
         {save.finance && <OwnerCard finance={save.finance} fans={save.fans ?? 60} />}
       </div>
     </section>
+  )
+}
+
+// 처음 시작 안내: 첫 경기 전에만, 닫으면 이 브라우저에서는 다시 안 뜬다 (편의 설정이라 브라우저에만 저장)
+const GUIDE_KEY = 'mini-fm-guide-closed'
+function StartGuide({ board }) {
+  const [closed, setClosed] = useState(() => { try { return localStorage.getItem(GUIDE_KEY) === '1' } catch { return false } })
+  if (closed) return null
+  const close = () => { setClosed(true); try { localStorage.setItem(GUIDE_KEY, '1') } catch { /* 저장 못 해도 이번 화면에선 닫힘 */ } }
+  return (
+    <div className="card start-guide">
+      <div className="sg-head"><strong>👋 감독 첫날</strong><button className="btn ghost small" onClick={close}>닫기</button></div>
+      {board?.label && <p className="small">이사회 목표: <b>{board.label}</b> — 시즌 중간·끝에 평가합니다. 두 시즌 연속 못 채우면 경질될 수 있습니다.</p>}
+      <ol className="sg-steps">
+        <li><Link to="/squad">스쿼드</Link>에서 선발 11명을 확인하세요. 선수를 누르면 능력치·플레이 스타일·계약이 보입니다.</li>
+        <li><Link to="/tactics">전술</Link>에서 전형과 팀 지시를 정합니다. 처음이면 추천 스타일 하나를 고르면 됩니다.</li>
+        <li>위의 <b>경기 진행 ▶</b>으로 경기를 봅니다. 경기 중에도 교체·지시를 내릴 수 있습니다.</li>
+        <li><Link to="/inbox">메시지함</Link>에 선수 면담 요청이 오면 답해 주세요. 직접 말로 설득하거나 약속할 수 있습니다.</li>
+      </ol>
+    </div>
   )
 }
 
