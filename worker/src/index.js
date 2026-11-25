@@ -4,7 +4,11 @@
 // Gemini 키는 Cloudflare 비밀값(GEMINI_API_KEY)에만 있고, 게임 코드·GitHub에는 없다.
 
 const ALLOWED = ['https://meongkune.github.io', 'http://localhost:5173', 'http://localhost:4173', 'http://127.0.0.1:5173']
-const MODELS = ['gemini-flash-lite-latest', 'gemini-flash-latest'] // 빠른 경량 모델 먼저, 한도·지연·오류면 다음 모델로
+const MODELS = ['gemini-flash-lite-latest', 'gemini-flash-latest'] // 가벼운 대화: 빠른 경량 모델 먼저, 한도·지연·오류면 다음 모델로
+const THINK_BUDGET = 0
+// 중요한 대화(재계약·이적·연봉·구단 협상)에 더 좋은 모델(flash)을 먼저 쓰는 것도 시험했지만(2026-11), 무료 등급에서 flash가 혼잡(503)이거나
+//   15초를 넘겨 결국 경량 모델로 넘어갔다. 경량 모델도 [이번 시즌 상황]을 주면 기록·경쟁자·강점을 근거로 충분히 답해서 지금은 같은 순서로 둔다.
+const MODELS_IMPORTANT = MODELS
 const OUTCOMES = ['none', 'resolved', 'promise_start', 'promise_role', 'promise_contract', 'promise_transfer', 'accepted_role', 'rejected', 'transfer_request', 'sulk', 'press_leak', 'loyal', 'sign', 'counter', 'refuse_deal']
 
 const cors = (origin) => ({
@@ -55,27 +59,35 @@ function systemPrompt(p) {
 [선수 정보] ${p.age}세, 포지션 ${clip(p.pos, 8)}, 능력치 OVR ${p.ovr}(팀 내 ${clip(p.rank, 20) || '?'}), 소속 ${clip(p.club, 40)}, 연봉 ${clip(p.wage, 20) || '?'}
 [성격 0~100] 자존심 ${pers.pride ?? 50}, 충성심 ${pers.loyalty ?? 50}, 다혈질 ${pers.temper ?? 50}, 프로의식 ${pers.pro ?? 50}
 [지금 상태] 사기 ${p.morale ?? 60}/100. ${clip(p.situation, 300)}
-[감독과의 관계] ${clip(p.memory, 400) || '특별한 기록 없음'}
+${p.context ? `[이번 시즌 상황 — 네가 알고 있는 사실]
+${clip(p.context, 900)}` : ''}
+[감독과의 관계] ${clip(p.memory, 700) || '특별한 기록 없음'}
 [면담 주제] ${clip(p.topic, 30) || '개별 면담'} — 선수가 원하는 것: ${clip(p.demand, 80) || '없음'}
 ${p.reason ? `[면담 이유] ${clip(p.reason, 200)}` : ''}
 ${p.deal ? dealPrompt(p.deal) : ''}
 
 현실성 규칙 (반드시 지켜라):
 1. 한국어로, 성격에 맞는 말투로 1~3문장. 게임·AI라는 말 금지.
-2. 듣기 좋은 말·칭찬만으로는 문제가 풀리지 않는다. 선수는 '구체적인 답'(출전 횟수, 역할, 계약 조건, 이적 허용 여부)을 원한다. 빈말이면 trustDelta는 0 이하.
-3. 지난 약속을 어긴 기록이 있으면 새 약속을 쉽게 믿지 않는다 (어긴 횟수가 많을수록 냉소적). 지킨 기록이 많으면 믿는다.
-4. 능력치가 팀 내 상위권인 선수(주전급)는 '로테이션/후보로 만족하라'는 말을 쉽게 받아들이지 않는다. 하위권 선수는 솔직한 설명을 받아들일 수 있다.
-5. 자존심·다혈질이 높으면 무시·모욕에 크게 반발한다. 프로의식이 높으면 화가 나도 감정적으로 행동하지 않는다. 충성심이 높으면 떠나지 않으려 한다.
-6. trustDelta: 이번 감독 발언으로 신뢰가 얼마나 바뀌는지 -20~+12 정수. 진심 있고 구체적이며 선수 요구에 맞으면 +, 요구를 피해 가는 빈말 0~-3, 무례·협박 -10 이하.
+2. 위 [지금 상태]·[이번 시즌 상황]·[감독과의 관계]에 적힌 사실만 쓴다. 경기 수·골·순위·벤치 기간·연봉·약속을 지어내지 마라. 시즌 개막 전이면 '계속 벤치' 같은 말은 하지 않는다.
+3. 사실을 자연스럽게 근거로 든다: 자기 기록(골·평점·선발 수), 같은 포지션 경쟁자와의 출전 차이, 팀 순위·연승·연패, 연봉 수준, 자기 강점. 근거 없이 막연한 불평·칭찬은 하지 않는다.
+4. 듣기 좋은 말·칭찬만으로는 문제가 풀리지 않는다. 선수는 '구체적인 답'(출전 횟수, 역할, 계약 조건, 이적 허용 여부)을 원한다. 빈말이면 trustDelta는 0 이하.
+5. 지난 약속을 어긴 기록이 있으면 새 약속을 쉽게 믿지 않는다(어긴 횟수가 많을수록 냉소적). 지킨 기록이 많으면 믿는다. 지난 면담에서 한 말과 앞뒤가 맞게 행동한다.
+6. 능력치가 팀 내 상위권인 선수(주전급)는 '로테이션/후보로 만족하라'는 말을 쉽게 받아들이지 않는다. 하위권 선수는 솔직한 설명을 받아들일 수 있다.
+7. 자존심·다혈질이 높으면 무시·모욕에 크게 반발한다. 프로의식이 높으면 화가 나도 감정적으로 행동하지 않는다. 충성심이 높으면 떠나지 않으려 한다. 팀이 연패 중이면 예민하고, 연승 중이면 너그럽다.
+8. 특별한 불만이 없는 일반 면담(감독이 불러서 온 경우)이면 기본적으로 협조적이고 담담하게 대화한다. 불만은 근거가 있을 때만 꺼낸다.
+9. trustDelta: 이번 감독 발언으로 신뢰가 얼마나 바뀌는지 -20~+12 정수. 진심 있고 구체적이며 선수 요구에 맞으면 +, 요구를 피해 가는 빈말 0~-3, 무례·협박 -10 이하.
    안부·컨디션 확인·일상적인 질문은 0~+2 (깎지 말 것). 감독이 사실을 바로잡거나 오해를 풀어 주면 인정하고 0 이상.
-10. [지금 상태]에 적힌 사실만 말하라. 경기 수·벤치 기간·출전 기록·약속을 지어내지 마라. 시즌 개막 전이면 '계속 벤치' 같은 말은 하지 않는다.
-11. 특별한 불만이 없는 일반 면담(감독이 불러서 온 경우)이면 기본적으로 협조적이고 담담하게 대화한다. 불만은 [지금 상태]에 근거가 있을 때만 꺼낸다.
-7. outcome (대화가 결론 났을 때만, 아니면 "none"):
+10. outcome (대화가 결론 났을 때만, 아니면 "none"):
    resolved(납득·해결) · promise_start(선발 기회 약속을 받아들임) · promise_role(본 포지션 약속을 받아들임) · promise_contract(재계약 약속을 받아들임) · promise_transfer(이적 허용 약속을 받아들임)
    accepted_role(현재 역할을 받아들임) · rejected(납득 못 함, 불만 남음) · transfer_request(이적 요청) · sulk(태업) · press_leak(언론 폭로) · loyal(충성 맹세)
    promise_* 는 감독이 실제로 그 약속을 말했을 때만. transfer_request·sulk·press_leak는 심한 모욕이나 반복된 약속 위반 같은 큰 이유가 있을 때만.
-8. end: 선수가 대화를 끝내고 나가면 true (보통 outcome이 정해지면 true).
-9. mood: 지금 감정을 한국어 한 단어로 (예: 분노, 서운함, 의심, 담담, 기대, 감동). 영어 금지.`
+11. end: 선수가 대화를 끝내고 나가면 true (보통 outcome이 정해지면 true).
+12. mood: 지금 감정을 한국어 한 단어로 (예: 분노, 서운함, 의심, 담담, 기대, 감동). 영어 금지.
+
+말투 예시 (그대로 베끼지 말고 이런 식으로 — 사실을 근거로, 짧게):
+- 나쁜 예: "감독님, 저도 더 뛰고 싶습니다. 기회를 주세요." (근거 없음)
+- 좋은 예: "지난 다섯 경기 중 선발은 한 번뿐이었습니다. 그 한 경기에서 평점 7.4였고요. 같은 자리 선수보다 제가 못하다고 보시는 이유를 듣고 싶습니다."
+- 좋은 예(프로의식 높음, 팀 연패 중): "지금은 팀이 먼저입니다. 다만 제 역할이 뭔지는 분명히 해 주셨으면 합니다."`
 }
 
 const CLUB_SCHEMA = {
@@ -95,7 +107,7 @@ async function askGemini(env, body) {
     contents: [...history, { role: 'user', parts: [{ text: `감독: ${clip(body.message, 300)}` }] }],
     generationConfig: {
       temperature: 0.9,
-      maxOutputTokens: 300,
+      maxOutputTokens: 1024, // 생각하는 모델은 생각에도 토큰을 써서, 300이면 답(JSON)이 잘릴 수 있었다
       responseMimeType: 'application/json',
       responseSchema: club ? CLUB_SCHEMA : {
         type: 'OBJECT',
@@ -113,17 +125,20 @@ async function askGemini(env, body) {
     },
   }
   let last = null
-  for (const model of MODELS) {
+  const models = club || body.player?.important ? MODELS_IMPORTANT : MODELS
+  for (const model of models) {
     let res
+    // 생각을 오래 하는 모델(flash)은 생각 예산을 줄인다 — 제한이 없으면 15초를 넘겨 경량 모델로 넘어가곤 했다
+    const body = model.includes('lite') ? payload : { ...payload, generationConfig: { ...payload.generationConfig, thinkingConfig: { thinkingBudget: THINK_BUDGET } } }
     try {
       res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-goog-api-key': env.GEMINI_API_KEY },
-        body: JSON.stringify(payload),
-        signal: AbortSignal.timeout(12000), // 12초 넘게 걸리면 다음 모델로
+        body: JSON.stringify(body),
+        signal: AbortSignal.timeout(15000), // 15초 넘게 걸리면 다음 모델로
       })
-    } catch { last = 504; continue }
-    if (res.status === 429 || res.status === 503 || res.status === 400) { last = res.status; continue } // 한도 초과·혼잡·모델 미지원 → 다음 모델
+    } catch { last = 504; console.log(`[talk] ${model} 시간 초과`); continue }
+    if (res.status === 429 || res.status === 503 || res.status === 400) { last = res.status; console.log(`[talk] ${model} ${res.status} ${(await res.text()).replace(/s+/g, " ").slice(0, 300)}`); continue } // 한도 초과·혼잡·모델 미지원 → 다음 모델
     if (!res.ok) throw Object.assign(new Error(`gemini ${res.status}`), { status: res.status })
     const data = await res.json()
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text

@@ -4,11 +4,11 @@ import { abilityStars, starText } from './Stars.jsx'
 import { useEffect, useRef, useState } from 'react'
 import { Kit, Flag } from './Badges.jsx'
 import { fetchProfile } from '../game/wiki.js'
-import { MAX_TURNS, OUTCOME_LABEL, dealFloor, parseOffer, rankOf, sayToPlayer, startTrust } from '../game/aiTalk.js'
+import { MAX_TURNS, OUTCOME_LABEL, contextOf, dealFloor, parseOffer, rankOf, sayToPlayer, startTrust } from '../game/aiTalk.js'
 import { TOPICS, relOf } from '../game/relations.js'
 import { personality, personalityText } from '../game/speech.js'
 import { moraleLabel } from '../game/season.js'
-import { playerOvr } from '../store.jsx'
+import { playerOvr, useGame } from '../store.jsx'
 
 const Bar = ({ value, tone }) => <span className={`tr-bar ${tone}`}><i style={{ width: `${Math.max(2, value)}%` }} /></span>
 const toneOf = (v) => (v >= 60 ? 'hi' : v >= 35 ? 'mid' : 'lo')
@@ -16,6 +16,9 @@ const toneOf = (v) => (v >= 60 ? 'hi' : v >= 35 ? 'mid' : 'lo')
 export default function TalkRoom({ player, team, status, reason, situation, topic = 'general', wage = null, totalRounds = 38, deal = null, onFinish, onClose }) {
   const st = status || {}
   const T = TOPICS[topic] || TOPICS.general
+  const game = useGame()
+  // 선수가 알고 있을 이번 시즌 상황 (면담을 여는 순간 기준으로 한 번)
+  const [context] = useState(() => { try { return contextOf(player, team, { save: game?.save, standings: game?.standings, totalRounds, leagueId: game?.data?.leagueId }) } catch { return '' } })
   const rel = relOf(st)
   const trust0 = startTrust(st)
   const [trust, setTrust] = useState(trust0)
@@ -44,7 +47,7 @@ export default function TalkRoom({ player, team, status, reason, situation, topi
     const before = lines
     const withMine = opening ? before : [...before, { role: 'manager', text: message }]
     setLines(withMine)
-    let r = await sayToPlayer({ player, team, status: st, message, intent, history: before.filter((l) => l.role !== 'system').map(({ role, text }) => ({ role, text })), trust, reason, situation, topic, wage, deal, offer: withOffer })
+    let r = await sayToPlayer({ player, team, status: st, message, intent, history: before.filter((l) => l.role !== 'system').map(({ role, text }) => ({ role, text })), trust, reason, situation, context, topic, wage, deal, offer: withOffer })
     // 계약 수락은 게임이 다시 확인: 하한 밑이면 '수락'을 역제안으로 바꾼다 (말로 연봉을 후려치는 것 방지)
     //   예전엔 이 안내를 선수 대사 끝에 붙여서 "긍정적으로 검토하겠다 …다만 12.7M 밑으론 안 된다"처럼 앞뒤가 안 맞았다 → 안내 줄로 따로
     let note = null

@@ -5,6 +5,8 @@ import { playerOvrOf } from '../engine/engine.js'
 import { news } from './season.js'
 import { personality, reactToSpeech } from './speech.js'
 import { TOPICS, makePromise, memoryText, relOf } from './relations.js'
+import { contractOf, wageFor } from './finance.js'
+import { styleTags } from './attributes.js'
 
 export const TALK_API = 'https://mini-fm-talk.meongkune.workers.dev/talk'
 export const MAX_TURNS = 6
@@ -36,6 +38,52 @@ export function situationOf(player, team, st = {}, { contractYears = null, inLin
   if (st.sulk > 0) out.push('태업 중')
   if (contractYears !== null) out.push(`계약 ${contractYears}년 남음`)
   return out.join(', ')
+}
+
+/**
+ * 선수가 알고 있을 '이번 시즌 상황' (AI에게 주는 사실 목록, 짧게) — 예전엔 출전 수·최근 평점 한 줄뿐이라
+ * 선수가 팀 순위·자기 기록·경쟁자·연봉 수준을 몰라서 일반적인 말만 했다.
+ * 모두 게임 안 사실만 넣는다 (AI가 숫자를 지어내지 않게, 워커 지시문에도 '여기 없는 사실은 말하지 마라').
+ */
+export function contextOf(player, team, { save = {}, standings = [], totalRounds = 38, leagueId = null } = {}) {
+  const out = []
+  const mine = save.teamId === team?.id
+  const st = save.status?.[player.id] || {}
+  // 팀 상황 (내 팀일 때만 — 다른 팀 선수와의 이적 협상에서는 그 팀 사정을 모른다)
+  const row = standings.findIndex((s) => s.id === team?.id)
+  if (mine && row >= 0 && save.round > 0) {
+    const s = standings[row]
+    const recent = (save.results || []).filter((r) => r.home === team.id || r.away === team.id).slice(-5)
+      .map((r) => { const [a, b] = r.home === team.id ? r.score : [...r.score].reverse(); return a > b ? '승' : a < b ? '패' : '무' }).join('')
+    out.push(`[팀] 리그 ${row + 1}위/${standings.length}팀 · 승점 ${s.pts} · ${save.round}/${totalRounds}라운드 · 최근 ${recent || '-'}${save.streak?.n >= 3 ? ` · ${save.streak.n}${save.streak.kind === 'w' ? '연승' : '연패'} 중` : ''}`)
+  }
+  if (mine && save.board?.label) out.push(`[이사회 목표] ${save.board.label}`)
+  // 이번 시즌 내 기록
+  const ps = save.pstats?.[player.id]
+  if (ps?.apps) out.push(`[이번 시즌 기록] 출전 ${ps.apps}(선발 ${ps.starts}) · 골 ${ps.g} · 도움 ${ps.a} · 평균 평점 ${(ps.rsum / ps.apps).toFixed(2)}${ps.mom ? ` · MOM ${ps.mom}회` : ''}`)
+  if (st.fr?.length) out.push(`[최근 평점] ${st.fr.join(', ')}`)
+  // 같은 포지션 경쟁자 (나보다 능력 높은 선수 · 그 선수 출전)
+  if (team?.players) {
+    const ovr = playerOvrOf(player)
+    const rivals = team.players.filter((p) => p.id !== player.id && p.pos === player.pos).sort((a, b) => playerOvrOf(b) - playerOvrOf(a)).slice(0, 3)
+      .map((p) => `${p.name.split(' ').at(-1)}(능력 ${playerOvrOf(p) > ovr ? '나보다 위' : playerOvrOf(p) < ovr ? '나보다 아래' : '비슷'}, 선발 ${save.pstats?.[p.id]?.starts ?? 0}경기)`)
+    if (rivals.length) out.push(`[같은 포지션] ${rivals.join(', ')}`)
+  }
+  // 연봉 수준 (내 팀)
+  if (mine && leagueId) {
+    const cw = contractOf(save, player, leagueId)
+    const fair = wageFor(player, leagueId)
+    const wages = team.players.map((p) => contractOf(save, p, leagueId).wage).sort((a, b) => b - a)
+    const wr = wages.findIndex((w) => w <= cw.wage) + 1
+    out.push(`[연봉] €${Math.round(cw.wage * 10) / 10}M/년 · 팀 내 연봉 ${wr}위 · 능력 대비 적정 수준의 ${Math.round((cw.wage / Math.max(0.1, fair)) * 100)}%`)
+  }
+  // 플레이 스타일 강점 (실제 기록 기반)
+  const tags = styleTags(player).map((t) => t.tag)
+  if (tags.length) out.push(`[내 강점] ${tags.join(', ')}`)
+  // 이 선수 관련 최근 소식 (메시지함)
+  const newsAbout = (save.inbox || []).filter((m) => m.playerId === player.id && m.type !== 'talk-log').slice(0, 3).map((m) => m.title)
+  if (newsAbout.length) out.push(`[최근 소식] ${newsAbout.join(' / ')}`)
+  return out.join('\n')
 }
 
 /** 규칙 기반 반응: 선택지(intent)나 직접 입력한 말 → 결과. AI가 없을 때 쓴다 */
@@ -120,7 +168,7 @@ function ruleDeal(player, deal, offer, trust) {
   return { reply: `그 금액은 어렵습니다. €${counterWage}M이면 생각해 보겠습니다.`, mood: '신중', trustDelta: r < 0.75 ? -3 : 0, outcome: 'counter', counterWage, counterYears: offer.years, end: false }
 }
 
-export async function sayToPlayer({ player, team, status, message, intent = null, history, trust, reason, situation, topic = 'general', wage = null, deal = null, offer = null }) {
+export async function sayToPlayer({ player, team, status, message, intent = null, history, trust, reason, situation, context = '', topic = 'general', wage = null, deal = null, offer = null }) {
   const st = status || {}
   const T = TOPICS[topic] || TOPICS.general
   const rank = rankOf(player, team)
@@ -128,7 +176,7 @@ export async function sayToPlayer({ player, team, status, message, intent = null
   try {
     const res = await fetch(TALK_API, {
       method: 'POST',
-      signal: AbortSignal.timeout(20000), // 20초 안에 답이 없으면 규칙 기반으로
+      signal: AbortSignal.timeout(28000), // 28초 안에 답이 없으면 규칙 기반으로 (중요한 대화는 더 큰 모델을 먼저 써서 조금 느릴 수 있다)
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         message,
@@ -137,6 +185,8 @@ export async function sayToPlayer({ player, team, status, message, intent = null
           name: player.name, age: player.age, pos: player.role || player.pos, ovr: playerOvrOf(player), club: team.name, rank: rank.text,
           wage: wage ? `€${wage}M/년` : null, personality: personality(player), morale: st.morale ?? 60, trust,
           situation, reason, topic: T.label, demand: T.demand, memory: memoryText({ ...st, trust }),
+          context, // 이번 시즌 상황 (contextOf) — 예전 워커는 이 칸을 무시한다
+          important: !!deal || ['contract', 'transfer', 'wage'].includes(topic), // 중요한 대화는 더 좋은 모델로
           ...(deal ? { deal: { ...deal, offer } } : {}),
         },
       }),
@@ -232,7 +282,7 @@ export async function sayToClub({ message, history, club, fallback = null }) {
   try {
     const res = await fetch(TALK_API, {
       method: 'POST',
-      signal: AbortSignal.timeout(20000),
+      signal: AbortSignal.timeout(28000), // 구단 협상도 더 큰 모델을 먼저 쓴다
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ mode: 'club', message, history, club }),
     })
