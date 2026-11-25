@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import PlayerCard from '../components/PlayerCard.jsx'
 import PlayerSheet from '../components/PlayerSheet.jsx'
 import { Crest } from '../components/Badges.jsx'
+import { SaveNote } from '../components/CloudBadge.jsx'
 import RecentMatches from '../components/RecentMatches.jsx'
 import { ICON, catOf, needsAnswer, preview } from './Inbox.jsx'
 import { moraleLabel, unavailable } from '../game/season.js'
@@ -73,6 +74,7 @@ export default function Home() {
           <h1>맡을 팀을 고르세요</h1>
           <p>{teams.length}개 구단이 홈·원정 두 번씩 맞붙는 {(teams.length - (teams.length % 2 ? 0 : 1)) * 2}라운드 시즌입니다.</p>
         </div>
+        <SaveNote />
 
         <div className="season-picker">
           {data.index.leagues.filter((l) => !l.marketOnly).map((l) => (

@@ -1722,7 +1722,7 @@ a.dt-chip { color: inherit; text-decoration: none; }
 
 /* ── 계정·클라우드 저장 ── */
 .cloud-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--line); background: var(--panel-2); color: var(--text, #eee); font-size: .72rem; font-weight: 700; margin-bottom: 8px; max-width: 100%; }
-.cloud-badge.compact { margin: 0 6px 0 0; padding: 4px 8px; font-size: .9rem; }
+.cloud-badge.compact { margin: 0 6px 0 0; padding: 4px 9px; font-size: .72rem; gap: 4px; }
 .cloud-badge span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .cloud-badge.s-idle { border-color: #2f7a52; }
 .cloud-badge.s-saving, .cloud-badge.s-pending { border-color: #a58a2a; }
@@ -1746,3 +1746,27 @@ a.dt-chip { color: inherit; text-decoration: none; }
 .privacy h3 { margin: 18px 0 6px; font-size: 1rem; }
 .privacy ul { padding-left: 18px; line-height: 1.65; }
 .privacy p { line-height: 1.65; }
+/* 저장 안내 (계정 화면·팀 고르기·알림) */
+.now-card h2 { margin: 4px 0 6px; font-size: 1.15rem; }
+.now-card .eyebrow { font-size: .7rem; letter-spacing: .5px; color: var(--muted, #9a93b5); font-weight: 800; }
+.now-save { font-weight: 800; margin: 0 0 6px; }
+.start-card h3 { margin-top: 0; }
+.start-choices { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.start-choice { text-align: left; display: flex; flex-direction: column; gap: 6px; padding: 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--panel-2); color: inherit; cursor: pointer; font: inherit; }
+.start-choice span { font-size: .8rem; opacity: .8; line-height: 1.45; }
+.start-choice.main { border-color: var(--accent, #7c5cff); box-shadow: 0 0 0 1px var(--accent, #7c5cff) inset; }
+.start-choice:hover:not(:disabled) { filter: brightness(1.12); }
+.slot-row.empty .slot-no { opacity: .55; }
+.slot-info strong .pill { margin-left: 8px; font-size: .65rem; vertical-align: middle; }
+.compare { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-bottom: 14px; }
+.compare > div { padding: 10px 12px; border-radius: 10px; background: var(--panel-2); border: 1px solid var(--line); }
+.compare > div.good { border-color: #2f7a52; }
+.compare ul { margin: 6px 0 0; }
+.faq summary { cursor: pointer; font-weight: 800; }
+.faq dl { margin: 10px 0 0; line-height: 1.55; }
+.faq dt { font-weight: 800; margin-top: 10px; }
+.faq dd { margin: 2px 0 0; font-size: .85rem; opacity: .85; }
+.save-note { margin: -4px 0 12px; padding: 8px 12px; border-radius: 10px; background: var(--panel-2); border: 1px solid var(--line); font-size: .82rem; line-height: 1.5; }
+.cloud-badge.s-guest, .cloud-badge.s-pick { border-style: dashed; }
+.toast { position: fixed; left: 50%; bottom: 84px; transform: translateX(-50%); z-index: 1100; max-width: min(520px, calc(100vw - 32px)); padding: 12px 16px; border-radius: 12px; background: #1f6f4a; color: #fff; font-size: .88rem; font-weight: 700; line-height: 1.45; box-shadow: 0 8px 24px rgba(0,0,0,.4); cursor: pointer; animation: toast-in .2s ease-out; }
+@keyframes toast-in { from { opacity: 0; transform: translate(-50%, 8px); } to { opacity: 1; transform: translate(-50%, 0); } }

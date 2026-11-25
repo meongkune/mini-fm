@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { GameProvider } from '../store.jsx'
-import { flush, forceMine, leaveSlot, onSession, onSync, openSlot, resetSync, session, setSession, syncState } from '../game/cloud.js'
+import { ago, flush, forceMine, leaveSlot, onSession, onSync, onToast, openSlot, resetSync, session, setSession, syncState, toast } from '../game/cloud.js'
 
 /**
  * 클라우드 슬롯으로 하고 있으면 시작할 때 서버에서 최신 세이브를 받아 오고,
@@ -33,32 +33,47 @@ export default function CloudGate({ children }) {
 
   const key = `${sess?.token && sess?.slot ? `slot${sess.slot}` : 'guest'}-${mountKey}`
 
-  if (boot === 'loading') return <div className="cloud-cover"><div className="card">☁️ 클라우드 세이브를 불러오는 중…</div></div>
+  if (boot === 'loading') return <div className="cloud-cover"><div className="card">☁️ 계정에 저장된 게임을 불러오는 중…</div></div>
   if (boot === 'error') {
     const kicked = bootError?.kind === 'kicked'
     return (
       <div className="cloud-cover">
         <div className="card cloud-box">
-          <h3>{kicked ? '다른 곳에서 로그인했습니다' : '클라우드 세이브를 불러오지 못했습니다'}</h3>
-          <p className="muted">{kicked ? '마지막으로 로그인한 한 곳에서만 이어서 할 수 있습니다. 여기서 하려면 다시 로그인하세요.' : bootError?.message}</p>
+          <h3>{kicked ? '다른 곳에서 로그인해서 여기는 로그아웃됐어요' : '계정에 저장된 게임을 불러오지 못했어요'}</h3>
+          <p className="muted">{kicked ? '계정 게임은 마지막으로 로그인한 한 곳에서만 할 수 있어요. 여기서 하려면 다시 로그인하세요. 저장된 게임은 그대로 있어요.' : `${bootError?.message} 인터넷 연결을 확인하고 다시 시도하세요.`}</p>
           <div className="row gap">
             {!kicked && <button className="btn" onClick={load}>다시 시도</button>}
             {kicked && <button className="btn" onClick={() => { setSession(null); location.assign(`${import.meta.env.BASE_URL}account`) }}>다시 로그인</button>}
-            <button className="btn ghost" onClick={() => { leaveSlot(); setBoot('ready') }}>게스트 세이브로 하기</button>
+            <button className="btn ghost" onClick={() => { leaveSlot(); setBoot('ready'); setTimeout(() => toast('💾 이 기기에 저장된 게임으로 시작했어요.'), 50) }}>이 기기 게임으로 하기</button>
           </div>
         </div>
       </div>
     )
   }
   return (
-    <GameProvider key={key}>
-      {children}
-      <SyncCover reload={load} />
-    </GameProvider>
+    <>
+      <GameProvider key={key}>
+        {children}
+        <SyncCover reload={load} />
+      </GameProvider>
+      <Toast />
+    </>
   )
 }
 
-/** 자동 저장 상태에 따라 진행을 막는 덮개 */
+/** 잠깐 떴다 사라지는 안내 (예: '1번 칸에 새 게임을 만들었어요') */
+function Toast() {
+  const [text, setText] = useState('')
+  useEffect(() => {
+    let t
+    const off = onToast((m) => { setText(m); clearTimeout(t); t = setTimeout(() => setText(''), 6000) })
+    return () => { off(); clearTimeout(t) }
+  }, [])
+  if (!text) return null
+  return <div className="toast" role="status" onClick={() => setText('')}>{text}</div>
+}
+
+/** 자동 저장이 막히면 진행을 멈추는 덮개 */
 function SyncCover({ reload }) {
   const [st, setSt] = useState(syncState)
   useEffect(() => onSync(setSt), [])
@@ -66,9 +81,9 @@ function SyncCover({ reload }) {
     return (
       <div className="cloud-cover">
         <div className="card cloud-box">
-          <h3>📡 연결이 끊겼습니다</h3>
-          <p className="muted">로그인한 게임은 서버에 저장돼야 이어서 진행할 수 있습니다. 연결되면 자동으로 저장하고 이 화면이 사라집니다.</p>
-          <p className="small muted">{st.message}</p>
+          <h3>📡 인터넷 연결이 끊겼어요</h3>
+          <p>계정에 저장하는 게임이라, 저장이 될 때까지 잠깐 멈춥니다. 연결이 돌아오면 <b>자동으로 저장하고 이 창이 사라져요</b>.</p>
+          <p className="small muted">{st.at ? `마지막으로 저장된 때: ${ago(st.at)} — 그때까지의 진행은 안전해요.` : ''} ({st.message})</p>
           <button className="btn" onClick={flush}>지금 다시 시도</button>
         </div>
       </div>
@@ -78,10 +93,11 @@ function SyncCover({ reload }) {
     return (
       <div className="cloud-cover">
         <div className="card cloud-box">
-          <h3>다른 곳에서 로그인했습니다</h3>
-          <p className="muted">마지막으로 로그인한 한 곳에서만 저장됩니다. 여기서 이어서 하려면 다시 로그인하세요. (여기서 마지막으로 한 진행은 저장되지 않았을 수 있습니다)</p>
+          <h3>다른 곳에서 로그인해서 여기는 로그아웃됐어요</h3>
+          <p>계정 게임은 마지막으로 로그인한 한 곳(기기·브라우저)에서만 할 수 있어요. 여기서 계속하려면 다시 로그인하세요.</p>
+          <p className="small muted">여기서 방금 한 진행 중 일부는 저장되지 않았을 수 있어요.</p>
           <div className="row gap">
-            <button className="btn" onClick={() => { setSession(null); resetSync(); location.assign(`${import.meta.env.BASE_URL}account`) }}>다시 로그인</button>
+            <button className="btn" onClick={() => { setSession(null); resetSync(); location.assign(`${import.meta.env.BASE_URL}account`) }}>다시 로그인하기</button>
           </div>
         </div>
       </div>
@@ -91,11 +107,15 @@ function SyncCover({ reload }) {
     return (
       <div className="cloud-cover">
         <div className="card cloud-box">
-          <h3>다른 곳에서 먼저 저장한 세이브가 있습니다</h3>
-          <p className="muted">같은 슬롯을 다른 기기(또는 다른 탭)에서 진행했습니다. 어느 쪽으로 이어서 할까요? 여기 진행으로 덮어쓰면 서버에 있던 세이브는 휴지통에 7일 동안 보관됩니다. 서버 세이브를 불러오면 여기서 저장되지 않은 진행은 사라집니다.</p>
+          <h3>이 게임을 다른 곳에서도 진행했어요</h3>
+          <p>같은 계정 칸의 게임을 다른 기기(또는 다른 탭)에서 먼저 저장했어요. 어느 쪽으로 이어서 할지 골라 주세요.</p>
+          <ul className="small">
+            <li><b>다른 곳 진행 불러오기</b> — 여기서 저장 안 된 진행은 사라져요.</li>
+            <li><b>여기 진행으로 계속하기</b> — 다른 곳 진행은 '지운 게임'에 7일 동안 남아요.</li>
+          </ul>
           <div className="row gap">
-            <button className="btn" onClick={() => { resetSync(); reload() }}>서버 세이브 불러오기</button>
-            <button className="btn ghost" onClick={forceMine}>지금 여기 진행으로 덮어쓰기</button>
+            <button className="btn" onClick={() => { resetSync(); reload() }}>다른 곳 진행 불러오기</button>
+            <button className="btn ghost" onClick={forceMine}>여기 진행으로 계속하기</button>
           </div>
         </div>
       </div>

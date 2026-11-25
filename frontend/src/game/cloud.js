@@ -177,6 +177,22 @@ export async function forceMine() {
 /** 충돌·접속 문제 상태를 지운다 (슬롯을 다시 받은 뒤) */
 export function resetSync() { latest = null; clearTimeout(timer); setState({ status: 'idle', message: '' }) }
 
+// ── 잠깐 띄우는 안내 (화면이 바뀌어도 남도록 게임 바깥에서 그린다) ──
+const toastListeners = new Set()
+export const onToast = (f) => { toastListeners.add(f); return () => toastListeners.delete(f) }
+export const toast = (text) => toastListeners.forEach((f) => f(text))
+
+/** '방금' · 'n분 전' · '오후 3:12' 같은 쉬운 시각 */
+export function ago(t) {
+  if (!t) return ''
+  const s = (Date.now() - t) / 1000
+  if (s < 60) return '방금'
+  if (s < 3600) return `${Math.floor(s / 60)}분 전`
+  const d = new Date(t)
+  const today = new Date().toDateString() === d.toDateString()
+  return d.toLocaleString('ko-KR', today ? { hour: 'numeric', minute: '2-digit' } : { month: 'numeric', day: 'numeric', hour: 'numeric', minute: '2-digit' })
+}
+
 // ── 구글 로그인 버튼 (Google Identity Services) ──
 let gisPromise = null
 export function loadGoogle() {
