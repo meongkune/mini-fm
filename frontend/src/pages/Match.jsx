@@ -13,6 +13,7 @@ import { ink, kitColors, lineupOvr, myTactics, onDark, playerOvr, short, teamOvr
 import TacticsPanel, { CORNER_DEF_OPTS, CORNER_OPTS } from '../components/TacticsPanel.jsx'
 import Matchups from '../components/Matchups.jsx'
 import MatchPitch from './MatchPitch.jsx'
+import PenaltyGame from './PenaltyGame.jsx'
 import { clipMs } from '../engine/playback.js'
 import NeedTeam from './NeedTeam.jsx'
 import { FormationPicker, LINE_OPTS, MENTALITY, OptionGroup, PRESSING, TEMPO_OPTS } from './Tactics.jsx'
@@ -23,6 +24,7 @@ const SPEEDS = { '1x': 1, '2x': 2, '4x': 5, '8x': 14 }
 const IDLE_MS = 650 // 다음 분을 계산하기 전 잠깐 (1배속 기준)
 // 상황별 장면 길이 배수 — 슈팅·세트피스·골은 천천히, 재개(골킥·스로인)는 조금 더
 const TICK_MULT = { build: 1, card: 2, clear: 2, miss: 2.5, save: 2.5, goal: 5 }
+const penSig = (m) => JSON.stringify(m.sides.map((s) => [s.onPitch, s.slots, s.tactics]))
 const tickDelay = (lineups, t, tactics, k) => Math.max(70, clipMs(lineups, t, tactics) / k)
 /** 경기장 배치: 포메이션 자리 좌표를 선수에게 붙인다 (경기장 그림과 장면 재생 시간 계산이 같이 쓴다) */
 function pitchLineups(match, teams) {
@@ -67,6 +69,8 @@ export default function Match() {
   const [shown, setShown] = useState(-1) // 지금 보여주는 장면(timeline 번호) — 계산은 앞서 있고 화면이 차례로 따라간다
   const [lastShout, setLastShout] = useState(null)
   const [revealed, setRevealed] = useState(true) // 지금 장면의 결과(골·자막)를 드러냈는가
+  const [pen, setPen] = useState(null) // 직접 차거나 막을 페널티킥 (열려 있는 동안 경기는 멈춘다)
+  const penRef = useRef(null) // { snap: 그 분을 계산하기 전의 경기 상태, info, sig }
   const [doneTick, setDoneTick] = useState(null) // 경기장이 재생을 끝냈다고 알려 온 장면
   const logRef = useRef(null)
 
@@ -97,6 +101,7 @@ export default function Match() {
   if (!matchRef.current && LIVE.match && LIVE.match.key === fixtureKey) matchRef.current = LIVE.match
   const match = matchRef.current
   if (import.meta.env.DEV) window.__match = match // 개발 중 디버깅용
+  if (import.meta.env.DEV) window.__penTest = (mine = true, pen = 78, gk = 75) => setPen({ key: 'test-' + Date.now(), atk: mine ? myIdx : 1 - myIdx, mine, takerName: '테스트 키커', pen, gk, p: 0.76 }) // 개발 중: 페널티킥 화면만 띄워 본다
   const lastTick = match && shown >= 0 ? match.timeline[shown] : null
   const pitchXI = match && ctx ? pitchLineups(match, ctx.teams) : null
   const delay = match && lastTick ? tickDelay(pitchXI, lastTick, [match.sides[0].tactics, match.sides[1].tactics], SPEEDS[speed]) : IDLE_MS / SPEEDS[speed]
@@ -162,16 +167,30 @@ export default function Match() {
 
   // 경기 시계: 장면을 하나씩 보여주고, 다 보여주면 다음 1분을 계산한다 (멈춤·교체 화면·부상 알림 중에는 정지)
   useEffect(() => {
-    if (phase !== 'live' || paused || sheet || interrupt || !match) return
+    if (phase !== 'live' || paused || sheet || interrupt || pen || !match) return
     const tl = match.timeline
     // 장면은 경기장이 재생을 끝냈을 때 넘어간다 (MatchPitch onEnd). 타이머로 넘기면 화면과 문자 중계가 어긋난다
     const played = shown >= 0 && doneTick === lastTick
     const t = setTimeout(() => {
-      if (shown < tl.length - 1) { setShown(shown + 1); return }
+      if (shown < tl.length - 1) {
+        // 다음 장면이 내가 직접 할 페널티킥이면 화면을 연다. 그 사이 교체·전술을 바꿨으면(되돌리면 사라진다) 엔진 결과대로 둔다
+        const pp = penRef.current
+        if (pp && tl[shown + 1].penKey === pp.info.key) {
+          if (pp.sig === penSig(match)) { setPen(pp.info); return }
+          penRef.current = null
+        }
+        setShown(shown + 1); return
+      }
       if (match.minute === 45 && halfOver(match, 1) && !match.htShown) { match.htShown = true; setPhase('ht'); return }
       if (halfOver(match, 2)) { setPhase('ft'); return }
       const before = tl.length
+      // 직접 조작 페널티킥: 이 분에 내 팀의 페널티킥이 나오면, 계산 전 상태를 들고 있다가 내가 찬 결과를 넣어 이 분을 다시 계산한다
+      const snap = structuredClone(match)
+      match.manualPen = true; match.penPending = null
       const it = step(match, ctx)
+      match.manualPen = false
+      penRef.current = match.penPending && !it ? { snap, info: match.penPending, sig: penSig(match) } : null
+      match.penPending = null
       if (it) { setInterrupt(it); setSheet('subs') }
       setShown(before)
       rerender()
@@ -204,10 +223,28 @@ export default function Match() {
   // 건너뛰기: 같은 계산을 한 번에 돌릴 뿐이라 결과는 천천히 볼 때와 같다
   const skip = () => {
     const first = !halfOver(match, 1)
+    penRef.current = null; setPen(null) // 건너뛰면 페널티킥도 엔진이 정한 대로
     const it = advance(match, ctx, first ? 45 : 90)
     setShown(match.timeline.length - 1)
     if (it) { setInterrupt(it); setSheet('subs') }
     else if (first) { match.htShown = true; setPhase('ht') } else setPhase('ft')
+    rerender()
+  }
+  // 페널티킥을 직접 찬(막은) 결과로 그 분을 다시 계산한다 (앞 장면들은 같은 난수라 그대로다)
+  const onPenDone = (outcome) => {
+    const pp = penRef.current
+    penRef.current = null
+    if (!pp) { setPen(null); return }
+    const s = pp.snap
+    s.penAnswers = { ...(s.penAnswers || {}), [pp.info.key]: outcome }
+    s.manualPen = true; s.penPending = null
+    const it = step(s, ctx)
+    s.manualPen = false; s.penPending = null
+    matchRef.current = s
+    if (LIVE.match === match) LIVE.match = s
+    if (it) { setInterrupt(it); setSheet('subs') }
+    setPen(null)
+    setShown(shown + 1)
     rerender()
   }
   const secondHalf = () => { setPhase('live'); setPaused(false); rerender() }
@@ -306,6 +343,7 @@ export default function Match() {
       </div>
       <div className="progress"><span style={{ width: `${(Math.min(90, nowMin) / 90) * 100}%` }} /></div>
 
+      {pen && <PenaltyGame key={pen.key} info={pen} seed={match.seed} colors={[home.color, away.color]} onDone={onPenDone} />}
       <div className="match-layout">
       <div className="ml-pitch">
       <MatchPitch
@@ -318,7 +356,7 @@ export default function Match() {
         tick={live ? lastTick : null}
         nextTick={live && lastTick ? match.timeline[shown + 1] || null : null}
         speed={SPEEDS[speed]}
-        frozen={paused || !!sheet || !!interrupt}
+        frozen={paused || !!sheet || !!interrupt || !!pen}
         onReveal={(t) => { if (t === lastTick) setRevealed(true) }}
         onEnd={(t) => { if (t === lastTick) { setRevealed(true); setDoneTick(t) } }}
         scorerName={lastTick?.p ? byId[lastTick.p]?.name : ''}

@@ -634,7 +634,8 @@ export function step(match, ctx, { withEvents = true } = {}) {
   const gkAttr = r[dfn].gk ? r[dfn].gk.A || attrsOf(r[dfn].gk).map : null
 
   // 슈팅 판정 (오픈 플레이·세트피스 공통): 'goal' | 'save' | 'miss'
-  const resolve = ({ shooter, assister, pOn, pGoal, how }) => {
+  //   force('goal'·'save'·'miss'): 감독이 직접 찬(막은) 페널티킥의 결과 — 주사위 대신 그 결과를 쓴다
+  const resolve = ({ shooter, assister, pOn, pGoal, how, force = null }) => {
     if (how !== 'pen') { const g = pOn * pGoal; pOn *= ON_TARGET_K; pGoal = Math.min(0.75, g / pOn) }
     S[atk].shots++
     match.ps[shooter.id].sh++
@@ -642,11 +643,11 @@ export function step(match, ctx, { withEvents = true } = {}) {
     S[atk].xg += xg
     match.ps[shooter.id].xg += xg
     Object.assign(tick, { k: 'miss', p: shooter.id })
-    if (rng.random() < pOn) {
+    if (force ? force !== 'miss' : rng.random() < pOn) {
       S[atk].onTarget++
       match.ps[shooter.id].sot++
       tick.k = 'save'
-      if (rng.random() < pGoal) {
+      if (force ? force === 'goal' : rng.random() < pGoal) {
         tick.k = 'goal'
         match.score[atk]++
         match.stop += 0.5
@@ -755,9 +756,14 @@ export function step(match, ctx, { withEvents = true } = {}) {
     S[atk].pens++
     match.stop += 0.5
     say({ type: 'pen', text: `⚠️ 페널티킥! ${fouler.name}(${names[dfn]})의 박스 안 반칙. 키커는 ${taker.name}.` })
-    scene({ k: 'miss', sp: 'pen', p: taker.id, kt: taker.id, side: rng.random() < 0.5 ? -1 : 1 })
+    // 직접 조작(match.manualPen — 경기를 지켜보는 중에만 켠다): 내 팀이 차거나 막는 페널티킥은 화면에서 직접 한 결과(match.penAnswers)를 쓴다.
+    //   아직 답이 없으면 penPending으로 알리고 일단 주사위 결과로 진행한다 — 화면이 이 분을 되돌려 답을 넣고 다시 계산한다
+    const penKey = `${minute}-${match.plus || 0}-${atk}`
+    const answer = match.manualPen ? match.penAnswers?.[penKey] ?? null : null
+    scene({ k: 'miss', sp: 'pen', p: taker.id, kt: taker.id, side: rng.random() < 0.5 ? -1 : 1, ...(match.manualPen ? { penKey } : {}) })
     const p = clamp(0.76 + (penOf(taker) - 75) / 250 - ((gkAttr?.['선방'] ?? keeper) - 75) / 300, 0.6, 0.9)
-    const res = resolve({ shooter: taker, assister: null, pOn: 0.93, pGoal: clamp(p / 0.93, 0, 0.97), how: 'pen' })
+    if (match.manualPen && !answer && match.myIdx != null && !match.penPending) match.penPending = { key: penKey, atk, mine: atk === match.myIdx, takerId: taker.id, takerName: taker.name, pen: Math.round(penOf(taker)), gk: Math.round(gkAttr?.['선방'] ?? keeper), p }
+    const res = resolve({ shooter: taker, assister: null, pOn: 0.93, pGoal: clamp(p / 0.93, 0, 0.97), how: 'pen', force: answer })
     if (res === 'goal') { S[atk].penGoals++; goalEvent(`⚽ 골!! ${taker.name}(${names[atk]})가 페널티킥을 침착하게 성공시킵니다!`, taker, null) }
     else if (res === 'save') { say({ type: 'save', text: `🧤 막았습니다! ${names[dfn]} 골키퍼가 ${taker.name}의 페널티킥을 쳐냅니다!` }); tick.r = 'gk' }
     else { say({ type: 'miss', text: `😱 ${taker.name}(${names[atk]})의 페널티킥이 골대를 벗어납니다!` }); tick.r = 'goalkick' }
