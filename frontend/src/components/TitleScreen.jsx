@@ -1,30 +1,25 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useGame } from '../store.jsx'
-import { cloudActive, onSession } from '../game/cloud.js'
 import { Crest } from './Badges.jsx'
-import { GoogleLogin, newGameConfirm, useNewGame } from './StartFlow.jsx'
+import { ImportCode, newGameConfirm } from './SaveBits.jsx'
 
 // 페이지를 새로 열 때마다 한 번 보여 준다 (게임을 새로 띄워도 다시 나오지 않게 모듈 변수로)
 let seen = false
 export const titleSeen = () => seen
 export const markSeen = () => { seen = true }
 
-/** 시작 화면: 이어하기 / 바로 시작 / 구글로 로그인 */
+/** 시작 화면: 이어하기 / 새 게임 / 바로 시작 / 다른 기기에서 가져오기 */
 export default function TitleScreen({ onClose }) {
-  const { data, save, myTeam, totalRounds } = useGame()
-  const newGame = useNewGame()
-  const [cloud, setCloud] = useState(cloudActive)
-  const [busy, setBusy] = useState(false)
-  useEffect(() => onSession(() => setCloud(cloudActive())), [])
+  const { data, save, myTeam, totalRounds, quitTeam } = useGame()
+  const [importing, setImporting] = useState(false)
 
   const go = () => { markSeen(); onClose() }
-  const startNew = async () => {
-    if (myTeam && !confirm(newGameConfirm(myTeam.name))) return
-    setBusy(true); markSeen()
-    try { await newGame(); onClose() } catch (e) { alert(e.message); setBusy(false) }
+  const startNew = () => {
+    if (!confirm(newGameConfirm(myTeam.name))) return
+    quitTeam()
+    go()
   }
-  const where = cloud ? '☁️ 구글 계정에 저장됨' : '💾 이 브라우저에 저장됨'
 
   return (
     <div className="title-screen">
@@ -42,27 +37,28 @@ export default function TitleScreen({ onClose }) {
                 <button className="title-btn main" onClick={go} style={{ '--c': myTeam.color }}>
                   <span className="tb-head">▶ 이어하기</span>
                   <span className="tb-team"><Crest team={myTeam} size={26} /> {myTeam.name}</span>
-                  <span className="tb-sub">{save.seasonNo || 1}번째 시즌 · {Math.min(save.round + 1, totalRounds)}/{totalRounds}라운드 · {where}</span>
+                  <span className="tb-sub">{save.seasonNo || 1}번째 시즌 · {Math.min(save.round + 1, totalRounds)}/{totalRounds}라운드</span>
                 </button>
-                <button className="title-btn" disabled={busy} onClick={startNew}>
+                <button className="title-btn" onClick={startNew}>
                   <span className="tb-head">🆕 새 게임</span>
-                  <span className="tb-sub">{cloud ? '하던 게임은 7일 동안 보관돼요' : '하던 게임은 지워져요'}</span>
+                  <span className="tb-sub">하던 게임은 지워져요</span>
                 </button>
               </>
             ) : (
               <button className="title-btn main" onClick={go}>
                 <span className="tb-head">▶ 바로 시작</span>
-                <span className="tb-sub">{cloud ? '☁️ 구글 계정에 저장돼요' : '로그인 없이 · 게임은 이 브라우저에 저장돼요'}</span>
+                <span className="tb-sub">맡을 팀을 고르면 시작해요</span>
               </button>
             )}
 
-            {cloud ? (
-              <p className="title-note">☁️ 구글 계정으로 로그인돼 있어요 · <Link to="/account" onClick={markSeen}>계정·저장 관리</Link></p>
+            <p className="title-note">💾 로그인 없이 이 브라우저에 자동 저장돼요</p>
+
+            {!importing ? (
+              <button className="linkish title-import" onClick={() => setImporting(true)}>📥 다른 기기에서 하던 게임 가져오기</button>
             ) : (
               <div className="title-login">
-                <span className="title-or">또는</span>
-                <p className="small">구글로 로그인하면 <b>폰·PC 어디서든</b> 이어서 할 수 있어요{myTeam ? ` (하던 ${myTeam.name} 게임도 그대로 옮겨져요)` : ''}.</p>
-                <GoogleLogin onBegin={markSeen} onDone={onClose} />
+                <p className="small">다른 기기의 <b>저장·기기 옮기기</b> 화면에서 만든 코드를 넣으세요.</p>
+                <ImportCode autoFocus onDone={markSeen} />
               </div>
             )}
           </div>

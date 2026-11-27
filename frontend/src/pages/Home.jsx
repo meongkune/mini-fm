@@ -3,8 +3,7 @@ import { Link } from 'react-router-dom'
 import PlayerCard from '../components/PlayerCard.jsx'
 import PlayerSheet from '../components/PlayerSheet.jsx'
 import { Crest } from '../components/Badges.jsx'
-import { SaveNote } from '../components/CloudBadge.jsx'
-import { newGameConfirm, useNewGame } from '../components/StartFlow.jsx'
+import { SaveNote, newGameConfirm } from '../components/SaveBits.jsx'
 import RecentMatches from '../components/RecentMatches.jsx'
 import { ICON, catOf, needsAnswer, preview } from './Inbox.jsx'
 import { moraleLabel, unavailable } from '../game/season.js'
@@ -48,11 +47,10 @@ function strengthLabel(rank, total) {
 }
 
 export default function Home() {
-  const { data, myTeam, save, standings, nextFixture, teamsById, totalRounds, seasonOver, chooseTeam, chooseSeason, status, unread, seasonText, review, startNextSeason, venueOf } = useGame()
+  const { data, myTeam, save, standings, nextFixture, teamsById, totalRounds, seasonOver, chooseTeam, chooseSeason, quitTeam, status, unread, seasonText, review, startNextSeason, venueOf } = useGame()
   const [busy, setBusy] = useState(null)
   const [detail, setDetail] = useState(null)
   const [pick, setPick] = useState('all') // 시작 추천 종류
-  const newGame = useNewGame()
 
   if (!myTeam) {
     const teams = [...data.teams].sort((a, b) => teamOvr(b) - teamOvr(a))
@@ -202,7 +200,7 @@ export default function Home() {
       {detail && <PlayerSheet player={detail} onClose={() => setDetail(null)} />}
 
       <div className="row end">
-        <button className="btn ghost small" onClick={async () => { if (confirm(newGameConfirm(myTeam.name))) { try { await newGame() } catch (e) { alert(e.message) } } }}>
+        <button className="btn ghost small" onClick={() => { if (confirm(newGameConfirm(myTeam.name))) quitTeam() }}>
           새 게임 (팀 다시 고르기)
         </button>
       </div>
