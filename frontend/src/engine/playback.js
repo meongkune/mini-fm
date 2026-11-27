@@ -246,7 +246,7 @@ export function scriptOf(lineups, tick, tactics, sim = null, stage2 = false) {
     // 공은 그 공격수가 뛰어드는 앞 공간으로 간다 (선수가 닿을 수 없는 먼 곳으로 차지 않는다)
     const rp = where(runner)
     const ptTo = { x: clamp(Math.max((rp.x + dir * 7) * dir, (last.pt.x + dir * 6) * dir) * dir, 4, W - 4), y: clamp(rp.y + (H / 2 - rp.y) * 0.2, 8, H - 8) }
-    add('pass', clamp(dist(last.pt, ptTo) / 20, 0.6, 1.6), { who: last.id, to: runner, ptFrom: last.pt, ptTo, kind: 'ground', label: `${route}`, s: 0.9 })
+    add('pass', clamp(dist(last.pt, ptTo) / 20, 0.6, 1.6), { who: last.id, to: runner, ptFrom: last.pt, ptTo, kind: dist(last.pt, ptTo) > 30 ? 'loft' : 'ground', label: `${route}`, s: 0.9 })
     revealAt = t
     add('whistle', 0.9, { who: runner, label: `${route} · 오프사이드`, s: 0.9 })
   } else if (cutPass) {

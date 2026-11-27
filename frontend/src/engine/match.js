@@ -716,17 +716,36 @@ export function step(match, ctx, { withEvents = true } = {}) {
   }
 
   // 직접 프리킥: 키커의 킥 vs 골키퍼
-  const directFk = () => {
+  //   dist(골문까지 거리, 사슬 엔진만): 가까울수록 잘 들어간다
+  const directFk = (dist = null) => {
     const taker = takerOf(match, atk, r[atk].xi, 'fk')
     if (!taker) return
-    scene({ k: 'miss', sp: 'fk', p: taker.id, kt: taker.id, side: rng.random() < 0.5 ? -1 : 1 })
+    scene({ k: 'miss', sp: 'fk', p: taker.id, kt: taker.id, side: rng.random() < 0.5 ? -1 : 1, ...(dist ? { dist: Math.round(dist) } : {}) })
     const kick = kickOf(taker)
+    const near = dist ? clamp(1.25 - (dist - 18) / 22, 0.75, 1.25) : 1
     const pOn = clamp(0.36 + (kick - 75) / 300, 0.25, 0.5)
-    const pGoal = clamp(0.15 + (kick - 75) / 150 - ((gkAttr?.['선방'] ?? keeper) - 70) / 300, 0.06, 0.32)
+    const pGoal = clamp((0.15 + (kick - 75) / 150 - ((gkAttr?.['선방'] ?? keeper) - 70) / 300) * near, 0.06, dist ? 0.36 : 0.32)
     const res = resolve({ shooter: taker, assister: null, pOn, pGoal, how: 'fk' })
     if (res === 'goal') goalEvent(`⚽ 프리킥 골!! ${taker.name}(${names[atk]})의 킥이 벽을 넘어 그대로 꽂힙니다!`, taker, null)
     else if (res === 'save') { say({ type: 'save', text: `🧤 ${taker.name}(${names[atk]})의 직접 프리킥, 골키퍼가 막아냅니다!` }); tick.r = 'gk' }
     else { say({ type: 'miss', text: `🎯 ${taker.name}(${names[atk]})의 직접 프리킥이 벽에 막힙니다.` }); tick.r = 'goalkick' }
+  }
+
+  // 위험 지역 프리킥(사슬 엔진): 반칙 지점의 거리·키커의 킥·팀 철학에 따라 직접 때리거나, 박스로 올리거나, 짧게 연결한다
+  //   (예전에는 거리와 무관하게 전부 직접 슛이라 경기당 5번씩 나왔다)
+  const smartFk = () => {
+    const taker = takerOf(match, atk, r[atk].xi, 'fk')
+    if (!taker) return
+    const dist = 18 + rng.random() * 14 // 골문까지 18~32m
+    const pShoot = clamp((dist <= 23 ? 0.6 : dist <= 27 ? 0.3 : 0.05) + (kickOf(taker) - 75) / 50, 0.02, 0.9)
+    if (rng.random() < pShoot) return directFk(dist)
+    const phil = match.sides[atk].tactics.phil
+    if (rng.random() < (phil === 'possession' ? 0.55 : phil === 'direct' ? 0.15 : 0.3)) {
+      if (withEvents && hash(`fs-${match.seed}-${minute}-${match.plus}`) < 0.4) say({ type: 'chance', text: `🎯 ${names[atk]}, ${Math.round(dist)}m 프리킥을 짧게 연결합니다.` })
+      tick.r = 'fk'
+      return
+    }
+    aerialPlay('fkx')
   }
 
   // 페널티킥: 키커(결정력·기술) vs 골키퍼(선방) — 평균 성공률 약 76%
@@ -807,7 +826,7 @@ export function step(match, ctx, { withEvents = true } = {}) {
       if (withEvents) match.events.push({ minute, type: 'card', team: dfn, player: fouler.name, text: `🟨 ${fouler.name}(${names[dfn]}) 경고. ${zone === 'pen' ? '박스 안에서 무리한 태클이었습니다.' : '거친 태클이었습니다.'}` })
     }
     if (zone === 'pen') penalty(fouler)
-    else if (zone === 'fk') directFk()
+    else if (zone === 'fk') { if (chainOn) smartFk(); else directFk() }
     else if (zone === 'fkx') aerialPlay('fkx')
     else tick.r = 'fk'
   }

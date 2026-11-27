@@ -304,7 +304,7 @@ export function setPieceFrame(lineups, tick, sub, shotStage) {
   let spot
   if (tick.sp === 'corner') spot = { x: goalX - dir * 0.6, y: side > 0 ? H - 0.6 : 0.6 }
   else if (tick.sp === 'pen') spot = { x: goalX - dir * 11, y: H / 2 }
-  else if (tick.sp === 'fk') spot = { x: goalX - dir * (21 + rand(seed) * 7), y: H / 2 + side * (3 + rand(seed + 1) * 10) }
+  else if (tick.sp === 'fk') spot = { x: goalX - dir * (tick.dist ?? 21 + rand(seed) * 7), y: H / 2 + side * (3 + rand(seed + 1) * 10) }
   else spot = { x: goalX - dir * (27 + rand(seed) * 8), y: side > 0 ? H - 7 - rand(seed + 2) * 6 : 7 + rand(seed + 2) * 6 }
   const pos = {}
   const kt = tick.kt ?? tick.p
