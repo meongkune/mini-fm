@@ -70,6 +70,7 @@ export default function Match() {
   const [lastShout, setLastShout] = useState(null)
   const [revealed, setRevealed] = useState(true) // 지금 장면의 결과(골·자막)를 드러냈는가
   const [pen, setPen] = useState(null) // 직접 차거나 막을 페널티킥 (열려 있는 동안 경기는 멈춘다)
+  const skipRef = useRef(null) // 경기장에서 재생하지 않고 넘길 장면(직접 찬 페널티킥)
   const penRef = useRef(null) // { snap: 그 분을 계산하기 전의 경기 상태, info, sig }
   const [doneTick, setDoneTick] = useState(null) // 경기장이 재생을 끝냈다고 알려 온 장면
   const logRef = useRef(null)
@@ -194,7 +195,7 @@ export default function Match() {
       if (it) { setInterrupt(it); setSheet('subs') }
       setShown(before)
       rerender()
-    }, shown < 0 || !lastTick ? IDLE_MS / SPEEDS[speed] : played ? 0 : delay * 2 + 16000 / SPEEDS[speed])
+    }, shown < 0 || !lastTick ? IDLE_MS / SPEEDS[speed] : played ? (penRef.current && lastTick && tl[shown + 1]?.penKey === penRef.current.info.key ? 900 : 0) : penRef.current ? 40000 : delay * 2 + 16000 / SPEEDS[speed]) // 직접 할 페널티킥이 걸린 분은 1배속으로 반칙 장면을 끝까지 보여 주고, 한 박자 뒤에 화면을 연다
     return () => clearTimeout(t)
   })
 
@@ -243,6 +244,7 @@ export default function Match() {
     matchRef.current = s
     if (LIVE.match === match) LIVE.match = s
     if (it) { setInterrupt(it); setSheet('subs') }
+    skipRef.current = s.timeline[shown + 1] || null // 방금 직접 한 킥은 경기장에서 다시 틀지 않는다 (결과 자리로 바로 넘어간다)
     setPen(null)
     setShown(shown + 1)
     rerender()
@@ -355,7 +357,8 @@ export default function Match() {
         score={score}
         tick={live ? lastTick : null}
         nextTick={live && lastTick ? match.timeline[shown + 1] || null : null}
-        speed={SPEEDS[speed]}
+        speed={penRef.current ? 1 : SPEEDS[speed]}
+        instant={!!lastTick && lastTick === skipRef.current}
         frozen={paused || !!sheet || !!interrupt || !!pen}
         onReveal={(t) => { if (t === lastTick) setRevealed(true) }}
         onEnd={(t) => { if (t === lastTick) { setRevealed(true); setDoneTick(t) } }}

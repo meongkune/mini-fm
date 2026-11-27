@@ -52,7 +52,7 @@ function drawPitch(g, w, h, land) {
  *        (타이머로 장면을 넘기면 키커를 기다리느라 길어진 장면이 잘리거나 문구와 어긋난다)
  * frozen: 일시정지·교체 화면 중에는 그 자리에서 멈춘다
  */
-export default function MatchPitch({ home, away, lineups, tick, nextTick = null, speed = 1, frozen = false, onReveal = null, onEnd = null, scorerName, idleLabel = '킥오프 대기', myIdx = 0, caption = null, tactics = null, score = null }) {
+export default function MatchPitch({ home, away, lineups, tick, nextTick = null, speed = 1, frozen = false, instant = false, onReveal = null, onEnd = null, scorerName, idleLabel = '킥오프 대기', myIdx = 0, caption = null, tactics = null, score = null }) {
   const stageRef = useRef(null)
   const planeRef = useRef(null)
   const canvasRef = useRef(null)
@@ -91,6 +91,8 @@ export default function MatchPitch({ home, away, lineups, tick, nextTick = null,
     if (tick && sim.tick === tick && sim.done) { syncPlayers(sim, lineups, tactics); return }
     startClip(sim, lineups, tick, tactics, nextTick)
     sim.told = 0
+    // instant: 이미 다른 화면(페널티킥 직접 조작)에서 본 장면 — 다시 틀지 않고 끝난 자리로 바로 넘긴다
+    if (instant && tick) { let n = 0; while (!sim.done && n++ < 4000) stepSim(sim, lineups, tactics, 0.05) }
     setHud({ label: sim.label, shown: false })
   }, [tick, lineups && lineups.map((l) => l.map((p) => p.id).join()).join('|')])
 
