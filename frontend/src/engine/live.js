@@ -20,7 +20,7 @@ export const LIVE = {
   thinkMin: 0.35, thinkMax: 0.95, // 공 가진 선수가 다음 판단까지 걸리는 시간
   tackleEvery: 0.55, tackleBase: 0.2, foulBase: 0.085,
   passSpeed: 17, loftSpeed: 21, shotSpeed: 27,
-  xg: [[7, 0.3], [11, 0.15], [15, 0.085], [19, 0.05], [24, 0.028], [30, 0.014]], // 거리별 기본 득점 확률
+  xg: [[7, 0.34], [11, 0.17], [15, 0.1], [19, 0.062], [24, 0.038], [30, 0.02]], // 거리별 기본 득점 확률
   shootBias: 1.0, // 슛을 고르는 정도
   riskW: { possession: 1.7, balanced: 1.25, counter: 1.05, direct: 0.95 },
   gainW: { possession: 0.75, balanced: 1.0, counter: 1.25, direct: 1.3 },
@@ -74,6 +74,7 @@ function restart(L, type, side, spot, extra = {}) {
   if (type === 'goalkick') taker = L.players.find((p) => p.side === side && p.gk)
   else if (type === 'kickoff') taker = field(L, side).sort((p, q) => uOf(side, q.x) - uOf(side, p.x) || (p.id < q.id ? -1 : 1))[0]
   else taker = field(L, side).sort((p, q) => dist(p, spot) - dist(q, spot))[0]
+  if (type === 'corner') L.lastCorner = L.t
   L.dead = { type, side, spot: { ...spot }, taker: taker?.id ?? null, wait: 0, ...extra }
   L.events.push({ t: L.t, type: 'restart', kind: type, side })
 }
@@ -148,7 +149,7 @@ function decide(L, p) {
   let best = { kind: 'dribble', v: -9 }
   if (xg > 0 && dGoal < 27) {
     // 좋은 자리가 아니어도 때린다: 실제 축구의 슛 대부분은 득점 확률 10% 안팎이다
-    const v = (xg * 2.2 + (dGoal < 16 ? 0.55 : dGoal < 22 ? 0.45 : 0.3) + (pressure > 2.5 ? 0.12 : 0) + (p.pos === 'MF' && dGoal > 16 ? 0.12 : 0)) * LIVE.shootBias
+    const v = (xg * 2.2 + (dGoal < 16 ? 0.55 : dGoal < 22 ? 0.45 : 0.3) + (pressure > 2.5 ? 0.12 : 0) + (p.pos === 'MF' && dGoal > 15 ? 0.4 : 0) + (p.pos === 'DF' && dGoal < 24 ? 0.25 : 0) + (dGoal < 20 && xg > 0.07 ? 0.45 : 0) + (dGoal < 12 ? 0.35 : 0)) * LIVE.shootBias // 골문이 열렸으면 망설이지 않는다
     if (v > best.v) best = { kind: 'shoot', v, xg }
   }
   // ── 패스 ──
@@ -169,11 +170,17 @@ function decide(L, p) {
       const reach = 1.0 + len * l.k * (loft ? 0.02 : 0.05)
       if (l.d < reach) risk += loft && l.k < 0.75 ? 0.15 : 1 - l.d / reach
     }
-    risk += loft ? 0.35 : 0
+    risk += loft ? (phil === 'possession' ? 0.3 : 0.15) : 0
     const space = Math.min(7, nearOppDist(L, m, lead)) / 7
     const gain = (um - u) / 20
     const box = inBox(side, lead.x, lead.y) ? 0.45 : 0
-    let v = gainW * gain * (gain < 0 ? 0.5 : 1) + 0.55 * space + box - riskW * risk + (xgOf(L, m, lead) * 2.4)
+    const mxg = xgOf(L, m, lead)
+    let v = gainW * gain * (gain < 0 ? 0.5 : 1) + 0.55 * space + box - riskW * risk + (mxg > xg * 1.6 ? mxg * 2.4 : mxg * 0.8) // 나보다 훨씬 좋은 자리일 때만 내준다
+    // 긴 패스: 반대편으로 넓게 벌려 주거나, 뒷공간으로 뛰는 동료에게 넘겨 준다
+    if (loft && space > 0.8 && Math.abs(m.y - p.y) > 22) v += 0.35
+    // 박스 앞으로 올라온 2선에게 내준다 (공격수만 슛하지 않게)
+    { const dg = dist(lead, g); if (m.pos !== 'FW' && dg > 14 && dg < 25 && Math.abs(lead.y - H / 2) < 16 && space > 0.5 && u > 70) v += 0.45 }
+    if (len > 18 && m.run && um > u + 8) v += 0.3 + (phil === 'direct' || phil === 'counter' ? 0.25 : 0)
     if (off) v -= 0.45 + (p.pass - 70) / 60 // 오프사이드인 동료에게는 잘 주지 않는다 (가끔 걸린다)
     if (pressure < 2.2 && gain < 0.1) v += 0.3 // 압박받으면 안전하게 뒤로
     if (m.gk) v -= 0.5
@@ -193,7 +200,7 @@ function decide(L, p) {
   return best
 }
 
-function kickTo(L, p, target, speed, loft) {
+function kickTo(L, p, target, speed, loft, head = false) {
   const b = L.ball
   const d = Math.max(0.5, dist(p, target))
   const err = (1 - clamp(p.pass / 100, 0.4, 0.97)) * d * 0.16 // 패스 정확도: 멀수록·능력이 낮을수록 빗나간다
@@ -205,7 +212,7 @@ function kickTo(L, p, target, speed, loft) {
   b.vx = ((tx - p.x) / dd) * speed * (loft ? 1 : 1.22) // 땅볼은 굴러가며 느려진다
   b.vy = ((ty - p.y) / dd) * speed * (loft ? 1 : 1.22)
   b.z = loft ? 0.3 : 0
-  b.vz = loft ? 4.9 * T : 0 // 도착할 때 내려오게
+  b.vz = loft ? 4.9 * T + (head ? 1.4 / T : 0) : 0 // 도착할 때 내려오게 (크로스는 머리 높이로)
   b.loft = loft
   b.from = p.id
   p.noTouch = 0.45
@@ -225,7 +232,7 @@ function act(L, p, c) {
       L.pendingOff = { at: L.t + 0.7, side: 1 - side, spot: { x: L.byId[c.to].x, y: L.byId[c.to].y } }
       return
     }
-    kickTo(L, p, c.lead, c.loft ? LIVE.loftSpeed : LIVE.passSpeed, c.loft)
+    kickTo(L, p, c.lead, c.loft ? LIVE.loftSpeed : LIVE.passSpeed, c.loft, c.loft && inBox(side, c.lead.x, c.lead.y)) // 박스 안으로 띄운 공은 머리 높이
     b.to = c.to
     L.events.push({ t: L.t, type: 'pass', side, from: p.id, to: c.to, loft: c.loft })
   } else if (c.kind === 'clear') {
@@ -290,7 +297,7 @@ export function stepLive(L, dt = LIVE.dt) {
       let settled = 0
       for (const p of L.players) if (Math.hypot(p.x - p.tx, p.y - p.ty) < 4) settled++
       for (const p of L.players) if (Math.hypot(p.x - p.tx, p.y - p.ty) > 6) p.sprint = true
-      const ready = dist(tk, { x: tk.tx, y: tk.ty }) < 1.2 && d.wait > (d.type === 'kickoff' ? 1.2 : 0.9) && (settled >= 17 || d.wait > 9) && d.type !== 'pen'
+      const ready = dist(tk, { x: tk.tx, y: tk.ty }) < 1.2 && d.wait > (d.type === 'kickoff' ? 1.2 : 0.9) && (settled >= (d.type === 'corner' ? 21 : 17) || d.wait > (d.type === 'corner' ? 13 : 9)) && d.type !== 'pen'
       if (ready) {
         L.dead = null
         b.owner = tk.id
@@ -299,7 +306,7 @@ export function stepLive(L, dt = LIVE.dt) {
           const dirA = dirOf(tk.side)
           const tgt = { x: goalX(tk.side) - dirA * (6 + rng.random() * 5), y: H / 2 + (rng.random() - 0.5) * 9 }
           L.stats[tk.side].passes++
-          kickTo(L, tk, tgt, LIVE.loftSpeed, true)
+          kickTo(L, tk, tgt, LIVE.loftSpeed, true, true)
           b.to = null
           L.events.push({ t: L.t, type: 'cross', side: tk.side, from: tk.id })
         } else {
@@ -343,7 +350,7 @@ export function stepLive(L, dt = LIVE.dt) {
         const r = rng.random()
         const pWin = clamp(LIVE.tackleBase + (tk.tackle - owner.tech) / 180, 0.06, 0.45)
         const pFoul = LIVE.foulBase * tk.aggr * (inBox(owner.side, owner.x, owner.y) ? 0.35 : 1) // 박스 안에서는 조심한다
-        if (r < pWin && uOf(tk.side, tk.x) < 20 && rng.random() < 0.3) { L.stats[tk.side].tackles++; L.stats[owner.side].corners++; L.events.push({ t: L.t, type: 'tackle', side: tk.side, p: tk.id, from: owner.id, out: true }); restart(L, 'corner', owner.side, { x: owner.side === 0 ? W - 0.5 : 0.5, y: owner.y < H / 2 ? 0.5 : H - 0.5 }) } // 걷어낸 공이 골라인 밖으로
+        if (r < pWin && uOf(tk.side, tk.x) < 20 && L.t - (L.lastCorner ?? -99) > 12 && rng.random() < 0.45) { L.stats[tk.side].tackles++; L.stats[owner.side].corners++; L.events.push({ t: L.t, type: 'tackle', side: tk.side, p: tk.id, from: owner.id, out: true }); restart(L, 'corner', owner.side, { x: owner.side === 0 ? W - 0.5 : 0.5, y: owner.y < H / 2 ? 0.5 : H - 0.5 }) } // 걷어낸 공이 골라인 밖으로
         else if (r < pWin) { L.stats[tk.side].tackles++; b.owner = tk.id; tk.think = 0.4; owner.stun = 0.7; b.from = null; L.events.push({ t: L.t, type: 'tackle', side: tk.side, p: tk.id, from: owner.id }) }
         else if (r < pWin + pFoul) {
           L.stats[tk.side].fouls++
@@ -378,9 +385,9 @@ export function stepLive(L, dt = LIVE.dt) {
       if (p.gk || p.id === b.owner || p.sprint) continue
       if (p.side === side) {
         p.runT -= dt
-        if (p.runT <= 0) { p.run = !p.run && rng.random() < (p.pos === 'FW' ? 0.75 : p.pos === 'MF' ? 0.5 : 0.14); p.runT = p.run ? 1.6 + rng.random() * 1.6 : 1.2 + rng.random() * 2.2; p.early = rng.random() < 0.3 }
+        if (p.runT <= 0) { p.run = !p.run && rng.random() < (p.pos === 'FW' ? 0.7 : p.pos === 'MF' ? 0.6 : 0.16); p.runT = p.run ? 1.6 + rng.random() * 1.6 : 1.2 + rng.random() * 2.2; p.early = rng.random() < 0.2 }
         const u = uOf(side, p.x)
-        if (p.run && uOf(side, b.x) > 30 && u >= uOf(side, b.x) - 4) {
+        if (p.run && uOf(side, b.x) > 30 && (u >= uOf(side, b.x) - 4 || (p.pos === 'MF' && uOf(side, b.x) > 68))) {
           // 뒷공간으로 뛴다 — 공이 떠나기 전에는 오프사이드 선에 맞춘다
           const tu = Math.min(line + (p.early ? 1.2 : -0.4) + (b.owner ? 0 : 6), 101) // 가끔 너무 일찍 뛰어 오프사이드에 걸린다
           p.tx = side === 0 ? tu : W - tu
@@ -454,7 +461,7 @@ export function stepLive(L, dt = LIVE.dt) {
       if (near.length) {
         let win = near[0]
         if (near.length > 1) {
-          const ws = near.map((p) => Math.max(5, (b.z > 1 ? p.tackle * 0.5 + p.tech * 0.5 : p.tech) - 40) * (p.id === b.to ? 1.5 : 1) / (0.4 + dist(p, b)))
+          const ws = near.map((p) => Math.max(5, (b.z > 1 ? (p.pos === 'DF' ? p.tackle + 8 : p.tackle * 0.5 + p.tech * 0.4) : p.tech) - 40) * (p.id === b.to ? 1.5 : 1) / (0.4 + dist(p, b)))
           let r = rng.random() * ws.reduce((a, c) => a + c, 0)
           for (let i = 0; i < near.length; i++) { r -= ws[i]; if (r <= 0) { win = near[i]; break } }
         }
@@ -463,12 +470,16 @@ export function stepLive(L, dt = LIVE.dt) {
         if (from && from.side !== win.side) {
           L.events.push({ t: L.t, type: 'intercept', side: win.side, p: win.id })
           // 자기 박스 안에서 끊은 공은 자주 골라인 밖으로 나간다 (측면에서 올라온 공이면 더)
-          if (!win.gk && inBox(from.side, win.x, win.y) && rng.random() < (Math.abs(from.y - H / 2) > 14 ? 0.5 : 0.28)) { L.stats[from.side].corners++; restart(L, 'corner', from.side, { x: from.side === 0 ? W - 0.5 : 0.5, y: win.y < H / 2 ? 0.5 : H - 0.5 }); return L }
+          if (!win.gk && inBox(from.side, win.x, win.y)) {
+            const recent = L.t - (L.lastCorner ?? -99) < 12 // 방금 코너킥이었으면 다시 주지 않는다
+            if (!recent && rng.random() < (Math.abs(from.y - H / 2) > 14 ? 0.42 : 0.22)) { L.stats[from.side].corners++; restart(L, 'corner', from.side, { x: from.side === 0 ? W - 0.5 : 0.5, y: win.y < H / 2 ? 0.5 : H - 0.5 }); return L }
+            if (b.z > 0.8 || rng.random() < 0.5) { b.owner = win.id; act(L, win, { kind: 'clear' }); return L } // 머리·발로 멀리 걷어낸다
+          }
         }
         // 박스 안에서 뜬 공을 공격수가 따내면 바로 헤더
         if (b.z > 1 && !win.gk && inBox(win.side, win.x, win.y) && from && from.side === win.side) { b.owner = win.id; const xg = xgOf(L, win) * 0.75; act(L, win, { kind: 'shoot', xg }); return L }
         b.owner = win.id; b.to = null; b.loft = false; b.z = 0
-        win.think = lerp(0.25, 0.6, rng.random()) * (b.from && from && from.side !== win.side ? 1.3 : 1)
+        win.think = inBox(win.side, win.x, win.y) ? 0.12 : lerp(0.25, 0.6, rng.random()) * (b.from && from && from.side !== win.side ? 1.3 : 1) // 박스 안에서는 바로 때리거나 내준다
         win.drib = null
         L.pendingOff = null
       }
@@ -502,11 +513,11 @@ function finishShot(L) {
   } else if (s.res === 'save') {
     L.events.push({ t: L.t, type: 'save', side: dfn, p: gk?.id })
     if (rng.random() < 0.55 && gk) { b.owner = gk.id; b.vx = b.vy = b.vz = 0; b.z = 0; b.from = null; gk.x = clamp(b.x, 0.6, W - 0.6); gk.y = b.y; gk.think = 1.6 }
-    else if (rng.random() < 0.75) { L.stats[s.side].corners++; restart(L, 'corner', s.side, { x: dfn === 0 ? 0.5 : W - 0.5, y: b.y < H / 2 ? 0.5 : H - 0.5 }) }
+    else if (rng.random() < (L.t - (L.lastCorner ?? -99) < 12 ? 0.25 : 0.7)) { L.stats[s.side].corners++; restart(L, 'corner', s.side, { x: dfn === 0 ? 0.5 : W - 0.5, y: b.y < H / 2 ? 0.5 : H - 0.5 }) }
     else { b.vx = -b.vx * 0.3 + (rng.random() - 0.5) * 8; b.vy = (rng.random() - 0.5) * 14; b.vz = 3; b.from = gk?.id ?? null } // 쳐낸 공이 흐른다
   } else if (s.res === 'block') {
     L.events.push({ t: L.t, type: 'block', side: dfn })
-    if (rng.random() < 0.45) { L.stats[s.side].corners++; restart(L, 'corner', s.side, { x: dfn === 0 ? 0.5 : W - 0.5, y: b.y < H / 2 ? 0.5 : H - 0.5 }) }
+    if (rng.random() < (L.t - (L.lastCorner ?? -99) < 12 ? 0.15 : 0.4)) { L.stats[s.side].corners++; restart(L, 'corner', s.side, { x: dfn === 0 ? 0.5 : W - 0.5, y: b.y < H / 2 ? 0.5 : H - 0.5 }) }
     else { b.vx = -b.vx * 0.25 + (rng.random() - 0.5) * 6; b.vy = (rng.random() - 0.5) * 12; b.vz = 2; b.z = 0.3; b.from = null }
   } else restart(L, 'goalkick', dfn, { x: dfn === 0 ? 5.5 : W - 5.5, y: H / 2 + (b.y < H / 2 ? -7 : 7) })
 }

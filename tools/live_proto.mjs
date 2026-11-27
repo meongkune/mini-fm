@@ -65,6 +65,8 @@ if (process.argv[2] === 'film') {
   const N = Number(process.argv[2]) || 20
   const T = { g: 0, sh: 0, on: 0, pass: 0, ok: 0, foul: 0, cor: 0, off: 0, tk: 0, xg: 0, hw: 0, dr: 0, aw: 0, big: 0, pens: 0, throws: 0, gk: 0, poss: [], secs: 0 }
   const byPos = { FW: 0, MF: 0, DF: 0, GK: 0 }
+  const shPos = {}, shXg = {}
+  let dSum = 0, dN = 0, pN = 0, pLoft = 0
   const t0 = Date.now()
   for (let g = 0; g < N; g++) {
     const { L } = mk(g)
@@ -75,7 +77,7 @@ if (process.argv[2] === 'film') {
     T.poss.push(a.possT / Math.max(1, a.possT + b.possT)); T.secs += L.t
     if (L.score[0] > L.score[1]) T.hw++; else if (L.score[0] === L.score[1]) T.dr++; else T.aw++
     if (Math.abs(L.score[0] - L.score[1]) >= 3) T.big++
-    for (const e of L.events) { if (e.type === 'goal') byPos[L.byId[e.p].pos]++; if (e.type === 'restart' && e.kind === 'pen') T.pens++; if (e.type === 'restart' && e.kind === 'throw') T.throws++; if (e.type === 'restart' && e.kind === 'goalkick') T.gk++ }
+    for (const e of L.events) { if (e.type === 'goal') byPos[L.byId[e.p].pos]++; if (e.type === 'shot') { const q = L.byId[e.p].pos; shPos[q] = (shPos[q] || 0) + 1; shXg[q] = (shXg[q] || 0) + e.xg; if (e.d != null) { dSum += e.d; dN++ } } if (e.type === 'pass') { pN++; if (e.loft) pLoft++ } if (e.type === 'restart' && e.kind === 'pen') T.pens++; if (e.type === 'restart' && e.kind === 'throw') T.throws++; if (e.type === 'restart' && e.kind === 'goalkick') T.gk++ }
   }
   const f = (v, k = 2) => (v / N).toFixed(k)
   const gs = byPos.FW + byPos.MF + byPos.DF + byPos.GK || 1
@@ -84,5 +86,6 @@ if (process.argv[2] === 'film') {
   console.log(`홈승 ${((T.hw / N) * 100).toFixed(0)}% · 무 ${((T.dr / N) * 100).toFixed(0)}% (21~26) · 원정승 ${((T.aw / N) * 100).toFixed(0)}% · 3골 차+ ${((T.big / N) * 100).toFixed(0)}% (10~15)`)
   console.log(`득점 FW ${((byPos.FW / gs) * 100).toFixed(0)}% (50~58) · MF ${((byPos.MF / gs) * 100).toFixed(0)}% (30~36) · DF ${((byPos.DF / gs) * 100).toFixed(0)}% (10~14)`)
   console.log(`패스 ${f(T.pass, 0)} · 성공률 ${((T.ok / Math.max(1, T.pass)) * 100).toFixed(0)}% · 태클 ${f(T.tk, 1)} · 파울 ${f(T.foul, 1)} (21) · 코너 ${f(T.cor, 1)} (10.5) · 오프사이드 ${f(T.off, 1)} (3.7) · 페널티 ${f(T.pens)} · 스로인 ${f(T.throws, 1)} · 골킥 ${f(T.gk, 1)}`)
+  console.log(`슛(경기당) ${Object.keys(shPos).map((k) => k + ' ' + (shPos[k] / N).toFixed(1) + '(슛당 ' + (shXg[k] / shPos[k]).toFixed(3) + ')').join(' · ')} · 평균 슛 거리 ${(dSum / dN).toFixed(1)}m · 긴 패스 비율 ${((pLoft / pN) * 100).toFixed(0)}%`)
   console.log(`홈 점유율 평균 ${((T.poss.reduce((a, c) => a + c, 0) / N) * 100).toFixed(0)}% (최소 ${(Math.min(...T.poss) * 100).toFixed(0)} ~ 최대 ${(Math.max(...T.poss) * 100).toFixed(0)})`)
 }
