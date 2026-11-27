@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { GameProvider } from '../store.jsx'
-import { ago, flush, forceMine, leaveSlot, onSession, onSync, onToast, openSlot, resetSync, session, setSession, syncState, toast } from '../game/cloud.js'
+import { ago, flush, forceMine, onSession, onSync, onToast, openSlot, resetSync, session, setSession, syncState, toast } from '../game/cloud.js'
 
 /**
  * 클라우드 슬롯으로 하고 있으면 시작할 때 서버에서 최신 세이브를 받아 오고,
@@ -31,7 +31,7 @@ export default function CloudGate({ children }) {
   }
   useEffect(() => { if (boot === 'loading') load() }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const key = `${sess?.token && sess?.slot ? `slot${sess.slot}` : 'guest'}-${mountKey}`
+  const key = `${sess?.token && sess?.slot ? `slot${sess.slot}-${sess.gen || 0}` : 'guest'}-${mountKey}` // 슬롯을 다시 받으면(gen) 게임을 새로 띄운다
 
   if (boot === 'loading') return <div className="cloud-cover"><div className="card">☁️ 계정에 저장된 게임을 불러오는 중…</div></div>
   if (boot === 'error') {
@@ -44,7 +44,7 @@ export default function CloudGate({ children }) {
           <div className="row gap">
             {!kicked && <button className="btn" onClick={load}>다시 시도</button>}
             {kicked && <button className="btn" onClick={() => { setSession(null); location.assign(`${import.meta.env.BASE_URL}account`) }}>다시 로그인</button>}
-            <button className="btn ghost" onClick={() => { leaveSlot(); setBoot('ready'); setTimeout(() => toast('💾 이 기기에 저장된 게임으로 시작했어요.'), 50) }}>이 기기 게임으로 하기</button>
+            <button className="btn ghost" onClick={() => { setSession(null); setBoot('ready'); setTimeout(() => toast('💾 로그아웃하고 이 브라우저 게임으로 시작했어요.'), 50) }}>로그인 없이 이 브라우저 게임 하기</button>
           </div>
         </div>
       </div>
@@ -108,10 +108,10 @@ function SyncCover({ reload }) {
       <div className="cloud-cover">
         <div className="card cloud-box">
           <h3>이 게임을 다른 곳에서도 진행했어요</h3>
-          <p>같은 계정 칸의 게임을 다른 기기(또는 다른 탭)에서 먼저 저장했어요. 어느 쪽으로 이어서 할지 골라 주세요.</p>
+          <p>같은 계정 게임을 다른 기기(또는 다른 탭)에서 먼저 저장했어요. 어느 쪽으로 이어서 할지 골라 주세요.</p>
           <ul className="small">
             <li><b>다른 곳 진행 불러오기</b> — 여기서 저장 안 된 진행은 사라져요.</li>
-            <li><b>여기 진행으로 계속하기</b> — 다른 곳 진행은 '지운 게임'에 7일 동안 남아요.</li>
+            <li><b>여기 진행으로 계속하기</b> — 다른 곳 진행은 '지난 게임'에 7일 동안 보관돼요.</li>
           </ul>
           <div className="row gap">
             <button className="btn" onClick={() => { resetSync(); reload() }}>다른 곳 진행 불러오기</button>

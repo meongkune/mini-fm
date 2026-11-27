@@ -94,14 +94,14 @@ export async function openSlot(slot) {
   const j = await call(`/save?slot=${slot}`)
   const save = await unpack(j.data)
   localStorage.setItem(CACHE_KEY, JSON.stringify(save))
-  setSession({ ...session(), slot, version: j.version })
+  setSession({ ...session(), slot, version: j.version, gen: Date.now() }) // gen: 게임을 새로 띄우라는 표시
   return save
 }
 /** 빈 슬롯(또는 덮어쓰기)에 세이브를 올리고 그 슬롯으로 하기 */
 export async function startSlot(slot, save, summary, replace = false) {
   const j = await call('/save', { method: 'PUT', body: { slot, baseVersion: 0, replace, data: await pack(save), summary } })
   localStorage.setItem(CACHE_KEY, JSON.stringify(save))
-  setSession({ ...session(), slot, version: j.version })
+  setSession({ ...session(), slot, version: j.version, gen: Date.now() })
   return j
 }
 export const deleteSlot = (slot) => call(`/save?slot=${slot}`, { method: 'DELETE' })

@@ -1770,3 +1770,23 @@ a.dt-chip { color: inherit; text-decoration: none; }
 .cloud-badge.s-guest, .cloud-badge.s-pick { border-style: dashed; }
 .toast { position: fixed; left: 50%; bottom: 84px; transform: translateX(-50%); z-index: 1100; max-width: min(520px, calc(100vw - 32px)); padding: 12px 16px; border-radius: 12px; background: #1f6f4a; color: #fff; font-size: .88rem; font-weight: 700; line-height: 1.45; box-shadow: 0 8px 24px rgba(0,0,0,.4); cursor: pointer; animation: toast-in .2s ease-out; }
 @keyframes toast-in { from { opacity: 0; transform: translate(-50%, 8px); } to { opacity: 1; transform: translate(-50%, 0); } }
+/* 시작 화면 */
+.title-screen { min-height: 100%; min-height: 100dvh; display: grid; place-items: center; padding: 24px 16px; background: radial-gradient(ellipse at top, #2a1f4f 0%, #0d0b16 70%); color: var(--text, #eee); }
+.title-inner { width: 100%; max-width: 420px; text-align: center; }
+.title-logo { font-size: 3rem; line-height: 1; }
+.title-inner h1 { margin: 8px 0 4px; font-size: 2.2rem; letter-spacing: .5px; }
+.title-sub { margin: 0; opacity: .85; }
+.title-free { margin: 4px 0 24px; font-size: .78rem; color: #8fe3b4; font-weight: 700; }
+.title-actions { display: flex; flex-direction: column; gap: 10px; text-align: left; }
+.title-btn { display: flex; flex-direction: column; gap: 4px; padding: 14px 16px; border-radius: 14px; border: 1px solid var(--line, #332c4d); background: var(--panel-2, #1e1930); color: inherit; font: inherit; cursor: pointer; }
+.title-btn.main { background: linear-gradient(135deg, var(--c, #7c5cff), #4b3aa8); border-color: transparent; box-shadow: 0 6px 20px rgba(0,0,0,.35); }
+.title-btn:hover:not(:disabled) { filter: brightness(1.1); }
+.title-btn .tb-head { font-size: 1.1rem; font-weight: 900; }
+.title-btn .tb-team { display: flex; align-items: center; gap: 8px; font-weight: 800; }
+.title-btn .tb-sub { font-size: .78rem; opacity: .85; }
+.title-login { margin-top: 6px; padding-top: 6px; text-align: center; }
+.title-login .gsi-btn { display: flex; justify-content: center; }
+.title-or { display: block; font-size: .75rem; opacity: .6; margin-bottom: 4px; }
+.title-note { text-align: center; font-size: .8rem; opacity: .85; }
+.title-foot { margin-top: 24px; opacity: .6; }
+.start-choices.one { grid-template-columns: 1fr; }

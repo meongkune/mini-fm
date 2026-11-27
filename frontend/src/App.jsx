@@ -1,4 +1,4 @@
-import { Component, useEffect, useRef } from 'react'
+import { Component, useEffect, useRef, useState } from 'react'
 import { Link, NavLink, Route, Routes, useLocation } from 'react-router-dom'
 import { useGame } from './store.jsx'
 import Home from './pages/Home.jsx'
@@ -14,6 +14,7 @@ import Club from './pages/Club.jsx'
 import Account from './pages/Account.jsx'
 import Privacy from './pages/Privacy.jsx'
 import { CloudBadge } from './components/CloudBadge.jsx'
+import TitleScreen, { markSeen, titleSeen } from './components/TitleScreen.jsx'
 import { Crest } from './components/Badges.jsx'
 import { setViewMode, useViewMode } from './components/DeviceFrame.jsx'
 import { eur } from './game/finance.js'
@@ -60,6 +61,11 @@ const SIDE = [
 
 export default function App() {
   const { mode } = useViewMode()
+  const { pathname } = useLocation()
+  const [, redraw] = useState(0)
+  // 페이지를 처음 열면 시작 화면부터 (다른 주소로 바로 들어오면 건너뜀)
+  if (pathname !== '/') markSeen() // 다른 화면을 한 번 봤으면 시작 화면은 다시 안 띄운다
+  if (pathname === '/' && !titleSeen()) return <TitleScreen onClose={() => redraw((x) => x + 1)} />
   return mode === 'desktop' ? <DesktopApp /> : <MobileApp />
 }
 
