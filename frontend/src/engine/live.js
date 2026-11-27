@@ -529,13 +529,16 @@ export function resolvePen(L) {
   return res
 }
 
+/** 후반 시작: 원정이 킥오프 */
+export function secondHalf(L) { L.half = 2; L.events.push({ t: L.t, type: 'half' }); restart(L, 'kickoff', 1, { x: W / 2, y: H / 2 }) }
+
 /** 한 경기를 끝까지 돌린다 (화면 없이) */
 export function runLive(L, onFrame = null) {
   const half = LIVE.playSeconds / 2
   let guard = 0
   while (L.clock < LIVE.playSeconds && guard++ < 60000) {
     if (L.dead && L.dead.type === 'pen' && L.dead.wait > 2.5) resolvePen(L)
-    if (L.half === 1 && L.clock >= half) { L.half = 2; restart(L, 'kickoff', 1, { x: W / 2, y: H / 2 }) }
+    if (L.half === 1 && L.clock >= half) secondHalf(L)
     stepLive(L)
     if (onFrame) onFrame(L)
   }

@@ -11,6 +11,7 @@ import Admin from './pages/Admin.jsx'
 import Inbox from './pages/Inbox.jsx'
 import Transfer from './pages/Transfer.jsx'
 import Club from './pages/Club.jsx'
+import LiveDemo from './pages/LiveDemo.jsx'
 import { Crest } from './components/Badges.jsx'
 import { setViewMode, useViewMode } from './components/DeviceFrame.jsx'
 import { eur } from './game/finance.js'
@@ -83,6 +84,7 @@ function Pages() {
           <Route path="/inbox" element={<Inbox />} />
           <Route path="/transfer" element={<Transfer />} />
           <Route path="/club" element={<Club />} />
+          <Route path="/live-demo" element={<LiveDemo />} />
           <Route path="*" element={<div className="card">페이지를 찾을 수 없습니다.</div>} />
         </Routes>
         </PageErrorBoundary>
