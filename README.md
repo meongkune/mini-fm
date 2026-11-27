@@ -290,7 +290,7 @@ aws ec2 describe-network-interfaces --network-interface-ids $ENI --query 'Networ
 | 📱 모바일 우선 | 폭 360~430px 기준, 하단 탭 바, 노치·제스처 바 여백(safe-area), 홈 화면에 추가하면 앱처럼 전체 화면(PWA). PC에서는 휴대폰 목업을 화면 높이에 맞춰 표시 |
 | 📡 상태 | ECS: 헬스 체크·가동 시간·Task·컨테이너 정보 / Pages: 빌드 버전·빌드 시각·데이터 출처 |
 
-진행 상황(감독 모드 상태·기록·이적·성장)은 모두 브라우저 `localStorage`의 세이브에만 저장되고, 원본 시즌 데이터(JSON)는 바뀌지 않습니다.
+진행 상황(감독 모드 상태·기록·이적·성장)은 모두 브라우저 `localStorage`의 세이브에만 저장되고, 원본 시즌 데이터(JSON)는 바뀌지 않습니다. 로그인은 없고, 다른 기기로 옮길 때만 **기록 옮기기 코드**(`abc-def-ghk`)를 씁니다 — 게임을 Cloudflare D1에 잠깐 맡겼다가 다른 기기에서 코드를 넣으면 옮겨지고, 한 번 쓰거나 24시간이 지나면 지웁니다.
 
 **스택:** React 18 · React Router 6 · Vite 5 / Python 3.12 · Flask 3.1 · gunicorn 23
 
@@ -374,6 +374,7 @@ aws ec2 describe-network-interfaces --network-interface-ids $ENI --query 'Networ
 | 국기 | [flagcdn.com](https://flagcdn.com/) | 브라우저에서 표시만 | 저장 안 함 |
 | 환율 (원화 표시) | [frankfurter.app](https://www.frankfurter.app/) · 유럽중앙은행 기준 | 브라우저에서 하루 한 번 | localStorage |
 | AI 면담 대화 | Google Gemini API (Cloudflare Workers 경유, 무료 한도) | `worker/` | 저장 안 함 |
+| 기록 옮기기 | 이용자가 옮기는 게임 데이터 | `worker/src/transfer.js` | Cloudflare D1, 한 번 쓰면·24시간 뒤 삭제 |
 
 연봉은 실제 보도 값이 추정치의 0.4~2.5배 안일 때만 쓰고, 나머지는 능력·리그·구단 규모로 추정합니다. 능력치·연봉·경기 결과는 게임용 값입니다.
 
